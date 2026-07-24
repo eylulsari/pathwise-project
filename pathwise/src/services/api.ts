@@ -45,23 +45,19 @@ const delay = <T>(data: T, ms = 350): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(data), ms));
 
 // ── token storage ──────────────────────────────────────────────────
+// Only the short-lived access token is kept in JS. The refresh token lives in
+// an httpOnly cookie the browser attaches automatically (safe from XSS).
 const ACCESS_KEY = 'pathwise.access';
-const REFRESH_KEY = 'pathwise.refresh';
 
 export const tokenStore = {
   get access() {
     return localStorage.getItem(ACCESS_KEY);
   },
-  get refresh() {
-    return localStorage.getItem(REFRESH_KEY);
-  },
-  set(access: string, refresh: string) {
+  setAccess(access: string) {
     localStorage.setItem(ACCESS_KEY, access);
-    localStorage.setItem(REFRESH_KEY, refresh);
   },
   clear() {
     localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
   },
 };
 
@@ -72,18 +68,19 @@ const AUTH_PATHS = ['/auth/login', '/auth/register', '/auth/refresh'];
 let refreshPromise: Promise<boolean> | null = null;
 
 async function tryRefresh(): Promise<boolean> {
-  if (!tokenStore.refresh) return false;
+  if (!tokenStore.access) return false; // no prior session to refresh
   if (!refreshPromise) {
     refreshPromise = (async () => {
       try {
+        // The refresh token rides along as an httpOnly cookie (credentials).
         const res = await fetch(`${API_URL}/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken: tokenStore.refresh }),
+          credentials: 'include',
         });
         if (!res.ok) throw new Error('refresh failed');
-        const data = (await res.json()) as { accessToken: string; refreshToken: string };
-        tokenStore.set(data.accessToken, data.refreshToken);
+        const data = (await res.json()) as { accessToken: string };
+        tokenStore.setAccess(data.accessToken);
         return true;
       } catch {
         tokenStore.clear();
@@ -102,14 +99,15 @@ async function rawFetch(path: string, options: RequestInit): Promise<Response> {
     ...(options.headers as Record<string, string>),
   };
   if (tokenStore.access) headers.Authorization = `Bearer ${tokenStore.access}`;
-  return fetch(`${API_URL}${path}`, { ...options, headers });
+  // Always include credentials so the httpOnly refresh cookie is set/sent.
+  return fetch(`${API_URL}${path}`, { ...options, headers, credentials: 'include' });
 }
 
 async function http<T>(path: string, options: RequestInit = {}): Promise<T> {
   let res = await rawFetch(path, options);
 
-  // Access token likely expired → rotate once via the refresh token and retry.
-  if (res.status === 401 && !AUTH_PATHS.includes(path) && tokenStore.refresh) {
+  // Access token likely expired → rotate once via the refresh cookie and retry.
+  if (res.status === 401 && !AUTH_PATHS.includes(path) && tokenStore.access) {
     const refreshed = await tryRefresh();
     if (refreshed) res = await rawFetch(path, options);
   }
@@ -145,7 +143,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(input),
     });
-    tokenStore.set(res.accessToken, res.refreshToken);
+    tokenStore.setAccess(res.accessToken);
     return res;
   },
 
@@ -154,7 +152,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(input),
     });
-    tokenStore.set(res.accessToken, res.refreshToken);
+    tokenStore.setAccess(res.accessToken);
     return res;
   },
 
@@ -163,14 +161,11 @@ export const api = {
   },
 
   async logout(): Promise<void> {
-    const refreshToken = tokenStore.refresh;
     try {
-      if (refreshToken) {
-        await http<void>('/auth/logout', {
-          method: 'POST',
-          body: JSON.stringify({ refreshToken }),
-        });
-      }
+      // Server reads the refresh cookie, revokes it and clears it.
+      await http<void>('/auth/logout', { method: 'POST' });
+    } catch {
+      /* already signed out / token expired */
     } finally {
       tokenStore.clear();
     }

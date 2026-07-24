@@ -130,7 +130,7 @@ export interface AuthUser {
 export interface AuthResponse {
   user: AuthUser;
   accessToken: string;
-  refreshToken: string;
+  // The refresh token is delivered as an httpOnly cookie, not in the body.
 }
 
 // ── Social network ─────────────────────────────────────────────────

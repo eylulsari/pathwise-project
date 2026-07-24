@@ -61,10 +61,18 @@ adapter in `infrastructure/` implements it (e.g. `UserRepositoryPort` ←
 
 ## 4. Auth flow
 
-1. `register` / `login` → issue **access token (~15m)** + **refresh token**.
+1. `register` / `login` → **access token (~15m)** in the JSON body; **refresh
+   token** delivered as an `httpOnly`, `sameSite=lax` cookie scoped to
+   `/api/auth` (safe from XSS — JS never sees it).
 2. Refresh token JTI stored in **Redis** (allows rotation + revocation).
-3. `refresh` verifies against Redis, rotates the token.
-4. `logout` deletes the refresh JTI from Redis.
+3. `refresh` reads the cookie, verifies against Redis, rotates the token and
+   re-sets the cookie. The frontend `api.ts` auto-runs this on any `401` and
+   retries the original request once.
+4. `logout` revokes the refresh JTI in Redis and clears the cookie.
+
+**Hardening:** `helmet` security headers, and `@nestjs/throttler` rate limiting
+(100 req/min globally, 10 req/min on the auth endpoints) via a global
+`ThrottlerGuard`.
 
 ## 5. Data model (relational)
 
