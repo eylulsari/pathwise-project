@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-night text-cream font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* Reusable gradient text for headings/brand */
+  .text-gradient {
+    @apply bg-accent-gradient bg-clip-text text-transparent;
+  }
+
+  /* Warm cream card on the midnight background */
+  .card-cream {
+    @apply bg-cream text-night rounded-2xl shadow-xl shadow-black/30;
+  }
+
+  /* Primary CTA button */
+  .btn-accent {
+    @apply bg-accent-gradient text-white font-semibold rounded-xl px-5 py-3
+      transition-transform duration-150 hover:scale-[1.02] active:scale-95
+      disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}
+
+/* Leaflet: the map container MUST have an explicit height at every ancestor,
+   otherwise the tiles collapse to 0px. See MapView for invalidateSize usage. */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #131129;
+}
