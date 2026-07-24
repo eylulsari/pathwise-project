@@ -64,14 +64,55 @@ export const tokenStore = {
   },
 };
 
-async function http<T>(path: string, options: RequestInit = {}): Promise<T> {
+/** Endpoints that must never trigger the refresh-retry loop. */
+const AUTH_PATHS = ['/auth/login', '/auth/register', '/auth/refresh'];
+
+/** Shared in-flight refresh so concurrent 401s trigger a single rotation. */
+let refreshPromise: Promise<boolean> | null = null;
+
+async function tryRefresh(): Promise<boolean> {
+  if (!tokenStore.refresh) return false;
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      try {
+        const res = await fetch(`${API_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken: tokenStore.refresh }),
+        });
+        if (!res.ok) throw new Error('refresh failed');
+        const data = (await res.json()) as { accessToken: string; refreshToken: string };
+        tokenStore.set(data.accessToken, data.refreshToken);
+        return true;
+      } catch {
+        tokenStore.clear();
+        return false;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+  }
+  return refreshPromise;
+}
+
+async function rawFetch(path: string, options: RequestInit): Promise<Response> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
   if (tokenStore.access) headers.Authorization = `Bearer ${tokenStore.access}`;
+  return fetch(`${API_URL}${path}`, { ...options, headers });
+}
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+async function http<T>(path: string, options: RequestInit = {}): Promise<T> {
+  let res = await rawFetch(path, options);
+
+  // Access token likely expired → rotate once via the refresh token and retry.
+  if (res.status === 401 && !AUTH_PATHS.includes(path) && tokenStore.refresh) {
+    const refreshed = await tryRefresh();
+    if (refreshed) res = await rawFetch(path, options);
+  }
+
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     try {
