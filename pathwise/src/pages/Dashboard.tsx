@@ -9,6 +9,11 @@ import { StartPointSelector } from '../components/controls/StartPointSelector';
 import { SurvivalWidget } from '../components/SurvivalWidget';
 import { TravelVibeQuiz, type QuizResult } from '../components/controls/TravelVibeQuiz';
 import { MustVisitList } from '../components/controls/MustVisitList';
+import { ToursPanel } from '../components/tours/ToursPanel';
+import { AiAssistant } from '../components/ai/AiAssistant';
+import { SplitBill } from '../components/SplitBill';
+import { ExportRoute } from '../components/ExportRoute';
+import { OfflineToggle } from '../components/OfflineToggle';
 
 interface DayState {
   config: RouteConfig;
@@ -42,6 +47,8 @@ export default function Dashboard() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showMustVisit, setShowMustVisit] = useState(false);
+  const [showSplitBill, setShowSplitBill] = useState(false);
+  const [offline, setOffline] = useState(false);
 
   const day = days[activeDay];
 
@@ -120,6 +127,21 @@ export default function Dashboard() {
     if (it) updateConfig({ hub: it.hub, budgetTry: result.budgetTry });
   }
 
+  // AI "Add to Today's Path" → lock the place in and regenerate this day.
+  function addToPath(placeId: string) {
+    if (day.mustVisitIds.includes(placeId)) return;
+    const next = [...day.mustVisitIds, placeId];
+    patchDay(activeDay, { mustVisitIds: next });
+    generateFor(activeDay, { ...buildRequest(day), mustVisitIds: next });
+  }
+
+  // Tour "Set as Today's Itinerary" → focus this day on the tour's hub.
+  function useTourHub(hub: Hub) {
+    const nextConfig = { ...day.config, hub };
+    patchDay(activeDay, { config: nextConfig });
+    generateFor(activeDay, { ...buildRequest({ ...day, config: nextConfig }) });
+  }
+
   function switchDay(index: number) {
     setActiveDay(index);
     setSelectedPlaceId(null);
@@ -132,8 +154,14 @@ export default function Dashboard() {
     <div className="flex min-h-screen flex-col">
       <AppHeader />
 
-      {/* Day tabs */}
-      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2">
+      {offline && (
+        <div className="bg-coral/20 px-4 py-1.5 text-center text-xs font-semibold text-coral">
+          📴 Offline Mode — showing your cached plan. (UI demo only — no real caching.)
+        </div>
+      )}
+
+      {/* Day tabs + action bar */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-white/10 px-4 py-2">
         {days.map((_, i) => (
           <button
             key={i}
@@ -145,9 +173,16 @@ export default function Dashboard() {
             Day {i + 1}
           </button>
         ))}
-        <span className="ml-auto hidden text-xs text-cream/40 sm:inline">
-          Each day focuses on a different neighborhood.
-        </span>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowSplitBill(true)}
+            className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/80 hover:text-cream"
+          >
+            💰 Split Bill
+          </button>
+          {day.itinerary && <ExportRoute itinerary={day.itinerary} />}
+          <OfflineToggle offline={offline} onToggle={() => setOffline((o) => !o)} />
+        </div>
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2 xl:h-[calc(100vh-105px)] xl:grid-cols-[330px_minmax(340px,400px)_1fr]">
@@ -174,6 +209,7 @@ export default function Dashboard() {
             </button>
           </div>
           <StartPointSelector value={startPoint} onChange={setStartPoint} />
+          <ToursPanel onUseTourHub={useTourHub} />
           <SurvivalWidget />
         </div>
 
@@ -218,6 +254,10 @@ export default function Dashboard() {
           onClose={() => setShowMustVisit(false)}
         />
       )}
+      {showSplitBill && <SplitBill onClose={() => setShowSplitBill(false)} />}
+
+      {/* Floating AI assistant */}
+      <AiAssistant onAddToPath={addToPath} />
     </div>
   );
 }
