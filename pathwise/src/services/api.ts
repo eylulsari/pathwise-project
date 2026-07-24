@@ -20,6 +20,7 @@ import type {
   PastTrip,
   Place,
   ProfileStats,
+  SavedTrip,
   Tour,
   Traveler,
 } from '../types';
@@ -183,6 +184,22 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(req),
     });
+  },
+
+  // ═════════════════════════════════════════════════════════════════
+  // TRIPS — real backend (Postgres). Save/list/delete a user's plans.
+  // ═════════════════════════════════════════════════════════════════
+  async saveTrip(title: string, itinerary: Itinerary): Promise<SavedTrip> {
+    return http<SavedTrip>('/trips', {
+      method: 'POST',
+      body: JSON.stringify({ title, itinerary }),
+    });
+  },
+  async getTrips(): Promise<SavedTrip[]> {
+    return http<SavedTrip[]>('/trips');
+  },
+  async deleteTrip(id: string): Promise<void> {
+    return http<void>(`/trips/${id}`, { method: 'DELETE' });
   },
 
   // ═════════════════════════════════════════════════════════════════

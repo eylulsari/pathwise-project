@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { PlacesModule } from './modules/places/places.module';
 import { ItineraryModule } from './modules/itinerary/itinerary.module';
+import { TripsModule } from './modules/trips/trips.module';
 
 // Feature modules (modular monolith — each is a clean boundary).
 
@@ -20,6 +21,7 @@ import { ItineraryModule } from './modules/itinerary/itinerary.module';
     AuthModule,
     PlacesModule,
     ItineraryModule,
+    TripsModule,
   ],
   controllers: [HealthController],
 })

@@ -210,6 +210,18 @@ export interface ProfileStats {
   spentTry: number;
 }
 
+/** A trip saved to the backend (Postgres) for the signed-in user. */
+export interface SavedTrip {
+  id: string;
+  title: string;
+  hub: Hub;
+  totalDistanceKm: number;
+  totalCostTry: number;
+  stopCount: number;
+  itinerary: Itinerary;
+  createdAt: string;
+}
+
 // ── Curated / live tours ───────────────────────────────────────────
 export type TourSource = 'GetYourGuide' | 'TripAdvisor' | 'Pathwise';
 export interface Tour {

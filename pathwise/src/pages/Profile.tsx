@@ -1,25 +1,69 @@
 import { useEffect, useState } from 'react';
-import type { Badge, PastTrip, ProfileStats } from '../types';
+import type { Badge, Hub, ProfileStats } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { AppHeader } from '../components/AppHeader';
-import { BUCKET_LIST_IDS } from '../mockData';
+import { BUCKET_LIST_IDS, PAST_TRIPS } from '../mockData';
 import { PLACES_BY_ID } from '../hubData';
 import { HUB_LABEL, formatTry, formatKm } from '../utils/format';
 
 type Tab = 'trips' | 'passport' | 'spots';
 
+/** Normalized card shape for both saved (backend) and demo (mock) trips. */
+interface TripCard {
+  id: string;
+  title: string;
+  hub: Hub;
+  dateISO: string;
+  distanceKm: number;
+  stops: number;
+  spentTry: number;
+  saved: boolean;
+}
+
 export default function Profile() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>('passport');
   const [badges, setBadges] = useState<Badge[]>([]);
-  const [trips, setTrips] = useState<PastTrip[]>([]);
+  const [trips, setTrips] = useState<TripCard[]>([]);
   const [stats, setStats] = useState<ProfileStats | null>(null);
 
   useEffect(() => {
     api.getBadges().then(setBadges);
-    api.getPastTrips().then(setTrips);
     api.getProfileStats().then(setStats);
+    // Prefer the user's real saved trips; fall back to demo trips if none yet.
+    api
+      .getTrips()
+      .then((saved) => {
+        if (saved.length > 0) {
+          setTrips(
+            saved.map((t) => ({
+              id: t.id,
+              title: t.title,
+              hub: t.hub,
+              dateISO: t.createdAt,
+              distanceKm: t.totalDistanceKm,
+              stops: t.stopCount,
+              spentTry: t.totalCostTry,
+              saved: true,
+            })),
+          );
+        } else {
+          setTrips(
+            PAST_TRIPS.map((t) => ({
+              id: t.id,
+              title: t.title,
+              hub: t.hub,
+              dateISO: t.date,
+              distanceKm: t.distanceKm,
+              stops: t.stops,
+              spentTry: t.spentTry,
+              saved: false,
+            })),
+          );
+        }
+      })
+      .catch(() => setTrips([]));
   }, []);
 
   // Visited-spot status derived from past trips' hubs (demo heuristic).
@@ -58,15 +102,26 @@ export default function Profile() {
 
         {tab === 'trips' && (
           <div className="space-y-3">
+            {trips.length === 0 && (
+              <p className="rounded-xl border border-white/10 bg-night-800 p-4 text-sm text-cream/50">
+                No trips yet — generate a plan and hit “💾 Save plan” to see it here.
+              </p>
+            )}
+            {trips.some((t) => !t.saved) && (
+              <p className="text-xs text-cream/40">Showing sample trips — save a plan to replace these with your own.</p>
+            )}
             {trips.map((t) => (
               <div key={t.id} className="flex items-center justify-between rounded-2xl border border-white/10 bg-night-800 p-4">
                 <div>
-                  <p className="font-semibold text-cream">{t.title}</p>
+                  <p className="font-semibold text-cream">
+                    {t.title}
+                    {t.saved && <span className="ml-2 rounded-full bg-emerald/15 px-2 py-0.5 text-[10px] font-semibold text-emerald">Saved</span>}
+                  </p>
                   <p className="text-xs text-cream/50">{HUB_LABEL[t.hub]}</p>
                 </div>
                 <div className="text-right text-sm">
                   <span className="rounded-full bg-violet/15 px-2.5 py-1 text-xs font-semibold text-violet">
-                    {new Date(t.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                    {new Date(t.dateISO).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                   </span>
                   <p className="mt-1 text-cream/60">{formatKm(t.distanceKm)} · {t.stops} stops · {formatTry(t.spentTry)}</p>
                 </div>

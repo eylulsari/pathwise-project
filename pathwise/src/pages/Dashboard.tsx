@@ -14,6 +14,7 @@ import { AiAssistant } from '../components/ai/AiAssistant';
 import { SplitBill } from '../components/SplitBill';
 import { ExportRoute } from '../components/ExportRoute';
 import { OfflineToggle } from '../components/OfflineToggle';
+import { HUB_LABEL } from '../utils/format';
 
 interface DayState {
   config: RouteConfig;
@@ -49,6 +50,7 @@ export default function Dashboard() {
   const [showMustVisit, setShowMustVisit] = useState(false);
   const [showSplitBill, setShowSplitBill] = useState(false);
   const [offline, setOffline] = useState(false);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   const day = days[activeDay];
 
@@ -142,6 +144,19 @@ export default function Dashboard() {
     generateFor(activeDay, { ...buildRequest({ ...day, config: nextConfig }) });
   }
 
+  async function saveCurrentPlan() {
+    if (!day.itinerary) return;
+    setSaveState('saving');
+    try {
+      const hubName = HUB_LABEL[day.itinerary.hub] ?? day.itinerary.hub;
+      await api.saveTrip(`Day ${activeDay + 1} · ${hubName}`, day.itinerary);
+      setSaveState('saved');
+      setTimeout(() => setSaveState('idle'), 2500);
+    } catch {
+      setSaveState('idle');
+    }
+  }
+
   function switchDay(index: number) {
     setActiveDay(index);
     setSelectedPlaceId(null);
@@ -174,6 +189,17 @@ export default function Dashboard() {
           </button>
         ))}
         <div className="ml-auto flex flex-wrap items-center gap-2">
+          <button
+            onClick={saveCurrentPlan}
+            disabled={!day.itinerary || saveState === 'saving'}
+            className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
+              saveState === 'saved'
+                ? 'border-emerald bg-emerald/20 text-emerald'
+                : 'border-white/10 text-cream/80 hover:text-cream'
+            }`}
+          >
+            {saveState === 'saved' ? '✓ Saved' : saveState === 'saving' ? 'Saving…' : '💾 Save plan'}
+          </button>
           <button
             onClick={() => setShowSplitBill(true)}
             className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/80 hover:text-cream"
