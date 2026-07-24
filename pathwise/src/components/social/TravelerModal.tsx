@@ -1,6 +1,7 @@
 import type { Traveler } from '../../types';
 import { BADGES } from '../../mockData';
 import { TurkeyMiniMap } from '../TurkeyMiniMap';
+import { useT } from '../../i18n';
 
 /** Traveler profile modal — bio, badges, visited provinces map and a DM button. */
 export function TravelerModal({
@@ -14,6 +15,7 @@ export function TravelerModal({
   onConnect: () => void;
   onClose: () => void;
 }) {
+  const { t } = useT();
   const badges = BADGES.filter((b) => traveler.badges.includes(b.id));
 
   return (
@@ -36,6 +38,7 @@ export function TravelerModal({
                     ✓ Solo-Verified
                   </span>
                 )}
+                {/* (#SoloVerified is a brand tag — kept untranslated) */}
               </p>
             </div>
           </div>
@@ -53,7 +56,7 @@ export function TravelerModal({
         </div>
 
         <section className="mt-5">
-          <h4 className="mb-2 text-sm font-bold text-night">Badges</h4>
+          <h4 className="mb-2 text-sm font-bold text-night">{t('social.badges')}</h4>
           {badges.length ? (
             <div className="flex flex-wrap gap-2">
               {badges.map((b) => (
@@ -63,12 +66,12 @@ export function TravelerModal({
               ))}
             </div>
           ) : (
-            <p className="text-xs text-night/50">No badges yet — just getting started.</p>
+            <p className="text-xs text-night/50">{t('social.noBadges')}</p>
           )}
         </section>
 
         <section className="mt-5">
-          <h4 className="mb-2 text-sm font-bold text-night">Visited provinces</h4>
+          <h4 className="mb-2 text-sm font-bold text-night">{t('social.visitedProvinces')}</h4>
           <TurkeyMiniMap visited={traveler.visitedProvinces} />
         </section>
 
@@ -80,10 +83,10 @@ export function TravelerModal({
               connected ? 'bg-emerald/20 text-emerald' : 'btn-accent'
             }`}
           >
-            {connected ? '✓ Connected' : '👋 Connect'}
+            {connected ? t('social.connected') : t('social.connect')}
           </button>
           <button className="flex-1 rounded-xl border-2 border-night/15 py-3 text-sm font-semibold text-night hover:border-night/30">
-            💬 Message
+            {t('social.message')}
           </button>
         </div>
       </div>

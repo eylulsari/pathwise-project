@@ -6,6 +6,7 @@ import { AppHeader } from '../components/AppHeader';
 import { BUCKET_LIST_IDS, PAST_TRIPS } from '../mockData';
 import { PLACES_BY_ID } from '../hubData';
 import { HUB_LABEL, formatTry, formatKm } from '../utils/format';
+import { useT } from '../i18n';
 
 type Tab = 'trips' | 'passport' | 'spots';
 
@@ -23,6 +24,7 @@ interface TripCard {
 
 export default function Profile() {
   const { user } = useAuth();
+  const { t } = useT();
   const [tab, setTab] = useState<Tab>('passport');
   const [badges, setBadges] = useState<Badge[]>([]);
   const [trips, setTrips] = useState<TripCard[]>([]);
@@ -81,49 +83,49 @@ export default function Profile() {
             </div>
             <div>
               <h1 className="font-display text-2xl font-bold">{user?.name}</h1>
-              <p className="text-white/80">{user?.nationality ?? 'Traveler'} · Istanbul explorer</p>
+              <p className="text-white/80">{user?.nationality ?? t('profile.traveler')} · {t('profile.explorer')}</p>
             </div>
           </div>
           {stats && (
             <div className="mt-5 grid grid-cols-3 gap-3">
-              <Stat label="Total distance" value={formatKm(stats.totalKm)} />
-              <Stat label="Stops visited" value={String(stats.stopsVisited)} />
-              <Stat label="Total spent" value={formatTry(stats.spentTry)} />
+              <Stat label={t('profile.totalDistance')} value={formatKm(stats.totalKm)} />
+              <Stat label={t('profile.stopsVisited')} value={String(stats.stopsVisited)} />
+              <Stat label={t('profile.totalSpent')} value={formatTry(stats.spentTry)} />
             </div>
           )}
         </div>
 
         {/* Tabs */}
         <div className="flex gap-2 border-b border-white/10">
-          <TabButton active={tab === 'trips'} onClick={() => setTab('trips')}>Past Trips</TabButton>
-          <TabButton active={tab === 'passport'} onClick={() => setTab('passport')}>İstanbul Passport</TabButton>
-          <TabButton active={tab === 'spots'} onClick={() => setTab('spots')}>Visited Spots</TabButton>
+          <TabButton active={tab === 'trips'} onClick={() => setTab('trips')}>{t('profile.pastTrips')}</TabButton>
+          <TabButton active={tab === 'passport'} onClick={() => setTab('passport')}>{t('profile.passport')}</TabButton>
+          <TabButton active={tab === 'spots'} onClick={() => setTab('spots')}>{t('profile.visitedSpots')}</TabButton>
         </div>
 
         {tab === 'trips' && (
           <div className="space-y-3">
             {trips.length === 0 && (
               <p className="rounded-xl border border-white/10 bg-night-800 p-4 text-sm text-cream/50">
-                No trips yet — generate a plan and hit “💾 Save plan” to see it here.
+                {t('profile.noTrips')}
               </p>
             )}
-            {trips.some((t) => !t.saved) && (
-              <p className="text-xs text-cream/40">Showing sample trips — save a plan to replace these with your own.</p>
+            {trips.some((tp) => !tp.saved) && (
+              <p className="text-xs text-cream/40">{t('profile.sampleNote')}</p>
             )}
-            {trips.map((t) => (
-              <div key={t.id} className="flex items-center justify-between rounded-2xl border border-white/10 bg-night-800 p-4">
+            {trips.map((tp) => (
+              <div key={tp.id} className="flex items-center justify-between rounded-2xl border border-white/10 bg-night-800 p-4">
                 <div>
                   <p className="font-semibold text-cream">
-                    {t.title}
-                    {t.saved && <span className="ml-2 rounded-full bg-emerald/15 px-2 py-0.5 text-[10px] font-semibold text-emerald">Saved</span>}
+                    {tp.title}
+                    {tp.saved && <span className="ml-2 rounded-full bg-emerald/15 px-2 py-0.5 text-[10px] font-semibold text-emerald">{t('profile.saved')}</span>}
                   </p>
-                  <p className="text-xs text-cream/50">{HUB_LABEL[t.hub]}</p>
+                  <p className="text-xs text-cream/50">{HUB_LABEL[tp.hub]}</p>
                 </div>
                 <div className="text-right text-sm">
                   <span className="rounded-full bg-violet/15 px-2.5 py-1 text-xs font-semibold text-violet">
-                    {new Date(t.dateISO).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                    {new Date(tp.dateISO).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                   </span>
-                  <p className="mt-1 text-cream/60">{formatKm(t.distanceKm)} · {t.stops} stops · {formatTry(t.spentTry)}</p>
+                  <p className="mt-1 text-cream/60">{formatKm(tp.distanceKm)} · {tp.stops} stops · {formatTry(tp.spentTry)}</p>
                 </div>
               </div>
             ))}
@@ -171,7 +173,7 @@ export default function Profile() {
                     <p className="text-xs text-cream/50">{HUB_LABEL[place.hub]}</p>
                   </div>
                   <span className={`ml-auto text-xs font-semibold ${visited ? 'text-emerald' : 'text-cream/40'}`}>
-                    {visited ? 'Visited' : 'Not yet'}
+                    {visited ? t('profile.visited') : t('profile.notYet')}
                   </span>
                 </div>
               );

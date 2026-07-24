@@ -15,6 +15,7 @@ import { SplitBill } from '../components/SplitBill';
 import { ExportRoute } from '../components/ExportRoute';
 import { OfflineToggle } from '../components/OfflineToggle';
 import { HUB_LABEL } from '../utils/format';
+import { useT } from '../i18n';
 
 interface DayState {
   config: RouteConfig;
@@ -42,6 +43,7 @@ const INITIAL_DAYS: DayState[] = [
 ];
 
 export default function Dashboard() {
+  const { t } = useT();
   const [days, setDays] = useState<DayState[]>(INITIAL_DAYS);
   const [activeDay, setActiveDay] = useState(0);
   const [startPoint, setStartPoint] = useState<StartPoint | null>(null);
@@ -192,7 +194,7 @@ export default function Dashboard() {
 
       {offline && (
         <div className="bg-coral/20 px-4 py-1.5 text-center text-xs font-semibold text-coral">
-          📴 Offline Mode — showing your cached plan. (UI demo only — no real caching.)
+          {t('dash.offlineBanner')}
         </div>
       )}
 
@@ -206,7 +208,7 @@ export default function Dashboard() {
               activeDay === i ? 'bg-accent-gradient text-white' : 'text-cream/60 hover:text-cream'
             }`}
           >
-            Day {i + 1}
+            {t('dash.day')} {i + 1}
           </button>
         ))}
         <div className="ml-auto flex flex-wrap items-center gap-2">
@@ -219,13 +221,13 @@ export default function Dashboard() {
                 : 'border-white/10 text-cream/80 hover:text-cream'
             }`}
           >
-            {saveState === 'saved' ? '✓ Saved' : saveState === 'saving' ? 'Saving…' : '💾 Save plan'}
+            {saveState === 'saved' ? `✓ ${t('dash.saved')}` : saveState === 'saving' ? t('dash.saving') : `💾 ${t('dash.savePlan')}`}
           </button>
           <button
             onClick={() => setShowSplitBill(true)}
             className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/80 hover:text-cream"
           >
-            💰 Split Bill
+            💰 {t('dash.splitBill')}
           </button>
           {day.itinerary && <ExportRoute itinerary={day.itinerary} />}
           <OfflineToggle offline={offline} onToggle={() => setOffline((o) => !o)} />
@@ -246,13 +248,13 @@ export default function Dashboard() {
               onClick={() => setShowQuiz(true)}
               className="rounded-xl border border-violet/40 px-3 py-2.5 text-sm font-semibold text-cream hover:bg-violet/10"
             >
-              🎭 Vibe Quiz
+              🎭 {t('dash.vibeQuiz')}
             </button>
             <button
               onClick={() => setShowMustVisit(true)}
               className="rounded-xl border border-emerald/40 px-3 py-2.5 text-sm font-semibold text-cream hover:bg-emerald/10"
             >
-              ⭐ Must-Visit {day.mustVisitIds.length > 0 && `(${day.mustVisitIds.length})`}
+              ⭐ {t('dash.mustVisit')} {day.mustVisitIds.length > 0 && `(${day.mustVisitIds.length})`}
             </button>
           </div>
           <StartPointSelector value={startPoint} onChange={setStartPoint} />
@@ -264,13 +266,13 @@ export default function Dashboard() {
         <div className="overflow-y-auto pr-1">
           {day.loading && (
             <div className="flex h-40 items-center justify-center text-cream/50">
-              <span className="animate-pulse">⚡ Generating your path…</span>
+              <span className="animate-pulse">{t('dash.generating')}</span>
             </div>
           )}
           {day.error && (
             <div className="rounded-xl bg-fuchsia/15 p-4 text-sm text-fuchsia">
               {day.error}
-              <button onClick={handleGenerate} className="ml-2 underline">Retry</button>
+              <button onClick={handleGenerate} className="ml-2 underline">{t('dash.retry')}</button>
             </div>
           )}
           {day.itinerary && !day.loading && (

@@ -10,6 +10,7 @@ import { api } from '../services/api';
 import { AppHeader } from '../components/AppHeader';
 import { TravelerModal } from '../components/social/TravelerModal';
 import { HUB_LABEL } from '../utils/format';
+import { useT } from '../i18n';
 
 const ALL_TAGS: TravelTag[] = [
   '#SoloVerified',
@@ -21,6 +22,7 @@ const ALL_TAGS: TravelTag[] = [
 ];
 
 export default function Social() {
+  const { t } = useT();
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [travelers, setTravelers] = useState<Traveler[]>([]);
   const [routes, setRoutes] = useState<CommunityRoute[]>([]);
@@ -82,8 +84,8 @@ export default function Social() {
       <AppHeader />
       <main className="mx-auto w-full max-w-6xl flex-1 space-y-8 p-4 md:p-6">
         <div>
-          <h1 className="font-display text-2xl font-bold">Social & Travel Buddies</h1>
-          <p className="text-sm text-cream/60">Find verified travelers, clone routes and check in as you go.</p>
+          <h1 className="font-display text-2xl font-bold">{t('social.title')}</h1>
+          <p className="text-sm text-cream/60">{t('social.subtitle')}</p>
         </div>
 
         {/* "I'm Here" check-in composer */}
@@ -93,11 +95,11 @@ export default function Social() {
               value={checkInText}
               onChange={(e) => setCheckInText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && broadcastCheckIn()}
-              placeholder="📍 I'm here — say what you're up to…"
+              placeholder={t('social.checkinPlaceholder')}
               className="flex-1 rounded-xl border border-white/10 bg-night px-4 py-2.5 text-sm outline-none focus:border-emerald"
             />
             <button onClick={broadcastCheckIn} className="rounded-xl bg-emerald px-4 py-2.5 text-sm font-semibold text-white">
-              I’m Here
+              {t('social.imHere')}
             </button>
           </div>
 
@@ -120,38 +122,38 @@ export default function Social() {
         {/* Traveler cards + filter */}
         <section>
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <h2 className="font-display text-lg font-bold">Travelers nearby</h2>
+            <h2 className="font-display text-lg font-bold">{t('social.travelersNearby')}</h2>
             <div className="flex flex-wrap gap-1.5">
-              <FilterChip label="All" active={filter === null} onClick={() => setFilter(null)} />
+              <FilterChip label={t('social.all')} active={filter === null} onClick={() => setFilter(null)} />
               {ALL_TAGS.map((t) => (
                 <FilterChip key={t} label={t} active={filter === t} onClick={() => setFilter(t)} />
               ))}
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((t) => (
-              <div key={t.id} className="card-cream p-4">
+            {filtered.map((tr) => (
+              <div key={tr.id} className="card-cream p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: t.avatarColor }}>
-                    {t.name.split(' ').map((n) => n[0]).join('')}
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: tr.avatarColor }}>
+                    {tr.name.split(' ').map((n) => n[0]).join('')}
                   </div>
                   <div>
-                    <p className="font-display font-bold text-night">{t.name}</p>
-                    <p className="text-xs text-night/50">{t.age} · {t.nationality}</p>
+                    <p className="font-display font-bold text-night">{tr.name}</p>
+                    <p className="text-xs text-night/50">{tr.age} · {tr.nationality}</p>
                   </div>
-                  {t.soloVerified && <span className="ml-auto text-emerald" title="Solo-Verified">✓</span>}
+                  {tr.soloVerified && <span className="ml-auto text-emerald" title="Solo-Verified">✓</span>}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {t.tags.slice(0, 3).map((tag) => (
+                  {tr.tags.slice(0, 3).map((tag) => (
                     <span key={tag} className="rounded-full bg-violet/10 px-2 py-0.5 text-[10px] font-semibold text-violet-deep">{tag}</span>
                   ))}
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <button onClick={() => toggleConnect(t.id)} className={`flex-1 rounded-lg py-2 text-xs font-semibold ${connected.has(t.id) ? 'bg-emerald/20 text-emerald' : 'bg-accent-gradient text-white'}`}>
-                    {connected.has(t.id) ? '✓ Connected' : '👋 Connect'}
+                  <button onClick={() => toggleConnect(tr.id)} className={`flex-1 rounded-lg py-2 text-xs font-semibold ${connected.has(tr.id) ? 'bg-emerald/20 text-emerald' : 'bg-accent-gradient text-white'}`}>
+                    {connected.has(tr.id) ? t('social.connected') : t('social.connect')}
                   </button>
-                  <button onClick={() => setActive(t)} className="flex-1 rounded-lg border border-night/15 py-2 text-xs font-semibold text-night hover:border-night/30">
-                    View profile
+                  <button onClick={() => setActive(tr)} className="flex-1 rounded-lg border border-night/15 py-2 text-xs font-semibold text-night hover:border-night/30">
+                    {t('social.viewProfile')}
                   </button>
                 </div>
               </div>
@@ -161,7 +163,7 @@ export default function Social() {
 
         {/* Community routes */}
         <section>
-          <h2 className="mb-3 font-display text-lg font-bold">Community routes</h2>
+          <h2 className="mb-3 font-display text-lg font-bold">{t('social.communityRoutes')}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {routes.map((r) => (
               <div key={r.id} className="rounded-2xl border border-white/10 bg-night-800 p-4">
@@ -176,7 +178,7 @@ export default function Social() {
                   <button onClick={() => likeRoute(r.id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${r.liked ? 'bg-fuchsia/20 text-fuchsia' : 'border border-white/10 text-cream/70'}`}>
                     {r.liked ? '❤️' : '🤍'} {r.likes}
                   </button>
-                  <button className="rounded-lg bg-violet/20 px-3 py-1.5 text-xs font-semibold text-cream">📋 Clone This Route</button>
+                  <button className="rounded-lg bg-violet/20 px-3 py-1.5 text-xs font-semibold text-cream">{t('social.clone')}</button>
                 </div>
               </div>
             ))}
@@ -185,7 +187,7 @@ export default function Social() {
 
         {/* Local Q&A forum */}
         <section>
-          <h2 className="mb-3 font-display text-lg font-bold">Local Q&A</h2>
+          <h2 className="mb-3 font-display text-lg font-bold">{t('social.localQA')}</h2>
           <div className="space-y-3">
             {forum.map((q) => (
               <ForumThread key={q.id} q={q} />
@@ -215,6 +217,7 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
 }
 
 function ForumThread({ q }: { q: ForumQuestion }) {
+  const { t } = useT();
   const [answers, setAnswers] = useState(q.answers);
   const [text, setText] = useState('');
   return (
@@ -240,7 +243,7 @@ function ForumThread({ q }: { q: ForumQuestion }) {
               setText('');
             }
           }}
-          placeholder="Quick answer…"
+          placeholder={t('social.quickAnswer')}
           className="flex-1 rounded-lg border border-white/10 bg-night px-3 py-1.5 text-sm outline-none focus:border-violet"
         />
       </div>

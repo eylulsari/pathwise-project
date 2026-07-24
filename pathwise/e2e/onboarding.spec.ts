@@ -55,3 +55,18 @@ test('can open the Travel Vibe Quiz from the dashboard', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Travel Vibe Quiz/i })).toBeVisible();
   await expect(page.getByText(/What's your mood/i)).toBeVisible();
 });
+
+test('language toggle switches the UI between English and Turkish', async ({ page }) => {
+  await page.goto('/');
+  // Defaults to English (Playwright locale is en-US).
+  await expect(page.getByRole('link', { name: 'Sign In', exact: true })).toBeVisible();
+
+  // Switch to Turkish via the header toggle.
+  await page.getByRole('button', { name: 'TR', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Giriş Yap', exact: true })).toBeVisible();
+  await expect(page.getByText(/akıllı & sosyal/i)).toBeVisible();
+
+  // Switch back to English.
+  await page.getByRole('button', { name: 'EN', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Sign In', exact: true })).toBeVisible();
+});

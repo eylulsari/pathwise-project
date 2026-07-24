@@ -1,6 +1,6 @@
 import type { GroupType, Hub, Interest, Weather } from '../../types';
 import { HUBS } from '../../hubData';
-import { INTEREST_LABEL } from '../../utils/format';
+import { useT } from '../../i18n';
 
 export interface RouteConfig {
   hub: Hub;
@@ -13,10 +13,10 @@ export interface RouteConfig {
 }
 
 const INTERESTS: Interest[] = ['food', 'history', 'photo', 'market', 'art', 'nature'];
-const GROUPS: { id: GroupType; label: string; icon: string }[] = [
-  { id: 'solo', label: 'Solo', icon: '🧍' },
-  { id: 'couple', label: 'Couple', icon: '👫' },
-  { id: 'friends', label: 'Friends', icon: '👥' },
+const GROUPS: { id: GroupType; icon: string }[] = [
+  { id: 'solo', icon: '🧍' },
+  { id: 'couple', icon: '👫' },
+  { id: 'friends', icon: '👥' },
 ];
 
 /** The dynamic route generator — hub, budget, pace, group, interests and a
@@ -32,16 +32,21 @@ export function RouteGenerator({
   onGenerate: () => void;
   generating: boolean;
 }) {
+  const { t } = useT();
   const timeOfDay =
-    config.startHour < 12 ? 'Morning' : config.startHour < 16 ? 'Afternoon' : 'Evening';
+    config.startHour < 12
+      ? t('dash.morning')
+      : config.startHour < 16
+        ? t('dash.afternoon')
+        : t('dash.evening');
 
   return (
     <div className="space-y-5 rounded-2xl border border-white/10 bg-night-800 p-4">
-      <h2 className="font-display text-lg font-bold">Build your path</h2>
+      <h2 className="font-display text-lg font-bold">{t('dash.buildPath')}</h2>
 
       {/* Hub selector — no default Sultanahmet */}
       <div>
-        <Label>Neighborhood / hub</Label>
+        <Label>{t('dash.hub')}</Label>
         <div className="grid grid-cols-1 gap-1.5">
           {HUBS.map((h) => (
             <button
@@ -64,7 +69,7 @@ export function RouteGenerator({
       {/* Budget slider */}
       <div>
         <Label>
-          Daily budget: <span className="text-cream">₺{config.budgetTry.toLocaleString('tr-TR')}{config.budgetTry >= 5000 ? '+' : ''}</span>
+          {t('dash.dailyBudget')}: <span className="text-cream">₺{config.budgetTry.toLocaleString('tr-TR')}{config.budgetTry >= 5000 ? '+' : ''}</span>
         </Label>
         <input
           type="range"
@@ -84,7 +89,7 @@ export function RouteGenerator({
       {/* Pace slider */}
       <div>
         <Label>
-          Time available: <span className="text-cream">{config.paceHours}{config.paceHours >= 8 ? '+' : ''} hours</span>
+          {t('dash.timeAvailable')}: <span className="text-cream">{config.paceHours}{config.paceHours >= 8 ? '+' : ''} {t('dash.hours')}</span>
         </Label>
         <input
           type="range"
@@ -96,14 +101,14 @@ export function RouteGenerator({
           className="w-full accent-violet"
         />
         <div className="flex justify-between text-[10px] text-cream/40">
-          <span>2h relaxed</span>
-          <span>8h+ packed</span>
+          <span>2{t('dash.hours').charAt(0)} {t('dash.relaxed')}</span>
+          <span>8+ {t('dash.packed')}</span>
         </div>
       </div>
 
       {/* Group type */}
       <div>
-        <Label>Group</Label>
+        <Label>{t('dash.group')}</Label>
         <div className="grid grid-cols-3 gap-1.5">
           {GROUPS.map((g) => (
             <button
@@ -116,7 +121,7 @@ export function RouteGenerator({
               }`}
             >
               <div>{g.icon}</div>
-              {g.label}
+              {t(`dash.${g.id}`)}
             </button>
           ))}
         </div>
@@ -124,7 +129,7 @@ export function RouteGenerator({
 
       {/* Interest chips */}
       <div>
-        <Label>Interests</Label>
+        <Label>{t('dash.interests')}</Label>
         <div className="flex flex-wrap gap-1.5">
           {INTERESTS.map((i) => {
             const on = config.interests.includes(i);
@@ -144,7 +149,7 @@ export function RouteGenerator({
                     : 'border-white/15 text-cream/70 hover:border-white/30'
                 }`}
               >
-                {INTEREST_LABEL[i]}
+                {t(`interests.${i}`)}
               </button>
             );
           })}
@@ -153,7 +158,7 @@ export function RouteGenerator({
 
       {/* Weather + time simulator */}
       <div>
-        <Label>Weather & time simulator</Label>
+        <Label>{t('dash.weatherTime')}</Label>
         <div className="flex gap-1.5">
           {(['sunny', 'rainy'] as Weather[]).map((w) => (
             <button
@@ -165,13 +170,13 @@ export function RouteGenerator({
                   : 'border-white/10 text-cream/70'
               }`}
             >
-              {w === 'sunny' ? '☀️ Sunny' : '🌧️ Rainy'}
+              {w === 'sunny' ? `☀️ ${t('dash.sunny')}` : `🌧️ ${t('dash.rainy')}`}
             </button>
           ))}
         </div>
         <div className="mt-2">
           <div className="flex justify-between text-xs text-cream/50">
-            <span>Start: {String(config.startHour).padStart(2, '0')}:00</span>
+            <span>{t('dash.start')}: {String(config.startHour).padStart(2, '0')}:00</span>
             <span>{timeOfDay}</span>
           </div>
           <input
@@ -187,7 +192,7 @@ export function RouteGenerator({
       </div>
 
       <button onClick={onGenerate} disabled={generating} className="btn-accent w-full">
-        {generating ? '⚡ Generating…' : '⚡ Generate My Custom Path'}
+        {generating ? t('dash.generating') : t('dash.generate')}
       </button>
     </div>
   );

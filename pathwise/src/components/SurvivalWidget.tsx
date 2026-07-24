@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { SURVIVAL_GUIDE } from '../mockData';
+import { useT } from '../i18n';
 
 /** City Survival & Etiquette accordion (Transit / Etiquette / Museum / Safety). */
 export function SurvivalWidget() {
+  const { t } = useT();
   const [open, setOpen] = useState<string | null>('transit');
 
   return (
     <div className="rounded-2xl border border-white/10 bg-night-800 p-4">
-      <h3 className="mb-3 font-display text-sm font-bold">City Survival & Etiquette</h3>
+      <h3 className="mb-3 font-display text-sm font-bold">{t('survival.title')}</h3>
       <div className="space-y-1.5">
         {SURVIVAL_GUIDE.map((cat) => {
           const isOpen = open === cat.id;

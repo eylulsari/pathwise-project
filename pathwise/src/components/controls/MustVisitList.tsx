@@ -1,6 +1,7 @@
 import { BUCKET_LIST_IDS } from '../../mockData';
 import { PLACES_BY_ID } from '../../hubData';
 import { HUB_LABEL, formatTry } from '../../utils/format';
+import { useT } from '../../i18n';
 
 /**
  * Must-Visit bucket list. Checked places are ALWAYS forced into the generated
@@ -16,13 +17,14 @@ export function MustVisitList({
   onToggle: (id: string) => void;
   onClose: () => void;
 }) {
+  const { t } = useT();
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="card-cream max-h-[85vh] w-full max-w-2xl overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-display text-xl font-bold text-night">Must-Visit Bucket List</h3>
-            <p className="text-xs text-night/50">Checked spots are locked into your route — never dropped for budget.</p>
+            <h3 className="font-display text-xl font-bold text-night">{t('mustVisit.title')}</h3>
+            <p className="text-xs text-night/50">{t('mustVisit.subtitle')}</p>
           </div>
           <button onClick={onClose} className="text-night/40 hover:text-night">✕</button>
         </div>
@@ -55,7 +57,7 @@ export function MustVisitList({
         </div>
 
         <button onClick={onClose} className="btn-accent mt-5 w-full">
-          Done — {selected.length} locked in
+          {t('mustVisit.done')} {selected.length} {t('mustVisit.lockedIn')}
         </button>
       </div>
     </div>

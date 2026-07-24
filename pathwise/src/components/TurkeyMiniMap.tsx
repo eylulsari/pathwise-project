@@ -19,7 +19,10 @@ const PROVINCE_POINTS: Record<string, [number, number]> = {
   Edremit: [50, 58],
 };
 
+import { useT } from '../i18n';
+
 export function TurkeyMiniMap({ visited }: { visited: string[] }) {
+  const { t } = useT();
   const visitedSet = new Set(visited);
   return (
     <div className="rounded-xl border border-night/10 bg-night/5 p-3">
@@ -46,7 +49,7 @@ export function TurkeyMiniMap({ visited }: { visited: string[] }) {
         })}
       </svg>
       <p className="mt-1 text-center text-xs text-night/50">
-        {visited.length} provinces visited
+        {visited.length} {t('social.provincesVisited')}
       </p>
     </div>
   );

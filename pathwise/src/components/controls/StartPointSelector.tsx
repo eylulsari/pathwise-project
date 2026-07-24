@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { StartPoint, StartPointKind } from '../../types';
 import { TRANSIT_HUBS } from '../../hubData';
+import { useT } from '../../i18n';
 
 /** Start-point selector: GPS, Hotel, Transit hub/pier, or pick on map.
  *  The choice sets the origin used to estimate the first leg's distance/time. */
@@ -11,15 +12,16 @@ export function StartPointSelector({
   value: StartPoint | null;
   onChange: (sp: StartPoint | null) => void;
 }) {
+  const { t } = useT();
   const [kind, setKind] = useState<StartPointKind>('transit');
   const [hotel, setHotel] = useState('');
   const [gpsErr, setGpsErr] = useState<string | null>(null);
 
   const OPTIONS: { id: StartPointKind; label: string; icon: string }[] = [
-    { id: 'gps', label: 'My location', icon: '📍' },
-    { id: 'hotel', label: 'Hotel', icon: '🏨' },
-    { id: 'transit', label: 'Transit hub', icon: '🚇' },
-    { id: 'map', label: 'Pick on map', icon: '🗺️' },
+    { id: 'gps', label: t('startPoint.myLocation'), icon: '📍' },
+    { id: 'hotel', label: t('startPoint.hotel'), icon: '🏨' },
+    { id: 'transit', label: t('startPoint.transit'), icon: '🚇' },
+    { id: 'map', label: t('startPoint.pickMap'), icon: '🗺️' },
   ];
 
   function useGps() {
@@ -42,7 +44,7 @@ export function StartPointSelector({
 
   return (
     <div className="rounded-2xl border border-white/10 bg-night-800 p-4">
-      <h3 className="mb-2 font-display text-sm font-bold">Start point</h3>
+      <h3 className="mb-2 font-display text-sm font-bold">{t('startPoint.title')}</h3>
       <div className="grid grid-cols-4 gap-1.5">
         {OPTIONS.map((o) => (
           <button
@@ -72,14 +74,14 @@ export function StartPointSelector({
           <input
             value={hotel}
             onChange={(e) => setHotel(e.target.value)}
-            placeholder="Hotel name / area"
+            placeholder={t('startPoint.hotelPlaceholder')}
             className="flex-1 rounded-lg border border-white/10 bg-night px-2 py-1.5 text-sm outline-none focus:border-violet"
           />
           <button
             onClick={() =>
               onChange({
                 kind: 'hotel',
-                label: hotel || 'Hotel',
+                label: hotel || t('startPoint.hotel'),
                 // Demo geocode → Sultanahmet hotel cluster (would call a geocoder).
                 lat: 41.0066,
                 lng: 28.9773,
@@ -87,7 +89,7 @@ export function StartPointSelector({
             }
             className="rounded-lg bg-violet/30 px-3 text-sm font-semibold"
           >
-            Set
+            {t('startPoint.set')}
           </button>
         </div>
       )}
@@ -101,7 +103,7 @@ export function StartPointSelector({
           defaultValue=""
           className="mt-2 w-full rounded-lg border border-white/10 bg-night px-2 py-1.5 text-sm outline-none focus:border-violet"
         >
-          <option value="" disabled>Choose a pier / station…</option>
+          <option value="" disabled>{t('startPoint.choosePier')}</option>
           {TRANSIT_HUBS.map((t) => (
             <option key={t.label} value={t.label}>{t.label}</option>
           ))}
@@ -109,15 +111,12 @@ export function StartPointSelector({
       )}
 
       {kind === 'map' && (
-        <p className="mt-2 text-xs text-cream/50">
-          Tip: click any pin on the map, then set it as your start. (Demo uses the
-          hub center as origin.)
-        </p>
+        <p className="mt-2 text-xs text-cream/50">{t('startPoint.mapTip')}</p>
       )}
 
       {value && (
         <p className="mt-2 rounded-lg bg-emerald/10 px-2 py-1.5 text-xs text-emerald">
-          Starting from: <span className="font-semibold">{value.label}</span>
+          {t('startPoint.startingFrom')}: <span className="font-semibold">{value.label}</span>
         </p>
       )}
     </div>

@@ -1,10 +1,13 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { WeatherWidget } from './WeatherWidget';
+import { LanguageToggle } from './LanguageToggle';
+import { useT } from '../i18n';
 
 /** Top navigation shared by Dashboard, Social and Profile. */
 export function AppHeader() {
   const { user, logout } = useAuth();
+  const { t } = useT();
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
@@ -19,9 +22,9 @@ export function AppHeader() {
           <span className="font-display text-lg font-bold text-gradient">Pathwise</span>
         </Link>
         <nav className="flex items-center gap-1">
-          <NavLink to="/dashboard" className={linkClass}>Plan</NavLink>
-          <NavLink to="/social" className={linkClass}>Social</NavLink>
-          <NavLink to="/profile" className={linkClass}>Profile</NavLink>
+          <NavLink to="/dashboard" className={linkClass}>{t('nav.plan')}</NavLink>
+          <NavLink to="/social" className={linkClass}>{t('nav.social')}</NavLink>
+          <NavLink to="/profile" className={linkClass}>{t('nav.profile')}</NavLink>
         </nav>
       </div>
 
@@ -29,6 +32,7 @@ export function AppHeader() {
         <div className="hidden md:block">
           <WeatherWidget />
         </div>
+        <LanguageToggle />
         <div className="flex items-center gap-2">
           <span className="hidden text-sm text-cream/70 sm:inline">
             {user?.name?.split(' ')[0]}
@@ -37,7 +41,7 @@ export function AppHeader() {
             onClick={logout}
             className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/70 hover:text-cream"
           >
-            Log out
+            {t('common.logout')}
           </button>
         </div>
       </div>

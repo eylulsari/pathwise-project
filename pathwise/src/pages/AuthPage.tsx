@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { IstanbulSilhouette } from '../components/IstanbulSilhouette';
+import { LanguageToggle } from '../components/LanguageToggle';
+import { useT } from '../i18n';
 
 type Mode = 'signin' | 'signup';
 
 export default function AuthPage() {
+  const { t } = useT();
   const [mode, setMode] = useState<Mode>('signup');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -53,14 +56,11 @@ export default function AuthPage() {
         </Link>
         <div>
           <h2 className="font-display text-4xl font-extrabold leading-tight">
-            Your Istanbul,
+            {t('auth.brand1')}
             <br />
-            <span className="text-gradient">one smart path.</span>
+            <span className="text-gradient">{t('auth.brand2')}</span>
           </h2>
-          <p className="mt-4 max-w-sm text-cream/60">
-            Sign in to generate budget-aware routes, save trips and meet
-            verified travel buddies.
-          </p>
+          <p className="mt-4 max-w-sm text-cream/60">{t('auth.brandSub')}</p>
         </div>
         <IstanbulSilhouette className="absolute bottom-0 left-0 h-40 w-full text-violet/20" />
       </div>
@@ -68,19 +68,20 @@ export default function AuthPage() {
       {/* Form panel */}
       <div className="flex items-center justify-center p-6">
         <form onSubmit={submit} className="w-full max-w-sm">
+          <div className="mb-4 flex justify-end md:hidden">
+            <LanguageToggle />
+          </div>
           <h1 className="font-display text-3xl font-bold">
-            {isSignup ? 'Create your account' : 'Welcome back'}
+            {isSignup ? t('auth.signUpTitle') : t('auth.signInTitle')}
           </h1>
           <p className="mt-1 text-sm text-cream/60">
-            {isSignup
-              ? 'A few details and you are planning.'
-              : 'Sign in to pick up where you left off.'}
+            {isSignup ? t('auth.signUpSub') : t('auth.signInSub')}
           </p>
 
           <div className="mt-6 space-y-4">
             {isSignup && (
               <Field
-                label="Full name"
+                label={t('auth.fullName')}
                 value={name}
                 onChange={setName}
                 placeholder="Aylin Demir"
@@ -88,7 +89,7 @@ export default function AuthPage() {
               />
             )}
             <Field
-              label="Email"
+              label={t('auth.email')}
               type="email"
               value={email}
               onChange={setEmail}
@@ -96,16 +97,16 @@ export default function AuthPage() {
               required
             />
             <Field
-              label="Password"
+              label={t('auth.password')}
               type="password"
               value={password}
               onChange={setPassword}
-              placeholder="At least 8 characters"
+              placeholder={t('auth.passwordHint')}
               required
             />
             {isSignup && (
               <Field
-                label="Nationality (optional)"
+                label={t('auth.nationality')}
                 value={nationality}
                 onChange={setNationality}
                 placeholder="Turkey"
@@ -120,15 +121,11 @@ export default function AuthPage() {
           )}
 
           <button type="submit" disabled={busy} className="btn-accent mt-6 w-full">
-            {busy
-              ? 'Please wait…'
-              : isSignup
-                ? 'Create account'
-                : 'Sign in'}
+            {busy ? t('auth.wait') : isSignup ? t('auth.createAccount') : t('auth.signInBtn')}
           </button>
 
           <p className="mt-4 text-center text-sm text-cream/60">
-            {isSignup ? 'Already have an account?' : 'New to Pathwise?'}{' '}
+            {isSignup ? t('auth.haveAccount') : t('auth.newHere')}{' '}
             <button
               type="button"
               onClick={() => {
@@ -137,7 +134,7 @@ export default function AuthPage() {
               }}
               className="font-semibold text-violet hover:text-fuchsia"
             >
-              {isSignup ? 'Sign in' : 'Create one'}
+              {isSignup ? t('auth.signInBtn') : t('auth.createOne')}
             </button>
           </p>
         </form>

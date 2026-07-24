@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import type { CURRENT_WEATHER } from '../mockData';
+import { useT } from '../i18n';
 
 type Weather = typeof CURRENT_WEATHER;
 
 /** Weather + crowd widget (OpenWeatherMap shaped). */
 export function WeatherWidget() {
+  const { t } = useT();
   const [w, setW] = useState<Weather | null>(null);
   useEffect(() => {
     api.getWeather().then(setW);
@@ -25,7 +27,7 @@ export function WeatherWidget() {
       <span className="font-semibold">{w.city}: {w.tempC}°C</span>
       <span className="text-cream/50">{w.condition}</span>
       <span className="mx-1 text-cream/20">|</span>
-      <span className={crowdColor}>Crowds: {w.crowdLevel}</span>
+      <span className={crowdColor}>{t('weather.crowds')}: {w.crowdLevel}</span>
     </div>
   );
 }

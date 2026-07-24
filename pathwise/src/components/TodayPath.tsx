@@ -4,6 +4,7 @@ import { BudgetBar } from './BudgetBar';
 import { LocalStoryModal } from './LocalStoryModal';
 import { formatTry, formatDuration, formatKm } from '../utils/format';
 import { haversineMeters, walkEstimate } from '../utils/geo';
+import { useT } from '../i18n';
 
 /** Today's Path — the ordered day plan with times, costs, transport legs, an
  *  auto lunch break and a local-story button per real stop. */
@@ -18,6 +19,7 @@ export function TodayPath({
   onSelectPlace: (placeId: string) => void;
   startPoint?: StartPoint | null;
 }) {
+  const { t } = useT();
   const [storyPlace, setStoryPlace] = useState<Place | null>(null);
 
   const firstPlace = itinerary.stops.find((s) => s.place)?.place ?? null;
@@ -29,7 +31,7 @@ export function TodayPath({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-xl font-bold">Today’s Path</h2>
+        <h2 className="font-display text-xl font-bold">{t('today.title')}</h2>
         <span className="text-xs text-cream/50">
           {formatKm(itinerary.totalDistanceKm)} · {formatDuration(itinerary.totalDurationMinutes)}
         </span>
@@ -73,11 +75,12 @@ function StopRow({
   onSelect: () => void;
   onStory: () => void;
 }) {
+  const { t } = useT();
   if (stop.isLunchBreak) {
     return (
       <li className="ml-3 border-l-2 border-dashed border-coral/50 pl-4">
         <div className="rounded-xl bg-coral/10 px-3 py-2 text-sm">
-          <span className="font-semibold text-coral">🍽️ Lunch Break</span>
+          <span className="font-semibold text-coral">🍽️ {t('today.lunch')}</span>
           <span className="ml-2 text-cream/50">
             {stop.arrivalTime}–{stop.departureTime} · {formatTry(stop.foodCostTry)}
           </span>
@@ -107,12 +110,12 @@ function StopRow({
             </div>
             <p className="mt-1 text-xs text-cream/50">
               🕒 {stop.arrivalTime}–{stop.departureTime} · {formatDuration(stop.durationMinutes)}
-              {place.museumPass && <span className="ml-2 text-emerald">🎫 Museum Pass</span>}
+              {place.museumPass && <span className="ml-2 text-emerald">🎫 {t('today.museumPass')}</span>}
             </p>
           </div>
           <div className="text-right text-xs">
             <div className="text-cream/70">
-              🎟️ {stop.entryFeeTry === 0 ? 'Free' : formatTry(stop.entryFeeTry)}
+              🎟️ {stop.entryFeeTry === 0 ? t('today.free') : formatTry(stop.entryFeeTry)}
             </div>
             {stop.foodCostTry > 0 && (
               <div className="text-cream/70">🍽️ {formatTry(stop.foodCostTry)}</div>
@@ -126,7 +129,7 @@ function StopRow({
           }}
           className="mt-2 text-xs font-semibold text-violet hover:text-fuchsia"
         >
-          📖 Read Local Story & Tips
+          {t('today.readStory')}
         </button>
       </div>
 

@@ -77,6 +77,9 @@ services:
       - backend
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
+      # Bind-mounts (esp. on Windows/macOS) don't forward inotify events into
+      # the container, so Vite HMR misses edits. Poll the filesystem instead.
+      CHOKIDAR_USEPOLLING: "true"
     ports:
       - "5173:5173"
     volumes:
