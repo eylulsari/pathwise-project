@@ -3,6 +3,8 @@ import Landing from './pages/Landing';
 import AuthPage from './pages/AuthPage';
 import Success from './pages/Success';
 import Dashboard from './pages/Dashboard';
+import Social from './pages/Social';
+import Profile from './pages/Profile';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 export default function App() {
@@ -16,6 +18,22 @@ export default function App() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/social"
+        element={
+          <ProtectedRoute>
+            <Social />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         }
       />
