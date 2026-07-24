@@ -1,9 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { Interest } from '../../places/domain/place';
+import { Hub, Interest, Place } from '../../places/domain/place';
+import { PlacesService } from '../../places/application/places.service';
 import { Itinerary, RouteGenerationInput } from '../domain/itinerary';
+import { haversineMeters } from '../domain/geo';
 import { RouteStrategyFactory } from './route-strategy.factory';
 import { HubBudgetStrategy } from './strategies/hub-budget.strategy';
 import { GenerateRouteDto, RebuildRouteDto } from './dto/generate-route.dto';
+
+export interface NearbySuggestion {
+  place: Place;
+  nearPlaceName: string;
+  distanceMeters: number;
+  walkMinutes: number;
+}
 
 /**
  * Application service for itinerary generation. Normalizes the request DTO into
@@ -16,6 +25,7 @@ export class ItineraryService {
     // Injected directly for rebuild (order-preserving re-assembly) — this is
     // inherently the hub-budget engine's assembly step, not a new strategy.
     private readonly hubBudget: HubBudgetStrategy,
+    private readonly places: PlacesService,
   ) {}
 
   async generate(dto: GenerateRouteDto): Promise<Itinerary> {
@@ -30,6 +40,7 @@ export class ItineraryService {
       startHour: dto.startHour,
       startOrigin: dto.startOrigin,
       endOrigin: dto.endOrigin,
+      reservations: dto.reservations,
       quiz: dto.quiz,
     };
 
@@ -50,7 +61,53 @@ export class ItineraryService {
       startHour: dto.startHour,
       startOrigin: dto.startOrigin,
       endOrigin: dto.endOrigin,
+      reservations: dto.reservations,
     };
     return this.hubBudget.rebuild(dto.placeIds, input);
+  }
+
+  /**
+   * "Add this too" — suggest one nearby, unselected, high-rated place in the
+   * same hub, closest to any current stop. Returns null if nothing fits.
+   */
+  async suggestNearby(
+    hub: Hub,
+    selectedIds: string[],
+  ): Promise<NearbySuggestion | null> {
+    const selectedSet = new Set(selectedIds);
+    const selected = (await this.places.findByIds(selectedIds)).filter((p) =>
+      selectedSet.has(p.placeId),
+    );
+    if (selected.length === 0) return null;
+
+    const candidates = (await this.places.findByHub(hub)).filter(
+      (p) => !selectedSet.has(p.placeId),
+    );
+    if (candidates.length === 0) return null;
+
+    // For each candidate, distance to its nearest already-picked stop.
+    const scored = candidates.map((c) => {
+      let nearest = selected[0];
+      let dist = Infinity;
+      for (const s of selected) {
+        const d = haversineMeters(c, s);
+        if (d < dist) {
+          dist = d;
+          nearest = s;
+        }
+      }
+      // Prefer close + highly rated (rating breaks near-ties on distance).
+      const score = dist - c.rating * 60;
+      return { c, nearest, dist, score };
+    });
+
+    scored.sort((a, b) => a.score - b.score);
+    const best = scored[0];
+    return {
+      place: best.c,
+      nearPlaceName: best.nearest.name,
+      distanceMeters: Math.round(best.dist),
+      walkMinutes: Math.max(1, Math.round(best.dist / 75)),
+    };
   }
 }

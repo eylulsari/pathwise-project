@@ -11,6 +11,15 @@ export interface Origin {
   label: string;
 }
 
+/** A booking pinned to a specific place — its scheduled time is fixed and the
+ *  rest of the day is re-timed around it. */
+export interface Reservation {
+  placeId: string;
+  time: string; // "HH:mm"
+  confirmationCode?: string;
+  note?: string;
+}
+
 /** Quiz answers (Travel Vibe Quiz) — consumed by QuizVibeStrategy. */
 export interface QuizInput {
   mood: 'history' | 'foodie' | 'art' | 'photo';
@@ -36,6 +45,8 @@ export interface RouteGenerationInput {
   startOrigin?: Origin;
   /** Where the day should end. When omitted the engine auto-suggests one. */
   endOrigin?: Origin;
+  /** Pinned bookings whose times must not move. */
+  reservations?: Reservation[];
   quiz?: QuizInput;
 }
 
@@ -59,6 +70,8 @@ export interface ItineraryStop {
   entryFeeTry: number;
   foodCostTry: number;
   transportToNext: TransportLeg | null;
+  /** Present when the user pinned a booking to this stop (time is fixed). */
+  reservation?: { time: string; confirmationCode?: string; note?: string };
 }
 
 export interface Itinerary {

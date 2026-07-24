@@ -28,6 +28,25 @@ export class OriginDto {
   label: string;
 }
 
+export class ReservationDto {
+  @IsString()
+  placeId: string;
+
+  @IsString()
+  @MaxLength(5) // "HH:mm"
+  time: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  confirmationCode?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  note?: string;
+}
+
 const HUBS = [
   'sultanahmet',
   'karakoy-galata',
@@ -105,6 +124,12 @@ export class GenerateRouteDto {
   endOrigin?: OriginDto;
 
   @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReservationDto)
+  reservations?: ReservationDto[];
+
+  @IsOptional()
   @ValidateNested()
   @Type(() => QuizDto)
   quiz?: QuizDto;
@@ -153,4 +178,20 @@ export class RebuildRouteDto {
   @ValidateNested()
   @Type(() => OriginDto)
   endOrigin?: OriginDto;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReservationDto)
+  reservations?: ReservationDto[];
+}
+
+/** POST /api/itinerary/suggest-nearby — one "add this too" candidate. */
+export class SuggestNearbyDto {
+  @IsIn(HUBS as unknown as string[])
+  hub: (typeof HUBS)[number];
+
+  @IsArray()
+  @IsString({ each: true })
+  placeIds: string[];
 }

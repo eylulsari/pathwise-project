@@ -17,7 +17,9 @@ import type {
   ForumQuestion,
   GenerateRouteRequest,
   RebuildRouteRequest,
+  Hub,
   Itinerary,
+  NearbySuggestion,
   PastTrip,
   Place,
   ProfileStats,
@@ -187,6 +189,14 @@ export const api = {
     return http<Itinerary>('/itinerary/rebuild', {
       method: 'POST',
       body: JSON.stringify(req),
+    });
+  },
+
+  /** "Add this too" — one nearby unselected place in the same hub. */
+  async suggestNearby(hub: Hub, placeIds: string[]): Promise<NearbySuggestion | null> {
+    return http<NearbySuggestion | null>('/itinerary/suggest-nearby', {
+      method: 'POST',
+      body: JSON.stringify({ hub, placeIds }),
     });
   },
 

@@ -3,6 +3,7 @@ import { ItineraryService } from '../../application/itinerary.service';
 import {
   GenerateRouteDto,
   RebuildRouteDto,
+  SuggestNearbyDto,
 } from '../../application/dto/generate-route.dto';
 
 @Controller('itinerary')
@@ -28,5 +29,12 @@ export class ItineraryController {
   @HttpCode(HttpStatus.OK)
   rebuild(@Body() dto: RebuildRouteDto) {
     return this.itinerary.rebuild(dto);
+  }
+
+  /** POST /api/itinerary/suggest-nearby — one "add this too" candidate. */
+  @Post('suggest-nearby')
+  @HttpCode(HttpStatus.OK)
+  suggestNearby(@Body() dto: SuggestNearbyDto) {
+    return this.itinerary.suggestNearby(dto.hub, dto.placeIds);
   }
 }

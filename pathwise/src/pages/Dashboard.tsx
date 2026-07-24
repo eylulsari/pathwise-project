@@ -12,8 +12,11 @@ import type {
   GenerateRouteRequest,
   Hub,
   Itinerary,
+  NearbySuggestion,
   Origin,
+  Place,
   RebuildRouteRequest,
+  Reservation,
   StartPoint,
 } from '../types';
 import { api } from '../services/api';
@@ -26,6 +29,7 @@ import { StartPointSelector } from '../components/controls/StartPointSelector';
 import { SurvivalWidget } from '../components/SurvivalWidget';
 import { TravelVibeQuiz, type QuizResult } from '../components/controls/TravelVibeQuiz';
 import { MustVisitList } from '../components/controls/MustVisitList';
+import { ReservationModal } from '../components/controls/ReservationModal';
 import { ToursPanel } from '../components/tours/ToursPanel';
 import { AiAssistant } from '../components/ai/AiAssistant';
 import { SplitBill } from '../components/SplitBill';
@@ -37,6 +41,7 @@ import { useT } from '../i18n';
 interface DayState {
   config: RouteConfig;
   mustVisitIds: string[];
+  reservations: Reservation[];
   itinerary: Itinerary | null;
   loading: boolean;
   error: string | null;
@@ -54,9 +59,9 @@ const baseConfig = (hub: Hub): RouteConfig => ({
 
 // Three days, three different neighborhoods — deliberately not Sultanahmet-first.
 const INITIAL_DAYS: DayState[] = [
-  { config: baseConfig('kadikoy-moda'), mustVisitIds: [], itinerary: null, loading: true, error: null },
-  { config: baseConfig('karakoy-galata'), mustVisitIds: [], itinerary: null, loading: false, error: null },
-  { config: baseConfig('balat-fener'), mustVisitIds: [], itinerary: null, loading: false, error: null },
+  { config: baseConfig('kadikoy-moda'), mustVisitIds: [], reservations: [], itinerary: null, loading: true, error: null },
+  { config: baseConfig('karakoy-galata'), mustVisitIds: [], reservations: [], itinerary: null, loading: false, error: null },
+  { config: baseConfig('balat-fener'), mustVisitIds: [], reservations: [], itinerary: null, loading: false, error: null },
 ];
 
 export default function Dashboard() {
@@ -77,6 +82,9 @@ export default function Dashboard() {
   const [offline, setOffline] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [routeGeometry, setRouteGeometry] = useState<[number, number][] | null>(null);
+  const [reservingPlace, setReservingPlace] = useState<Place | null>(null);
+  const [suggestion, setSuggestion] = useState<NearbySuggestion | null>(null);
+  const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
 
   const day = days[activeDay];
 
@@ -120,6 +128,7 @@ export default function Dashboard() {
     startHour: d.config.startHour,
     startOrigin: toOrigin(startPoint),
     endOrigin: toOrigin(endPoint),
+    reservations: d.reservations,
   });
 
   // ── Drag-and-drop manual reorder ──────────────────────────────────
@@ -136,6 +145,7 @@ export default function Dashboard() {
     startHour: d.config.startHour,
     startOrigin: toOrigin(startPoint),
     endOrigin: toOrigin(endPoint),
+    reservations: d.reservations,
   });
 
   async function rebuildDay(index: number, ids: string[]) {
@@ -202,6 +212,26 @@ export default function Dashboard() {
     };
   }, [day.itinerary]);
 
+  // Fetch a nearby "add this too" suggestion for the visible day.
+  useEffect(() => {
+    const ids = (day.itinerary?.stops ?? [])
+      .filter((s) => s.place)
+      .map((s) => s.place!.placeId);
+    if (ids.length === 0) {
+      setSuggestion(null);
+      return;
+    }
+    let active = true;
+    api.suggestNearby(day.config.hub, ids).then((s) => {
+      if (!active) return;
+      setSuggestion(s && !dismissedSuggestions.has(s.place.placeId) ? s : null);
+    });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day.itinerary, day.config.hub]);
+
   function updateConfig(patch: Partial<RouteConfig>) {
     patchDay(activeDay, { config: { ...day.config, ...patch } });
   }
@@ -247,6 +277,39 @@ export default function Dashboard() {
     const nextConfig = { ...day.config, hub };
     patchDay(activeDay, { config: nextConfig });
     generateFor(activeDay, { ...buildRequest({ ...day, config: nextConfig }) });
+  }
+
+  // ── Reservations (pinned times) ───────────────────────────────────
+  function saveReservation(r: Reservation) {
+    const next = [...day.reservations.filter((x) => x.placeId !== r.placeId), r];
+    const updated = { ...day, reservations: next };
+    patchDay(activeDay, { reservations: next });
+    setReservingPlace(null);
+    // Re-plan so the day re-times around the pinned booking.
+    generateFor(activeDay, buildRequest(updated));
+  }
+
+  function removeReservation(placeId: string) {
+    const next = day.reservations.filter((x) => x.placeId !== placeId);
+    const updated = { ...day, reservations: next };
+    patchDay(activeDay, { reservations: next });
+    setReservingPlace(null);
+    generateFor(activeDay, buildRequest(updated));
+  }
+
+  // ── "Add this too" suggestion ─────────────────────────────────────
+  function addSuggestion() {
+    if (!suggestion) return;
+    const ids = [...realIdsOf(day), suggestion.place.placeId];
+    setSuggestion(null);
+    rebuildDay(activeDay, ids);
+  }
+
+  function dismissSuggestion() {
+    if (suggestion) {
+      setDismissedSuggestions((prev) => new Set(prev).add(suggestion.place.placeId));
+    }
+    setSuggestion(null);
   }
 
   async function saveCurrentPlan() {
@@ -369,6 +432,10 @@ export default function Dashboard() {
               onSelectPlace={setSelectedPlaceId}
               startPoint={startPoint}
               reordering={reordering}
+              onReserve={setReservingPlace}
+              suggestion={suggestion}
+              onAddSuggestion={addSuggestion}
+              onDismissSuggestion={dismissSuggestion}
             />
           )}
         </div>
@@ -394,6 +461,15 @@ export default function Dashboard() {
         />
       )}
       {showSplitBill && <SplitBill onClose={() => setShowSplitBill(false)} />}
+      {reservingPlace && (
+        <ReservationModal
+          place={reservingPlace}
+          existing={day.reservations.find((r) => r.placeId === reservingPlace.placeId)}
+          onSave={saveReservation}
+          onRemove={() => removeReservation(reservingPlace.placeId)}
+          onClose={() => setReservingPlace(null)}
+        />
+      )}
 
       {/* Floating AI assistant */}
       <AiAssistant onAddToPath={addToPath} />

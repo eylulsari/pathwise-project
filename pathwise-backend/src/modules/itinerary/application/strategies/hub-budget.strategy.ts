@@ -184,6 +184,21 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       remaining.splice(nearestIdx, 1);
     }
 
+    // Reservations are the hardest constraint: order pinned stops by their
+    // fixed times and slot free stops around them chronologically.
+    const reservations = input.reservations ?? [];
+    if (reservations.length > 0) {
+      const pinned = new Map(reservations.map((r) => [r.placeId, this.toMinutes(r.time)]));
+      const withAnchor = tour.map((p, i) => ({
+        p,
+        anchor: pinned.has(p.placeId)
+          ? (pinned.get(p.placeId) as number)
+          : input.startHour * 60 + i * 90, // ~90 min per free stop
+      }));
+      withAnchor.sort((a, b) => a.anchor - b.anchor);
+      return withAnchor.map((x) => x.p);
+    }
+
     // End anchoring takes priority over the evening rule: if an end origin is
     // set, force the stop nearest it to be last. Otherwise, on an evening start
     // push sunset spots to the tail so golden hour lands right.
@@ -227,6 +242,9 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     input: RouteGenerationInput,
     hub: Hub,
   ): Itinerary {
+    const reservations = new Map(
+      (input.reservations ?? []).map((r) => [r.placeId, r]),
+    );
     const stops: ItineraryStop[] = [];
     let clock = input.startHour * 60; // minutes since midnight
     let lunchInserted = false;
@@ -263,6 +281,15 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
         lunchInserted = true;
       }
 
+      // Pinned reservation → the stop's arrival time is FIXED. If we'd arrive
+      // earlier, we wait; the whole day re-times around this anchor.
+      const res = reservations.get(place.placeId);
+      if (res) {
+        const pinned = this.toMinutes(res.time);
+        if (pinned >= clock) clock = pinned; // wait for the booking
+        else clock = pinned; // honor the pin even if it means an earlier slot
+      }
+
       const arrival = clock;
       const departure = clock + place.avgVisitMinutes;
       tickets += place.entryFeeTry;
@@ -287,6 +314,9 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
         entryFeeTry: place.entryFeeTry,
         foodCostTry: place.avgFoodCostTry,
         transportToNext: leg,
+        reservation: res
+          ? { time: res.time, confirmationCode: res.confirmationCode, note: res.note }
+          : undefined,
       });
 
       clock = departure + (leg?.durationMinutes ?? 0);
@@ -374,5 +404,12 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     const h = Math.floor(m / 60);
     const min = Math.round(m % 60);
     return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+  }
+
+  /** "HH:mm" → minutes since midnight. */
+  private toMinutes(hhmm: string): number {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm.trim());
+    if (!m) return 0;
+    return Number(m[1]) * 60 + Number(m[2]);
   }
 }

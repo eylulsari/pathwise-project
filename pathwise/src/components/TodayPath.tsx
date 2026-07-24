@@ -5,7 +5,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { Itinerary, ItineraryStop, Place, StartPoint } from '../types';
+import type {
+  Itinerary,
+  ItineraryStop,
+  NearbySuggestion,
+  Place,
+  StartPoint,
+} from '../types';
 import { BudgetBar } from './BudgetBar';
 import { LocalStoryModal } from './LocalStoryModal';
 import { formatTry, formatDuration, formatKm } from '../utils/format';
@@ -20,12 +26,20 @@ export function TodayPath({
   onSelectPlace,
   startPoint,
   reordering,
+  onReserve,
+  suggestion,
+  onAddSuggestion,
+  onDismissSuggestion,
 }: {
   itinerary: Itinerary;
   selectedPlaceId: string | null;
   onSelectPlace: (placeId: string) => void;
   startPoint?: StartPoint | null;
   reordering?: boolean;
+  onReserve?: (place: Place) => void;
+  suggestion?: NearbySuggestion | null;
+  onAddSuggestion?: () => void;
+  onDismissSuggestion?: () => void;
 }) {
   const { t } = useT();
   const [storyPlace, setStoryPlace] = useState<Place | null>(null);
@@ -69,10 +83,30 @@ export function TodayPath({
               active={stop.place?.placeId === selectedPlaceId}
               onSelect={() => stop.place && onSelectPlace(stop.place.placeId)}
               onStory={() => stop.place && setStoryPlace(stop.place)}
+              onReserve={onReserve}
             />
           ))}
         </ol>
       </SortableContext>
+
+      {/* "Add this too" nearby suggestion */}
+      {suggestion && (
+        <div className="rounded-2xl border border-violet/40 bg-violet/10 p-3">
+          <p className="text-sm">
+            <span className="font-semibold text-violet">{t('suggest.title')}: {suggestion.place.name}</span>
+            <span className="text-cream/60"> — {suggestion.walkMinutes} min {t('suggest.away')} ({suggestion.place.rating}★)</span>
+          </p>
+          <p className="mt-0.5 text-xs italic text-cream/50">💡 {suggestion.place.localTip}</p>
+          <div className="mt-2 flex gap-2">
+            <button onClick={onAddSuggestion} className="rounded-lg bg-accent-gradient px-3 py-1.5 text-xs font-semibold text-white">
+              {t('suggest.add')}
+            </button>
+            <button onClick={onDismissSuggestion} className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-semibold text-cream/60">
+              {t('suggest.dismiss')}
+            </button>
+          </div>
+        </div>
+      )}
 
       {storyPlace && (
         <LocalStoryModal place={storyPlace} onClose={() => setStoryPlace(null)} />
@@ -86,11 +120,13 @@ function StopRow({
   active,
   onSelect,
   onStory,
+  onReserve,
 }: {
   stop: ItineraryStop;
   active: boolean;
   onSelect: () => void;
   onStory: () => void;
+  onReserve?: (place: Place) => void;
 }) {
   const { t } = useT();
 
@@ -109,7 +145,7 @@ function StopRow({
   }
 
   const place = stop.place!;
-  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} />;
+  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} />;
 }
 
 function SortableStopRow({
@@ -118,12 +154,14 @@ function SortableStopRow({
   active,
   onSelect,
   onStory,
+  onReserve,
 }: {
   stop: ItineraryStop;
   place: Place;
   active: boolean;
   onSelect: () => void;
   onStory: () => void;
+  onReserve?: (place: Place) => void;
 }) {
   const { t } = useT();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -167,6 +205,12 @@ function SortableStopRow({
                 🕒 {stop.arrivalTime}–{stop.departureTime} · {formatDuration(stop.durationMinutes)}
                 {place.museumPass && <span className="ml-2 text-emerald">🎫 {t('today.museumPass')}</span>}
               </p>
+              {stop.reservation && (
+                <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-coral/20 px-2 py-0.5 text-[10px] font-semibold text-coral">
+                  📎 {stop.reservation.time}
+                  {stop.reservation.confirmationCode && ` · ${stop.reservation.confirmationCode}`}
+                </span>
+              )}
             </div>
           </div>
           <div className="text-right text-xs">
@@ -178,15 +222,28 @@ function SortableStopRow({
             )}
           </div>
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onStory();
-          }}
-          className="mt-2 text-xs font-semibold text-violet hover:text-fuchsia"
-        >
-          {t('today.readStory')}
-        </button>
+        <div className="mt-2 flex items-center gap-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onStory();
+            }}
+            className="text-xs font-semibold text-violet hover:text-fuchsia"
+          >
+            {t('today.readStory')}
+          </button>
+          {onReserve && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onReserve(place);
+              }}
+              className="text-xs font-semibold text-coral hover:text-fuchsia"
+            >
+              {stop.reservation ? '📎 ' + stop.reservation.time : t('reservation.add')}
+            </button>
+          )}
+        </div>
       </div>
 
       {stop.transportToNext && (

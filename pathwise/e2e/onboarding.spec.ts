@@ -92,6 +92,31 @@ test('drag-and-drop reorders Today’s Path and an End point selector exists', a
     .not.toBe(before[0]);
 });
 
+test('can pin a reservation and see a nearby suggestion', async ({ page }) => {
+  const email = `e2e_res_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('Res Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+
+  // Lower the pace (2nd range = pace) and regenerate so the hub isn't
+  // saturated → a nearby "add this too" suggestion becomes available.
+  await page.locator('input[type=range]').nth(1).fill('2');
+  await page.getByRole('button', { name: /Generate My Custom Path/i }).click();
+  await expect(page.getByText(/Nearby:/i)).toBeVisible({ timeout: 12_000 });
+
+  // Pin a reservation on the first stop.
+  await page.getByRole('button', { name: /^📎 Reserve$/ }).first().click();
+  await expect(page.getByRole('heading', { name: /Add reservation/i })).toBeVisible();
+  await page.getByRole('button', { name: /Save reservation/i }).click();
+
+  // A 📎 time badge appears on a stop after the day re-times around it.
+  await expect(page.locator('text=/📎 \\d{2}:\\d{2}/').first()).toBeVisible({ timeout: 10_000 });
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).

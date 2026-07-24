@@ -58,6 +58,13 @@ export interface TransportLeg {
   durationMinutes: number;
 }
 
+export interface Reservation {
+  placeId: string;
+  time: string; // "HH:mm"
+  confirmationCode?: string;
+  note?: string;
+}
+
 export interface ItineraryStop {
   order: number;
   place: Place | null; // null → synthetic Lunch Break
@@ -68,6 +75,14 @@ export interface ItineraryStop {
   entryFeeTry: number;
   foodCostTry: number;
   transportToNext: TransportLeg | null;
+  reservation?: { time: string; confirmationCode?: string; note?: string };
+}
+
+export interface NearbySuggestion {
+  place: Place;
+  nearPlaceName: string;
+  distanceMeters: number;
+  walkMinutes: number;
 }
 
 export interface Itinerary {
@@ -101,6 +116,7 @@ export interface GenerateRouteRequest {
   startHour: number;
   startOrigin?: Origin;
   endOrigin?: Origin;
+  reservations?: Reservation[];
   quiz?: {
     mood: 'history' | 'foodie' | 'art' | 'photo';
     pace: 'relaxed' | 'moderate' | 'packed';
@@ -119,6 +135,7 @@ export interface RebuildRouteRequest {
   startHour: number;
   startOrigin?: Origin;
   endOrigin?: Origin;
+  reservations?: Reservation[];
 }
 
 // ── Start / end point selector ─────────────────────────────────────
