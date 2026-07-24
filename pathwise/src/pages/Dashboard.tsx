@@ -51,6 +51,7 @@ export default function Dashboard() {
   const [showSplitBill, setShowSplitBill] = useState(false);
   const [offline, setOffline] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [routeGeometry, setRouteGeometry] = useState<[number, number][] | null>(null);
 
   const day = days[activeDay];
 
@@ -96,6 +97,26 @@ export default function Dashboard() {
     generateFor(0, buildRequest(INITIAL_DAYS[0]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Fetch real OSRM walking geometry whenever the visible itinerary changes.
+  useEffect(() => {
+    const stops = (day.itinerary?.stops ?? [])
+      .map((s) => s.place)
+      .filter((p): p is NonNullable<typeof p> => p !== null)
+      .map((p) => ({ lat: p.lat, lng: p.lng }));
+    if (stops.length < 2) {
+      setRouteGeometry(null);
+      return;
+    }
+    let active = true;
+    setRouteGeometry(null); // clear stale line while fetching
+    api.getRouteGeometry(stops).then((geo) => {
+      if (active) setRouteGeometry(geo);
+    });
+    return () => {
+      active = false;
+    };
+  }, [day.itinerary]);
 
   function updateConfig(patch: Partial<RouteConfig>) {
     patchDay(activeDay, { config: { ...day.config, ...patch } });
@@ -268,6 +289,7 @@ export default function Dashboard() {
             itinerary={day.itinerary}
             selectedPlaceId={selectedPlaceId}
             onSelectPlace={setSelectedPlaceId}
+            routeGeometry={routeGeometry}
           />
         </div>
       </div>

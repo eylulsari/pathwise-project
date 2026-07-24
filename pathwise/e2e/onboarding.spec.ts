@@ -35,6 +35,9 @@ test('sign up, land on dashboard, map and Today’s Path render', async ({ page 
   const pinCount = await page.locator('.leaflet-marker-icon').count();
   expect(pinCount).toBeGreaterThan(0);
 
+  // A route line is drawn between stops (real OSRM geometry or fallback).
+  await expect(page.locator('.leaflet-overlay-pane path').first()).toBeVisible();
+
   // The route generator controls are present.
   await expect(page.getByRole('button', { name: /Generate My Custom Path/i })).toBeVisible();
 });

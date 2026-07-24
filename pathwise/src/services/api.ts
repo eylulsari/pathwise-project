@@ -212,6 +212,31 @@ export const api = {
   },
 
   // ═════════════════════════════════════════════════════════════════
+  // ROUTE GEOMETRY — real OSRM foot routing so the map line follows the
+  // actual streets between stops (OpenStreetMap/OSRM). Returns null on any
+  // failure so the map falls back to straight lines (offline-safe).
+  // ═════════════════════════════════════════════════════════════════
+  async getRouteGeometry(
+    stops: { lat: number; lng: number }[],
+  ): Promise<[number, number][] | null> {
+    if (stops.length < 2) return null;
+    const coords = stops.map((s) => `${s.lng},${s.lat}`).join(';');
+    const url = `https://router.project-osrm.org/route/v1/foot/${coords}?overview=full&geometries=geojson`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+      const line: [number, number][] | undefined =
+        data?.routes?.[0]?.geometry?.coordinates;
+      if (!Array.isArray(line)) return null;
+      // OSRM/GeoJSON is [lng, lat]; Leaflet wants [lat, lng].
+      return line.map(([lng, lat]) => [lat, lng] as [number, number]);
+    } catch {
+      return null; // offline / rate-limited → caller draws straight lines
+    }
+  },
+
+  // ═════════════════════════════════════════════════════════════════
   // SOCIAL — Firebase/PostgreSQL shaped (check-ins, buddies, routes, forum)
   //   return http<CheckIn[]>('/social/check-ins');
   // ═════════════════════════════════════════════════════════════════

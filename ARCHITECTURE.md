@@ -98,7 +98,7 @@ and document the origin in comments:
 | Source                        | Fields it feeds                                   |
 | ----------------------------- | ------------------------------------------------- |
 | Google Places API             | `place_id`, `lat/lng`, `rating`, `photo_url`, …   |
-| OpenStreetMap/Overpass + OSRM | walking geometry, distance/duration               |
+| OpenStreetMap/Overpass + OSRM | walking geometry (LIVE OSRM foot routing on the map, straight-line fallback), distance/duration |
 | IBB Open Data                 | transit info, museum-pass validity                |
 | GetYourGuide / TripAdvisor    | curated & live tours, source badges               |
 | OpenWeatherMap                | weather widget                                     |

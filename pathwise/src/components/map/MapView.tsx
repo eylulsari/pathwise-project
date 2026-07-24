@@ -64,10 +64,12 @@ export function MapView({
   itinerary,
   selectedPlaceId,
   onSelectPlace,
+  routeGeometry,
 }: {
   itinerary: Itinerary | null;
   selectedPlaceId: string | null;
   onSelectPlace: (placeId: string) => void;
+  routeGeometry?: [number, number][] | null;
 }) {
   const [fullscreen, setFullscreen] = useState(false);
   const [resizeSignal, setResizeSignal] = useState(0);
@@ -108,12 +110,20 @@ export function MapView({
           attribution='&copy; OpenStreetMap contributors &copy; CARTO'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
-        {/* Real walking/ferry path between ordered stops (OSRM geometry in prod) */}
-        {line.length > 1 && (
+        {/* Walking path between ordered stops. Prefer the real OSRM street
+            geometry (solid); fall back to straight dashed lines when offline. */}
+        {routeGeometry && routeGeometry.length > 1 ? (
           <Polyline
-            positions={line}
-            pathOptions={{ color: hub.accent, weight: 4, opacity: 0.8, dashArray: '2 8' }}
+            positions={routeGeometry}
+            pathOptions={{ color: hub.accent, weight: 4, opacity: 0.85 }}
           />
+        ) : (
+          line.length > 1 && (
+            <Polyline
+              positions={line}
+              pathOptions={{ color: hub.accent, weight: 4, opacity: 0.8, dashArray: '2 8' }}
+            />
+          )
         )}
         {places.map((p, i) => {
           const open = isOpenNow(p.openingHours);
