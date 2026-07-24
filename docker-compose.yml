@@ -1,0 +1,87 @@
+# ─────────────────────────────────────────────────────────────
+# Pathwise — full stack: frontend, backend, postgres, redis
+# Bring everything up with:  docker compose up --build
+# ─────────────────────────────────────────────────────────────
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pathwise-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pathwise}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pathwise_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-pathwise}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pathwise-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pathwise}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: pathwise-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - pathwise-redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./pathwise-backend
+      target: development # multi-stage: dev target with hot-reload
+    container_name: pathwise-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      BACKEND_PORT: ${BACKEND_PORT:-3000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_USER: ${POSTGRES_USER:-pathwise}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pathwise_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-pathwise}
+      DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-true}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change_me_access_secret}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_me_refresh_secret}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-7d}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./pathwise-backend/src:/app/src
+      - ./pathwise-backend/test:/app/test
+
+  frontend:
+    build:
+      context: ./pathwise
+    container_name: pathwise-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./pathwise/src:/app/src
+
+volumes:
+  pathwise-pgdata:
+  pathwise-redisdata:
