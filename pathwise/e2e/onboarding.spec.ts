@@ -56,6 +56,42 @@ test('can open the Travel Vibe Quiz from the dashboard', async ({ page }) => {
   await expect(page.getByText(/What's your mood/i)).toBeVisible();
 });
 
+test('drag-and-drop reorders Today’s Path and an End point selector exists', async ({ page }) => {
+  const email = `e2e_dnd_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('DnD Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+
+  // End point selector (Phase 2) is present with an Auto option.
+  await expect(page.getByRole('heading', { name: 'End point' })).toBeVisible();
+
+  // Wait for at least two stops.
+  const names = page.locator('ol li h3');
+  await expect(names.nth(1)).toBeVisible();
+  const before = await names.allTextContents();
+  expect(before.length).toBeGreaterThan(1);
+
+  // Drag stop #1's handle below stop #2 (dnd-kit needs stepped pointer moves).
+  const handles = page.getByRole('button', { name: 'Drag to reorder' });
+  const h0 = await handles.nth(0).boundingBox();
+  const row1 = await page.locator('ol li').nth(1).boundingBox();
+  if (h0 && row1) {
+    await page.mouse.move(h0.x + h0.width / 2, h0.y + h0.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(h0.x + h0.width / 2, h0.y + h0.height / 2 + 12, { steps: 5 });
+    await page.mouse.move(row1.x + row1.width / 2, row1.y + row1.height + 20, { steps: 12 });
+    await page.mouse.up();
+  }
+
+  // Order recomputed → the first stop is no longer the same.
+  await expect
+    .poll(async () => (await names.allTextContents())[0], { timeout: 10_000 })
+    .not.toBe(before[0]);
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).

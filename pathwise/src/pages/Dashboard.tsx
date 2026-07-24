@@ -1,6 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { GenerateRouteRequest, Hub, Itinerary, StartPoint } from '../types';
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+import type {
+  GenerateRouteRequest,
+  Hub,
+  Itinerary,
+  Origin,
+  RebuildRouteRequest,
+  StartPoint,
+} from '../types';
 import { api } from '../services/api';
+import { DayTab } from '../components/dnd/DayTab';
 import { AppHeader } from '../components/AppHeader';
 import { MapView } from '../components/map/MapView';
 import { TodayPath } from '../components/TodayPath';
@@ -47,7 +64,13 @@ export default function Dashboard() {
   const [days, setDays] = useState<DayState[]>(INITIAL_DAYS);
   const [activeDay, setActiveDay] = useState(0);
   const [startPoint, setStartPoint] = useState<StartPoint | null>(null);
+  const [endPoint, setEndPoint] = useState<StartPoint | null>(null);
+  const [reordering, setReordering] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  );
   const [showQuiz, setShowQuiz] = useState(false);
   const [showMustVisit, setShowMustVisit] = useState(false);
   const [showSplitBill, setShowSplitBill] = useState(false);
@@ -82,6 +105,9 @@ export default function Dashboard() {
     [patchDay],
   );
 
+  const toOrigin = (p: StartPoint | null): Origin | undefined =>
+    p ? { lat: p.lat, lng: p.lng, label: p.label } : undefined;
+
   const buildRequest = (d: DayState): GenerateRouteRequest => ({
     mode: 'hub-budget',
     hub: d.config.hub,
@@ -92,7 +118,63 @@ export default function Dashboard() {
     mustVisitIds: d.mustVisitIds,
     weather: d.config.weather,
     startHour: d.config.startHour,
+    startOrigin: toOrigin(startPoint),
+    endOrigin: toOrigin(endPoint),
   });
+
+  // ── Drag-and-drop manual reorder ──────────────────────────────────
+  const realIdsOf = (d: DayState): string[] =>
+    (d.itinerary?.stops ?? []).filter((s) => s.place).map((s) => s.place!.placeId);
+
+  const rebuildReq = (d: DayState, ids: string[]): RebuildRouteRequest => ({
+    placeIds: ids,
+    hub: d.config.hub,
+    budgetTry: d.config.budgetTry,
+    paceHours: d.config.paceHours,
+    group: d.config.group,
+    weather: d.config.weather,
+    startHour: d.config.startHour,
+    startOrigin: toOrigin(startPoint),
+    endOrigin: toOrigin(endPoint),
+  });
+
+  async function rebuildDay(index: number, ids: string[]) {
+    setReordering(true);
+    try {
+      const it = await api.rebuildRoute(rebuildReq(days[index], ids));
+      patchDay(index, { itinerary: it });
+    } catch {
+      /* keep the previous itinerary on failure */
+    } finally {
+      setReordering(false);
+    }
+  }
+
+  async function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over) return;
+    const activeId = String(active.id);
+    const overId = String(over.id);
+    if (activeId === overId) return;
+
+    // Dropped onto a Day tab → move the stop to that day.
+    if (overId.startsWith('day-')) {
+      const target = Number(overId.slice(4));
+      if (target === activeDay) return;
+      const curIds = realIdsOf(days[activeDay]).filter((id) => id !== activeId);
+      const tgtIds = [...realIdsOf(days[target]), activeId];
+      await Promise.all([rebuildDay(activeDay, curIds), rebuildDay(target, tgtIds)]);
+      setSelectedPlaceId(null);
+      return;
+    }
+
+    // Reorder within the current day.
+    const ids = realIdsOf(days[activeDay]);
+    const oldIndex = ids.indexOf(activeId);
+    const newIndex = ids.indexOf(overId);
+    if (oldIndex < 0 || newIndex < 0) return;
+    await rebuildDay(activeDay, arrayMove(ids, oldIndex, newIndex));
+  }
 
   // Generate the first day's default plan on mount.
   useEffect(() => {
@@ -198,18 +280,17 @@ export default function Dashboard() {
         </div>
       )}
 
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
       {/* Day tabs + action bar */}
       <div className="flex flex-wrap items-center gap-2 border-b border-white/10 px-4 py-2">
         {days.map((_, i) => (
-          <button
+          <DayTab
             key={i}
+            index={i}
+            active={activeDay === i}
             onClick={() => switchDay(i)}
-            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
-              activeDay === i ? 'bg-accent-gradient text-white' : 'text-cream/60 hover:text-cream'
-            }`}
-          >
-            {t('dash.day')} {i + 1}
-          </button>
+            label={`${t('dash.day')} ${i + 1}`}
+          />
         ))}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <button
@@ -258,6 +339,12 @@ export default function Dashboard() {
             </button>
           </div>
           <StartPointSelector value={startPoint} onChange={setStartPoint} />
+          <StartPointSelector
+            value={endPoint}
+            onChange={setEndPoint}
+            titleKey="endPoint.title"
+            showAuto
+          />
           <ToursPanel onUseTourHub={useTourHub} />
           <SurvivalWidget />
         </div>
@@ -281,6 +368,7 @@ export default function Dashboard() {
               selectedPlaceId={selectedPlaceId}
               onSelectPlace={setSelectedPlaceId}
               startPoint={startPoint}
+              reordering={reordering}
             />
           )}
         </div>
@@ -295,6 +383,7 @@ export default function Dashboard() {
           />
         </div>
       </div>
+      </DndContext>
 
       {showQuiz && <TravelVibeQuiz onComplete={handleQuiz} onClose={() => setShowQuiz(false)} />}
       {showMustVisit && (

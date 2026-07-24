@@ -4,6 +4,13 @@ export type GroupType = 'solo' | 'couple' | 'friends';
 export type Weather = 'sunny' | 'rainy';
 export type RouteMode = 'hub-budget' | 'quiz-vibe';
 
+/** A start or end anchor for the day (GPS/hotel/transit/map point). */
+export interface Origin {
+  lat: number;
+  lng: number;
+  label: string;
+}
+
 /** Quiz answers (Travel Vibe Quiz) — consumed by QuizVibeStrategy. */
 export interface QuizInput {
   mood: 'history' | 'foodie' | 'art' | 'photo';
@@ -25,6 +32,10 @@ export interface RouteGenerationInput {
   mustVisitIds: string[];
   weather: Weather;
   startHour: number; // 0–23, when the day begins
+  /** Where the day starts (used to seed the route order). */
+  startOrigin?: Origin;
+  /** Where the day should end. When omitted the engine auto-suggests one. */
+  endOrigin?: Origin;
   quiz?: QuizInput;
 }
 

@@ -1,4 +1,10 @@
 import { useState } from 'react';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { Itinerary, ItineraryStop, Place, StartPoint } from '../types';
 import { BudgetBar } from './BudgetBar';
 import { LocalStoryModal } from './LocalStoryModal';
@@ -6,21 +12,27 @@ import { formatTry, formatDuration, formatKm } from '../utils/format';
 import { haversineMeters, walkEstimate } from '../utils/geo';
 import { useT } from '../i18n';
 
-/** Today's Path — the ordered day plan with times, costs, transport legs, an
- *  auto lunch break and a local-story button per real stop. */
+/** Today's Path — the ordered day plan. Real stops are drag-sortable (the
+ *  DndContext lives in Dashboard); an auto lunch break stays static. */
 export function TodayPath({
   itinerary,
   selectedPlaceId,
   onSelectPlace,
   startPoint,
+  reordering,
 }: {
   itinerary: Itinerary;
   selectedPlaceId: string | null;
   onSelectPlace: (placeId: string) => void;
   startPoint?: StartPoint | null;
+  reordering?: boolean;
 }) {
   const { t } = useT();
   const [storyPlace, setStoryPlace] = useState<Place | null>(null);
+
+  const realIds = itinerary.stops
+    .filter((s) => s.place)
+    .map((s) => s.place!.placeId);
 
   const firstPlace = itinerary.stops.find((s) => s.place)?.place ?? null;
   const startLeg =
@@ -34,6 +46,7 @@ export function TodayPath({
         <h2 className="font-display text-xl font-bold">{t('today.title')}</h2>
         <span className="text-xs text-cream/50">
           {formatKm(itinerary.totalDistanceKm)} · {formatDuration(itinerary.totalDurationMinutes)}
+          {reordering && <span className="ml-2 animate-pulse text-violet">· {t('dash.saving')}</span>}
         </span>
       </div>
 
@@ -45,17 +58,21 @@ export function TodayPath({
         </div>
       )}
 
-      <ol className="space-y-1">
-        {itinerary.stops.map((stop, i) => (
-          <StopRow
-            key={i}
-            stop={stop}
-            active={stop.place?.placeId === selectedPlaceId}
-            onSelect={() => stop.place && onSelectPlace(stop.place.placeId)}
-            onStory={() => stop.place && setStoryPlace(stop.place)}
-          />
-        ))}
-      </ol>
+      <p className="text-[11px] text-cream/40">{t('today.dragHint')}</p>
+
+      <SortableContext items={realIds} strategy={verticalListSortingStrategy}>
+        <ol className="space-y-1">
+          {itinerary.stops.map((stop, i) => (
+            <StopRow
+              key={stop.place ? stop.place.placeId : `lunch-${i}`}
+              stop={stop}
+              active={stop.place?.placeId === selectedPlaceId}
+              onSelect={() => stop.place && onSelectPlace(stop.place.placeId)}
+              onStory={() => stop.place && setStoryPlace(stop.place)}
+            />
+          ))}
+        </ol>
+      </SortableContext>
 
       {storyPlace && (
         <LocalStoryModal place={storyPlace} onClose={() => setStoryPlace(null)} />
@@ -76,6 +93,8 @@ function StopRow({
   onStory: () => void;
 }) {
   const { t } = useT();
+
+  // Lunch break is synthetic → static, not draggable.
   if (stop.isLunchBreak) {
     return (
       <li className="ml-3 border-l-2 border-dashed border-coral/50 pl-4">
@@ -90,28 +109,65 @@ function StopRow({
   }
 
   const place = stop.place!;
+  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} />;
+}
+
+function SortableStopRow({
+  stop,
+  place,
+  active,
+  onSelect,
+  onStory,
+}: {
+  stop: ItineraryStop;
+  place: Place;
+  active: boolean;
+  onSelect: () => void;
+  onStory: () => void;
+}) {
+  const { t } = useT();
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: place.placeId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   return (
-    <li className="ml-3 border-l-2 border-white/10 pl-4">
+    <li ref={setNodeRef} style={style} className="ml-3 border-l-2 border-white/10 pl-4">
       <div
         onClick={onSelect}
-        className={`cursor-pointer rounded-xl border p-3 transition-colors ${
-          active
-            ? 'border-violet bg-violet/10'
-            : 'border-white/10 bg-night-800 hover:border-white/20'
+        className={`rounded-xl border p-3 transition-colors ${
+          active ? 'border-violet bg-violet/10' : 'border-white/10 bg-night-800 hover:border-white/20'
         }`}
       >
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-gradient text-xs font-bold text-white">
-                {stop.order}
-              </span>
-              <h3 className="font-semibold text-cream">{place.name}</h3>
+          <div className="flex items-start gap-2">
+            {/* Drag handle */}
+            <button
+              {...attributes}
+              {...listeners}
+              onClick={(e) => e.stopPropagation()}
+              className="mt-0.5 cursor-grab touch-none text-cream/30 hover:text-cream/70 active:cursor-grabbing"
+              title={t('today.dragHandle')}
+              aria-label={t('today.dragHandle')}
+            >
+              ⠿
+            </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-gradient text-xs font-bold text-white">
+                  {stop.order}
+                </span>
+                <h3 className="font-semibold text-cream">{place.name}</h3>
+              </div>
+              <p className="mt-1 text-xs text-cream/50">
+                🕒 {stop.arrivalTime}–{stop.departureTime} · {formatDuration(stop.durationMinutes)}
+                {place.museumPass && <span className="ml-2 text-emerald">🎫 {t('today.museumPass')}</span>}
+              </p>
             </div>
-            <p className="mt-1 text-xs text-cream/50">
-              🕒 {stop.arrivalTime}–{stop.departureTime} · {formatDuration(stop.durationMinutes)}
-              {place.museumPass && <span className="ml-2 text-emerald">🎫 {t('today.museumPass')}</span>}
-            </p>
           </div>
           <div className="text-right text-xs">
             <div className="text-cream/70">
@@ -133,7 +189,6 @@ function StopRow({
         </button>
       </div>
 
-      {/* Transport leg to next stop */}
       {stop.transportToNext && (
         <div className="py-1.5 pl-1 text-xs text-cream/40">{stop.transportToNext.label}</div>
       )}

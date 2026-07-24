@@ -149,12 +149,25 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
   private orderStops(places: Place[], input: RouteGenerationInput): Place[] {
     if (places.length <= 1) return places;
 
-    // Nearest-neighbour tour starting from the northern-most stop so the walk
-    // reads naturally. (A real build would call OSRM for an optimized route.)
+    // Seed the nearest-neighbour tour from the start origin if given, otherwise
+    // the northern-most stop so the walk reads naturally. (A real build would
+    // call OSRM for a true optimized route.)
     const remaining = [...places];
-    const start = remaining.reduce((a, b) => (a.lat > b.lat ? a : b));
-    const tour: Place[] = [start];
-    remaining.splice(remaining.indexOf(start), 1);
+    const startAnchor: LatLng =
+      input.startOrigin ?? remaining.reduce((a, b) => (a.lat > b.lat ? a : b));
+
+    // First stop = the place nearest the start anchor.
+    let firstIdx = 0;
+    let firstDist = Infinity;
+    remaining.forEach((p, i) => {
+      const d = haversineMeters(startAnchor, p);
+      if (d < firstDist) {
+        firstDist = d;
+        firstIdx = i;
+      }
+    });
+    const tour: Place[] = [remaining[firstIdx]];
+    remaining.splice(firstIdx, 1);
 
     while (remaining.length) {
       const last = tour[tour.length - 1];
@@ -171,7 +184,18 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       remaining.splice(nearestIdx, 1);
     }
 
-    // Evening start → push sunset spots to the tail so golden hour lands right.
+    // End anchoring takes priority over the evening rule: if an end origin is
+    // set, force the stop nearest it to be last. Otherwise, on an evening start
+    // push sunset spots to the tail so golden hour lands right.
+    if (input.endOrigin && tour.length > 1) {
+      const end = input.endOrigin;
+      const endStop = tour.reduce((closest, p) =>
+        haversineMeters(p, end) < haversineMeters(closest, end) ? p : closest,
+      );
+      const rest = tour.filter((p) => p.placeId !== endStop.placeId);
+      return [...rest, endStop];
+    }
+
     const isEvening = input.startHour >= 16;
     if (isEvening) {
       const sunset = tour.filter((p) => p.isSunsetSpot);
@@ -179,6 +203,21 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       return [...rest, ...sunset];
     }
     return tour;
+  }
+
+  /**
+   * Rebuild an itinerary from an EXPLICIT stop order (drag-and-drop manual
+   * edit). Skips scoring/selection/reordering — just re-runs assembly so times,
+   * transport legs, distance and the budget are recomputed for the given order.
+   */
+  async rebuild(orderedPlaceIds: string[], input: RouteGenerationInput): Promise<Itinerary> {
+    const found = await this.places.findByIds(orderedPlaceIds);
+    const byId = new Map(found.map((p) => [p.placeId, p]));
+    const ordered = orderedPlaceIds
+      .map((id) => byId.get(id))
+      .filter((p): p is Place => p !== undefined);
+    const hub = input.hub ?? ordered[0]?.hub ?? 'kadikoy-moda';
+    return this.assemble(ordered, input, hub);
   }
 
   // ── assembly (times, lunch, transport, costs) ────────────────────

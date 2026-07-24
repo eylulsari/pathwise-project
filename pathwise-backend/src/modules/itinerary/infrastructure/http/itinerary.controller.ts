@@ -1,6 +1,9 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ItineraryService } from '../../application/itinerary.service';
-import { GenerateRouteDto } from '../../application/dto/generate-route.dto';
+import {
+  GenerateRouteDto,
+  RebuildRouteDto,
+} from '../../application/dto/generate-route.dto';
 
 @Controller('itinerary')
 export class ItineraryController {
@@ -14,5 +17,16 @@ export class ItineraryController {
   @HttpCode(HttpStatus.OK)
   generate(@Body() dto: GenerateRouteDto) {
     return this.itinerary.generate(dto);
+  }
+
+  /**
+   * POST /api/itinerary/rebuild
+   * Recompute times/transport/budget for a manually reordered stop list
+   * (drag-and-drop) without re-optimizing the order.
+   */
+  @Post('rebuild')
+  @HttpCode(HttpStatus.OK)
+  rebuild(@Body() dto: RebuildRouteDto) {
+    return this.itinerary.rebuild(dto);
   }
 }

@@ -3,21 +3,28 @@ import type { StartPoint, StartPointKind } from '../../types';
 import { TRANSIT_HUBS } from '../../hubData';
 import { useT } from '../../i18n';
 
-/** Start-point selector: GPS, Hotel, Transit hub/pier, or pick on map.
- *  The choice sets the origin used to estimate the first leg's distance/time. */
+/** Start/end point selector: GPS, Hotel, Transit hub/pier, pick on map, and
+ *  (for the end point) Auto-suggest — the route engine picks the best finish.
+ *  The choice sets the origin used to seed/anchor the route. */
 export function StartPointSelector({
   value,
   onChange,
+  titleKey = 'startPoint.title',
+  showAuto = false,
 }: {
   value: StartPoint | null;
   onChange: (sp: StartPoint | null) => void;
+  titleKey?: string;
+  /** When true, adds an "Auto-suggest" choice that clears the anchor. */
+  showAuto?: boolean;
 }) {
   const { t } = useT();
-  const [kind, setKind] = useState<StartPointKind>('transit');
+  const [kind, setKind] = useState<StartPointKind | 'auto'>(showAuto ? 'auto' : 'transit');
   const [hotel, setHotel] = useState('');
   const [gpsErr, setGpsErr] = useState<string | null>(null);
 
-  const OPTIONS: { id: StartPointKind; label: string; icon: string }[] = [
+  const OPTIONS: { id: StartPointKind | 'auto'; label: string; icon: string }[] = [
+    ...(showAuto ? [{ id: 'auto' as const, label: t('startPoint.auto'), icon: '✨' }] : []),
     { id: 'gps', label: t('startPoint.myLocation'), icon: '📍' },
     { id: 'hotel', label: t('startPoint.hotel'), icon: '🏨' },
     { id: 'transit', label: t('startPoint.transit'), icon: '🚇' },
@@ -44,14 +51,15 @@ export function StartPointSelector({
 
   return (
     <div className="rounded-2xl border border-white/10 bg-night-800 p-4">
-      <h3 className="mb-2 font-display text-sm font-bold">{t('startPoint.title')}</h3>
-      <div className="grid grid-cols-4 gap-1.5">
+      <h3 className="mb-2 font-display text-sm font-bold">{t(titleKey)}</h3>
+      <div className={`grid gap-1.5 ${showAuto ? 'grid-cols-5' : 'grid-cols-4'}`}>
         {OPTIONS.map((o) => (
           <button
             key={o.id}
             onClick={() => {
               setKind(o.id);
               if (o.id === 'gps') useGps();
+              if (o.id === 'auto') onChange(null); // clear → engine auto-picks
             }}
             className={`rounded-lg border px-1 py-2 text-center text-xs transition-colors ${
               kind === o.id

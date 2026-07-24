@@ -16,6 +16,7 @@ import type {
   CommunityRoute,
   ForumQuestion,
   GenerateRouteRequest,
+  RebuildRouteRequest,
   Itinerary,
   PastTrip,
   Place,
@@ -176,6 +177,14 @@ export const api = {
   // ═════════════════════════════════════════════════════════════════
   async generateRoute(req: GenerateRouteRequest): Promise<Itinerary> {
     return http<Itinerary>('/itinerary/generate', {
+      method: 'POST',
+      body: JSON.stringify(req),
+    });
+  },
+
+  /** Recompute after a manual drag-and-drop reorder (keeps the given order). */
+  async rebuildRoute(req: RebuildRouteRequest): Promise<Itinerary> {
+    return http<Itinerary>('/itinerary/rebuild', {
       method: 'POST',
       body: JSON.stringify(req),
     });

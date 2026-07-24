@@ -90,8 +90,10 @@ export const translations = {
       offlineBanner:
         '📴 Offline Mode — showing your cached plan. (UI demo only — no real caching.)',
     },
+    endPoint: { title: 'End point' },
     startPoint: {
       title: 'Start point',
+      auto: 'Auto',
       myLocation: 'My location',
       hotel: 'Hotel',
       transit: 'Transit hub',
@@ -115,6 +117,8 @@ export const translations = {
       readStory: '📖 Read Local Story & Tips',
       free: 'Free',
       museumPass: 'Museum Pass',
+      dragHint: 'Drag ⠿ to reorder, or onto a Day tab to move it.',
+      dragHandle: 'Drag to reorder',
     },
     weather: { crowds: 'Crowds' },
     survival: { title: 'City Survival & Etiquette' },
@@ -271,8 +275,10 @@ export const translations = {
       offlineBanner:
         '📴 Çevrimdışı Mod — önbellekteki planın gösteriliyor. (Sadece arayüz demosu — gerçek önbellek yok.)',
     },
+    endPoint: { title: 'Bitiş noktası' },
     startPoint: {
       title: 'Başlangıç noktası',
+      auto: 'Oto',
       myLocation: 'Konumum',
       hotel: 'Otel',
       transit: 'Ulaşım noktası',
@@ -296,6 +302,8 @@ export const translations = {
       readStory: '📖 Yerel Hikaye & İpuçları',
       free: 'Ücretsiz',
       museumPass: 'Müze Kart',
+      dragHint: 'Sıralamak için ⠿ sürükle, ya da bir Gün sekmesine bırak.',
+      dragHandle: 'Sıralamak için sürükle',
     },
     weather: { crowds: 'Kalabalık' },
     survival: { title: 'Şehirde Hayatta Kalma & Adap' },

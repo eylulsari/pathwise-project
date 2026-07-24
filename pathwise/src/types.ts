@@ -99,6 +99,8 @@ export interface GenerateRouteRequest {
   mustVisitIds?: string[];
   weather: Weather;
   startHour: number;
+  startOrigin?: Origin;
+  endOrigin?: Origin;
   quiz?: {
     mood: 'history' | 'foodie' | 'art' | 'photo';
     pace: 'relaxed' | 'moderate' | 'packed';
@@ -106,13 +108,33 @@ export interface GenerateRouteRequest {
   };
 }
 
-// ── Start point selector ───────────────────────────────────────────
+/** Order-preserving recompute after a manual drag-and-drop reorder. */
+export interface RebuildRouteRequest {
+  placeIds: string[];
+  hub?: Hub;
+  budgetTry: number;
+  paceHours: number;
+  group: GroupType;
+  weather: Weather;
+  startHour: number;
+  startOrigin?: Origin;
+  endOrigin?: Origin;
+}
+
+// ── Start / end point selector ─────────────────────────────────────
 export type StartPointKind = 'gps' | 'hotel' | 'transit' | 'map';
 export interface StartPoint {
   kind: StartPointKind;
   label: string;
   lat: number;
   lng: number;
+}
+
+/** A start/end anchor sent to the route engine. */
+export interface Origin {
+  lat: number;
+  lng: number;
+  label: string;
 }
 
 // ── Auth / user ────────────────────────────────────────────────────

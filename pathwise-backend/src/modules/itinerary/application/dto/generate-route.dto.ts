@@ -1,16 +1,32 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
-  IsEnum,
   IsIn,
   IsInt,
   IsNumber,
   IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
+
+export class OriginDto {
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  lat: number;
+
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng: number;
+
+  @IsString()
+  @MaxLength(120)
+  label: string;
+}
 
 const HUBS = [
   'sultanahmet',
@@ -80,6 +96,61 @@ export class GenerateRouteDto {
 
   @IsOptional()
   @ValidateNested()
+  @Type(() => OriginDto)
+  startOrigin?: OriginDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => OriginDto)
+  endOrigin?: OriginDto;
+
+  @IsOptional()
+  @ValidateNested()
   @Type(() => QuizDto)
   quiz?: QuizDto;
+}
+
+/**
+ * POST /api/itinerary/rebuild — recompute an itinerary from an explicit stop
+ * order (drag-and-drop). No re-optimization: the given order is preserved.
+ */
+export class RebuildRouteDto {
+  @IsArray()
+  @IsString({ each: true })
+  placeIds: string[];
+
+  @IsOptional()
+  @IsIn(HUBS as unknown as string[])
+  hub?: (typeof HUBS)[number];
+
+  @IsNumber()
+  @Min(0)
+  @Max(50000)
+  budgetTry: number;
+
+  @IsNumber()
+  @Min(1)
+  @Max(12)
+  paceHours: number;
+
+  @IsIn(['solo', 'couple', 'friends'])
+  group: 'solo' | 'couple' | 'friends';
+
+  @IsIn(['sunny', 'rainy'])
+  weather: 'sunny' | 'rainy';
+
+  @IsInt()
+  @Min(0)
+  @Max(23)
+  startHour: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => OriginDto)
+  startOrigin?: OriginDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => OriginDto)
+  endOrigin?: OriginDto;
 }
