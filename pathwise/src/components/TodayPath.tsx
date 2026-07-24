@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import type { Itinerary, ItineraryStop, Place } from '../types';
+import type { Itinerary, ItineraryStop, Place, StartPoint } from '../types';
 import { BudgetBar } from './BudgetBar';
 import { LocalStoryModal } from './LocalStoryModal';
 import { formatTry, formatDuration, formatKm } from '../utils/format';
+import { haversineMeters, walkEstimate } from '../utils/geo';
 
 /** Today's Path — the ordered day plan with times, costs, transport legs, an
  *  auto lunch break and a local-story button per real stop. */
@@ -10,12 +11,20 @@ export function TodayPath({
   itinerary,
   selectedPlaceId,
   onSelectPlace,
+  startPoint,
 }: {
   itinerary: Itinerary;
   selectedPlaceId: string | null;
   onSelectPlace: (placeId: string) => void;
+  startPoint?: StartPoint | null;
 }) {
   const [storyPlace, setStoryPlace] = useState<Place | null>(null);
+
+  const firstPlace = itinerary.stops.find((s) => s.place)?.place ?? null;
+  const startLeg =
+    startPoint && firstPlace
+      ? walkEstimate(haversineMeters(startPoint, firstPlace))
+      : null;
 
   return (
     <div className="space-y-4">
@@ -27,6 +36,12 @@ export function TodayPath({
       </div>
 
       <BudgetBar itinerary={itinerary} />
+
+      {startLeg && (
+        <div className="rounded-xl border border-emerald/30 bg-emerald/10 px-3 py-2 text-xs text-emerald">
+          <span className="font-semibold">{startPoint!.label}</span> · {startLeg}
+        </div>
+      )}
 
       <ol className="space-y-1">
         {itinerary.stops.map((stop, i) => (
