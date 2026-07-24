@@ -57,6 +57,20 @@ npm run dev
 > Local backend needs PostgreSQL + Redis running. The easiest path is
 > `docker compose up postgres redis` and then run the backend from your host.
 
+## Testing
+
+```bash
+# Backend unit tests (route engine, factory, auth) — no DB needed
+cd pathwise-backend && npm test
+
+# Frontend E2E (real browser) — needs the stack running first
+docker compose up -d
+cd pathwise && npm run e2e        # or: npm run e2e:ui
+```
+
+The E2E suite (`pathwise/e2e/`) drives a real Chromium through onboarding →
+dashboard and asserts the Leaflet map + Today's Path render with live data.
+
 ## Documentation
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — patterns, module boundaries, data model

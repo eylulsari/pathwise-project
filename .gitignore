@@ -36,3 +36,10 @@ pathwise/dist-ssr
 
 # Docker
 .docker-data/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
+
