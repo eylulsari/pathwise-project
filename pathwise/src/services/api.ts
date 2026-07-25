@@ -342,6 +342,12 @@ export const api = {
     return PLACES_BY_ID[id];
   },
 
+  /** Free-text place search (backend substring search). */
+  async searchPlaces(q: string): Promise<Place[]> {
+    if (!q.trim()) return [];
+    return http<Place[]>(`/places/search?q=${encodeURIComponent(q)}`);
+  },
+
   // ═════════════════════════════════════════════════════════════════
   // ROUTE GEOMETRY — real OSRM foot routing so the map line follows the
   // actual streets between stops (OpenStreetMap/OSRM). Returns null on any

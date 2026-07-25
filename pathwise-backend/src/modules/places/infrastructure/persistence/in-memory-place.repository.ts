@@ -24,4 +24,34 @@ export class InMemoryPlaceRepository implements PlaceRepositoryPort {
     const set = new Set(placeIds);
     return this.places.filter((p) => set.has(p.placeId));
   }
+
+  /** Human-readable neighbourhood labels so a search for "Kadıköy" matches. */
+  private static readonly HUB_LABEL: Record<string, string> = {
+    sultanahmet: 'Sultanahmet & Old City',
+    'karakoy-galata': 'Karaköy & Galata',
+    'kadikoy-moda': 'Kadıköy & Moda',
+    'balat-fener': 'Balat & Fener',
+    'besiktas-bogaz': 'Beşiktaş & Bosphorus',
+  };
+
+  // Simple in-memory substring search. A production build would use Postgres
+  // full-text search (to_tsvector) or Elasticsearch — this shares the port so
+  // the swap is a local change.
+  async search(query: string): Promise<Place[]> {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return this.places
+      .filter((p) => {
+        const haystack = [
+          p.name,
+          p.category,
+          p.hub,
+          InMemoryPlaceRepository.HUB_LABEL[p.hub] ?? '',
+        ]
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(q);
+      })
+      .slice(0, 8);
+  }
 }

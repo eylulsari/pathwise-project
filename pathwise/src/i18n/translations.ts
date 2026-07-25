@@ -131,6 +131,12 @@ export const translations = {
       dragHint: 'Drag ⠿ to reorder, or onto a Day tab to move it.',
       dragHandle: 'Drag to reorder',
     },
+    search: {
+      placeholder: 'Search a place… (e.g. Hagia Sophia, Kadıköy Market)',
+      empty: 'No place by that name — we’ll add it soon.',
+      add: '➕ Add',
+      tours: 'Tours & activities',
+    },
     weather: { crowds: 'Crowds' },
     survival: { title: 'City Survival & Etiquette' },
     reservation: {
@@ -443,6 +449,12 @@ export const translations = {
       museumPass: 'Müze Kart',
       dragHint: 'Sıralamak için ⠿ sürükle, ya da bir Gün sekmesine bırak.',
       dragHandle: 'Sıralamak için sürükle',
+    },
+    search: {
+      placeholder: 'Bir yer ara… (örn. Ayasofya, Kadıköy Pazarı)',
+      empty: 'Bu isimde bir yer bulamadık — yakında eklenecek.',
+      add: '➕ Ekle',
+      tours: 'Turlar & aktiviteler',
     },
     weather: { crowds: 'Kalabalık' },
     survival: { title: 'Şehirde Hayatta Kalma & Adap' },

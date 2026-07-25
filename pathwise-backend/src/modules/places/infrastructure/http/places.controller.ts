@@ -11,4 +11,10 @@ export class PlacesController {
   list(@Query('hub') hub?: Hub) {
     return hub ? this.places.findByHub(hub) : this.places.findAll();
   }
+
+  /** GET /api/places/search?q= — free-text place search. */
+  @Get('search')
+  search(@Query('q') q = '') {
+    return this.places.search(q);
+  }
 }

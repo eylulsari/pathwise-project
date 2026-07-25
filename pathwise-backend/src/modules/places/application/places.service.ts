@@ -23,4 +23,8 @@ export class PlacesService {
   findByIds(ids: string[]): Promise<Place[]> {
     return this.places.findByIds(ids);
   }
+
+  search(query: string): Promise<Place[]> {
+    return this.places.search(query);
+  }
 }

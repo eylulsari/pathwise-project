@@ -27,6 +27,7 @@ import { useT } from '../i18n';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { cacheItineraries, loadCachedItineraries } from '../utils/offlineCache';
 import { DayTab } from '../components/dnd/DayTab';
+import { SearchBar } from '../components/SearchBar';
 import { AppHeader } from '../components/AppHeader';
 import { MapView } from '../components/map/MapView';
 import { TodayPath } from '../components/TodayPath';
@@ -99,6 +100,7 @@ export default function Dashboard() {
   const [routeGeometry, setRouteGeometry] = useState<[number, number][] | null>(null);
   const [reservingPlace, setReservingPlace] = useState<Place | null>(null);
   const [journalPlace, setJournalPlace] = useState<Place | null>(null);
+  const [searchFocus, setSearchFocus] = useState<Place | null>(null);
   const [suggestion, setSuggestion] = useState<NearbySuggestion | null>(null);
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
 
@@ -506,7 +508,16 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2 xl:h-[calc(100vh-105px)] xl:grid-cols-[330px_minmax(340px,400px)_1fr]">
+      {/* Free-text search (between the action bar and the planner) */}
+      <div className="px-4 pt-3">
+        <SearchBar
+          onFocusPlace={setSearchFocus}
+          onAddPlace={addToPath}
+          onUseTourHub={useTourHub}
+        />
+      </div>
+
+      <div className="grid flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2 xl:h-[calc(100vh-155px)] xl:grid-cols-[330px_minmax(340px,400px)_1fr]">
         {/* Left rail: controls */}
         <div className="space-y-4 overflow-y-auto pr-1">
           <RouteGenerator
@@ -590,6 +601,8 @@ export default function Dashboard() {
             selectedPlaceId={selectedPlaceId}
             onSelectPlace={setSelectedPlaceId}
             routeGeometry={routeGeometry}
+            focusPlace={searchFocus}
+            onAddFocus={(id) => { addToPath(id); setSearchFocus(null); }}
           />
         </div>
       </div>

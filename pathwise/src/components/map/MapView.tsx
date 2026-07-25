@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   MapContainer,
   Marker,
@@ -14,7 +14,7 @@ import { isOpenNow } from '../../utils/format';
 
 /** A numbered, hub-accented pin built as a divIcon (avoids the broken default
  *  Leaflet marker-image paths under bundlers). */
-function pin(order: number, color: string, active: boolean): L.DivIcon {
+function pin(order: number | string, color: string, active: boolean): L.DivIcon {
   return L.divIcon({
     className: '',
     html: `<div style="
@@ -37,10 +37,12 @@ function pin(order: number, color: string, active: boolean): L.DivIcon {
 function MapController({
   center,
   selected,
+  focus,
   resizeSignal,
 }: {
   center: [number, number];
   selected: Place | null;
+  focus: Place | null;
   resizeSignal: number;
 }) {
   const map = useMap();
@@ -52,10 +54,12 @@ function MapController({
     return () => clearTimeout(t);
   }, [map, resizeSignal]);
 
+  // A search focus takes priority; otherwise fly to the selected stop or hub.
   useEffect(() => {
-    if (selected) map.flyTo([selected.lat, selected.lng], 16, { duration: 0.8 });
+    if (focus) map.flyTo([focus.lat, focus.lng], 16, { duration: 0.8 });
+    else if (selected) map.flyTo([selected.lat, selected.lng], 16, { duration: 0.8 });
     else map.flyTo(center, 14, { duration: 0.6 });
-  }, [map, selected, center]);
+  }, [map, selected, focus, center]);
 
   return null;
 }
@@ -65,14 +69,27 @@ export function MapView({
   selectedPlaceId,
   onSelectPlace,
   routeGeometry,
+  focusPlace,
+  onAddFocus,
 }: {
   itinerary: Itinerary | null;
   selectedPlaceId: string | null;
   onSelectPlace: (placeId: string) => void;
   routeGeometry?: [number, number][] | null;
+  focusPlace?: Place | null;
+  onAddFocus?: (placeId: string) => void;
 }) {
   const [fullscreen, setFullscreen] = useState(false);
   const [resizeSignal, setResizeSignal] = useState(0);
+  const focusMarkerRef = useRef<L.Marker | null>(null);
+
+  // Auto-open the search-focus popup when a result is selected.
+  useEffect(() => {
+    if (focusPlace && focusMarkerRef.current) {
+      const t = setTimeout(() => focusMarkerRef.current?.openPopup(), 300);
+      return () => clearTimeout(t);
+    }
+  }, [focusPlace]);
 
   // Bump the resize signal whenever fullscreen flips so the controller runs
   // invalidateSize after the CSS transition settles.
@@ -149,7 +166,31 @@ export function MapView({
             </Marker>
           );
         })}
-        <MapController center={center} selected={selected} resizeSignal={resizeSignal} />
+        {/* Search focus — a temporary highlighted pin (may be off-route). */}
+        {focusPlace && (
+          <Marker
+            ref={focusMarkerRef}
+            position={[focusPlace.lat, focusPlace.lng]}
+            icon={pin('★', '#FF007F', true)}
+          >
+            <Popup>
+              <div className="min-w-[190px]">
+                <p className="font-display text-sm font-bold text-night">{focusPlace.name}</p>
+                <p className="mt-0.5 text-xs text-night/60">🕒 {focusPlace.openingHours}</p>
+                <p className="mt-1 text-xs italic text-night/70">💡 {focusPlace.localTip}</p>
+                {onAddFocus && (
+                  <button
+                    onClick={() => onAddFocus(focusPlace.placeId)}
+                    className="mt-2 w-full rounded-lg bg-accent-gradient py-1 text-xs font-semibold text-white"
+                  >
+                    ➕ Add to Today’s Path
+                  </button>
+                )}
+              </div>
+            </Popup>
+          </Marker>
+        )}
+        <MapController center={center} selected={selected} focus={focusPlace ?? null} resizeSignal={resizeSignal} />
       </MapContainer>
 
       {/* Fullscreen toggle (top-right) */}

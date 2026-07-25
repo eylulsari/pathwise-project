@@ -10,4 +10,6 @@ export interface PlaceRepositoryPort {
   findAll(): Promise<Place[]>;
   findByHub(hub: Hub): Promise<Place[]>;
   findByIds(placeIds: string[]): Promise<Place[]>;
+  /** Case-insensitive substring search over name, hub and category. */
+  search(query: string): Promise<Place[]>;
 }

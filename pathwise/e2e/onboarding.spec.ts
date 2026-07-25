@@ -292,6 +292,31 @@ test('group poll: create, vote, and see the tally', async ({ page }) => {
   await expect(card.getByText(/100%/)).toBeVisible({ timeout: 10_000 });
 });
 
+test('search bar finds a place and adds it to Today’s Path', async ({ page }) => {
+  const email = `e2e_search_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('Search Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+
+  const search = page.getByPlaceholder(/Search a place/i);
+  // Empty state for a nonsense query.
+  await search.fill('zzzzzz');
+  await expect(page.getByText(/we.ll add it soon/i)).toBeVisible({ timeout: 5_000 });
+
+  // Real query → result appears; add it to the path.
+  await search.fill('Hagia');
+  const result = page.getByRole('button', { name: /Hagia Sophia/i });
+  await expect(result).toBeVisible({ timeout: 5_000 });
+  await page.getByRole('button', { name: '➕ Add' }).first().click();
+
+  // Hagia Sophia (forced in) now appears among the day's stops.
+  await expect(page.locator('ol li h3', { hasText: 'Hagia Sophia' })).toBeVisible({ timeout: 10_000 });
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).
