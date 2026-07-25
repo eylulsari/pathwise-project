@@ -4,6 +4,7 @@ import type { Itinerary } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { exportItineraryPdf, googleMapsUrl } from '../utils/export';
 import { downloadIcs } from '../utils/ics';
+import { api } from '../services/api';
 
 const PDF_KEY = 'pathwise.pdfExports'; // "YYYY-MM:count"
 
@@ -29,6 +30,7 @@ export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
   function onPdf() {
     setOpen(false);
     if (!isPremium && !canExportPdf()) {
+      api.recordPaywall('pdf'); // A6 analytics
       navigate('/premium'); // free monthly limit reached → upgrade
       return;
     }

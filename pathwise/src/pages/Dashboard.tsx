@@ -435,6 +435,7 @@ export default function Dashboard() {
   function switchDay(index: number) {
     // Free plan: only Day 1 is active — the rest lead to the Premium page.
     if (!isPremium && index > 0) {
+      api.recordPaywall('day'); // A6 analytics
       navigate('/premium');
       return;
     }

@@ -16,6 +16,7 @@ import { JournalModule } from './modules/journal/journal.module';
 import { ReferralModule } from './modules/referral/referral.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PollsModule } from './modules/polls/polls.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 // Feature modules (modular monolith — each is a clean boundary).
 
@@ -38,6 +39,7 @@ import { PollsModule } from './modules/polls/polls.module';
     ReferralModule,
     NotificationsModule,
     PollsModule,
+    AnalyticsModule,
   ],
   controllers: [HealthController],
   providers: [

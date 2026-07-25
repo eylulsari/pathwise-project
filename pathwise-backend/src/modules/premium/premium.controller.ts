@@ -15,6 +15,7 @@ import { CurrentUser } from '../auth/infrastructure/decorators/current-user.deco
 import { AuthUser } from '../auth/domain/auth-user';
 import { PremiumGuard } from '../../common/guards/premium.guard';
 import { RedisService } from '../../infrastructure/redis/redis.service';
+import { NotificationsService } from '../notifications/application/notifications.service';
 import {
   FREE_OPTIMIZE_LIMIT,
   optimizeDailyKey,
@@ -28,6 +29,7 @@ export class PremiumController {
     private readonly users: UsersService,
     private readonly places: PlacesService,
     private readonly redis: RedisService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /** POST /api/premium/subscription — demo upgrade/downgrade (no real payment). */
@@ -43,6 +45,22 @@ export class PremiumController {
   async usage(@CurrentUser() user: AuthUser) {
     const full = await this.users.findById(user.id);
     const used = await this.redis.getCount(optimizeDailyKey(user.id));
+
+    // A6 — if the trial ends within 24h, drop a one-time reminder (B6).
+    if (full.trialEndsAt) {
+      const msLeft = full.trialEndsAt.getTime() - Date.now();
+      if (msLeft > 0 && msLeft < 86400 * 1000) {
+        if (!(await this.notifications.hasType(user.id, 'trial'))) {
+          await this.notifications.notify(
+            user.id,
+            'trial',
+            '⏳ Trial ending soon',
+            'Your Premium trial ends within a day — upgrade to keep unlimited planning.',
+          );
+        }
+      }
+    }
+
     return {
       tier: full.subscriptionTier,
       optimizeUsed: used,

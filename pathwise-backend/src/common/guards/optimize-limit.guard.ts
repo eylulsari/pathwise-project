@@ -42,6 +42,8 @@ export class OptimizeLimitGuard implements CanActivate {
     const key = optimizeDailyKey(userId);
     const used = await this.redis.increment(key, secondsUntilMidnight());
     if (used > FREE_OPTIMIZE_LIMIT) {
+      // A6 — count the paywall hit.
+      await this.redis.increment('paywall:optimize', 90 * 86400);
       throw new HttpException(
         {
           statusCode: HttpStatus.PAYMENT_REQUIRED,

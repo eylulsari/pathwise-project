@@ -39,7 +39,7 @@ export class UserOrmEntity {
 
   // Feature-flag tier. Migration: AddSubscriptionTierToUsers (dev auto-syncs).
   @Column({ type: 'varchar', length: 16, default: 'free' })
-  subscriptionTier: 'free' | 'premium';
+  subscriptionTier: 'free' | 'premium' | 'trial';
 
   // Trial/reward premium window (referral B2 + trial A6).
   @Column({ type: 'timestamptz', nullable: true })

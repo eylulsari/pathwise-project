@@ -173,7 +173,7 @@ export interface Origin {
 }
 
 // ── Auth / user ────────────────────────────────────────────────────
-export type SubscriptionTier = 'free' | 'premium';
+export type SubscriptionTier = 'free' | 'premium' | 'trial';
 
 export interface AuthUser {
   id: string;

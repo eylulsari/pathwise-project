@@ -178,6 +178,14 @@ export const api = {
   async getUsage(): Promise<UsageInfo> {
     return http<UsageInfo>('/premium/usage');
   },
+  /** A6 — record a client-side paywall hit (day/story/pdf). */
+  async recordPaywall(feature: 'day' | 'story' | 'pdf'): Promise<void> {
+    await http('/analytics/paywall', { method: 'POST', body: JSON.stringify({ feature }) }).catch(() => {});
+  },
+  /** A7 — record an affiliate/partner link click. */
+  async recordAffiliateClick(tourId: string, source: string): Promise<void> {
+    await http('/analytics/affiliate-click', { method: 'POST', body: JSON.stringify({ tourId, source }) }).catch(() => {});
+  },
 
   // ── Notification Center (B6) ──
   async getNotifications(): Promise<import('../types').AppNotification[]> {

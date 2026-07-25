@@ -20,7 +20,9 @@ function makeUser(passwordHash: string): User {
 }
 
 describe('AuthService', () => {
-  let users: jest.Mocked<Pick<UsersService, 'findByEmail' | 'create' | 'findById'>>;
+  let users: jest.Mocked<
+    Pick<UsersService, 'findByEmail' | 'create' | 'findById' | 'startTrial'>
+  >;
   let refreshStore: jest.Mocked<RefreshTokenStorePort>;
   let jwt: { signAsync: jest.Mock; verifyAsync: jest.Mock };
   let config: { get: jest.Mock };
@@ -31,6 +33,7 @@ describe('AuthService', () => {
       findByEmail: jest.fn(),
       create: jest.fn(),
       findById: jest.fn(),
+      startTrial: jest.fn().mockResolvedValue(undefined),
     };
     refreshStore = { save: jest.fn(), isValid: jest.fn(), revoke: jest.fn() };
     jwt = {
@@ -58,6 +61,7 @@ describe('AuthService', () => {
     it('hashes the password and issues tokens', async () => {
       users.findByEmail.mockResolvedValue(null);
       users.create.mockImplementation(async (data) => makeUser(data.passwordHash));
+      users.findById.mockResolvedValue(makeUser('hash')); // re-fetched after trial
 
       const res = await service.register({
         name: 'Aylin Demir',

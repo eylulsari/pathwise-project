@@ -44,7 +44,19 @@ export class UsersService {
    */
   async setSubscriptionTier(id: string, tier: SubscriptionTier) {
     const user = await this.users.setSubscriptionTier(id, tier);
+    // Choosing the free tier ends any active trial/reward window.
+    if (tier === 'free' && user.trialEndsAt) {
+      const cleared = await this.users.setTrialEndsAt(id, null);
+      return cleared.toPublic();
+    }
     return user.toPublic();
+  }
+
+  /** Start an N-day Premium trial for a new user (A6). */
+  async startTrial(id: string, days: number) {
+    await this.users.setSubscriptionTier(id, 'trial');
+    const until = new Date(Date.now() + days * 86400 * 1000);
+    return this.users.setTrialEndsAt(id, until);
   }
 
   /**

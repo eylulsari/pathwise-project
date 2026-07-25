@@ -124,28 +124,34 @@ test('can pin a reservation and see a nearby suggestion', async ({ page }) => {
   await expect(page.locator('text=/📎 \\d{2}:\\d{2}/').first()).toBeVisible({ timeout: 10_000 });
 });
 
-test('free plan locks Day 2 and upgrading to Premium unlocks it', async ({ page }) => {
+test('trial→free locks Day 2, and upgrading to Premium unlocks it', async ({ page }) => {
   const email = `e2e_prem_${Date.now()}@std.antalya.edu.tr`;
   await page.goto('/auth');
   await page.getByPlaceholder('Aylin Demir').fill('Prem Tester');
   await page.getByPlaceholder('you@example.com').fill(email);
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
-  await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
 
-  // Free: Day 2 is locked and an optimize counter is shown.
+  // A6: new users get a 7-day Premium trial → Day 2 is unlocked initially.
+  await expect(page.getByRole('button', { name: /🔒 Day 2/ })).toHaveCount(0);
+
+  // Switch to Free on the Premium page (ends the trial) to reach the paywall.
+  await page.getByRole('link', { name: /Premium/ }).click();
+  await expect(page).toHaveURL(/\/premium$/);
+  await page.getByRole('button', { name: /Switch to Free/i }).click();
+  await expect(page.getByRole('button', { name: /Upgrade to Premium/i })).toBeVisible({ timeout: 10_000 });
+
+  // Back on the dashboard Day 2 is now locked with an optimize counter.
+  await page.getByRole('link', { name: 'Plan', exact: true }).click();
+  await page.waitForURL(/\/dashboard$/);
   await expect(page.getByRole('button', { name: /🔒 Day 2/ })).toBeVisible();
   await expect(page.getByText(/optimizations left today/i)).toBeVisible();
 
-  // Go to Premium and upgrade.
+  // Upgrade → Day 2 unlocked + unlimited.
   await page.getByRole('link', { name: /Premium/ }).click();
-  await expect(page).toHaveURL(/\/premium$/);
-  await expect(page.getByRole('button', { name: /Upgrade to Premium/i })).toBeVisible();
   await page.getByRole('button', { name: /Upgrade to Premium/i }).click();
-  // After upgrade the button flips to downgrade.
   await expect(page.getByRole('button', { name: /Switch to Free/i })).toBeVisible({ timeout: 10_000 });
-
-  // Back on the dashboard Day 2 is unlocked (no lock icon) + unlimited shown.
   await page.getByRole('link', { name: 'Plan', exact: true }).click();
   await page.waitForURL(/\/dashboard$/);
   await expect(page.getByRole('button', { name: /🔒 Day 2/ })).toHaveCount(0);

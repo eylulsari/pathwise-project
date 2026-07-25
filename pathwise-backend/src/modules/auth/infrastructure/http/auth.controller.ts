@@ -21,8 +21,11 @@ import { AuthUser } from '../../domain/auth-user';
 
 const REFRESH_COOKIE = 'pw_refresh';
 
-// Auth endpoints are the prime brute-force target — 10 requests / minute / IP.
-@Throttle({ default: { ttl: 60000, limit: 10 } })
+// Auth endpoints are the prime brute-force target. Limit is env-configurable
+// (default 10/min/IP for prod; raised in dev/CI where E2E registers many users).
+const AUTH_THROTTLE_LIMIT = Number(process.env.AUTH_THROTTLE_LIMIT ?? 10);
+
+@Throttle({ default: { ttl: 60000, limit: AUTH_THROTTLE_LIMIT } })
 @Controller('auth')
 export class AuthController {
   constructor(

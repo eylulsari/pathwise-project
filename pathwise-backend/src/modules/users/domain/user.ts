@@ -2,7 +2,7 @@
  * Domain model — framework-free. Knows nothing about TypeORM or NestJS.
  * The persistence layer maps this to/from the ORM entity.
  */
-export type SubscriptionTier = 'free' | 'premium';
+export type SubscriptionTier = 'free' | 'premium' | 'trial';
 
 export interface UserProps {
   id: string;

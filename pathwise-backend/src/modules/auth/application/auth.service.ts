@@ -46,13 +46,17 @@ export class AuthService {
     if (existing) throw new ConflictException('Email is already registered');
 
     const passwordHash = await bcrypt.hash(dto.password, AuthService.SALT_ROUNDS);
-    const user = await this.users.create({
+    const created = await this.users.create({
       name: dto.name,
       email: dto.email,
       passwordHash,
       nationality: dto.nationality ?? null,
       age: dto.age ?? null,
     });
+
+    // A6 — every new account gets a 7-day Premium trial.
+    await this.users.startTrial(created.id, 7);
+    const user = await this.users.findById(created.id);
 
     return this.buildAuthResponse(user);
   }

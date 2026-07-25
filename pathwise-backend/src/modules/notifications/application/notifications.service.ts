@@ -47,6 +47,11 @@ export class NotificationsService {
     return this.notifications.count({ where: { userId, read: false } });
   }
 
+  /** Whether the user already has a notification of this type (dedupe). */
+  async hasType(userId: string, type: NotificationType): Promise<boolean> {
+    return (await this.notifications.count({ where: { userId, type } })) > 0;
+  }
+
   async markRead(userId: string, id: string) {
     await this.notifications.update({ id, userId }, { read: true });
   }

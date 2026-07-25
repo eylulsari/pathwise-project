@@ -129,6 +129,7 @@ export function ToursPanel({
               href={detail.affiliateUrl}
               target="_blank"
               rel="noopener noreferrer sponsored"
+              onClick={() => api.recordAffiliateClick(detail.id, detail.source)}
               className="mt-2 block w-full rounded-xl border border-emerald/40 py-3 text-center text-sm font-semibold text-emerald hover:bg-emerald/10"
             >
               {t('tours.reserve')}

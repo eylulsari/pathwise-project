@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Place } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 import { useT } from '../i18n';
 
 /**
@@ -71,7 +72,7 @@ export function LocalStoryModal({
           </p>
           {!isPremium && (
             <button
-              onClick={() => navigate('/premium')}
+              onClick={() => { api.recordPaywall('story'); navigate('/premium'); }}
               className="mt-1 text-xs font-semibold text-violet hover:text-fuchsia"
             >
               {t('premium.unlock')}
@@ -89,7 +90,7 @@ export function LocalStoryModal({
           <section className="mt-4 rounded-xl border border-night/10 bg-night/5 p-4 text-center">
             <p className="text-sm font-semibold text-night">🔒 {t('premium.fullAudio')}</p>
             <p className="mt-1 text-xs text-night/60">{t('premium.shortOnly')}</p>
-            <button onClick={() => navigate('/premium')} className="btn-accent mt-3 px-4 py-2 text-xs">
+            <button onClick={() => { api.recordPaywall('story'); navigate('/premium'); }} className="btn-accent mt-3 px-4 py-2 text-xs">
               {t('premium.upgrade')}
             </button>
           </section>

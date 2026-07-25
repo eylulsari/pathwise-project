@@ -8,6 +8,7 @@ import {
 import { Request } from 'express';
 import { UsersService } from '../../modules/users/application/users.service';
 import { AuthUser } from '../../modules/auth/domain/auth-user';
+import { RedisService } from '../../infrastructure/redis/redis.service';
 
 /**
  * Gates premium-only endpoints. Must run AFTER JwtAuthGuard (which sets
@@ -16,7 +17,10 @@ import { AuthUser } from '../../modules/auth/domain/auth-user';
  */
 @Injectable()
 export class PremiumGuard implements CanActivate {
-  constructor(private readonly users: UsersService) {}
+  constructor(
+    private readonly users: UsersService,
+    private readonly redis: RedisService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request & { user?: AuthUser }>();
@@ -25,6 +29,8 @@ export class PremiumGuard implements CanActivate {
     }
     const user = await this.users.findById(req.user.id);
     if (!user.isPremium) {
+      // A6 — count the paywall hit (this guard fronts the full audio guide).
+      await this.redis.increment('paywall:audio', 90 * 86400);
       throw new HttpException(
         { statusCode: HttpStatus.PAYMENT_REQUIRED, message: 'Premium feature', error: 'PaymentRequired' },
         HttpStatus.PAYMENT_REQUIRED,
