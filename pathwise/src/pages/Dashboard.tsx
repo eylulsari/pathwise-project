@@ -36,6 +36,7 @@ import { SurvivalWidget } from '../components/SurvivalWidget';
 import { TravelVibeQuiz, type QuizResult } from '../components/controls/TravelVibeQuiz';
 import { MustVisitList } from '../components/controls/MustVisitList';
 import { ReservationModal } from '../components/controls/ReservationModal';
+import { JournalModal } from '../components/JournalModal';
 import { ToursPanel } from '../components/tours/ToursPanel';
 import { AiAssistant } from '../components/ai/AiAssistant';
 import { SplitBill } from '../components/SplitBill';
@@ -94,6 +95,7 @@ export default function Dashboard() {
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [routeGeometry, setRouteGeometry] = useState<[number, number][] | null>(null);
   const [reservingPlace, setReservingPlace] = useState<Place | null>(null);
+  const [journalPlace, setJournalPlace] = useState<Place | null>(null);
   const [suggestion, setSuggestion] = useState<NearbySuggestion | null>(null);
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
 
@@ -494,6 +496,7 @@ export default function Dashboard() {
               startPoint={startPoint}
               reordering={reordering}
               onReserve={setReservingPlace}
+              onJournal={setJournalPlace}
               suggestion={suggestion}
               onAddSuggestion={addSuggestion}
               onDismissSuggestion={dismissSuggestion}
@@ -530,6 +533,9 @@ export default function Dashboard() {
           onRemove={() => removeReservation(reservingPlace.placeId)}
           onClose={() => setReservingPlace(null)}
         />
+      )}
+      {journalPlace && (
+        <JournalModal place={journalPlace} onClose={() => setJournalPlace(null)} />
       )}
 
       {/* Floating AI assistant */}

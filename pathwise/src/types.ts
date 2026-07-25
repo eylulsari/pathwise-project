@@ -85,6 +85,24 @@ export interface NearbySuggestion {
   walkMinutes: number;
 }
 
+// ── Trip Journal (B1) ──────────────────────────────────────────────
+export interface JournalEntry {
+  id: string;
+  placeId: string;
+  photoUrl: string | null;
+  note: string | null;
+  rating: number; // 1–5
+  createdAt: string;
+}
+
+export interface JournalSummary {
+  entryCount: number;
+  photoCount: number;
+  noteCount: number;
+  avgRating: number;
+  categoryRatings: Partial<Record<Interest, number>>;
+}
+
 export interface Itinerary {
   hub: Hub;
   mode: RouteMode;

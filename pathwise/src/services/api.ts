@@ -19,6 +19,8 @@ import type {
   RebuildRouteRequest,
   Hub,
   Itinerary,
+  JournalEntry,
+  JournalSummary,
   NearbySuggestion,
   PastTrip,
   Place,
@@ -222,6 +224,27 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(req),
     });
+  },
+
+  // ═════════════════════════════════════════════════════════════════
+  // TRIP JOURNAL (B1) — photo/note/rating per visited place.
+  // ═════════════════════════════════════════════════════════════════
+  async upsertJournal(input: {
+    placeId: string;
+    rating: number;
+    photoUrl?: string;
+    note?: string;
+  }): Promise<JournalEntry> {
+    return http<JournalEntry>('/journal', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+  async getJournal(): Promise<JournalEntry[]> {
+    return http<JournalEntry[]>('/journal');
+  },
+  async getJournalSummary(): Promise<JournalSummary> {
+    return http<JournalSummary>('/journal/summary');
   },
 
   /** "Add this too" — one nearby unselected place in the same hub. */

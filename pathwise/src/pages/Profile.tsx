@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Badge, Hub, ProfileStats } from '../types';
+import type { Badge, Hub, JournalSummary, ProfileStats } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { AppHeader } from '../components/AppHeader';
@@ -29,10 +29,12 @@ export default function Profile() {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [trips, setTrips] = useState<TripCard[]>([]);
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [journal, setJournal] = useState<JournalSummary | null>(null);
 
   useEffect(() => {
     api.getBadges().then(setBadges);
     api.getProfileStats().then(setStats);
+    api.getJournalSummary().then(setJournal).catch(() => {});
     // Prefer the user's real saved trips; fall back to demo trips if none yet.
     api
       .getTrips()
@@ -104,6 +106,14 @@ export default function Profile() {
 
         {tab === 'trips' && (
           <div className="space-y-3">
+            {journal && journal.entryCount > 0 && (
+              <div className="rounded-2xl border border-emerald/30 bg-emerald/5 p-4 text-sm">
+                <span className="font-display font-bold text-cream">📸 {t('journal.summary')}</span>
+                <span className="ml-2 text-cream/70">
+                  {journal.photoCount} {t('journal.photos')}, {journal.noteCount} {t('journal.notes')} · {t('journal.avg')} {journal.avgRating}★
+                </span>
+              </div>
+            )}
             {trips.length === 0 && (
               <p className="rounded-xl border border-white/10 bg-night-800 p-4 text-sm text-cream/50">
                 {t('profile.noTrips')}

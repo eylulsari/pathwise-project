@@ -27,6 +27,7 @@ export function TodayPath({
   startPoint,
   reordering,
   onReserve,
+  onJournal,
   suggestion,
   onAddSuggestion,
   onDismissSuggestion,
@@ -37,6 +38,7 @@ export function TodayPath({
   startPoint?: StartPoint | null;
   reordering?: boolean;
   onReserve?: (place: Place) => void;
+  onJournal?: (place: Place) => void;
   suggestion?: NearbySuggestion | null;
   onAddSuggestion?: () => void;
   onDismissSuggestion?: () => void;
@@ -84,6 +86,7 @@ export function TodayPath({
               onSelect={() => stop.place && onSelectPlace(stop.place.placeId)}
               onStory={() => stop.place && setStoryPlace(stop.place)}
               onReserve={onReserve}
+              onJournal={onJournal}
             />
           ))}
         </ol>
@@ -121,12 +124,14 @@ function StopRow({
   onSelect,
   onStory,
   onReserve,
+  onJournal,
 }: {
   stop: ItineraryStop;
   active: boolean;
   onSelect: () => void;
   onStory: () => void;
   onReserve?: (place: Place) => void;
+  onJournal?: (place: Place) => void;
 }) {
   const { t } = useT();
 
@@ -145,7 +150,7 @@ function StopRow({
   }
 
   const place = stop.place!;
-  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} />;
+  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} onJournal={onJournal} />;
 }
 
 function SortableStopRow({
@@ -155,6 +160,7 @@ function SortableStopRow({
   onSelect,
   onStory,
   onReserve,
+  onJournal,
 }: {
   stop: ItineraryStop;
   place: Place;
@@ -162,6 +168,7 @@ function SortableStopRow({
   onSelect: () => void;
   onStory: () => void;
   onReserve?: (place: Place) => void;
+  onJournal?: (place: Place) => void;
 }) {
   const { t } = useT();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -241,6 +248,17 @@ function SortableStopRow({
               className="text-xs font-semibold text-coral hover:text-fuchsia"
             >
               {stop.reservation ? '📎 ' + stop.reservation.time : t('reservation.add')}
+            </button>
+          )}
+          {onJournal && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onJournal(place);
+              }}
+              className="text-xs font-semibold text-emerald hover:text-fuchsia"
+            >
+              {t('journal.button')}
             </button>
           )}
         </div>
