@@ -2,6 +2,8 @@
  * Domain model — framework-free. Knows nothing about TypeORM or NestJS.
  * The persistence layer maps this to/from the ORM entity.
  */
+export type SubscriptionTier = 'free' | 'premium';
+
 export interface UserProps {
   id: string;
   name: string;
@@ -11,6 +13,7 @@ export interface UserProps {
   age?: number | null;
   travelStyles: string[];
   bio?: string | null;
+  subscriptionTier?: SubscriptionTier;
   createdAt: Date;
 }
 
@@ -23,6 +26,7 @@ export class User {
   age: number | null;
   travelStyles: string[];
   bio: string | null;
+  subscriptionTier: SubscriptionTier;
   readonly createdAt: Date;
 
   constructor(props: UserProps) {
@@ -34,7 +38,12 @@ export class User {
     this.age = props.age ?? null;
     this.travelStyles = props.travelStyles ?? [];
     this.bio = props.bio ?? null;
+    this.subscriptionTier = props.subscriptionTier ?? 'free';
     this.createdAt = props.createdAt;
+  }
+
+  get isPremium(): boolean {
+    return this.subscriptionTier === 'premium';
   }
 
   /** Public-safe view — never leaks the password hash. */
@@ -47,6 +56,7 @@ export class User {
       age: this.age,
       travelStyles: this.travelStyles,
       bio: this.bio,
+      subscriptionTier: this.subscriptionTier,
       createdAt: this.createdAt,
     };
   }

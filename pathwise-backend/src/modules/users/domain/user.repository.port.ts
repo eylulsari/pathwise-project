@@ -1,4 +1,4 @@
-import { User } from './user';
+import { SubscriptionTier, User } from './user';
 
 /** DI token for the repository port (interfaces vanish at runtime). */
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY');
@@ -22,4 +22,5 @@ export interface UserRepositoryPort {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   save(user: User): Promise<User>;
+  setSubscriptionTier(id: string, tier: SubscriptionTier): Promise<User>;
 }

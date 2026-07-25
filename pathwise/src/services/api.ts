@@ -26,6 +26,7 @@ import type {
   SavedTrip,
   Tour,
   Traveler,
+  UsageInfo,
 } from '../types';
 import { PLACES, PLACES_BY_ID } from '../hubData';
 import {
@@ -161,6 +162,23 @@ export const api = {
 
   async me(): Promise<AuthUser> {
     return http<AuthUser>('/users/me');
+  },
+
+  // ═════════════════════════════════════════════════════════════════
+  // PREMIUM — feature-flag tier (demo; real payment is a TODO).
+  // ═════════════════════════════════════════════════════════════════
+  async setSubscription(tier: 'free' | 'premium'): Promise<AuthUser> {
+    return http<AuthUser>('/premium/subscription', {
+      method: 'POST',
+      body: JSON.stringify({ tier }),
+    });
+  },
+  async getUsage(): Promise<UsageInfo> {
+    return http<UsageInfo>('/premium/usage');
+  },
+  /** Full audio guide — premium only (throws on 402 for free users). */
+  async getFullAudioGuide(placeId: string): Promise<{ durationSeconds: number; transcript: string }> {
+    return http(`/premium/audio-guide/${placeId}`);
   },
 
   async logout(): Promise<void> {

@@ -26,4 +26,17 @@ export class RedisService {
   async exists(key: string): Promise<boolean> {
     return (await this.client.exists(key)) === 1;
   }
+
+  /** Atomically increment a counter, setting a TTL on first creation. */
+  async increment(key: string, ttlSeconds: number): Promise<number> {
+    const value = await this.client.incr(key);
+    if (value === 1) await this.client.expire(key, ttlSeconds);
+    return value;
+  }
+
+  /** Read a counter's current value (0 if unset). */
+  async getCount(key: string): Promise<number> {
+    const raw = await this.client.get(key);
+    return raw ? Number(raw) : 0;
+  }
 }

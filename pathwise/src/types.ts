@@ -155,6 +155,8 @@ export interface Origin {
 }
 
 // ── Auth / user ────────────────────────────────────────────────────
+export type SubscriptionTier = 'free' | 'premium';
+
 export interface AuthUser {
   id: string;
   name: string;
@@ -163,7 +165,14 @@ export interface AuthUser {
   age?: number | null;
   travelStyles: string[];
   bio?: string | null;
+  subscriptionTier: SubscriptionTier;
   createdAt: string;
+}
+
+export interface UsageInfo {
+  tier: SubscriptionTier;
+  optimizeUsed: number;
+  optimizeLimit: number | null; // null = unlimited (premium)
 }
 
 export interface AuthResponse {

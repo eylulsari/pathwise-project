@@ -9,11 +9,13 @@ export function DayTab({
   active,
   onClick,
   label,
+  locked = false,
 }: {
   index: number;
   active: boolean;
   onClick: () => void;
   label: string;
+  locked?: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `day-${index}` });
 
@@ -21,15 +23,18 @@ export function DayTab({
     <button
       ref={setNodeRef}
       onClick={onClick}
+      title={locked ? 'Premium' : undefined}
       className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
         isOver
           ? 'bg-emerald text-white ring-2 ring-emerald/50'
           : active
             ? 'bg-accent-gradient text-white'
-            : 'text-cream/60 hover:text-cream'
+            : locked
+              ? 'text-cream/30 hover:text-cream/50'
+              : 'text-cream/60 hover:text-cream'
       }`}
     >
-      {label}
+      {locked ? `🔒 ${label}` : label}
     </button>
   );
 }

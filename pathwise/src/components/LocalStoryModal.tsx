@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Place } from '../types';
+import { useAuth } from '../context/AuthContext';
+import { useT } from '../i18n';
 
 /**
- * "Read Local Story & Tips" modal. Shows historical context, a photo-angle
- * suggestion and a SIMULATED 15-second audio guide — there is no real audio
- * file; a progress bar + transcript advance on a timer to fake the preview.
+ * "Read Local Story & Tips" modal. Free users get a short summary + a locked
+ * audio guide; premium users get the full story and the full audio guide.
+ * (The audio is still a SIMULATED progress-bar preview — no real file.)
  */
 export function LocalStoryModal({
   place,
@@ -13,7 +16,11 @@ export function LocalStoryModal({
   place: Place;
   onClose: () => void;
 }) {
+  const { isPremium } = useAuth();
+  const { t } = useT();
+  const navigate = useNavigate();
   const story = buildStory(place);
+  const shortSummary = story.history.split('. ')[0] + '.';
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0); // 0–100 over 15s
   const timer = useRef<number | null>(null);
@@ -59,7 +66,17 @@ export function LocalStoryModal({
 
         <section className="mt-4">
           <h4 className="text-sm font-bold text-violet-deep">📖 The story</h4>
-          <p className="mt-1 text-sm leading-relaxed text-night/80">{story.history}</p>
+          <p className="mt-1 text-sm leading-relaxed text-night/80">
+            {isPremium ? story.history : shortSummary}
+          </p>
+          {!isPremium && (
+            <button
+              onClick={() => navigate('/premium')}
+              className="mt-1 text-xs font-semibold text-violet hover:text-fuchsia"
+            >
+              {t('premium.unlock')}
+            </button>
+          )}
         </section>
 
         <section className="mt-4 rounded-xl bg-violet/10 p-3">
@@ -67,7 +84,16 @@ export function LocalStoryModal({
           <p className="mt-1 text-sm text-night/80">{story.photoTip}</p>
         </section>
 
-        {/* Simulated 15-second audio guide */}
+        {/* Audio guide — full for premium, locked preview for free */}
+        {!isPremium ? (
+          <section className="mt-4 rounded-xl border border-night/10 bg-night/5 p-4 text-center">
+            <p className="text-sm font-semibold text-night">🔒 {t('premium.fullAudio')}</p>
+            <p className="mt-1 text-xs text-night/60">{t('premium.shortOnly')}</p>
+            <button onClick={() => navigate('/premium')} className="btn-accent mt-3 px-4 py-2 text-xs">
+              {t('premium.upgrade')}
+            </button>
+          </section>
+        ) : (
         <section className="mt-4 rounded-xl border border-night/10 p-3">
           <div className="flex items-center gap-3">
             <button
@@ -98,9 +124,10 @@ export function LocalStoryModal({
             {playing && <span className="animate-pulse">▍</span>}
           </p>
           <p className="mt-1 text-[10px] uppercase tracking-wide text-night/30">
-            Simulated preview — no audio file is played
+            💎 Full guide — simulated preview (no audio file is played)
           </p>
         </section>
+        )}
       </div>
     </div>
   );

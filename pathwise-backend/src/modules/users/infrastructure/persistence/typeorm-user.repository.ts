@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../domain/user';
+import { SubscriptionTier, User } from '../../domain/user';
 import {
   CreateUserData,
   UserRepositoryPort,
@@ -29,6 +29,7 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
       age: row.age,
       travelStyles: row.travelStyles ?? [],
       bio: row.bio,
+      subscriptionTier: row.subscriptionTier ?? 'free',
       createdAt: row.createdAt,
     });
   }
@@ -67,7 +68,14 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
       age: user.age,
       travelStyles: user.travelStyles,
       bio: user.bio,
+      subscriptionTier: user.subscriptionTier,
     });
     return this.toDomain(saved as UserOrmEntity);
+  }
+
+  async setSubscriptionTier(id: string, tier: SubscriptionTier): Promise<User> {
+    await this.repo.update({ id }, { subscriptionTier: tier });
+    const row = await this.repo.findOne({ where: { id } });
+    return this.toDomain(row as UserOrmEntity);
   }
 }

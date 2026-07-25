@@ -37,12 +37,14 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     const hub = input.hub ?? 'kadikoy-moda';
 
     // 1 — candidate pool: hub places + must-visits from anywhere.
+    // Reserved stops are treated like must-visits: a booking means you're going,
+    // so they're force-included and never dropped for budget/pace.
+    const reservedIds = (input.reservations ?? []).map((r) => r.placeId);
+    const forcedIds = [...input.mustVisitIds, ...reservedIds];
     const hubPlaces = await this.places.findByHub(hub);
-    const mustVisits = input.mustVisitIds.length
-      ? await this.places.findByIds(input.mustVisitIds)
-      : [];
-    const pool = this.dedupe([...mustVisits, ...hubPlaces]);
-    const mustSet = new Set(input.mustVisitIds);
+    const forced = forcedIds.length ? await this.places.findByIds(forcedIds) : [];
+    const pool = this.dedupe([...forced, ...hubPlaces]);
+    const mustSet = new Set(forcedIds);
 
     // 2 — score and sort (must-visits always float to the top).
     const scored = pool

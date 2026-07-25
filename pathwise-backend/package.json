@@ -12,7 +12,9 @@
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "migration:run": "npm run build && typeorm migration:run -d dist/infrastructure/database/data-source.js",
+    "migration:revert": "npm run build && typeorm migration:revert -d dist/infrastructure/database/data-source.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.4",

@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { User } from '../domain/user';
+import { SubscriptionTier, User } from '../domain/user';
 import {
   CreateUserData,
   USER_REPOSITORY,
@@ -34,6 +34,16 @@ export class UsersService {
   /** Public profile view for `GET /users/me`. */
   async getPublicProfile(id: string) {
     const user = await this.findById(id);
+    return user.toPublic();
+  }
+
+  /**
+   * Set the subscription tier. This is the seam a real payment webhook
+   * (Stripe/İyzico) would call after a successful charge.
+   * TODO: gate behind a verified payment; for now it's a demo toggle.
+   */
+  async setSubscriptionTier(id: string, tier: SubscriptionTier) {
+    const user = await this.users.setSubscriptionTier(id, tier);
     return user.toPublic();
   }
 }

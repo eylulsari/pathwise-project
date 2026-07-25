@@ -6,7 +6,7 @@ import { useT } from '../i18n';
 
 /** Top navigation shared by Dashboard, Social and Profile. */
 export function AppHeader() {
-  const { user, logout } = useAuth();
+  const { user, logout, isPremium } = useAuth();
   const { t } = useT();
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -25,6 +25,16 @@ export function AppHeader() {
           <NavLink to="/dashboard" className={linkClass}>{t('nav.plan')}</NavLink>
           <NavLink to="/social" className={linkClass}>{t('nav.social')}</NavLink>
           <NavLink to="/profile" className={linkClass}>{t('nav.profile')}</NavLink>
+          <NavLink
+            to="/premium"
+            className={({ isActive }) =>
+              `rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+                isActive ? 'bg-violet/20 text-cream' : 'text-violet hover:text-fuchsia'
+              }`
+            }
+          >
+            {isPremium ? '💎 Premium' : t('premium.nav')}
+          </NavLink>
         </nav>
       </div>
 

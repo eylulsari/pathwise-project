@@ -1,5 +1,13 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ItineraryService } from '../../application/itinerary.service';
+import { OptimizeLimitGuard } from '../../../../common/guards/optimize-limit.guard';
 import {
   GenerateRouteDto,
   RebuildRouteDto,
@@ -14,6 +22,7 @@ export class ItineraryController {
    * POST /api/itinerary/generate
    * Public (no auth) so the landing/quiz can preview a route before sign-up.
    */
+  @UseGuards(OptimizeLimitGuard)
   @Post('generate')
   @HttpCode(HttpStatus.OK)
   generate(@Body() dto: GenerateRouteDto) {

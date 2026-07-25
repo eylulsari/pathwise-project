@@ -20,6 +20,8 @@ interface AuthContextValue {
   }) => Promise<void>;
   login: (input: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  isPremium: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -65,8 +67,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const refreshUser: AuthContextValue['refreshUser'] = async () => {
+    try {
+      setUser(await api.me());
+    } catch {
+      /* ignore — keep current user */
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        register,
+        login,
+        logout,
+        refreshUser,
+        isPremium: user?.subscriptionTier === 'premium',
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

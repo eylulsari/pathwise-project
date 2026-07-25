@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DndContext,
   PointerSensor,
@@ -19,7 +19,11 @@ import type {
   Reservation,
   StartPoint,
 } from '../types';
+import { useNavigate } from 'react-router-dom';
+import type { UsageInfo } from '../types';
 import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { useT } from '../i18n';
 import { DayTab } from '../components/dnd/DayTab';
 import { AppHeader } from '../components/AppHeader';
 import { MapView } from '../components/map/MapView';
@@ -36,7 +40,6 @@ import { SplitBill } from '../components/SplitBill';
 import { ExportRoute } from '../components/ExportRoute';
 import { OfflineToggle } from '../components/OfflineToggle';
 import { HUB_LABEL } from '../utils/format';
-import { useT } from '../i18n';
 
 interface DayState {
   config: RouteConfig;
@@ -66,6 +69,10 @@ const INITIAL_DAYS: DayState[] = [
 
 export default function Dashboard() {
   const { t } = useT();
+  const { isPremium } = useAuth();
+  const navigate = useNavigate();
+  const [usage, setUsage] = useState<UsageInfo | null>(null);
+  const [optimizeBlocked, setOptimizeBlocked] = useState(false);
   const [days, setDays] = useState<DayState[]>(INITIAL_DAYS);
   const [activeDay, setActiveDay] = useState(0);
   const [startPoint, setStartPoint] = useState<StartPoint | null>(null);
@@ -101,12 +108,19 @@ export default function Dashboard() {
         const itinerary = await api.generateRoute(req);
         patchDay(index, { itinerary, loading: false });
         setSelectedPlaceId(null);
+        setOptimizeBlocked(false);
+        api.getUsage().then(setUsage).catch(() => {});
         return itinerary;
       } catch (err) {
-        patchDay(index, {
-          loading: false,
-          error: err instanceof Error ? err.message : 'Failed to generate route',
-        });
+        const msg = err instanceof Error ? err.message : 'Failed to generate route';
+        // Free daily optimize limit hit → prompt upgrade instead of erroring.
+        if (/limited to|Premium/i.test(msg)) {
+          setOptimizeBlocked(true);
+          patchDay(index, { loading: false });
+          api.getUsage().then(setUsage).catch(() => {});
+          return null;
+        }
+        patchDay(index, { loading: false, error: msg });
         return null;
       }
     },
@@ -186,9 +200,14 @@ export default function Dashboard() {
     await rebuildDay(activeDay, arrayMove(ids, oldIndex, newIndex));
   }
 
-  // Generate the first day's default plan on mount.
+  // Generate the first day's default plan on mount + load premium usage.
+  // Guarded so React 18 StrictMode's double-invoke doesn't burn two optimizes.
+  const didInit = useRef(false);
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
     generateFor(0, buildRequest(INITIAL_DAYS[0]));
+    api.getUsage().then(setUsage).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -326,6 +345,11 @@ export default function Dashboard() {
   }
 
   function switchDay(index: number) {
+    // Free plan: only Day 1 is active — the rest lead to the Premium page.
+    if (!isPremium && index > 0) {
+      navigate('/premium');
+      return;
+    }
     setActiveDay(index);
     setSelectedPlaceId(null);
     if (!days[index].itinerary && !days[index].loading) {
@@ -342,6 +366,12 @@ export default function Dashboard() {
           {t('dash.offlineBanner')}
         </div>
       )}
+      {optimizeBlocked && (
+        <div className="flex items-center justify-center gap-2 bg-violet/20 px-4 py-1.5 text-center text-xs font-semibold text-cream">
+          🔒 {usage?.optimizeLimit ?? 3}/{usage?.optimizeLimit ?? 3} — {t('premium.optimizeLeft')}: 0
+          <button onClick={() => navigate('/premium')} className="underline">{t('premium.unlock')}</button>
+        </div>
+      )}
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
       {/* Day tabs + action bar */}
@@ -353,9 +383,17 @@ export default function Dashboard() {
             active={activeDay === i}
             onClick={() => switchDay(i)}
             label={`${t('dash.day')} ${i + 1}`}
+            locked={!isPremium && i > 0}
           />
         ))}
         <div className="ml-auto flex flex-wrap items-center gap-2">
+          {usage && (
+            <span className="rounded-lg border border-white/10 px-2.5 py-1 text-xs text-cream/60">
+              {usage.optimizeLimit === null
+                ? `💎 ${t('premium.unlimited')}`
+                : `⚡ ${Math.max(0, usage.optimizeLimit - usage.optimizeUsed)} ${t('premium.optimizeLeft')}`}
+            </span>
+          )}
           <button
             onClick={saveCurrentPlan}
             disabled={!day.itinerary || saveState === 'saving'}

@@ -37,6 +37,10 @@ export class UserOrmEntity {
   @Column({ type: 'text', nullable: true })
   bio: string | null;
 
+  // Feature-flag tier. Migration: AddSubscriptionTierToUsers (dev auto-syncs).
+  @Column({ type: 'varchar', length: 16, default: 'free' })
+  subscriptionTier: 'free' | 'premium';
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
