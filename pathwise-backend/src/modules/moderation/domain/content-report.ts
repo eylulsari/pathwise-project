@@ -1,4 +1,4 @@
-export type ReportedContentType = 'forum' | 'checkin' | 'route';
+export type ReportedContentType = 'forum' | 'checkin' | 'route' | 'stale_info';
 export type ReportStatus = 'open' | 'reviewed';
 
 /** A user-filed report about a piece of social content. Framework-free. */

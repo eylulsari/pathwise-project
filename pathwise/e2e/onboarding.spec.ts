@@ -317,6 +317,29 @@ test('search bar finds a place and adds it to Today’s Path', async ({ page }) 
   await expect(page.locator('ol li h3', { hasText: 'Hagia Sophia' })).toBeVisible({ timeout: 10_000 });
 });
 
+test('can leave a community review from a stop’s story modal', async ({ page }) => {
+  const email = `e2e_rev_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('Review Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+
+  // Open a stop's story modal → reviews section.
+  await page.getByRole('button', { name: /Read Local Story/i }).first().click();
+  await expect(page.getByRole('heading', { name: /Reviews/i })).toBeVisible();
+  await expect(page.getByText(/Google:/)).toBeVisible();
+
+  // Post a review → it appears in the list.
+  const text = `Loved it ${Date.now()}`;
+  await page.getByPlaceholder(/Share your experience/i).fill(text);
+  await page.getByRole('button', { name: /Post review/i }).click();
+  await expect(page.getByText(text)).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(/Pathwise community/i)).toBeVisible();
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).

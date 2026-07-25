@@ -138,6 +138,16 @@ export const translations = {
       tours: 'Tours & activities',
     },
     weather: { crowds: 'Crowds' },
+    reviews: {
+      title: 'Reviews',
+      community: 'Pathwise community',
+      placeholder: 'Share your experience…',
+      submit: 'Post review',
+      helpful: 'Helpful',
+      empty: 'No community reviews yet — be the first.',
+      stale: 'Report outdated info',
+      reported: 'Reported',
+    },
     survival: { title: 'City Survival & Etiquette' },
     reservation: {
       add: '📎 Reserve',
@@ -457,6 +467,16 @@ export const translations = {
       tours: 'Turlar & aktiviteler',
     },
     weather: { crowds: 'Kalabalık' },
+    reviews: {
+      title: 'Yorumlar',
+      community: 'Pathwise topluluğu',
+      placeholder: 'Deneyimini paylaş…',
+      submit: 'Yorum gönder',
+      helpful: 'Faydalı',
+      empty: 'Henüz topluluk yorumu yok — ilk sen ol.',
+      stale: 'Güncel değil bildir',
+      reported: 'Bildirildi',
+    },
     survival: { title: 'Şehirde Hayatta Kalma & Adap' },
     reservation: {
       add: '📎 Rezervasyon',

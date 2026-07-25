@@ -1,8 +1,9 @@
 import { IsIn, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateReportDto {
-  @IsIn(['forum', 'checkin', 'route'])
-  contentType: 'forum' | 'checkin' | 'route';
+  // 'stale_info' → outdated place info reported from the review UI (Phase 3).
+  @IsIn(['forum', 'checkin', 'route', 'stale_info'])
+  contentType: 'forum' | 'checkin' | 'route' | 'stale_info';
 
   @IsString()
   @MaxLength(120)

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Place } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { ReviewsSection } from './ReviewsSection';
 import { useT } from '../i18n';
 
 /**
@@ -129,6 +130,9 @@ export function LocalStoryModal({
           </p>
         </section>
         )}
+
+        {/* Community reviews — available to everyone (Phase 3) */}
+        <ReviewsSection place={place} />
       </div>
     </div>
   );

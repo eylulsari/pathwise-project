@@ -78,6 +78,21 @@ export interface ItineraryStop {
   reservation?: { time: string; confirmationCode?: string; note?: string };
 }
 
+// ── Reviews (Phase 3) ──────────────────────────────────────────────
+export interface Review {
+  id: string;
+  authorName: string;
+  rating: number;
+  comment: string;
+  helpfulCount: number;
+  createdAt: string;
+}
+export interface ReviewsResponse {
+  average: number;
+  count: number;
+  reviews: Review[];
+}
+
 export interface NearbySuggestion {
   place: Place;
   nearPlaceName: string;

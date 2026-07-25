@@ -244,7 +244,7 @@ export const api = {
   // MODERATION — report social content (B7).
   // ═════════════════════════════════════════════════════════════════
   async reportContent(
-    contentType: 'forum' | 'checkin' | 'route',
+    contentType: 'forum' | 'checkin' | 'route' | 'stale_info',
     contentId: string,
     reason: string,
   ): Promise<void> {
@@ -346,6 +346,17 @@ export const api = {
   async searchPlaces(q: string): Promise<Place[]> {
     if (!q.trim()) return [];
     return http<Place[]>(`/places/search?q=${encodeURIComponent(q)}`);
+  },
+
+  // ── Reviews (Phase 3) ──
+  async getReviews(placeId: string): Promise<import('../types').ReviewsResponse> {
+    return http(`/places/${placeId}/reviews`);
+  },
+  async createReview(placeId: string, rating: number, comment: string): Promise<import('../types').ReviewsResponse> {
+    return http(`/places/${placeId}/reviews`, { method: 'POST', body: JSON.stringify({ rating, comment }) });
+  },
+  async markReviewHelpful(placeId: string, reviewId: string): Promise<{ id: string; helpfulCount: number }> {
+    return http(`/places/${placeId}/reviews/${reviewId}/helpful`, { method: 'POST' });
   },
 
   // ═════════════════════════════════════════════════════════════════
