@@ -144,6 +144,15 @@ export const translations = {
       sponsored: 'Sponsored',
       reserve: '🎟️ Reserve Spot',
     },
+    report: {
+      report: 'Report',
+      reason: 'Reason',
+      spam: 'Spam',
+      offensive: 'Offensive',
+      misinformation: 'Misinformation',
+      other: 'Other',
+      thanks: 'Reported',
+    },
     quiz: {
       title: 'Travel Vibe Quiz',
       moodQ: "What's your mood?",
@@ -385,6 +394,15 @@ export const translations = {
     tours: {
       sponsored: 'Sponsorlu',
       reserve: '🎟️ Yer Ayırt',
+    },
+    report: {
+      report: 'Bildir',
+      reason: 'Sebep',
+      spam: 'Spam',
+      offensive: 'Uygunsuz',
+      misinformation: 'Yanlış bilgi',
+      other: 'Diğer',
+      thanks: 'Bildirildi',
     },
     quiz: {
       title: 'Seyahat Tarzı Testi',

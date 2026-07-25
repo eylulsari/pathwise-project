@@ -181,6 +181,20 @@ export const api = {
     return http(`/premium/audio-guide/${placeId}`);
   },
 
+  // ═════════════════════════════════════════════════════════════════
+  // MODERATION — report social content (B7).
+  // ═════════════════════════════════════════════════════════════════
+  async reportContent(
+    contentType: 'forum' | 'checkin' | 'route',
+    contentId: string,
+    reason: string,
+  ): Promise<void> {
+    await http('/moderation/reports', {
+      method: 'POST',
+      body: JSON.stringify({ contentType, contentId, reason }),
+    });
+  },
+
   async logout(): Promise<void> {
     try {
       // Server reads the refresh cookie, revokes it and clears it.

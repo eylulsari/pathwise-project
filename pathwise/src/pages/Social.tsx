@@ -9,6 +9,7 @@ import type {
 import { api } from '../services/api';
 import { AppHeader } from '../components/AppHeader';
 import { TravelerModal } from '../components/social/TravelerModal';
+import { ReportButton } from '../components/social/ReportButton';
 import { HUB_LABEL } from '../utils/format';
 import { useT } from '../i18n';
 
@@ -109,11 +110,12 @@ export default function Social() {
                 <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: c.traveler.avatarColor }}>
                   {c.traveler.name.split(' ').map((n) => n[0]).join('')}
                 </div>
-                <div className="text-sm">
+                <div className="flex-1 text-sm">
                   <span className="font-semibold text-cream">{c.traveler.name}</span>
                   <span className="text-cream/50"> · {c.placeName} · {c.minutesAgo === 0 ? 'now' : `${c.minutesAgo}m ago`}</span>
                   <p className="text-cream/80">{c.message}</p>
                 </div>
+                <ReportButton contentType="checkin" contentId={c.id} />
               </div>
             ))}
           </div>
@@ -179,6 +181,7 @@ export default function Social() {
                     {r.liked ? '❤️' : '🤍'} {r.likes}
                   </button>
                   <button className="rounded-lg bg-violet/20 px-3 py-1.5 text-xs font-semibold text-cream">{t('social.clone')}</button>
+                  <span className="ml-auto self-center"><ReportButton contentType="route" contentId={r.id} /></span>
                 </div>
               </div>
             ))}
@@ -222,7 +225,10 @@ function ForumThread({ q }: { q: ForumQuestion }) {
   const [text, setText] = useState('');
   return (
     <div className="rounded-2xl border border-white/10 bg-night-800 p-4">
-      <p className="font-semibold text-cream">{q.question}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="font-semibold text-cream">{q.question}</p>
+        <ReportButton contentType="forum" contentId={q.id} />
+      </div>
       <p className="text-xs text-cream/50">{q.authorName} · {q.minutesAgo}m ago</p>
       <div className="mt-3 space-y-2 border-l-2 border-white/10 pl-3">
         {answers.map((a, i) => (

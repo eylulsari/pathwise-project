@@ -11,6 +11,7 @@ import { PlacesModule } from './modules/places/places.module';
 import { ItineraryModule } from './modules/itinerary/itinerary.module';
 import { TripsModule } from './modules/trips/trips.module';
 import { PremiumModule } from './modules/premium/premium.module';
+import { ModerationModule } from './modules/moderation/moderation.module';
 
 // Feature modules (modular monolith — each is a clean boundary).
 
@@ -28,6 +29,7 @@ import { PremiumModule } from './modules/premium/premium.module';
     ItineraryModule,
     TripsModule,
     PremiumModule,
+    ModerationModule,
   ],
   controllers: [HealthController],
   providers: [
