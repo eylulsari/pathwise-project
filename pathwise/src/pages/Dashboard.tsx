@@ -30,6 +30,7 @@ import { DayTab } from '../components/dnd/DayTab';
 import { SearchBar } from '../components/SearchBar';
 import { AppHeader } from '../components/AppHeader';
 import { MapView } from '../components/map/MapView';
+import { SosButton } from '../components/SosButton';
 import { TodayPath } from '../components/TodayPath';
 import { RouteGenerator, type RouteConfig } from '../components/controls/RouteGenerator';
 import { StartPointSelector } from '../components/controls/StartPointSelector';
@@ -595,7 +596,7 @@ export default function Dashboard() {
         </div>
 
         {/* Right: Map */}
-        <div className="h-[60vh] xl:h-full">
+        <div className="relative h-[60vh] xl:h-full">
           <MapView
             itinerary={day.itinerary}
             selectedPlaceId={selectedPlaceId}
@@ -604,6 +605,7 @@ export default function Dashboard() {
             focusPlace={searchFocus}
             onAddFocus={(id) => { addToPath(id); setSearchFocus(null); }}
           />
+          <SosButton />
         </div>
       </div>
       </DndContext>

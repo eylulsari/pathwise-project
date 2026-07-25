@@ -340,6 +340,35 @@ test('can leave a community review from a stop’s story modal', async ({ page }
   await expect(page.getByText(/Pathwise community/i)).toBeVisible();
 });
 
+test('SOS button confirms, shows emergency info, and shares location', async ({ page, context }) => {
+  // Grant + fix geolocation so the GPS path is deterministic (the component
+  // falls back to Sultanahmet if denied, so this only pins the happy path).
+  await context.grantPermissions(['geolocation']);
+  await context.setGeolocation({ latitude: 41.0086, longitude: 28.9802 });
+
+  const email = `e2e_sos_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('SOS Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+
+  // Press SOS → a confirm step guards against accidental presses.
+  await page.getByRole('button', { name: /🆘 SOS/ }).click();
+  await expect(page.getByRole('heading', { name: /Send emergency alert/i })).toBeVisible();
+
+  // Confirm → emergency line 112 + nearest tourist police appear.
+  await page.getByRole('button', { name: /I need help/i }).click();
+  await expect(page.getByText('112', { exact: false })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(/tourist police/i).first()).toBeVisible();
+
+  // Share location → backend records the alert and confirms.
+  await page.getByRole('button', { name: /Share my location/i }).click();
+  await expect(page.getByText(/Location (shared|recorded)/i)).toBeVisible({ timeout: 10_000 });
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).

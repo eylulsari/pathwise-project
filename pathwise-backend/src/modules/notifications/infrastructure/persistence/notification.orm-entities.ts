@@ -13,6 +13,7 @@ export type NotificationType =
   | 'poll' // B3
   | 'nearby' // social check-in
   | 'budget' // budget tracker
+  | 'sos' // safety / SOS
   | 'welcome';
 
 @Entity({ name: 'notifications' })

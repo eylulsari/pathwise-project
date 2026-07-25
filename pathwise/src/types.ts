@@ -212,7 +212,7 @@ export interface UsageInfo {
 
 // ── Notification Center (B6) ───────────────────────────────────────
 export type NotificationType =
-  | 'reservation' | 'trial' | 'poll' | 'nearby' | 'budget' | 'welcome';
+  | 'reservation' | 'trial' | 'poll' | 'nearby' | 'budget' | 'sos' | 'welcome';
 
 export interface AppNotification {
   id: string;

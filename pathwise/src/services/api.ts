@@ -187,6 +187,11 @@ export const api = {
     await http('/analytics/affiliate-click', { method: 'POST', body: JSON.stringify({ tourId, source }) }).catch(() => {});
   },
 
+  // ── SOS / safety (Phase 2) ──
+  async sendSosAlert(input: { lat: number; lng: number; share: boolean; sharedWithUserIds: string[] }): Promise<{ sharedCount: number }> {
+    return http('/safety/sos-alert', { method: 'POST', body: JSON.stringify(input) });
+  },
+
   // ── Notification Center (B6) ──
   async getNotifications(): Promise<import('../types').AppNotification[]> {
     return http('/notifications');

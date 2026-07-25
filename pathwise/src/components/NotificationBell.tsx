@@ -9,6 +9,7 @@ const ICONS: Record<NotificationType, string> = {
   poll: '🗳️',
   nearby: '📍',
   budget: '💸',
+  sos: '🆘',
   welcome: '👋',
 };
 

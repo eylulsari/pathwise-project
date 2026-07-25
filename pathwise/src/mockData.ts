@@ -216,6 +216,23 @@ export const SURVIVAL_GUIDE: SurvivalCategory[] = [
   },
 ];
 
+// ── Tourist police stations (SOS / safety, Phase 2) ────────────────
+// Shaped like IBB Open Data / Emniyet directory; used to find the nearest one.
+export interface PoliceStation {
+  name: string;
+  lat: number;
+  lng: number;
+  phone: string;
+}
+export const EMERGENCY_NUMBER = '112'; // Turkey single emergency line
+export const POLICE_STATIONS: PoliceStation[] = [
+  { name: 'Sultanahmet Tourist Police', lat: 41.0058, lng: 28.9769, phone: '+90 212 527 4503' },
+  { name: 'Taksim Tourist Police', lat: 41.0369, lng: 28.9857, phone: '+90 212 245 0912' },
+  { name: 'Kadıköy Police Station', lat: 40.9903, lng: 29.0253, phone: '+90 216 349 0837' },
+  { name: 'Beşiktaş Police Station', lat: 41.0426, lng: 29.0056, phone: '+90 212 236 1616' },
+  { name: 'Beyoğlu (Galata) Police', lat: 41.0256, lng: 28.9741, phone: '+90 212 251 8748' },
+];
+
 // ── Must-visit bucket list (subset of places) ──────────────────────
 export const BUCKET_LIST_IDS: string[] = [
   'ChIJ-galata-tower',

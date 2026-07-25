@@ -58,6 +58,10 @@ export default function Social() {
     setConnected((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
+      // Persist connected buddy names so other features (e.g. the SOS
+      // "share my location" alert) can target them without a global store.
+      const names = travelers.filter((t) => next.has(t.id)).map((t) => t.name);
+      localStorage.setItem('pathwise.buddies', JSON.stringify(names));
       return next;
     });
   }

@@ -18,6 +18,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { PollsModule } from './modules/polls/polls.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { SafetyModule } from './modules/safety/safety.module';
 
 // Feature modules (modular monolith — each is a clean boundary).
 
@@ -42,6 +43,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     PollsModule,
     AnalyticsModule,
     ReviewsModule,
+    SafetyModule,
   ],
   controllers: [HealthController],
   providers: [
