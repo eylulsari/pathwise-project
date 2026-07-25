@@ -433,11 +433,21 @@ export const api = {
   },
 
   // ═════════════════════════════════════════════════════════════════
-  // WEATHER — OpenWeatherMap current-conditions
-  //   return http(`https://api.openweathermap.org/data/2.5/weather?q=Istanbul...`);
+  // WEATHER — live OpenWeatherMap via the backend (GET /weather).
+  // Backend caches 15m and falls back to mock if the key/feed is missing,
+  // so a failure here still degrades to the local mock shape.
   // ═════════════════════════════════════════════════════════════════
-  async getWeather() {
-    return delay(CURRENT_WEATHER, 200);
+  async getWeather(): Promise<typeof CURRENT_WEATHER & {
+    feelsLikeC?: number;
+    humidityPct?: number;
+    conditionCode?: number;
+    source?: 'live' | 'cache' | 'fallback';
+  }> {
+    try {
+      return await http('/weather');
+    } catch {
+      return CURRENT_WEATHER; // network down → local mock
+    }
   },
 
   // ═════════════════════════════════════════════════════════════════

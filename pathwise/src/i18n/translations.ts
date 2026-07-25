@@ -137,7 +137,7 @@ export const translations = {
       add: '➕ Add',
       tours: 'Tours & activities',
     },
-    weather: { crowds: 'Crowds' },
+    weather: { crowds: 'Crowds', feelsLike: 'feels' },
     reviews: {
       title: 'Reviews',
       editorial: 'Pathwise editorial',
@@ -491,7 +491,7 @@ export const translations = {
       add: '➕ Ekle',
       tours: 'Turlar & aktiviteler',
     },
-    weather: { crowds: 'Kalabalık' },
+    weather: { crowds: 'Kalabalık', feelsLike: 'hissedilen' },
     reviews: {
       title: 'Yorumlar',
       editorial: 'Pathwise editoryal',

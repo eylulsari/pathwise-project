@@ -65,6 +65,8 @@ services:
       # Dev/CI: raise the auth rate limit so the E2E suite (many sign-ups) isn't
       # throttled. Keep the default (10) in production.
       AUTH_THROTTLE_LIMIT: ${AUTH_THROTTLE_LIMIT:-100}
+      # Optional — weather falls back to mock data if unset. (Never committed.)
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
     ports:
       - "3000:3000"
     volumes:

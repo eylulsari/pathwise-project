@@ -20,6 +20,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { SafetyModule } from './modules/safety/safety.module';
 import { CurrencyModule } from './modules/currency/currency.module';
+import { WeatherModule } from './modules/weather/weather.module';
 
 // Feature modules (modular monolith — each is a clean boundary).
 
@@ -46,6 +47,7 @@ import { CurrencyModule } from './modules/currency/currency.module';
     ReviewsModule,
     SafetyModule,
     CurrencyModule,
+    WeatherModule,
   ],
   controllers: [HealthController],
   providers: [
