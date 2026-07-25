@@ -257,6 +257,23 @@ export interface CommunityRoute {
   tags: Interest[];
 }
 
+// ── Group Poll (B3) ────────────────────────────────────────────────
+export interface PollOption {
+  id: string;
+  placeId: string;
+  label: string;
+  votes: number;
+}
+export interface Poll {
+  id: string;
+  creatorUserId: string;
+  question: string;
+  options: PollOption[];
+  status: 'open' | 'closed';
+  winnerPlaceId: string | null;
+  createdAt: string;
+}
+
 export interface ForumQuestion {
   id: string;
   authorName: string;

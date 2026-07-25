@@ -159,6 +159,16 @@ export const translations = {
       locked: 'Locked',
       lockTip: 'Pin this stop at its time — the rest re-sequences around it',
     },
+    poll: {
+      title: 'Group Polls',
+      start: 'Start Poll',
+      empty: 'No polls yet — start one and let friends vote.',
+      close: 'Close poll',
+      addWinner: '➕ Add winner to path',
+      questionPlaceholder: 'Where should we go?',
+      pickOptions: 'Pick 2–4 options',
+      create: 'Create poll',
+    },
     report: {
       report: 'Report',
       reason: 'Reason',
@@ -461,6 +471,16 @@ export const translations = {
       lock: 'Saati sabitle',
       locked: 'Sabit',
       lockTip: 'Bu durağı saatine sabitle — gerisi etrafında yeniden dizilir',
+    },
+    poll: {
+      title: 'Grup Oylamaları',
+      start: 'Oylama Başlat',
+      empty: 'Henüz oylama yok — bir tane başlat, arkadaşlar oy versin.',
+      close: 'Oylamayı kapat',
+      addWinner: '➕ Kazananı rotaya ekle',
+      questionPlaceholder: 'Nereye gidelim?',
+      pickOptions: '2–4 seçenek seç',
+      create: 'Oylama oluştur',
     },
     report: {
       report: 'Bildir',

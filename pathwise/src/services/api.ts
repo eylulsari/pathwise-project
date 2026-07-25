@@ -206,6 +206,20 @@ export const api = {
     window.dispatchEvent(new Event('pw-notify'));
   },
 
+  // ── Group Poll (B3) ──
+  async createPoll(question: string, options: { placeId: string; label: string }[]): Promise<import('../types').Poll> {
+    return http('/polls', { method: 'POST', body: JSON.stringify({ question, options }) });
+  },
+  async getPolls(): Promise<import('../types').Poll[]> {
+    return http('/polls');
+  },
+  async votePoll(id: string, optionId: string): Promise<import('../types').Poll> {
+    return http(`/polls/${id}/vote`, { method: 'POST', body: JSON.stringify({ optionId }) });
+  },
+  async closePoll(id: string): Promise<import('../types').Poll> {
+    return http(`/polls/${id}/close`, { method: 'POST' });
+  },
+
   // ── Referral (B2) ──
   async getReferral(): Promise<{ code: string; redeemedCount: number; rewardDays: number }> {
     return http('/referral/me');

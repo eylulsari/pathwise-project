@@ -256,6 +256,36 @@ test('selective offline: download a chosen day and see its size', async ({ page 
   await expect(page.getByRole('button', { name: /✓ Saved/ }).first()).toBeVisible();
 });
 
+test('group poll: create, vote, and see the tally', async ({ page }) => {
+  const email = `e2e_poll_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('Poll Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 30_000 });
+
+  await page.getByRole('link', { name: 'Social', exact: true }).click();
+  await page.waitForURL(/\/social$/);
+  await expect(page.getByRole('heading', { name: /Group Polls/i })).toBeVisible({ timeout: 15_000 });
+
+  // Start a poll, pick two options, create.
+  await page.getByRole('button', { name: /Start Poll/i }).first().click();
+  await page.getByPlaceholder(/Where should we go/i).fill('Best coffee?');
+  const opts = page.getByRole('button', { name: /^☐ / });
+  await opts.nth(0).click();
+  await opts.nth(1).click();
+  const q = `Best coffee ${Date.now()}?`;
+  await page.getByPlaceholder(/Where should we go/i).fill(q);
+  await page.getByRole('button', { name: /Create poll/i }).click();
+
+  // Scope to THIS poll's card (polls are global across users) and vote.
+  const card = page.locator('div.rounded-2xl', { hasText: q });
+  await expect(card).toBeVisible();
+  await card.getByRole('button').filter({ hasText: /· \d+%/ }).first().click();
+  await expect(card.getByText(/100%/)).toBeVisible({ timeout: 10_000 });
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).

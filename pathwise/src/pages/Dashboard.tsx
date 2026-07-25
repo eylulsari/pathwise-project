@@ -238,6 +238,16 @@ export default function Dashboard() {
     cacheItineraries(days.map((d) => d.itinerary));
   }, [days]);
 
+  // B3: a poll winner selected on the Social page → add it to Today's Path.
+  useEffect(() => {
+    const winner = localStorage.getItem('pathwise.pollWinner');
+    if (winner && !isOffline) {
+      localStorage.removeItem('pathwise.pollWinner');
+      addToPath(winner);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day.itinerary]);
+
   // Fetch real OSRM walking geometry whenever the visible itinerary changes.
   useEffect(() => {
     const stops = (day.itinerary?.stops ?? [])

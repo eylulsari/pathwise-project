@@ -10,6 +10,7 @@ import { api } from '../services/api';
 import { AppHeader } from '../components/AppHeader';
 import { TravelerModal } from '../components/social/TravelerModal';
 import { ReportButton } from '../components/social/ReportButton';
+import { PollSection } from '../components/social/PollSection';
 import { HUB_LABEL } from '../utils/format';
 import { useT } from '../i18n';
 
@@ -169,6 +170,9 @@ export default function Social() {
             ))}
           </div>
         </section>
+
+        {/* Group polls (B3) */}
+        <PollSection />
 
         {/* Community routes */}
         <section>
