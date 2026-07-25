@@ -2,20 +2,24 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
+import { api } from '../services/api';
 
 /**
  * Currency converter (B4). All money in the app is stored in TRY; this layer
- * converts it to a display currency using a MOCK rate table (real FX feed is a
- * later phase). The choice persists in localStorage.
+ * converts it to a display currency. Rates come live from the backend
+ * (Frankfurter via GET /currency/rates); the mock `perTry` values below are the
+ * seed/fallback used until the fetch resolves or if it fails. The choice
+ * persists in localStorage.
  */
 export interface Currency {
   code: string;
   symbol: string;
-  /** How much of this currency 1 TRY is worth (mock, mid-2026). */
+  /** How much of this currency 1 TRY is worth (seeded mock, then live). */
   perTry: number;
 }
 
@@ -42,11 +46,31 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [code, setCode] = useState<string>(
     () => localStorage.getItem(STORAGE_KEY) ?? 'TRY',
   );
-
-  const currency = useMemo(
-    () => CURRENCIES.find((c) => c.code === code) ?? CURRENCIES[0],
-    [code],
+  // Live rates keyed by code, seeded from the mock table. Replaced by the
+  // backend feed on mount; on any failure the seed values simply remain.
+  const [rates, setRates] = useState<Record<string, number>>(() =>
+    Object.fromEntries(CURRENCIES.map((c) => [c.code, c.perTry])),
   );
+
+  useEffect(() => {
+    let alive = true;
+    api
+      .getCurrencyRates()
+      .then((r) => {
+        if (alive) setRates((prev) => ({ ...prev, TRY: 1, ...r.rates }));
+      })
+      .catch(() => {
+        /* keep the seeded fallback rates — converter must not break */
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const currency = useMemo(() => {
+    const base = CURRENCIES.find((c) => c.code === code) ?? CURRENCIES[0];
+    return { ...base, perTry: rates[base.code] ?? base.perTry };
+  }, [code, rates]);
 
   const setCurrencyCode = useCallback((next: string) => {
     localStorage.setItem(STORAGE_KEY, next);

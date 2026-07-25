@@ -19,6 +19,7 @@ import { PollsModule } from './modules/polls/polls.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { SafetyModule } from './modules/safety/safety.module';
+import { CurrencyModule } from './modules/currency/currency.module';
 
 // Feature modules (modular monolith — each is a clean boundary).
 
@@ -44,6 +45,7 @@ import { SafetyModule } from './modules/safety/safety.module';
     AnalyticsModule,
     ReviewsModule,
     SafetyModule,
+    CurrencyModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -440,6 +440,19 @@ export const api = {
   },
 
   // ═════════════════════════════════════════════════════════════════
+  // CURRENCY — live TRY rates via the backend (Frankfurter, key-less).
+  // Falls back to a static table server-side if the feed is unreachable.
+  // ═════════════════════════════════════════════════════════════════
+  async getCurrencyRates(): Promise<{
+    base: 'TRY';
+    date: string;
+    rates: Record<string, number>;
+    source: 'live' | 'cache' | 'fallback';
+  }> {
+    return http('/currency/rates');
+  },
+
+  // ═════════════════════════════════════════════════════════════════
   // AI ASSISTANT — would call the backend which proxies an LLM. Here a
   // deterministic mock keyed off the question keywords.
   // ═════════════════════════════════════════════════════════════════
