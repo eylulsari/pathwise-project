@@ -139,6 +139,10 @@ export const translations = {
       add: '➕ Add to Today’s Path',
       dismiss: 'Dismiss',
     },
+    tours: {
+      sponsored: 'Sponsored',
+      reserve: '🎟️ Reserve Spot',
+    },
     quiz: {
       title: 'Travel Vibe Quiz',
       moodQ: "What's your mood?",
@@ -375,6 +379,10 @@ export const translations = {
       away: 'uzakta',
       add: '➕ Bugünün Rotasına Ekle',
       dismiss: 'Kapat',
+    },
+    tours: {
+      sponsored: 'Sponsorlu',
+      reserve: '🎟️ Yer Ayırt',
     },
     quiz: {
       title: 'Seyahat Tarzı Testi',

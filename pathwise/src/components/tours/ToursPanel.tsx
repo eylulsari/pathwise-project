@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Hub, Tour } from '../../types';
 import { api } from '../../services/api';
 import { HUB_LABEL, formatTry } from '../../utils/format';
+import { useAuth } from '../../context/AuthContext';
+import { useT } from '../../i18n';
 
 const SOURCE_BADGE: Record<string, string> = {
   GetYourGuide: 'bg-orange-500/20 text-orange-300',
@@ -12,6 +14,8 @@ const SOURCE_BADGE: Record<string, string> = {
 /** Curated + live tours. "Sync Live Tours" pulls partner-API tours; a tour
  *  opens a slide-over with its stops and "Set as Today's Itinerary". */
 export function ToursPanel({ onUseTourHub }: { onUseTourHub: (hub: Hub) => void }) {
+  const { isPremium } = useAuth();
+  const { t } = useT();
   const [tours, setTours] = useState<Tour[]>([]);
   const [syncing, setSyncing] = useState(false);
   const [synced, setSynced] = useState(false);
@@ -20,6 +24,12 @@ export function ToursPanel({ onUseTourHub }: { onUseTourHub: (hub: Hub) => void 
   useEffect(() => {
     api.getCuratedTours().then(setTours);
   }, []);
+
+  // Premium is ad-free: sponsored cards are hidden. Otherwise sponsored first.
+  const visibleTours = useMemo(() => {
+    const list = isPremium ? tours.filter((t) => !t.isSponsored) : [...tours];
+    return list.sort((a, b) => Number(b.isSponsored) - Number(a.isSponsored));
+  }, [tours, isPremium]);
 
   async function syncLive() {
     setSyncing(true);
@@ -43,20 +53,27 @@ export function ToursPanel({ onUseTourHub }: { onUseTourHub: (hub: Hub) => void 
       </div>
 
       <div className="space-y-2">
-        {tours.map((t) => (
+        {visibleTours.map((tour) => (
           <button
-            key={t.id}
-            onClick={() => setDetail(t)}
+            key={tour.id}
+            onClick={() => setDetail(tour)}
             className="w-full rounded-xl border border-white/10 bg-night p-3 text-left transition-colors hover:border-white/25"
           >
             <div className="flex items-start justify-between gap-2">
-              <span className="font-semibold text-cream">{t.title}</span>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${SOURCE_BADGE[t.source]}`}>
-                {t.source}
+              <span className="font-semibold text-cream">{tour.title}</span>
+              <span className="flex flex-shrink-0 gap-1">
+                {tour.isSponsored && (
+                  <span className="rounded-full bg-coral/20 px-2 py-0.5 text-[10px] font-semibold text-coral">
+                    {t('tours.sponsored')}
+                  </span>
+                )}
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${SOURCE_BADGE[tour.source]}`}>
+                  {tour.source}
+                </span>
               </span>
             </div>
             <p className="mt-1 text-xs text-cream/50">
-              {HUB_LABEL[t.hub]} · {t.durationHours}h · ⭐ {t.rating} · {formatTry(t.priceTry)}
+              {HUB_LABEL[tour.hub]} · {tour.durationHours}h · ⭐ {tour.rating} · {formatTry(tour.priceTry)}
             </p>
           </button>
         ))}
@@ -76,6 +93,11 @@ export function ToursPanel({ onUseTourHub }: { onUseTourHub: (hub: Hub) => void 
             <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${SOURCE_BADGE[detail.source]}`}>
               via {detail.source}
             </span>
+            {detail.isSponsored && (
+              <span className="ml-2 rounded-full bg-coral/20 px-2 py-0.5 text-xs font-semibold text-coral">
+                {t('tours.sponsored')}
+              </span>
+            )}
 
             <h4 className="mt-5 text-sm font-bold text-cream">Stops</h4>
             <ol className="mt-2 space-y-2">
@@ -96,6 +118,15 @@ export function ToursPanel({ onUseTourHub }: { onUseTourHub: (hub: Hub) => void 
             >
               Set as Today’s Itinerary
             </button>
+            {/* Affiliate booking link (mock ?ref=pathwise → revenue share). */}
+            <a
+              href={detail.affiliateUrl}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              className="mt-2 block w-full rounded-xl border border-emerald/40 py-3 text-center text-sm font-semibold text-emerald hover:bg-emerald/10"
+            >
+              {t('tours.reserve')}
+            </a>
           </div>
         </div>
       )}

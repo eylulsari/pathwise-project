@@ -282,6 +282,10 @@ export interface Tour {
   rating: number;
   stopNames: string[];
   live: boolean; // synced via "Sync Live Tours"
+  /** Partner booking link (mock ?ref=pathwise; real affiliate later). */
+  affiliateUrl: string;
+  /** Sponsored placement — badged and surfaced to the top; hidden for premium. */
+  isSponsored: boolean;
 }
 
 // ── AI assistant ───────────────────────────────────────────────────
