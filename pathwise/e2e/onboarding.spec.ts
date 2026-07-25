@@ -330,7 +330,7 @@ test('can leave a community review from a stop’s story modal', async ({ page }
   // Open a stop's story modal → reviews section.
   await page.getByRole('button', { name: /Read Local Story/i }).first().click();
   await expect(page.getByRole('heading', { name: /Reviews/i })).toBeVisible();
-  await expect(page.getByText(/Google:/)).toBeVisible();
+  await expect(page.getByText(/Pathwise editorial/i)).toBeVisible();
 
   // Post a review → it appears in the list.
   const text = `Loved it ${Date.now()}`;
@@ -367,6 +367,33 @@ test('SOS button confirms, shows emergency info, and shares location', async ({ 
   // Share location → backend records the alert and confirms.
   await page.getByRole('button', { name: /Share my location/i }).click();
   await expect(page.getByText(/Location (shared|recorded)/i)).toBeVisible({ timeout: 10_000 });
+});
+
+test('story modal shows live Wikipedia + OSM enrichment for a landmark', async ({ page }) => {
+  const email = `e2e_enrich_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('Enrich Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+
+  // Force a known enriched landmark (Hagia Sophia) into the day via search.
+  const search = page.getByPlaceholder(/Search a place/i);
+  await search.fill('Hagia');
+  await expect(page.getByRole('button', { name: /Hagia Sophia/i })).toBeVisible({ timeout: 5_000 });
+  await page.getByRole('button', { name: '➕ Add' }).first().click();
+  const stop = page.locator('ol li', { hasText: 'Hagia Sophia' });
+  await expect(stop.locator('h3')).toBeVisible({ timeout: 10_000 });
+
+  // Open its story modal → the live enrichment panel appears (real APIs).
+  await stop.getByRole('button', { name: /Read Local Story/i }).click();
+  await expect(page.getByRole('heading', { name: /Live details/i })).toBeVisible({ timeout: 20_000 });
+  // Wikipedia attribution (licence requirement) is shown.
+  await expect(page.getByText(/Source: Wikipedia/i)).toBeVisible({ timeout: 20_000 });
+  // Rating is relabelled as the curated editorial score.
+  await expect(page.getByText(/Pathwise editorial/i)).toBeVisible();
 });
 
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {

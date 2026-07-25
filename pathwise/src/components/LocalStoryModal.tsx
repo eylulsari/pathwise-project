@@ -4,6 +4,7 @@ import type { Place } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { ReviewsSection } from './ReviewsSection';
+import { PlaceEnrichmentPanel } from './PlaceEnrichmentPanel';
 import { useT } from '../i18n';
 
 /**
@@ -130,6 +131,9 @@ export function LocalStoryModal({
           </p>
         </section>
         )}
+
+        {/* Live enrichment — OSM tags + Wikipedia (silently hidden if absent) */}
+        <PlaceEnrichmentPanel place={place} />
 
         {/* Community reviews — available to everyone (Phase 3) */}
         <ReviewsSection place={place} />

@@ -54,9 +54,9 @@ export function ReviewsSection({ place }: { place: Place }) {
         )}
       </div>
 
-      {/* Ratings: static Google vs community */}
+      {/* Ratings: curated Pathwise editorial score vs live community average */}
       <p className="mt-1 text-xs text-night/70">
-        <span className="font-semibold">Google:</span> {place.rating}★
+        <span className="font-semibold">{t('reviews.editorial')}:</span> {place.rating}★
         {data && data.count > 0 && (
           <>
             {' · '}

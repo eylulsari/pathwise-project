@@ -93,6 +93,27 @@ export interface ReviewsResponse {
   reviews: Review[];
 }
 
+// ── Live place enrichment (OSM/Overpass + Wikipedia) ───────────────
+export interface OsmEnrichment {
+  openingHours: string | null;
+  openingHoursRaw: string | null;
+  wheelchair: string | null; // 'yes' | 'no' | 'limited'
+  cuisine: string | null;
+  source: 'overpass';
+}
+export interface WikipediaEnrichment {
+  title: string;
+  summary: string;
+  thumbnailUrl: string | null;
+  pageUrl: string;
+  attribution: 'Wikipedia';
+}
+export interface PlaceEnrichment {
+  placeId: string;
+  osm: OsmEnrichment | null;
+  wikipedia: WikipediaEnrichment | null;
+}
+
 export interface NearbySuggestion {
   place: Place;
   nearPlaceName: string;

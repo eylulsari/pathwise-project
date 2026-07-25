@@ -140,6 +140,7 @@ export const translations = {
     weather: { crowds: 'Crowds' },
     reviews: {
       title: 'Reviews',
+      editorial: 'Pathwise editorial',
       community: 'Pathwise community',
       placeholder: 'Share your experience…',
       submit: 'Post review',
@@ -147,6 +148,16 @@ export const translations = {
       empty: 'No community reviews yet — be the first.',
       stale: 'Report outdated info',
       reported: 'Reported',
+    },
+    enrich: {
+      title: 'Live details',
+      source: 'Source',
+      hours: 'Hours',
+      cuisine: 'Cuisine',
+      wheelchairYes: 'Wheelchair accessible',
+      wheelchairLimited: 'Partial wheelchair access',
+      wheelchairNo: 'Not wheelchair accessible',
+      osmSource: 'Live tags from OpenStreetMap',
     },
     survival: { title: 'City Survival & Etiquette' },
     sos: {
@@ -483,6 +494,7 @@ export const translations = {
     weather: { crowds: 'Kalabalık' },
     reviews: {
       title: 'Yorumlar',
+      editorial: 'Pathwise editoryal',
       community: 'Pathwise topluluğu',
       placeholder: 'Deneyimini paylaş…',
       submit: 'Yorum gönder',
@@ -490,6 +502,16 @@ export const translations = {
       empty: 'Henüz topluluk yorumu yok — ilk sen ol.',
       stale: 'Güncel değil bildir',
       reported: 'Bildirildi',
+    },
+    enrich: {
+      title: 'Canlı bilgiler',
+      source: 'Kaynak',
+      hours: 'Saatler',
+      cuisine: 'Mutfak',
+      wheelchairYes: 'Tekerlekli sandalyeye uygun',
+      wheelchairLimited: 'Kısmen erişilebilir',
+      wheelchairNo: 'Tekerlekli sandalyeye uygun değil',
+      osmSource: 'Canlı etiketler OpenStreetMap’ten',
     },
     survival: { title: 'Şehirde Hayatta Kalma & Adap' },
     sos: {

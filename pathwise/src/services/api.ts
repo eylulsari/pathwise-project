@@ -24,6 +24,7 @@ import type {
   NearbySuggestion,
   PastTrip,
   Place,
+  PlaceEnrichment,
   ProfileStats,
   SavedTrip,
   Tour,
@@ -437,6 +438,14 @@ export const api = {
   // ═════════════════════════════════════════════════════════════════
   async getWeather() {
     return delay(CURRENT_WEATHER, 200);
+  },
+
+  // ═════════════════════════════════════════════════════════════════
+  // PLACE ENRICHMENT — live OSM (Overpass) + Wikipedia detail via backend.
+  // Any missing slice is null; the UI keeps its curated values.
+  // ═════════════════════════════════════════════════════════════════
+  async getPlaceEnrichment(placeId: string): Promise<PlaceEnrichment> {
+    return http(`/places/${encodeURIComponent(placeId)}/enrichment`);
   },
 
   // ═════════════════════════════════════════════════════════════════
