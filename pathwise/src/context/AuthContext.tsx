@@ -26,11 +26,30 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const USER_KEY = 'pathwise.user';
+const cacheUser = (u: AuthUser | null) =>
+  u ? localStorage.setItem(USER_KEY, JSON.stringify(u)) : localStorage.removeItem(USER_KEY);
+const readCachedUser = (): AuthUser | null => {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? (JSON.parse(raw) as AuthUser) : null;
+  } catch {
+    return null;
+  }
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUserState] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Bootstrap: if we hold an access token, resolve the current user.
+  // Keep the cached copy in sync so we can boot offline.
+  const setUser = (u: AuthUser | null) => {
+    cacheUser(u);
+    setUserState(u);
+  };
+
+  // Bootstrap: if we hold an access token, resolve the current user. When
+  // offline, hydrate from the cached user so the app still opens.
   useEffect(() => {
     let active = true;
     (async () => {
@@ -38,11 +57,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         return;
       }
+      if (!navigator.onLine) {
+        if (active) setUserState(readCachedUser());
+        if (active) setLoading(false);
+        return;
+      }
       try {
         const me = await api.me();
         if (active) setUser(me);
       } catch {
-        tokenStore.clear();
+        // Network failure → keep the cached session; only a real 401 clears it
+        // (the api layer already dropped tokens on a failed refresh).
+        const cached = readCachedUser();
+        if (cached && tokenStore.access) {
+          if (active) setUserState(cached);
+        } else {
+          tokenStore.clear();
+          cacheUser(null);
+        }
       } finally {
         if (active) setLoading(false);
       }

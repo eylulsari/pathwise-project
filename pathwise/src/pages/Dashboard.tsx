@@ -24,6 +24,8 @@ import type { UsageInfo } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useT } from '../i18n';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { cacheItineraries, loadCachedItineraries } from '../utils/offlineCache';
 import { DayTab } from '../components/dnd/DayTab';
 import { AppHeader } from '../components/AppHeader';
 import { MapView } from '../components/map/MapView';
@@ -86,7 +88,9 @@ export default function Dashboard() {
   const [showQuiz, setShowQuiz] = useState(false);
   const [showMustVisit, setShowMustVisit] = useState(false);
   const [showSplitBill, setShowSplitBill] = useState(false);
-  const [offline, setOffline] = useState(false);
+  const [simulatedOffline, setSimulatedOffline] = useState(false);
+  const online = useOnlineStatus();
+  const isOffline = !online || simulatedOffline;
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [routeGeometry, setRouteGeometry] = useState<[number, number][] | null>(null);
   const [reservingPlace, setReservingPlace] = useState<Place | null>(null);
@@ -200,16 +204,32 @@ export default function Dashboard() {
     await rebuildDay(activeDay, arrayMove(ids, oldIndex, newIndex));
   }
 
-  // Generate the first day's default plan on mount + load premium usage.
+  // On mount: if offline, hydrate the last cached plan instead of calling the
+  // network; otherwise generate the default plan + load premium usage.
   // Guarded so React 18 StrictMode's double-invoke doesn't burn two optimizes.
   const didInit = useRef(false);
   useEffect(() => {
     if (didInit.current) return;
     didInit.current = true;
+    if (!navigator.onLine) {
+      loadCachedItineraries().then((cached) => {
+        if (cached) {
+          setDays((prev) => prev.map((d, i) => ({ ...d, itinerary: cached[i] ?? null, loading: false })));
+        } else {
+          patchDay(0, { loading: false });
+        }
+      });
+      return;
+    }
     generateFor(0, buildRequest(INITIAL_DAYS[0]));
     api.getUsage().then(setUsage).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Persist itineraries for offline use whenever any day's plan changes.
+  useEffect(() => {
+    cacheItineraries(days.map((d) => d.itinerary));
+  }, [days]);
 
   // Fetch real OSRM walking geometry whenever the visible itinerary changes.
   useEffect(() => {
@@ -256,6 +276,7 @@ export default function Dashboard() {
   }
 
   function handleGenerate() {
+    if (isOffline) return; // no network in offline mode
     generateFor(activeDay, buildRequest(day));
   }
 
@@ -361,9 +382,9 @@ export default function Dashboard() {
     <div className="flex min-h-screen flex-col">
       <AppHeader />
 
-      {offline && (
+      {isOffline && (
         <div className="bg-coral/20 px-4 py-1.5 text-center text-xs font-semibold text-coral">
-          {t('dash.offlineBanner')}
+          {!online ? t('dash.offlineReal') : t('dash.offlineBanner')}
         </div>
       )}
       {optimizeBlocked && (
@@ -396,7 +417,7 @@ export default function Dashboard() {
           )}
           <button
             onClick={saveCurrentPlan}
-            disabled={!day.itinerary || saveState === 'saving'}
+            disabled={!day.itinerary || saveState === 'saving' || isOffline}
             className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
               saveState === 'saved'
                 ? 'border-emerald bg-emerald/20 text-emerald'
@@ -412,7 +433,7 @@ export default function Dashboard() {
             💰 {t('dash.splitBill')}
           </button>
           {day.itinerary && <ExportRoute itinerary={day.itinerary} />}
-          <OfflineToggle offline={offline} onToggle={() => setOffline((o) => !o)} />
+          <OfflineToggle offline={isOffline} onToggle={() => setSimulatedOffline((o) => !o)} />
         </div>
       </div>
 
@@ -424,11 +445,13 @@ export default function Dashboard() {
             onChange={updateConfig}
             onGenerate={handleGenerate}
             generating={day.loading}
+            offline={isOffline}
           />
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setShowQuiz(true)}
-              className="rounded-xl border border-violet/40 px-3 py-2.5 text-sm font-semibold text-cream hover:bg-violet/10"
+              disabled={isOffline}
+              className="rounded-xl border border-violet/40 px-3 py-2.5 text-sm font-semibold text-cream hover:bg-violet/10 disabled:opacity-40"
             >
               🎭 {t('dash.vibeQuiz')}
             </button>
@@ -446,7 +469,7 @@ export default function Dashboard() {
             titleKey="endPoint.title"
             showAuto
           />
-          <ToursPanel onUseTourHub={useTourHub} />
+          <ToursPanel onUseTourHub={useTourHub} offline={isOffline} />
           <SurvivalWidget />
         </div>
 

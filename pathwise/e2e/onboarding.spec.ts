@@ -145,6 +145,43 @@ test('free plan locks Day 2 and upgrading to Premium unlocks it', async ({ page 
   await expect(page.getByText(/Unlimited/i)).toBeVisible();
 });
 
+test('offline mode: banner, disabled network actions, and IndexedDB cache', async ({ page }) => {
+  // NOTE: a true offline *reload* is served by the service worker's precache,
+  // which vite-plugin-pwa builds for production (sw.js) but not for the dev
+  // server. Here we verify the offline UX + that the plan is cached to
+  // IndexedDB for offline hydration.
+  const email = `e2e_off_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('Offline Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+
+  // The generated plan is persisted to IndexedDB for offline use.
+  const cached = await page.waitForFunction(async () => {
+    const db: IDBDatabase = await new Promise((res, rej) => {
+      const r = indexedDB.open('pathwise-offline', 1);
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    const val = await new Promise((res) => {
+      const tx = db.transaction('cache', 'readonly').objectStore('cache').get('day-itineraries');
+      tx.onsuccess = () => res(tx.result);
+      tx.onerror = () => res(null);
+    });
+    return Array.isArray(val) && val[0] && (val[0] as { stops: unknown[] }).stops.length > 0;
+  }, { timeout: 10_000 });
+  expect(await cached.jsonValue()).toBe(true);
+
+  // Toggle offline → banner + network actions disabled.
+  await page.getByRole('button', { name: /📶 Online/ }).click();
+  await expect(page.getByText(/Offline Mode/i)).toBeVisible();
+  await expect(page.getByRole('button', { name: /connection required/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /💾 Save plan/ })).toBeDisabled();
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).

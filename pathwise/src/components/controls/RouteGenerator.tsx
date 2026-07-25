@@ -26,11 +26,13 @@ export function RouteGenerator({
   onChange,
   onGenerate,
   generating,
+  offline = false,
 }: {
   config: RouteConfig;
   onChange: (patch: Partial<RouteConfig>) => void;
   onGenerate: () => void;
   generating: boolean;
+  offline?: boolean;
 }) {
   const { t } = useT();
   const timeOfDay =
@@ -191,8 +193,8 @@ export function RouteGenerator({
         </div>
       </div>
 
-      <button onClick={onGenerate} disabled={generating} className="btn-accent w-full">
-        {generating ? t('dash.generating') : t('dash.generate')}
+      <button onClick={onGenerate} disabled={generating || offline} className="btn-accent w-full">
+        {offline ? t('dash.offlineNeed') : generating ? t('dash.generating') : t('dash.generate')}
       </button>
     </div>
   );

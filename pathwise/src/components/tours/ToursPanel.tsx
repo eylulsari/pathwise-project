@@ -13,7 +13,13 @@ const SOURCE_BADGE: Record<string, string> = {
 
 /** Curated + live tours. "Sync Live Tours" pulls partner-API tours; a tour
  *  opens a slide-over with its stops and "Set as Today's Itinerary". */
-export function ToursPanel({ onUseTourHub }: { onUseTourHub: (hub: Hub) => void }) {
+export function ToursPanel({
+  onUseTourHub,
+  offline = false,
+}: {
+  onUseTourHub: (hub: Hub) => void;
+  offline?: boolean;
+}) {
   const { isPremium } = useAuth();
   const { t } = useT();
   const [tours, setTours] = useState<Tour[]>([]);
@@ -45,10 +51,10 @@ export function ToursPanel({ onUseTourHub }: { onUseTourHub: (hub: Hub) => void 
         <h3 className="font-display text-sm font-bold">Curated & live tours</h3>
         <button
           onClick={syncLive}
-          disabled={syncing}
-          className="rounded-lg border border-violet/40 px-2.5 py-1 text-xs font-semibold text-cream hover:bg-violet/10"
+          disabled={syncing || offline}
+          className="rounded-lg border border-violet/40 px-2.5 py-1 text-xs font-semibold text-cream hover:bg-violet/10 disabled:opacity-40"
         >
-          {syncing ? '🔄 Syncing…' : synced ? '✓ Synced' : '🔄 Sync Live Tours'}
+          {offline ? '📴 Offline' : syncing ? '🔄 Syncing…' : synced ? '✓ Synced' : '🔄 Sync Live Tours'}
         </button>
       </div>
 

@@ -87,8 +87,9 @@ export const translations = {
       generate: '⚡ Generate My Custom Path',
       vibeQuiz: 'Vibe Quiz',
       mustVisit: 'Must-Visit',
-      offlineBanner:
-        '📴 Offline Mode — showing your cached plan. (UI demo only — no real caching.)',
+      offlineBanner: '📴 Offline Mode (simulated) — showing your cached plan.',
+      offlineReal: '📴 You are offline — showing your cached plan and map.',
+      offlineNeed: '📴 Offline — connection required',
     },
     endPoint: { title: 'End point' },
     startPoint: {
@@ -328,8 +329,9 @@ export const translations = {
       generate: '⚡ Özel Rotamı Oluştur',
       vibeQuiz: 'Tarz Testi',
       mustVisit: 'Görülmeli',
-      offlineBanner:
-        '📴 Çevrimdışı Mod — önbellekteki planın gösteriliyor. (Sadece arayüz demosu — gerçek önbellek yok.)',
+      offlineBanner: '📴 Çevrimdışı Mod (simülasyon) — önbellekteki planın gösteriliyor.',
+      offlineReal: '📴 Çevrimdışısın — önbellekteki plan ve harita gösteriliyor.',
+      offlineNeed: '📴 Çevrimdışı — bağlantı gerekli',
     },
     endPoint: { title: 'Bitiş noktası' },
     startPoint: {
