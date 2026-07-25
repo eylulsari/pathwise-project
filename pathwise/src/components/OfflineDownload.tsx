@@ -1,0 +1,91 @@
+import { useEffect, useRef, useState } from 'react';
+import type { Itinerary } from '../types';
+import {
+  downloadDay,
+  estimateDaySizeMb,
+  getDownloadedDays,
+  removeDownload,
+} from '../utils/offlineCache';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { useT } from '../i18n';
+
+/** Selective offline download (A5): pick which day(s) to save offline, see the
+ *  size, and get a "syncing" indicator when the connection returns. */
+export function OfflineDownload({
+  days,
+}: {
+  days: { label: string; itinerary: Itinerary | null }[];
+}) {
+  const { t } = useT();
+  const online = useOnlineStatus();
+  const [open, setOpen] = useState(false);
+  const [downloaded, setDownloaded] = useState<Set<number>>(getDownloadedDays());
+  const [syncing, setSyncing] = useState(false);
+  const wasOffline = useRef(!online);
+
+  // Offline → online transition with cached days → show a brief "syncing".
+  useEffect(() => {
+    if (online && wasOffline.current && downloaded.size > 0) {
+      setSyncing(true);
+      const id = window.setTimeout(() => setSyncing(false), 2500);
+      wasOffline.current = false;
+      return () => window.clearTimeout(id);
+    }
+    if (!online) wasOffline.current = true;
+  }, [online, downloaded.size]);
+
+  async function toggle(index: number, itinerary: Itinerary | null) {
+    if (downloaded.has(index)) {
+      await removeDownload(index);
+    } else if (itinerary) {
+      await downloadDay(index, itinerary);
+    }
+    setDownloaded(new Set(getDownloadedDays()));
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/80 hover:text-cream"
+      >
+        📥 {t('offlineDl.button')}{downloaded.size > 0 ? ` (${downloaded.size})` : ''}
+        {syncing && <span className="ml-1 animate-pulse text-emerald">🔄</span>}
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 z-[1041] mt-1 w-64 overflow-hidden rounded-xl border border-white/10 bg-night-800 shadow-xl">
+            <p className="border-b border-white/10 px-3 py-2 text-[10px] uppercase tracking-wide text-cream/40">
+              {t('offlineDl.title')}
+            </p>
+            {syncing && (
+              <p className="px-3 py-1.5 text-xs font-semibold text-emerald">🔄 {t('offlineDl.syncing')}</p>
+            )}
+            {days.map((d, i) => {
+              const size = estimateDaySizeMb(d.itinerary);
+              const on = downloaded.has(i);
+              return (
+                <div key={i} className="flex items-center justify-between px-3 py-2 text-sm">
+                  <span className="text-cream/80">
+                    {d.label}
+                    <span className="ml-1 text-cream/40">— {size} MB</span>
+                  </span>
+                  <button
+                    onClick={() => toggle(i, d.itinerary)}
+                    disabled={!d.itinerary}
+                    className={`rounded-lg px-2 py-1 text-xs font-semibold disabled:opacity-30 ${
+                      on ? 'bg-emerald/20 text-emerald' : 'bg-violet/20 text-cream'
+                    }`}
+                  >
+                    {on ? `✓ ${t('offlineDl.downloaded')}` : `⬇ ${t('offlineDl.download')}`}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

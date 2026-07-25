@@ -42,6 +42,7 @@ import { AiAssistant } from '../components/ai/AiAssistant';
 import { SplitBill } from '../components/SplitBill';
 import { ExportRoute } from '../components/ExportRoute';
 import { OfflineToggle } from '../components/OfflineToggle';
+import { OfflineDownload } from '../components/OfflineDownload';
 import { HUB_LABEL } from '../utils/format';
 
 interface DayState {
@@ -489,6 +490,7 @@ export default function Dashboard() {
             💰 {t('dash.splitBill')}
           </button>
           {day.itinerary && <ExportRoute itinerary={day.itinerary} />}
+          <OfflineDownload days={days.map((d, i) => ({ label: `${t('dash.day')} ${i + 1}`, itinerary: d.itinerary }))} />
           <OfflineToggle offline={isOffline} onToggle={() => setSimulatedOffline((o) => !o)} />
         </div>
       </div>

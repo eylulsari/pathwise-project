@@ -94,6 +94,13 @@ export const translations = {
       routeUpdated: 'Route updated.',
       undo: 'Undo',
     },
+    offlineDl: {
+      button: 'Offline',
+      title: 'Download for offline',
+      download: 'Download',
+      downloaded: 'Saved',
+      syncing: 'Syncing…',
+    },
     endPoint: { title: 'End point' },
     startPoint: {
       title: 'Start point',
@@ -389,6 +396,13 @@ export const translations = {
       offlineNeed: '📴 Çevrimdışı — bağlantı gerekli',
       routeUpdated: 'Rota güncellendi.',
       undo: 'Geri Al',
+    },
+    offlineDl: {
+      button: 'Çevrimdışı',
+      title: 'Çevrimdışı indir',
+      download: 'İndir',
+      downloaded: 'Kaydedildi',
+      syncing: 'Senkronize ediliyor…',
     },
     endPoint: { title: 'Bitiş noktası' },
     startPoint: {

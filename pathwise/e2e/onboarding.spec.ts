@@ -236,6 +236,26 @@ test('notification center receives a nearby alert and can mute types', async ({ 
   await expect(page.getByText(/Budget alerts/i)).toBeVisible();
 });
 
+test('selective offline: download a chosen day and see its size', async ({ page }) => {
+  const email = `e2e_dl_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('DL Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+
+  // Open the Offline download menu → per-day list with MB sizes.
+  await page.getByRole('button', { name: /📥 Offline/ }).click();
+  await expect(page.getByText(/Download for offline/i)).toBeVisible();
+  await expect(page.getByText(/MB/).first()).toBeVisible();
+
+  // Download Day 1 → it flips to "Saved".
+  await page.getByRole('button', { name: /⬇ Download/ }).first().click();
+  await expect(page.getByRole('button', { name: /✓ Saved/ }).first()).toBeVisible();
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).

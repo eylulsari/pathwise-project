@@ -58,3 +58,38 @@ export async function loadCachedItineraries(): Promise<(Itinerary | null)[] | nu
     return null;
   }
 }
+
+// ── Selective per-day download (A5) ────────────────────────────────
+const DOWNLOADED_KEY = 'pathwise.offlineDays'; // set of downloaded day indices
+
+/** Estimate the offline footprint of a day in MB (itinerary JSON + map tiles). */
+export function estimateDaySizeMb(itinerary: Itinerary | null): number {
+  if (!itinerary) return 0;
+  const jsonBytes = JSON.stringify(itinerary).length;
+  const realStops = itinerary.stops.filter((s) => s.place).length;
+  // ~1.5 MB of map tiles cached per stop's neighborhood (mock).
+  const tileBytes = realStops * 1.5 * 1024 * 1024;
+  return Math.max(0.1, Math.round(((jsonBytes + tileBytes) / (1024 * 1024)) * 10) / 10);
+}
+
+/** Explicitly download a chosen day for offline use. */
+export async function downloadDay(index: number, itinerary: Itinerary): Promise<void> {
+  await idbSet(`day-${index}-download`, itinerary);
+  const set = getDownloadedDays();
+  set.add(index);
+  localStorage.setItem(DOWNLOADED_KEY, JSON.stringify([...set]));
+}
+
+export function getDownloadedDays(): Set<number> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(DOWNLOADED_KEY) ?? '[]'));
+  } catch {
+    return new Set();
+  }
+}
+
+export async function removeDownload(index: number): Promise<void> {
+  const set = getDownloadedDays();
+  set.delete(index);
+  localStorage.setItem(DOWNLOADED_KEY, JSON.stringify([...set]));
+}
