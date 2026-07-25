@@ -28,6 +28,7 @@ export function TodayPath({
   reordering,
   onReserve,
   onJournal,
+  onToggleAnchor,
   suggestion,
   onAddSuggestion,
   onDismissSuggestion,
@@ -39,6 +40,7 @@ export function TodayPath({
   reordering?: boolean;
   onReserve?: (place: Place) => void;
   onJournal?: (place: Place) => void;
+  onToggleAnchor?: (place: Place, currentArrival: string) => void;
   suggestion?: NearbySuggestion | null;
   onAddSuggestion?: () => void;
   onDismissSuggestion?: () => void;
@@ -87,6 +89,7 @@ export function TodayPath({
               onStory={() => stop.place && setStoryPlace(stop.place)}
               onReserve={onReserve}
               onJournal={onJournal}
+              onToggleAnchor={onToggleAnchor}
             />
           ))}
         </ol>
@@ -125,6 +128,7 @@ function StopRow({
   onStory,
   onReserve,
   onJournal,
+  onToggleAnchor,
 }: {
   stop: ItineraryStop;
   active: boolean;
@@ -132,6 +136,7 @@ function StopRow({
   onStory: () => void;
   onReserve?: (place: Place) => void;
   onJournal?: (place: Place) => void;
+  onToggleAnchor?: (place: Place, currentArrival: string) => void;
 }) {
   const { t } = useT();
 
@@ -150,7 +155,7 @@ function StopRow({
   }
 
   const place = stop.place!;
-  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} onJournal={onJournal} />;
+  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} onJournal={onJournal} onToggleAnchor={onToggleAnchor} />;
 }
 
 function SortableStopRow({
@@ -161,6 +166,7 @@ function SortableStopRow({
   onStory,
   onReserve,
   onJournal,
+  onToggleAnchor,
 }: {
   stop: ItineraryStop;
   place: Place;
@@ -169,6 +175,7 @@ function SortableStopRow({
   onStory: () => void;
   onReserve?: (place: Place) => void;
   onJournal?: (place: Place) => void;
+  onToggleAnchor?: (place: Place, currentArrival: string) => void;
 }) {
   const { t } = useT();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -259,6 +266,18 @@ function SortableStopRow({
               className="text-xs font-semibold text-emerald hover:text-fuchsia"
             >
               {t('journal.button')}
+            </button>
+          )}
+          {onToggleAnchor && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleAnchor(place, stop.arrivalTime);
+              }}
+              className={`text-xs font-semibold hover:text-fuchsia ${stop.reservation ? 'text-coral' : 'text-cream/50'}`}
+              title={t('anchor.lockTip')}
+            >
+              {stop.reservation ? `⚓ ${t('anchor.locked')}` : `⏰ ${t('anchor.lock')}`}
             </button>
           )}
         </div>

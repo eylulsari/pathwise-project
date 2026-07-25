@@ -381,6 +381,18 @@ export default function Dashboard() {
     generateFor(activeDay, buildRequest(updated));
   }
 
+  // ── Mid-stop time anchor (A2) — one-click pin at the current time ─
+  function toggleAnchor(place: Place, currentArrival: string) {
+    const has = day.reservations.some((r) => r.placeId === place.placeId);
+    const next = has
+      ? day.reservations.filter((r) => r.placeId !== place.placeId)
+      : [...day.reservations, { placeId: place.placeId, time: currentArrival }];
+    recordUndo(activeDay);
+    const updated = { ...day, reservations: next };
+    patchDay(activeDay, { reservations: next });
+    generateFor(activeDay, buildRequest(updated));
+  }
+
   // ── "Add this too" suggestion ─────────────────────────────────────
   function addSuggestion() {
     if (!suggestion) return;
@@ -550,6 +562,7 @@ export default function Dashboard() {
               reordering={reordering}
               onReserve={setReservingPlace}
               onJournal={setJournalPlace}
+              onToggleAnchor={toggleAnchor}
               suggestion={suggestion}
               onAddSuggestion={addSuggestion}
               onDismissSuggestion={dismissSuggestion}

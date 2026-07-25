@@ -186,17 +186,23 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       remaining.splice(nearestIdx, 1);
     }
 
-    // Reservations are the hardest constraint: order pinned stops by their
-    // fixed times and slot free stops around them chronologically.
+    // Time anchors (mid-stop pinning A2 / reservations): pinned stops keep their
+    // fixed times and act as anchors. Free stops flow around them in the
+    // geographic (NN) order, timed by their realistic durations so "before" and
+    // "after" the anchor sequence sensibly.
     const reservations = input.reservations ?? [];
     if (reservations.length > 0) {
       const pinned = new Map(reservations.map((r) => [r.placeId, this.toMinutes(r.time)]));
-      const withAnchor = tour.map((p, i) => ({
-        p,
-        anchor: pinned.has(p.placeId)
-          ? (pinned.get(p.placeId) as number)
-          : input.startHour * 60 + i * 90, // ~90 min per free stop
-      }));
+      let clock = input.startHour * 60;
+      const withAnchor = tour.map((p) => {
+        if (pinned.has(p.placeId)) {
+          return { p, anchor: pinned.get(p.placeId) as number };
+        }
+        const anchor = clock;
+        clock += p.avgVisitMinutes + 15; // visit + a short travel buffer
+        return { p, anchor };
+      });
+      // Stable sort keeps the NN order among free stops while anchors slot by time.
       withAnchor.sort((a, b) => a.anchor - b.anchor);
       return withAnchor.map((x) => x.p);
     }

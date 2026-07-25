@@ -147,6 +147,11 @@ export const translations = {
       sponsored: 'Sponsored',
       reserve: '🎟️ Reserve Spot',
     },
+    anchor: {
+      lock: 'Lock time',
+      locked: 'Locked',
+      lockTip: 'Pin this stop at its time — the rest re-sequences around it',
+    },
     report: {
       report: 'Report',
       reason: 'Reason',
@@ -437,6 +442,11 @@ export const translations = {
     tours: {
       sponsored: 'Sponsorlu',
       reserve: '🎟️ Yer Ayırt',
+    },
+    anchor: {
+      lock: 'Saati sabitle',
+      locked: 'Sabit',
+      lockTip: 'Bu durağı saatine sabitle — gerisi etrafında yeniden dizilir',
     },
     report: {
       report: 'Bildir',
