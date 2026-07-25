@@ -253,6 +253,16 @@ export default function Dashboard() {
     };
   }, [day.itinerary]);
 
+  // Budget alert → Notification Center (B6), deduped per generated plan.
+  const lastBudgetNotif = useRef<string | null>(null);
+  useEffect(() => {
+    const it = day.itinerary;
+    if (it?.overBudget && lastBudgetNotif.current !== it.generatedAt) {
+      lastBudgetNotif.current = it.generatedAt;
+      api.emitNotification('budget');
+    }
+  }, [day.itinerary]);
+
   // Fetch a nearby "add this too" suggestion for the visible day.
   useEffect(() => {
     const ids = (day.itinerary?.stops ?? [])

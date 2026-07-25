@@ -154,6 +154,19 @@ export const translations = {
       other: 'Other',
       thanks: 'Reported',
     },
+    notif: {
+      title: 'Notifications',
+      markAll: 'Mark all read',
+      prefs: 'Notify me about',
+      empty: 'No notifications yet.',
+      type: {
+        reservation: 'Reservation reminders',
+        trial: 'Trial ending',
+        poll: 'Friend polls',
+        nearby: 'Friends nearby',
+        budget: 'Budget alerts',
+      },
+    },
     journal: {
       button: '📸 Journal',
       title: 'Trip Journal',
@@ -429,6 +442,19 @@ export const translations = {
       misinformation: 'Yanlış bilgi',
       other: 'Diğer',
       thanks: 'Bildirildi',
+    },
+    notif: {
+      title: 'Bildirimler',
+      markAll: 'Tümünü oku',
+      prefs: 'Şunları bildir',
+      empty: 'Henüz bildirim yok.',
+      type: {
+        reservation: 'Rezervasyon hatırlatmaları',
+        trial: 'Deneme bitişi',
+        poll: 'Arkadaş oylamaları',
+        nearby: 'Yakındaki arkadaşlar',
+        budget: 'Bütçe uyarıları',
+      },
     },
     journal: {
       button: '📸 Günlük',

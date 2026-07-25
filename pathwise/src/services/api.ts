@@ -179,6 +179,33 @@ export const api = {
     return http<UsageInfo>('/premium/usage');
   },
 
+  // ── Notification Center (B6) ──
+  async getNotifications(): Promise<import('../types').AppNotification[]> {
+    return http('/notifications');
+  },
+  async getUnreadCount(): Promise<number> {
+    const r = await http<{ count: number }>('/notifications/unread-count');
+    return r.count;
+  },
+  async markNotificationRead(id: string): Promise<void> {
+    await http(`/notifications/${id}/read`, { method: 'POST' });
+  },
+  async markAllNotificationsRead(): Promise<void> {
+    await http('/notifications/read-all', { method: 'POST' });
+  },
+  async getNotifPrefs(): Promise<string[]> {
+    const r = await http<{ muted: string[] }>('/notifications/preferences');
+    return r.muted;
+  },
+  async setNotifPrefs(muted: string[]): Promise<void> {
+    await http('/notifications/preferences', { method: 'PUT', body: JSON.stringify({ muted }) });
+  },
+  async emitNotification(type: 'budget' | 'nearby'): Promise<void> {
+    await http('/notifications/emit', { method: 'POST', body: JSON.stringify({ type }) }).catch(() => {});
+    // Nudge the notification bell to refresh its unread count.
+    window.dispatchEvent(new Event('pw-notify'));
+  },
+
   // ── Referral (B2) ──
   async getReferral(): Promise<{ code: string; redeemedCount: number; rewardDays: number }> {
     return http('/referral/me');

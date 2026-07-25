@@ -205,6 +205,30 @@ test('currency converter shows converted budget and calendar export works', asyn
   expect(download.suggestedFilename()).toMatch(/\.ics$/);
 });
 
+test('notification center receives a nearby alert and can mute types', async ({ page }) => {
+  const email = `e2e_ntf_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('Notif Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+
+  // Visiting Social emits a "nearby" notification.
+  await page.getByRole('link', { name: 'Social', exact: true }).click();
+  await page.waitForURL(/\/social$/);
+  await expect(page.getByRole('heading', { name: /Social & Travel Buddies/i })).toBeVisible();
+
+  // Bell shows an unread badge; open it and see the notification + preferences.
+  const bell = page.getByRole('button', { name: 'Notifications' });
+  await expect(bell).toContainText(/[1-9]/, { timeout: 10_000 });
+  await bell.click();
+  await expect(page.getByText(/Friend nearby/i)).toBeVisible();
+  // Open preferences (⚙) and confirm a mutable type is listed.
+  await page.getByRole('button', { name: '⚙' }).click();
+  await expect(page.getByText(/Budget alerts/i)).toBeVisible();
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).

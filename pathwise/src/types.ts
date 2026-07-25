@@ -195,6 +195,19 @@ export interface UsageInfo {
   optimizeLimit: number | null; // null = unlimited (premium)
 }
 
+// ── Notification Center (B6) ───────────────────────────────────────
+export type NotificationType =
+  | 'reservation' | 'trial' | 'poll' | 'nearby' | 'budget' | 'welcome';
+
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export interface AuthResponse {
   user: AuthUser;
   accessToken: string;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   CheckIn,
   CommunityRoute,
@@ -34,11 +34,18 @@ export default function Social() {
   const [active, setActive] = useState<Traveler | null>(null);
   const [checkInText, setCheckInText] = useState('');
 
+  const didEmit = useRef(false);
   useEffect(() => {
     api.getCheckIns().then(setCheckIns);
     api.getTravelers().then(setTravelers);
     api.getCommunityRoutes().then(setRoutes);
     api.getForum().then(setForum);
+    // A nearby check-in → Notification Center (B6). Guard the StrictMode
+    // double-invoke so we don't emit twice.
+    if (!didEmit.current) {
+      didEmit.current = true;
+      api.emitNotification('nearby');
+    }
   }, []);
 
   const filtered = useMemo(

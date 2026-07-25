@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { WeatherWidget } from './WeatherWidget';
 import { LanguageToggle } from './LanguageToggle';
+import { NotificationBell } from './NotificationBell';
 import { useT } from '../i18n';
 
 /** Top navigation shared by Dashboard, Social and Profile. */
@@ -42,6 +43,7 @@ export function AppHeader() {
         <div className="hidden md:block">
           <WeatherWidget />
         </div>
+        <NotificationBell />
         <LanguageToggle />
         <div className="flex items-center gap-2">
           <span className="hidden text-sm text-cream/70 sm:inline">

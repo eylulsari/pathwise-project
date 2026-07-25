@@ -14,6 +14,7 @@ import { PremiumModule } from './modules/premium/premium.module';
 import { ModerationModule } from './modules/moderation/moderation.module';
 import { JournalModule } from './modules/journal/journal.module';
 import { ReferralModule } from './modules/referral/referral.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 // Feature modules (modular monolith — each is a clean boundary).
 
@@ -34,6 +35,7 @@ import { ReferralModule } from './modules/referral/referral.module';
     ModerationModule,
     JournalModule,
     ReferralModule,
+    NotificationsModule,
   ],
   controllers: [HealthController],
   providers: [
