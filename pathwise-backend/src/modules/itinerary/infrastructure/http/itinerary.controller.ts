@@ -8,6 +8,9 @@ import {
 } from '@nestjs/common';
 import { ItineraryService } from '../../application/itinerary.service';
 import { OptimizeLimitGuard } from '../../../../common/guards/optimize-limit.guard';
+import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
+import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
+import { AuthUser } from '../../../auth/domain/auth-user';
 import {
   GenerateRouteDto,
   RebuildRouteDto,
@@ -40,10 +43,14 @@ export class ItineraryController {
     return this.itinerary.rebuild(dto);
   }
 
-  /** POST /api/itinerary/suggest-nearby — one "add this too" candidate. */
+  /**
+   * POST /api/itinerary/suggest-nearby — one "add this too" candidate,
+   * personalized by the signed-in user's Trip Journal category ratings (A4).
+   */
+  @UseGuards(JwtAuthGuard)
   @Post('suggest-nearby')
   @HttpCode(HttpStatus.OK)
-  suggestNearby(@Body() dto: SuggestNearbyDto) {
-    return this.itinerary.suggestNearby(dto.hub, dto.placeIds);
+  suggestNearby(@CurrentUser() user: AuthUser, @Body() dto: SuggestNearbyDto) {
+    return this.itinerary.suggestNearby(dto.hub, dto.placeIds, user.id);
   }
 }

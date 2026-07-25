@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Hub, Interest, Place } from '../../places/domain/place';
 import { PlacesService } from '../../places/application/places.service';
+import { JournalService } from '../../journal/application/journal.service';
 import { Itinerary, RouteGenerationInput } from '../domain/itinerary';
 import { haversineMeters } from '../domain/geo';
 import { RouteStrategyFactory } from './route-strategy.factory';
@@ -26,6 +27,7 @@ export class ItineraryService {
     // inherently the hub-budget engine's assembly step, not a new strategy.
     private readonly hubBudget: HubBudgetStrategy,
     private readonly places: PlacesService,
+    private readonly journal: JournalService,
   ) {}
 
   async generate(dto: GenerateRouteDto): Promise<Itinerary> {
@@ -73,6 +75,7 @@ export class ItineraryService {
   async suggestNearby(
     hub: Hub,
     selectedIds: string[],
+    userId?: string,
   ): Promise<NearbySuggestion | null> {
     const selectedSet = new Set(selectedIds);
     const selected = (await this.places.findByIds(selectedIds)).filter((p) =>
@@ -85,6 +88,11 @@ export class ItineraryService {
     );
     if (candidates.length === 0) return null;
 
+    // A4 — personalize: boost categories the user rated highly in their journal.
+    const categoryRatings = userId
+      ? (await this.journal.summary(userId)).categoryRatings
+      : {};
+
     // For each candidate, distance to its nearest already-picked stop.
     const scored = candidates.map((c) => {
       let nearest = selected[0];
@@ -96,8 +104,10 @@ export class ItineraryService {
           nearest = s;
         }
       }
-      // Prefer close + highly rated (rating breaks near-ties on distance).
-      const score = dist - c.rating * 60;
+      // Prefer close + highly rated; a high journal rating for this category
+      // pulls the score down (better) so favorite categories surface first.
+      const journalBoost = (categoryRatings[c.category] ?? 0) * 120;
+      const score = dist - c.rating * 60 - journalBoost;
       return { c, nearest, dist, score };
     });
 
