@@ -1,6 +1,8 @@
 import type { GroupType, Hub, Interest, Weather } from '../../types';
 import { HUBS } from '../../hubData';
 import { useT } from '../../i18n';
+import { useCurrency } from '../../context/CurrencyContext';
+import { CurrencySelect } from '../CurrencySelect';
 
 export interface RouteConfig {
   hub: Hub;
@@ -35,6 +37,7 @@ export function RouteGenerator({
   offline?: boolean;
 }) {
   const { t } = useT();
+  const { currency, format } = useCurrency();
   const timeOfDay =
     config.startHour < 12
       ? t('dash.morning')
@@ -70,9 +73,15 @@ export function RouteGenerator({
 
       {/* Budget slider */}
       <div>
-        <Label>
-          {t('dash.dailyBudget')}: <span className="text-cream">₺{config.budgetTry.toLocaleString('tr-TR')}{config.budgetTry >= 5000 ? '+' : ''}</span>
-        </Label>
+        <div className="mb-1.5 flex items-center justify-between">
+          <Label>
+            {t('dash.dailyBudget')}: <span className="text-cream">₺{config.budgetTry.toLocaleString('tr-TR')}{config.budgetTry >= 5000 ? '+' : ''}</span>
+            {currency.code !== 'TRY' && (
+              <span className="ml-1 text-cream/50">≈ {format(config.budgetTry)}</span>
+            )}
+          </Label>
+          <CurrencySelect />
+        </div>
         <input
           type="range"
           min={300}

@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { formatTry } from '../utils/format';
+import { useCurrency } from '../context/CurrencyContext';
+import { CurrencySelect } from './CurrencySelect';
 
 interface LineItem { id: number; label: string; amount: number }
 
 /** Split Bill modal — enter itemized expenses, split by people or by connected
  *  buddies. */
 export function SplitBill({ onClose }: { onClose: () => void }) {
+  const { currency, format } = useCurrency();
   const [items, setItems] = useState<LineItem[]>([
     { id: 1, label: 'Lunch at Çiya', amount: 420 },
   ]);
@@ -29,7 +32,12 @@ export function SplitBill({ onClose }: { onClose: () => void }) {
       <div className="card-cream w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h3 className="font-display text-xl font-bold text-night">💰 Split the Bill</h3>
-          <button onClick={onClose} className="text-night/40 hover:text-night">✕</button>
+          <div className="flex items-center gap-2">
+            <div className="[&_select]:border-night/15 [&_select]:bg-white [&_select]:text-night">
+              <CurrencySelect />
+            </div>
+            <button onClick={onClose} className="text-night/40 hover:text-night">✕</button>
+          </div>
         </div>
 
         <div className="mt-4 space-y-2">
@@ -61,8 +69,11 @@ export function SplitBill({ onClose }: { onClose: () => void }) {
 
         <div className="mt-4 rounded-xl bg-accent-gradient p-4 text-center text-white">
           <p className="text-sm text-white/80">Each person pays</p>
-          <p className="font-display text-3xl font-bold">{formatTry(perPerson)}</p>
-          <p className="text-xs text-white/70">Total {formatTry(total)} ÷ {people}</p>
+          <p className="font-display text-3xl font-bold">{format(perPerson)}</p>
+          {currency.code !== 'TRY' && (
+            <p className="text-xs text-white/80">{formatTry(perPerson)}</p>
+          )}
+          <p className="text-xs text-white/70">Total {format(total)} ÷ {people}</p>
         </div>
       </div>
     </div>

@@ -182,6 +182,29 @@ test('offline mode: banner, disabled network actions, and IndexedDB cache', asyn
   await expect(page.getByRole('button', { name: /💾 Save plan/ })).toBeDisabled();
 });
 
+test('currency converter shows converted budget and calendar export works', async ({ page }) => {
+  const email = `e2e_cur_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('Cur Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+
+  // B4: switch display currency to USD → converted budget appears.
+  await page.getByLabel('Display currency').selectOption('USD');
+  await expect(page.getByText(/≈ \$/).first()).toBeVisible();
+
+  // B5: export dropdown offers .ics and downloads it.
+  await page.getByRole('button', { name: /Export/ }).click();
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: /Add to Calendar/i }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/\.ics$/);
+});
+
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {
   await page.goto('/');
   // Defaults to English (Playwright locale is en-US).

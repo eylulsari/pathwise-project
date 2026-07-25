@@ -1,10 +1,12 @@
 import type { Itinerary } from '../types';
 import { formatTry } from '../utils/format';
 import { useT } from '../i18n';
+import { useCurrency } from '../context/CurrencyContext';
 
 /** Live budget tracker — turns coral→fuchsia as you approach/exceed budget. */
 export function BudgetBar({ itinerary }: { itinerary: Itinerary }) {
   const { t } = useT();
+  const { currency, format } = useCurrency();
   const spent = itinerary.costBreakdown.totalTry;
   const budget = itinerary.budgetTry;
   const pct = Math.min(100, Math.round((spent / budget) * 100));
@@ -24,6 +26,9 @@ export function BudgetBar({ itinerary }: { itinerary: Itinerary }) {
         <span className="text-sm font-semibold text-cream/80">{t('today.dailyBudget')}</span>
         <span className={`text-sm font-bold ${over ? 'text-fuchsia' : 'text-cream'}`}>
           {formatTry(spent)} <span className="text-cream/40">/ {formatTry(budget)}</span>
+          {currency.code !== 'TRY' && (
+            <span className="ml-1 text-cream/40">({format(spent)})</span>
+          )}
         </span>
       </div>
       <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-night">

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Itinerary } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { exportItineraryPdf, googleMapsUrl } from '../utils/export';
+import { downloadIcs } from '../utils/ics';
 
 const PDF_KEY = 'pathwise.pdfExports'; // "YYYY-MM:count"
 
@@ -18,12 +20,14 @@ function recordPdfExport() {
   localStorage.setItem(PDF_KEY, `${month}:${count}`);
 }
 
-/** Export actions — simulated PDF download + a real Google Maps directions link. */
+/** Export menu — PDF (gated), Google Maps directions, and .ics calendar. */
 export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
   const { isPremium } = useAuth();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   function onPdf() {
+    setOpen(false);
     if (!isPremium && !canExportPdf()) {
       navigate('/premium'); // free monthly limit reached → upgrade
       return;
@@ -33,21 +37,41 @@ export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="relative">
       <button
-        onClick={onPdf}
+        onClick={() => setOpen((o) => !o)}
         className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/80 hover:text-cream"
       >
-        📄 Export PDF{!isPremium && !canExportPdf() ? ' 🔒' : ''}
+        ⬇ Export ▾
       </button>
-      <a
-        href={googleMapsUrl(itinerary)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/80 hover:text-cream"
-      >
-        🗺️ Open in Google Maps
-      </a>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 z-[1041] mt-1 w-56 overflow-hidden rounded-xl border border-white/10 bg-night-800 shadow-xl">
+            <button onClick={onPdf} className="block w-full px-4 py-2.5 text-left text-sm text-cream/80 hover:bg-white/5">
+              📄 Export PDF{!isPremium && !canExportPdf() ? ' 🔒' : ''}
+            </button>
+            <a
+              href={googleMapsUrl(itinerary)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="block w-full px-4 py-2.5 text-left text-sm text-cream/80 hover:bg-white/5"
+            >
+              🗺️ Open in Google Maps
+            </a>
+            <button
+              onClick={() => {
+                setOpen(false);
+                downloadIcs(itinerary);
+              }}
+              className="block w-full px-4 py-2.5 text-left text-sm text-cream/80 hover:bg-white/5"
+            >
+              📅 Add to Calendar (.ics)
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
