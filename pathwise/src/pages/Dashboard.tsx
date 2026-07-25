@@ -49,6 +49,7 @@ interface DayState {
   mustVisitIds: string[];
   reservations: Reservation[];
   itinerary: Itinerary | null;
+  undoStack: Itinerary[]; // A1 — last 5 states for undo
   loading: boolean;
   error: string | null;
 }
@@ -65,9 +66,9 @@ const baseConfig = (hub: Hub): RouteConfig => ({
 
 // Three days, three different neighborhoods — deliberately not Sultanahmet-first.
 const INITIAL_DAYS: DayState[] = [
-  { config: baseConfig('kadikoy-moda'), mustVisitIds: [], reservations: [], itinerary: null, loading: true, error: null },
-  { config: baseConfig('karakoy-galata'), mustVisitIds: [], reservations: [], itinerary: null, loading: false, error: null },
-  { config: baseConfig('balat-fener'), mustVisitIds: [], reservations: [], itinerary: null, loading: false, error: null },
+  { config: baseConfig('kadikoy-moda'), mustVisitIds: [], reservations: [], itinerary: null, undoStack: [], loading: true, error: null },
+  { config: baseConfig('karakoy-galata'), mustVisitIds: [], reservations: [], itinerary: null, undoStack: [], loading: false, error: null },
+  { config: baseConfig('balat-fener'), mustVisitIds: [], reservations: [], itinerary: null, undoStack: [], loading: false, error: null },
 ];
 
 export default function Dashboard() {
@@ -81,6 +82,7 @@ export default function Dashboard() {
   const [startPoint, setStartPoint] = useState<StartPoint | null>(null);
   const [endPoint, setEndPoint] = useState<StartPoint | null>(null);
   const [reordering, setReordering] = useState(false);
+  const [undoVisible, setUndoVisible] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -187,6 +189,8 @@ export default function Dashboard() {
     const overId = String(over.id);
     if (activeId === overId) return;
 
+    recordUndo(activeDay); // A1 — snapshot before the drag reorder/move
+
     // Dropped onto a Day tab → move the stop to that day.
     if (overId.startsWith('day-')) {
       const target = Number(overId.slice(4));
@@ -287,8 +291,36 @@ export default function Dashboard() {
     patchDay(activeDay, { config: { ...day.config, ...patch } });
   }
 
+  // ── Undo layer (A1) ───────────────────────────────────────────────
+  // Snapshot the current plan before a user-initiated change (drag/optimize).
+  function recordUndo(index: number) {
+    const current = days[index].itinerary;
+    if (!current) return;
+    setDays((prev) =>
+      prev.map((d, i) =>
+        i === index ? { ...d, undoStack: [current, ...d.undoStack].slice(0, 5) } : d,
+      ),
+    );
+    setUndoVisible(true);
+    window.clearTimeout((recordUndo as unknown as { _t?: number })._t);
+    (recordUndo as unknown as { _t?: number })._t = window.setTimeout(
+      () => setUndoVisible(false),
+      6000,
+    );
+  }
+
+  function undo() {
+    const stack = days[activeDay].undoStack;
+    if (stack.length === 0) return;
+    const [prevItinerary, ...rest] = stack;
+    patchDay(activeDay, { itinerary: prevItinerary, undoStack: rest });
+    setUndoVisible(false);
+    setSelectedPlaceId(null);
+  }
+
   function handleGenerate() {
     if (isOffline) return; // no network in offline mode
+    recordUndo(activeDay); // A1 — snapshot before optimize
     generateFor(activeDay, buildRequest(day));
   }
 
@@ -487,6 +519,17 @@ export default function Dashboard() {
 
         {/* Middle: Today's Path */}
         <div className="overflow-y-auto pr-1">
+          {undoVisible && day.undoStack.length > 0 && (
+            <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-violet/40 bg-violet/10 px-3 py-2 text-sm">
+              <span className="text-cream/90">✏️ {t('dash.routeUpdated')}</span>
+              <div className="flex items-center gap-2">
+                <button onClick={undo} className="rounded-lg bg-accent-gradient px-3 py-1 text-xs font-semibold text-white">
+                  ↩ {t('dash.undo')}
+                </button>
+                <button onClick={() => setUndoVisible(false)} className="text-xs text-cream/50 hover:text-cream">✕</button>
+              </div>
+            </div>
+          )}
           {day.loading && (
             <div className="flex h-40 items-center justify-center text-cream/50">
               <span className="animate-pulse">{t('dash.generating')}</span>

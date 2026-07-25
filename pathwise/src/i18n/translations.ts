@@ -91,6 +91,8 @@ export const translations = {
       offlineBanner: '📴 Offline Mode (simulated) — showing your cached plan.',
       offlineReal: '📴 You are offline — showing your cached plan and map.',
       offlineNeed: '📴 Offline — connection required',
+      routeUpdated: 'Route updated.',
+      undo: 'Undo',
     },
     endPoint: { title: 'End point' },
     startPoint: {
@@ -380,6 +382,8 @@ export const translations = {
       offlineBanner: '📴 Çevrimdışı Mod (simülasyon) — önbellekteki planın gösteriliyor.',
       offlineReal: '📴 Çevrimdışısın — önbellekteki plan ve harita gösteriliyor.',
       offlineNeed: '📴 Çevrimdışı — bağlantı gerekli',
+      routeUpdated: 'Rota güncellendi.',
+      undo: 'Geri Al',
     },
     endPoint: { title: 'Bitiş noktası' },
     startPoint: {

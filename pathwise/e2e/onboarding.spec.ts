@@ -90,6 +90,13 @@ test('drag-and-drop reorders Today’s Path and an End point selector exists', a
   await expect
     .poll(async () => (await names.allTextContents())[0], { timeout: 10_000 })
     .not.toBe(before[0]);
+
+  // A1: an "Route updated / Undo" banner appears; Undo restores the order.
+  await expect(page.getByText(/Route updated/i)).toBeVisible();
+  await page.getByRole('button', { name: /Undo/i }).click();
+  await expect
+    .poll(async () => (await names.allTextContents())[0], { timeout: 10_000 })
+    .toBe(before[0]);
 });
 
 test('can pin a reservation and see a nearby suggestion', async ({ page }) => {
