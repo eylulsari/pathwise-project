@@ -30,6 +30,7 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
       travelStyles: row.travelStyles ?? [],
       bio: row.bio,
       subscriptionTier: row.subscriptionTier ?? 'free',
+      trialEndsAt: row.trialEndsAt ?? null,
       createdAt: row.createdAt,
     });
   }
@@ -75,6 +76,12 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
 
   async setSubscriptionTier(id: string, tier: SubscriptionTier): Promise<User> {
     await this.repo.update({ id }, { subscriptionTier: tier });
+    const row = await this.repo.findOne({ where: { id } });
+    return this.toDomain(row as UserOrmEntity);
+  }
+
+  async setTrialEndsAt(id: string, trialEndsAt: Date | null): Promise<User> {
+    await this.repo.update({ id }, { trialEndsAt });
     const row = await this.repo.findOne({ where: { id } });
     return this.toDomain(row as UserOrmEntity);
   }

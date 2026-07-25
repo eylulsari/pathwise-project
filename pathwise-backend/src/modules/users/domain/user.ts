@@ -14,6 +14,8 @@ export interface UserProps {
   travelStyles: string[];
   bio?: string | null;
   subscriptionTier?: SubscriptionTier;
+  /** Effective-premium-until timestamp (referral reward B2 + trial A6). */
+  trialEndsAt?: Date | null;
   createdAt: Date;
 }
 
@@ -27,6 +29,7 @@ export class User {
   travelStyles: string[];
   bio: string | null;
   subscriptionTier: SubscriptionTier;
+  trialEndsAt: Date | null;
   readonly createdAt: Date;
 
   constructor(props: UserProps) {
@@ -39,11 +42,14 @@ export class User {
     this.travelStyles = props.travelStyles ?? [];
     this.bio = props.bio ?? null;
     this.subscriptionTier = props.subscriptionTier ?? 'free';
+    this.trialEndsAt = props.trialEndsAt ?? null;
     this.createdAt = props.createdAt;
   }
 
+  /** Premium if on the paid tier OR within an active trial/reward window. */
   get isPremium(): boolean {
-    return this.subscriptionTier === 'premium';
+    if (this.subscriptionTier === 'premium') return true;
+    return this.trialEndsAt != null && this.trialEndsAt.getTime() > Date.now();
   }
 
   /** Public-safe view — never leaks the password hash. */
@@ -57,6 +63,8 @@ export class User {
       travelStyles: this.travelStyles,
       bio: this.bio,
       subscriptionTier: this.subscriptionTier,
+      trialEndsAt: this.trialEndsAt,
+      isPremium: this.isPremium,
       createdAt: this.createdAt,
     };
   }

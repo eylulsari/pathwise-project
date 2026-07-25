@@ -178,6 +178,14 @@ export const api = {
   async getUsage(): Promise<UsageInfo> {
     return http<UsageInfo>('/premium/usage');
   },
+
+  // ── Referral (B2) ──
+  async getReferral(): Promise<{ code: string; redeemedCount: number; rewardDays: number }> {
+    return http('/referral/me');
+  },
+  async redeemReferral(code: string): Promise<{ rewardedDays: number }> {
+    return http('/referral/redeem', { method: 'POST', body: JSON.stringify({ code }) });
+  },
   /** Full audio guide — premium only (throws on 402 for free users). */
   async getFullAudioGuide(placeId: string): Promise<{ durationSeconds: number; transcript: string }> {
     return http(`/premium/audio-guide/${placeId}`);

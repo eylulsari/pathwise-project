@@ -23,4 +23,5 @@ export interface UserRepositoryPort {
   findByEmail(email: string): Promise<User | null>;
   save(user: User): Promise<User>;
   setSubscriptionTier(id: string, tier: SubscriptionTier): Promise<User>;
+  setTrialEndsAt(id: string, trialEndsAt: Date | null): Promise<User>;
 }

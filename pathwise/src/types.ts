@@ -184,6 +184,8 @@ export interface AuthUser {
   travelStyles: string[];
   bio?: string | null;
   subscriptionTier: SubscriptionTier;
+  trialEndsAt?: string | null;
+  isPremium?: boolean; // backend-computed (tier OR active trial/reward window)
   createdAt: string;
 }
 

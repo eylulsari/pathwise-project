@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AppHeader } from '../components/AppHeader';
+import { ReferralPanel } from '../components/ReferralPanel';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { useT } from '../i18n';
@@ -41,7 +42,14 @@ export default function Premium() {
           <p className="mt-3 inline-block rounded-full bg-white/15 px-3 py-1 text-sm">
             {t('premium.current')}: <span className="font-bold">{isPremium ? t('premium.premium') : t('premium.free')}</span>
           </p>
+          {user?.subscriptionTier !== 'premium' && user?.trialEndsAt && new Date(user.trialEndsAt) > new Date() && (
+            <p className="mt-2 text-xs text-white/80">
+              ⏳ {t('premium.trialActive')} — {t('premium.trialEnds')} {new Date(user.trialEndsAt).toLocaleDateString()}
+            </p>
+          )}
         </div>
+
+        <ReferralPanel />
 
         {/* Comparison table */}
         <div className="overflow-x-auto rounded-2xl border border-white/10 bg-night-800">

@@ -116,7 +116,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         refreshUser,
-        isPremium: user?.subscriptionTier === 'premium',
+        // Backend computes isPremium (paid tier OR active trial/reward window).
+        isPremium: user?.isPremium ?? user?.subscriptionTier === 'premium',
       }}
     >
       {children}

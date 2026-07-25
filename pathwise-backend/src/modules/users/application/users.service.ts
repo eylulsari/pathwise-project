@@ -46,4 +46,22 @@ export class UsersService {
     const user = await this.users.setSubscriptionTier(id, tier);
     return user.toPublic();
   }
+
+  /**
+   * Extend the premium/trial window by N days (referral reward B2, trial A6).
+   * Adds onto the later of "now" or the current trialEndsAt.
+   */
+  async grantPremiumDays(id: string, days: number) {
+    const user = await this.findById(id);
+    const base = Math.max(Date.now(), user.trialEndsAt?.getTime() ?? 0);
+    const until = new Date(base + days * 86400 * 1000);
+    const updated = await this.users.setTrialEndsAt(id, until);
+    return updated.toPublic();
+  }
+
+  /** Set an absolute trial end (used by A6 to assign the signup trial). */
+  async setTrialEndsAt(id: string, until: Date | null) {
+    const updated = await this.users.setTrialEndsAt(id, until);
+    return updated.toPublic();
+  }
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 import { IstanbulSilhouette } from '../components/IstanbulSilhouette';
 import { LanguageToggle } from '../components/LanguageToggle';
 import { useT } from '../i18n';
@@ -14,6 +15,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nationality, setNationality] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -32,6 +34,10 @@ export default function AuthPage() {
           password,
           nationality: nationality || undefined,
         });
+        // B2: redeem a friend's referral code if provided (best-effort).
+        if (referralCode.trim()) {
+          await api.redeemReferral(referralCode.trim().toUpperCase()).catch(() => {});
+        }
         navigate('/success');
       } else {
         await login({ email, password });
@@ -110,6 +116,14 @@ export default function AuthPage() {
                 value={nationality}
                 onChange={setNationality}
                 placeholder="Turkey"
+              />
+            )}
+            {isSignup && (
+              <Field
+                label={t('auth.referral')}
+                value={referralCode}
+                onChange={setReferralCode}
+                placeholder="PWXXXXXX"
               />
             )}
           </div>

@@ -13,6 +13,7 @@ import { TripsModule } from './modules/trips/trips.module';
 import { PremiumModule } from './modules/premium/premium.module';
 import { ModerationModule } from './modules/moderation/moderation.module';
 import { JournalModule } from './modules/journal/journal.module';
+import { ReferralModule } from './modules/referral/referral.module';
 
 // Feature modules (modular monolith — each is a clean boundary).
 
@@ -32,6 +33,7 @@ import { JournalModule } from './modules/journal/journal.module';
     PremiumModule,
     ModerationModule,
     JournalModule,
+    ReferralModule,
   ],
   controllers: [HealthController],
   providers: [
