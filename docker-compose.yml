@@ -67,6 +67,9 @@ services:
       AUTH_THROTTLE_LIMIT: ${AUTH_THROTTLE_LIMIT:-100}
       # Optional — weather falls back to mock data if unset. (Never committed.)
       OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
+      # Optional — AI assistant falls back to canned answers if unset.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
     ports:
       - "3000:3000"
     volumes:

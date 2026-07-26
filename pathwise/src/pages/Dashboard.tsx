@@ -633,7 +633,14 @@ export default function Dashboard() {
       )}
 
       {/* Floating AI assistant */}
-      <AiAssistant onAddToPath={addToPath} />
+      <AiAssistant
+        onAddToPath={addToPath}
+        activePlan={
+          day.itinerary?.stops
+            .map((s) => s.place?.name)
+            .filter((n): n is string => Boolean(n)) ?? []
+        }
+      />
     </div>
   );
 }

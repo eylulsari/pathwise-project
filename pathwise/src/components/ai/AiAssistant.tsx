@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { AiSuggestion } from '../../types';
-import { api } from '../../services/api';
+import { api, type AiChatTurn } from '../../services/api';
 import { formatTry } from '../../utils/format';
 
 interface Message {
@@ -8,6 +8,9 @@ interface Message {
   text: string;
   suggestion?: AiSuggestion;
 }
+
+/** Keep the last N turns of context sent to the backend (matches its own cap). */
+const HISTORY_TURNS = 8;
 
 const CHIPS = [
   'Best sunset spot?',
@@ -18,7 +21,14 @@ const CHIPS = [
 /** Floating AI assistant. Question chips, rich answer cards with cost + safety
  *  badge, and an "Add to Today's Path" action that locks the place into the
  *  route. */
-export function AiAssistant({ onAddToPath }: { onAddToPath: (placeId: string) => void }) {
+export function AiAssistant({
+  onAddToPath,
+  activePlan = [],
+}: {
+  onAddToPath: (placeId: string) => void;
+  /** Place names on Today's Path, sent to the backend for personalised replies. */
+  activePlan?: string[];
+}) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'ai', text: 'Hi! Ask me for a sunset spot, a cheap eat or a rainy-day plan.' },
@@ -27,13 +37,34 @@ export function AiAssistant({ onAddToPath }: { onAddToPath: (placeId: string) =>
   const [busy, setBusy] = useState(false);
 
   async function ask(q: string) {
-    if (!q.trim()) return;
+    if (!q.trim() || busy) return;
+    // Snapshot the conversation BEFORE adding this turn, so history is the
+    // prior context. Skip the greeting and any suggestion-card-only turns.
+    const history: AiChatTurn[] = messages
+      .filter((m) => m.text.trim())
+      .slice(-HISTORY_TURNS)
+      .map((m) => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }],
+      }));
+
     setMessages((m) => [...m, { role: 'user', text: q }]);
     setInput('');
     setBusy(true);
-    const res = await api.askAssistant(q);
-    setMessages((m) => [...m, { role: 'ai', text: res.answer, suggestion: res.suggestion }]);
-    setBusy(false);
+    try {
+      const res = await api.askAssistant(q, history, activePlan);
+      setMessages((m) => [...m, { role: 'ai', text: res.answer, suggestion: res.suggestion }]);
+    } catch {
+      setMessages((m) => [
+        ...m,
+        {
+          role: 'ai',
+          text: "Sorry — I couldn't reach the assistant just now. Please try again in a moment.",
+        },
+      ]);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (

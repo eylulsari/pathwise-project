@@ -472,46 +472,29 @@ export const api = {
   },
 
   // ═════════════════════════════════════════════════════════════════
-  // AI ASSISTANT — would call the backend which proxies an LLM. Here a
-  // deterministic mock keyed off the question keywords.
+  // AI ASSISTANT — real backend chat, grounded in the place dataset and
+  // powered by Google Gemini. The backend degrades to canned answers when
+  // the key is missing or the API fails, so this always resolves with a
+  // usable reply; the component handles transport errors gracefully.
   // ═════════════════════════════════════════════════════════════════
-  async askAssistant(question: string): Promise<{
+  async askAssistant(
+    message: string,
+    conversationHistory: AiChatTurn[] = [],
+    activePlan: string[] = [],
+  ): Promise<{
     answer: string;
     suggestion?: AiSuggestion;
+    source?: 'gemini' | 'fallback';
   }> {
-    const q = question.toLowerCase();
-    let suggestion: AiSuggestion | undefined;
-    let answer =
-      'I can help you plan around budget, weather and vibe. Try asking for a sunset spot, a cheap eat, or a rainy-day plan.';
-
-    if (q.includes('sunset') || q.includes('golden')) {
-      suggestion = {
-        placeId: 'ChIJ-galata-tower',
-        name: 'Galata Tower',
-        reason: 'Best 360° golden-hour view over the Golden Horn.',
-        costTry: 1000,
-        safety: 'safe',
-      };
-      answer = 'For golden hour, head to Galata Tower ~45 min before sunset.';
-    } else if (q.includes('cheap') || q.includes('budget') || q.includes('eat')) {
-      suggestion = {
-        placeId: 'ChIJ-kadikoy-carsi',
-        name: 'Kadıköy Market',
-        reason: 'Graze fish sandwiches, pickles and börek for very little.',
-        costTry: 250,
-        safety: 'safe',
-      };
-      answer = 'On a budget? Graze your way through Kadıköy Market on the Asian side.';
-    } else if (q.includes('rain')) {
-      suggestion = {
-        placeId: 'ChIJ-sultanahmet-basilicacistern',
-        name: 'Basilica Cistern',
-        reason: 'Fully underground — perfect when it rains.',
-        costTry: 900,
-        safety: 'safe',
-      };
-      answer = 'Raining? Duck into the Basilica Cistern — it is entirely indoors.';
-    }
-    return delay({ answer, suggestion }, 600);
+    return http('/assistant/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, conversationHistory, activePlan }),
+    });
   },
 };
+
+/** One turn of chat history in the backend/Gemini shape. */
+export interface AiChatTurn {
+  role: 'user' | 'model';
+  parts: { text: string }[];
+}
