@@ -104,6 +104,12 @@ export default function Dashboard() {
   const [searchFocus, setSearchFocus] = useState<Place | null>(null);
   const [suggestion, setSuggestion] = useState<NearbySuggestion | null>(null);
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
+  // Transient toast (e.g. must-visit picks auto-applied to the route).
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<number | null>(null);
+  // Must-Visit selections at the moment the picker opened — compared on close
+  // so we can auto-apply + report what changed without an extra Generate tap.
+  const mustVisitSnapshot = useRef<string[]>([]);
 
   const day = days[activeDay];
 
@@ -345,6 +351,36 @@ export default function Dashboard() {
     patchDay(activeDay, { mustVisitIds: next });
   }
 
+  function showToast(msg: string) {
+    setToast(msg);
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(null), 3200);
+  }
+
+  function openMustVisit() {
+    mustVisitSnapshot.current = day.mustVisitIds;
+    setShowMustVisit(true);
+  }
+
+  // Auto-apply the picks on close (no extra Generate tap) and toast the result.
+  function closeMustVisit() {
+    setShowMustVisit(false);
+    const before = mustVisitSnapshot.current;
+    const after = day.mustVisitIds;
+    const added = after.filter((id) => !before.includes(id));
+    const removed = before.filter((id) => !after.includes(id));
+    if (added.length === 0 && removed.length === 0) return;
+    if (isOffline || !day.itinerary) return; // can't re-plan offline / with no plan
+    recordUndo(activeDay);
+    generateFor(activeDay, buildRequest(day));
+    if (added.length > 0) {
+      const suffix = added.length === 1 ? t('dash.stopAdded') : t('dash.stopsAdded');
+      showToast(`✅ ${t('dash.mustVisitApplied')} · ${added.length} ${suffix}`);
+    } else {
+      showToast(`✅ ${t('dash.routeUpdated')}`);
+    }
+  }
+
   async function handleQuiz(result: QuizResult) {
     setShowQuiz(false);
     const req: GenerateRouteRequest = {
@@ -454,12 +490,12 @@ export default function Dashboard() {
       <AppHeader />
 
       {isOffline && (
-        <div className="bg-coral/20 px-4 py-1.5 text-center text-xs font-semibold text-coral">
+        <div className="bg-terracotta/20 px-4 py-1.5 text-center text-xs font-semibold text-terracotta">
           {!online ? t('dash.offlineReal') : t('dash.offlineBanner')}
         </div>
       )}
       {optimizeBlocked && (
-        <div className="flex items-center justify-center gap-2 bg-violet/20 px-4 py-1.5 text-center text-xs font-semibold text-cream">
+        <div className="flex items-center justify-center gap-2 bg-iznik/20 px-4 py-1.5 text-center text-xs font-semibold text-ink">
           🔒 {usage?.optimizeLimit ?? 3}/{usage?.optimizeLimit ?? 3} — {t('premium.optimizeLeft')}: 0
           <button onClick={() => navigate('/premium')} className="underline">{t('premium.unlock')}</button>
         </div>
@@ -467,7 +503,7 @@ export default function Dashboard() {
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
       {/* Day tabs + action bar */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/10 px-4 py-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-ink/10 px-4 py-2">
         {days.map((_, i) => (
           <DayTab
             key={i}
@@ -480,7 +516,7 @@ export default function Dashboard() {
         ))}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {usage && (
-            <span className="rounded-lg border border-white/10 px-2.5 py-1 text-xs text-cream/60">
+            <span className="rounded-lg border border-ink/10 px-2.5 py-1 text-xs text-ink/60">
               {usage.optimizeLimit === null
                 ? `💎 ${t('premium.unlimited')}`
                 : `⚡ ${Math.max(0, usage.optimizeLimit - usage.optimizeUsed)} ${t('premium.optimizeLeft')}`}
@@ -491,15 +527,15 @@ export default function Dashboard() {
             disabled={!day.itinerary || saveState === 'saving' || isOffline}
             className={`rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
               saveState === 'saved'
-                ? 'border-emerald bg-emerald/20 text-emerald'
-                : 'border-white/10 text-cream/80 hover:text-cream'
+                ? 'border-sage bg-sage/20 text-sage'
+                : 'border-ink/10 text-ink/80 hover:text-ink'
             }`}
           >
             {saveState === 'saved' ? `✓ ${t('dash.saved')}` : saveState === 'saving' ? t('dash.saving') : `💾 ${t('dash.savePlan')}`}
           </button>
           <button
             onClick={() => setShowSplitBill(true)}
-            className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/80 hover:text-cream"
+            className="rounded-lg border border-ink/10 px-3 py-1.5 text-sm font-semibold text-ink/80 hover:text-ink"
           >
             💰 {t('dash.splitBill')}
           </button>
@@ -519,8 +555,9 @@ export default function Dashboard() {
       </div>
 
       <div className="grid flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2 xl:h-[calc(100vh-155px)] xl:grid-cols-[330px_minmax(340px,400px)_1fr]">
-        {/* Left rail: controls */}
-        <div className="space-y-4 overflow-y-auto pr-1">
+        {/* Left rail: controls — on mobile these fine-tuning tools drop below the
+            already-generated plan + map (results-first); desktop layout unchanged. */}
+        <div className="order-3 space-y-4 overflow-y-auto pr-1 lg:order-none">
           <RouteGenerator
             config={day.config}
             onChange={updateConfig}
@@ -532,13 +569,13 @@ export default function Dashboard() {
             <button
               onClick={() => setShowQuiz(true)}
               disabled={isOffline}
-              className="rounded-xl border border-violet/40 px-3 py-2.5 text-sm font-semibold text-cream hover:bg-violet/10 disabled:opacity-40"
+              className="rounded-xl border border-iznik/40 px-3 py-2.5 text-sm font-semibold text-ink hover:bg-iznik/10 disabled:opacity-40"
             >
               🎭 {t('dash.vibeQuiz')}
             </button>
             <button
-              onClick={() => setShowMustVisit(true)}
-              className="rounded-xl border border-emerald/40 px-3 py-2.5 text-sm font-semibold text-cream hover:bg-emerald/10"
+              onClick={openMustVisit}
+              className="rounded-xl border border-sage/40 px-3 py-2.5 text-sm font-semibold text-ink hover:bg-sage/10"
             >
               ⭐ {t('dash.mustVisit')} {day.mustVisitIds.length > 0 && `(${day.mustVisitIds.length})`}
             </button>
@@ -554,26 +591,26 @@ export default function Dashboard() {
           <SurvivalWidget />
         </div>
 
-        {/* Middle: Today's Path */}
-        <div className="overflow-y-auto pr-1">
+        {/* Middle: Today's Path — first thing on mobile (the actual result). */}
+        <div className="order-1 overflow-y-auto pr-1 lg:order-none">
           {undoVisible && day.undoStack.length > 0 && (
-            <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-violet/40 bg-violet/10 px-3 py-2 text-sm">
-              <span className="text-cream/90">✏️ {t('dash.routeUpdated')}</span>
+            <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-iznik/40 bg-iznik/10 px-3 py-2 text-sm">
+              <span className="text-ink/90">✏️ {t('dash.routeUpdated')}</span>
               <div className="flex items-center gap-2">
-                <button onClick={undo} className="rounded-lg bg-accent-gradient px-3 py-1 text-xs font-semibold text-white">
+                <button onClick={undo} className="rounded-lg bg-iznik px-3 py-1 text-xs font-semibold text-white">
                   ↩ {t('dash.undo')}
                 </button>
-                <button onClick={() => setUndoVisible(false)} className="text-xs text-cream/50 hover:text-cream">✕</button>
+                <button onClick={() => setUndoVisible(false)} className="text-xs text-ink/50 hover:text-ink">✕</button>
               </div>
             </div>
           )}
           {day.loading && (
-            <div className="flex h-40 items-center justify-center text-cream/50">
+            <div className="flex h-40 items-center justify-center text-ink/50">
               <span className="animate-pulse">{t('dash.generating')}</span>
             </div>
           )}
           {day.error && (
-            <div className="rounded-xl bg-fuchsia/15 p-4 text-sm text-fuchsia">
+            <div className="rounded-xl bg-sunset/15 p-4 text-sm text-terracotta">
               {day.error}
               <button onClick={handleGenerate} className="ml-2 underline">{t('dash.retry')}</button>
             </div>
@@ -595,8 +632,8 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Right: Map */}
-        <div className="relative h-[60vh] xl:h-full">
+        {/* Right: Map — second on mobile, right after the plan. */}
+        <div className="relative order-2 h-[60vh] lg:order-none xl:h-full">
           <MapView
             itinerary={day.itinerary}
             selectedPlaceId={selectedPlaceId}
@@ -615,7 +652,7 @@ export default function Dashboard() {
         <MustVisitList
           selected={day.mustVisitIds}
           onToggle={toggleMustVisit}
-          onClose={() => setShowMustVisit(false)}
+          onClose={closeMustVisit}
         />
       )}
       {showSplitBill && <SplitBill onClose={() => setShowSplitBill(false)} />}
@@ -630,6 +667,16 @@ export default function Dashboard() {
       )}
       {journalPlace && (
         <JournalModal place={journalPlace} onClose={() => setJournalPlace(null)} />
+      )}
+
+      {/* Transient action feedback (e.g. must-visit picks applied) */}
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-24 left-1/2 z-[1100] -translate-x-1/2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-soft-lg"
+        >
+          {toast}
+        </div>
       )}
 
       {/* Floating AI assistant */}

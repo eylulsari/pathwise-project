@@ -93,6 +93,9 @@ export const translations = {
       offlineNeed: '📴 Offline — connection required',
       routeUpdated: 'Route updated.',
       undo: 'Undo',
+      mustVisitApplied: 'Route updated',
+      stopsAdded: 'stops added',
+      stopAdded: 'stop added',
     },
     offlineDl: {
       button: 'Offline',
@@ -447,6 +450,9 @@ export const translations = {
       offlineNeed: '📴 Çevrimdışı — bağlantı gerekli',
       routeUpdated: 'Rota güncellendi.',
       undo: 'Geri Al',
+      mustVisitApplied: 'Rota güncellendi',
+      stopsAdded: 'durak eklendi',
+      stopAdded: 'durak eklendi',
     },
     offlineDl: {
       button: 'Çevrimdışı',
