@@ -38,7 +38,9 @@ export default function AuthPage() {
         if (referralCode.trim()) {
           await api.redeemReferral(referralCode.trim().toUpperCase()).catch(() => {});
         }
-        navigate('/success');
+        // Straight to the planner — the first route auto-generates there, so the
+        // separate confirmation interstitial was an extra step with no payoff.
+        navigate('/dashboard');
       } else {
         await login({ email, password });
         navigate('/dashboard');
@@ -55,7 +57,7 @@ export default function AuthPage() {
   return (
     <div className="grid min-h-full md:grid-cols-2">
       {/* Brand panel */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-night-800 p-10 md:flex">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-surface-2 p-10 md:flex">
         <Link to="/" className="flex items-center gap-2">
           <span className="text-2xl">🗺️</span>
           <span className="font-display text-xl font-bold text-gradient">Pathwise</span>
@@ -66,9 +68,9 @@ export default function AuthPage() {
             <br />
             <span className="text-gradient">{t('auth.brand2')}</span>
           </h2>
-          <p className="mt-4 max-w-sm text-cream/60">{t('auth.brandSub')}</p>
+          <p className="mt-4 max-w-sm text-ink/60">{t('auth.brandSub')}</p>
         </div>
-        <IstanbulSilhouette className="absolute bottom-0 left-0 h-40 w-full text-violet/20" />
+        <IstanbulSilhouette className="absolute bottom-0 left-0 h-40 w-full text-iznik/20" />
       </div>
 
       {/* Form panel */}
@@ -80,7 +82,7 @@ export default function AuthPage() {
           <h1 className="font-display text-3xl font-bold">
             {isSignup ? t('auth.signUpTitle') : t('auth.signInTitle')}
           </h1>
-          <p className="mt-1 text-sm text-cream/60">
+          <p className="mt-1 text-sm text-ink/60">
             {isSignup ? t('auth.signUpSub') : t('auth.signInSub')}
           </p>
 
@@ -129,7 +131,7 @@ export default function AuthPage() {
           </div>
 
           {error && (
-            <p className="mt-4 rounded-lg bg-fuchsia/15 px-3 py-2 text-sm text-fuchsia">
+            <p className="mt-4 rounded-lg bg-sunset/15 px-3 py-2 text-sm text-terracotta">
               {error}
             </p>
           )}
@@ -138,7 +140,7 @@ export default function AuthPage() {
             {busy ? t('auth.wait') : isSignup ? t('auth.createAccount') : t('auth.signInBtn')}
           </button>
 
-          <p className="mt-4 text-center text-sm text-cream/60">
+          <p className="mt-4 text-center text-sm text-ink/60">
             {isSignup ? t('auth.haveAccount') : t('auth.newHere')}{' '}
             <button
               type="button"
@@ -146,7 +148,7 @@ export default function AuthPage() {
                 setMode(isSignup ? 'signin' : 'signup');
                 setError(null);
               }}
-              className="font-semibold text-violet hover:text-fuchsia"
+              className="font-semibold text-iznik hover:text-terracotta"
             >
               {isSignup ? t('auth.signInBtn') : t('auth.createOne')}
             </button>
@@ -167,7 +169,7 @@ function Field(props: {
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-cream/80">
+      <span className="mb-1 block text-sm font-medium text-ink/80">
         {props.label}
       </span>
       <input
@@ -176,7 +178,7 @@ function Field(props: {
         onChange={(e) => props.onChange(e.target.value)}
         placeholder={props.placeholder}
         required={props.required}
-        className="w-full rounded-xl border border-white/10 bg-night-800 px-4 py-3 text-cream placeholder:text-cream/30 outline-none transition-colors focus:border-violet"
+        className="w-full rounded-xl border border-ink/10 bg-surface-2 px-4 py-3 text-ink placeholder:text-ink/30 outline-none transition-colors focus:border-iznik"
       />
     </label>
   );
