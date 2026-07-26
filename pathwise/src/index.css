@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   html,
@@ -14,26 +14,26 @@
   }
 
   body {
-    @apply bg-night text-cream font-sans antialiased;
+    @apply bg-surface text-ink font-sans antialiased;
   }
 }
 
 @layer components {
-  /* Reusable gradient text for headings/brand */
+  /* Brand wordmark gradient — teal→terracotta, readable on the ivory ground */
   .text-gradient {
-    @apply bg-accent-gradient bg-clip-text text-transparent;
+    @apply bg-brand-gradient bg-clip-text text-transparent;
   }
 
-  /* Warm cream card on the midnight background */
+  /* Elevated white card that pops off the ivory background */
   .card-cream {
-    @apply bg-cream text-night rounded-2xl shadow-xl shadow-black/30;
+    @apply bg-white text-ink rounded-2xl shadow-soft;
   }
 
-  /* Primary CTA button */
+  /* Primary CTA button — flat İznik blue (no neon gradient) */
   .btn-accent {
-    @apply bg-accent-gradient text-white font-semibold rounded-xl px-5 py-3
+    @apply bg-iznik text-white font-semibold rounded-xl px-5 py-3
       transition-transform duration-150 hover:scale-[1.02] active:scale-95
-      disabled:opacity-50 disabled:cursor-not-allowed;
+      hover:bg-iznik/90 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 }
 
@@ -42,5 +42,5 @@
 .leaflet-container {
   height: 100%;
   width: 100%;
-  background: #131129;
+  background: #F3ECE2;
 }

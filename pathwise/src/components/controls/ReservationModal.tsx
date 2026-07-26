@@ -27,43 +27,43 @@ export function ReservationModal({
       <div className="card-cream w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-display text-lg font-bold text-night">📎 {t('reservation.title')}</h3>
-            <p className="text-xs text-night/50">{place.name}</p>
+            <h3 className="font-display text-lg font-bold text-ink">📎 {t('reservation.title')}</h3>
+            <p className="text-xs text-ink/50">{place.name}</p>
           </div>
-          <button onClick={onClose} className="text-night/40 hover:text-night">✕</button>
+          <button onClick={onClose} className="text-ink/40 hover:text-ink">✕</button>
         </div>
 
-        <label className="mt-4 block text-sm font-semibold text-night/80">{t('reservation.time')}</label>
+        <label className="mt-4 block text-sm font-semibold text-ink/80">{t('reservation.time')}</label>
         <input
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-night/15 px-3 py-2 text-night outline-none focus:border-violet"
+          className="mt-1 w-full rounded-lg border border-ink/15 px-3 py-2 text-ink outline-none focus:border-iznik"
         />
 
-        <label className="mt-3 block text-sm font-semibold text-night/80">{t('reservation.code')}</label>
+        <label className="mt-3 block text-sm font-semibold text-ink/80">{t('reservation.code')}</label>
         <input
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="AYA-9921"
-          className="mt-1 w-full rounded-lg border border-night/15 px-3 py-2 text-night outline-none focus:border-violet"
+          className="mt-1 w-full rounded-lg border border-ink/15 px-3 py-2 text-ink outline-none focus:border-iznik"
         />
 
-        <label className="mt-3 block text-sm font-semibold text-night/80">{t('reservation.note')}</label>
+        <label className="mt-3 block text-sm font-semibold text-ink/80">{t('reservation.note')}</label>
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder={t('reservation.notePlaceholder')}
-          className="mt-1 w-full rounded-lg border border-night/15 px-3 py-2 text-night outline-none focus:border-violet"
+          className="mt-1 w-full rounded-lg border border-ink/15 px-3 py-2 text-ink outline-none focus:border-iznik"
         />
 
-        <p className="mt-3 text-xs text-night/50">{t('reservation.pinNote')}</p>
+        <p className="mt-3 text-xs text-ink/50">{t('reservation.pinNote')}</p>
 
         <div className="mt-5 flex gap-2">
           {existing && (
             <button
               onClick={onRemove}
-              className="rounded-lg border-2 border-fuchsia/40 px-3 py-2 text-sm font-semibold text-fuchsia"
+              className="rounded-lg border-2 border-sunset/40 px-3 py-2 text-sm font-semibold text-terracotta"
             >
               {t('reservation.remove')}
             </button>

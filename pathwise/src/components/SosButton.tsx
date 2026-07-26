@@ -85,10 +85,10 @@ export function SosButton() {
         <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/70 p-4" onClick={reset}>
           <div className="card-cream w-full max-w-sm p-6 text-center" onClick={(e) => e.stopPropagation()}>
             <div className="text-4xl">🆘</div>
-            <h3 className="mt-2 font-display text-xl font-bold text-night">{t('sos.confirmTitle')}</h3>
-            <p className="mt-1 text-sm text-night/60">{t('sos.confirmBody')}</p>
+            <h3 className="mt-2 font-display text-xl font-bold text-ink">{t('sos.confirmTitle')}</h3>
+            <p className="mt-1 text-sm text-ink/60">{t('sos.confirmBody')}</p>
             <div className="mt-5 flex gap-2">
-              <button onClick={reset} className="flex-1 rounded-xl border-2 border-night/15 py-2.5 text-sm font-semibold text-night">
+              <button onClick={reset} className="flex-1 rounded-xl border-2 border-ink/15 py-2.5 text-sm font-semibold text-ink">
                 {t('sos.cancel')}
               </button>
               <button onClick={locate} className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-bold text-white">
@@ -104,11 +104,11 @@ export function SosButton() {
           <div className="card-cream w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between">
               <h3 className="font-display text-lg font-bold text-red-600">🆘 {t('sos.title')}</h3>
-              <button onClick={reset} className="text-night/40 hover:text-night">✕</button>
+              <button onClick={reset} className="text-ink/40 hover:text-ink">✕</button>
             </div>
 
             {stage === 'locating' ? (
-              <p className="mt-4 animate-pulse text-sm text-night/60">{t('sos.locating')}</p>
+              <p className="mt-4 animate-pulse text-sm text-ink/60">{t('sos.locating')}</p>
             ) : (
               <div className="mt-4 space-y-3">
                 <a href={`tel:${EMERGENCY_NUMBER}`} className="flex items-center justify-between rounded-xl bg-red-600 px-4 py-3 text-white">
@@ -117,15 +117,15 @@ export function SosButton() {
                 </a>
 
                 {nearest && (
-                  <div className="rounded-xl border border-night/10 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-night/40">{t('sos.nearestPolice')}</p>
-                    <p className="mt-0.5 text-sm font-semibold text-night">👮 {nearest.name}</p>
-                    <p className="text-xs text-night/60">{nearest.phone} · {(nearestDistM / 1000).toFixed(1)} km</p>
+                  <div className="rounded-xl border border-ink/10 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-ink/40">{t('sos.nearestPolice')}</p>
+                    <p className="mt-0.5 text-sm font-semibold text-ink">👮 {nearest.name}</p>
+                    <p className="text-xs text-ink/60">{nearest.phone} · {(nearestDistM / 1000).toFixed(1)} km</p>
                   </div>
                 )}
 
                 {shared ? (
-                  <p className="rounded-xl bg-emerald/15 px-3 py-2 text-center text-sm font-semibold text-emerald">
+                  <p className="rounded-xl bg-sage/15 px-3 py-2 text-center text-sm font-semibold text-sage">
                     ✓ {buddies.length > 0 ? t('sos.shared') : t('sos.sharedNoBuddies')}
                   </p>
                 ) : (
@@ -133,7 +133,7 @@ export function SosButton() {
                     📍 {t('sos.share')}{buddies.length > 0 ? ` (${buddies.length})` : ''}
                   </button>
                 )}
-                <p className="text-center text-[10px] text-night/40">{t('sos.demoNote')}</p>
+                <p className="text-center text-[10px] text-ink/40">{t('sos.demoNote')}</p>
               </div>
             )}
           </div>

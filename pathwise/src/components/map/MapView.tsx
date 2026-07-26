@@ -23,8 +23,8 @@ function pin(order: number | string, color: string, active: boolean): L.DivIcon 
       border-radius:50% 50% 50% 0;
       transform:rotate(-45deg);
       display:flex;align-items:center;justify-content:center;
-      box-shadow:0 4px 10px rgba(0,0,0,.5);
-      border:2px solid ${active ? '#FDF7EF' : 'rgba(253,247,239,.4)'};
+      box-shadow:0 4px 10px rgba(61,50,41,.25);
+      border:2px solid ${active ? '#FFFFFF' : 'rgba(255,255,255,.7)'};
     "><span style="transform:rotate(45deg);color:#fff;font-weight:700;font-size:13px;">${order}</span></div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 28],
@@ -153,14 +153,14 @@ export function MapView({
             >
               <Popup>
                 <div className="min-w-[190px]">
-                  <p className="font-display text-sm font-bold text-night">{p.name}</p>
-                  <p className="mt-0.5 text-xs text-night/60">🕒 {p.openingHours}</p>
-                  <p className="mt-1 text-xs text-night/80">
+                  <p className="font-display text-sm font-bold text-ink">{p.name}</p>
+                  <p className="mt-0.5 text-xs text-ink/60">🕒 {p.openingHours}</p>
+                  <p className="mt-1 text-xs text-ink/80">
                     🎟️ {p.entryFeeTry === 0 ? 'Free entry' : `₺${p.entryFeeTry}`}
-                    {open === true && <span className="ml-2 font-semibold text-emerald">● Open now</span>}
-                    {open === false && <span className="ml-2 font-semibold text-fuchsia">● Closed</span>}
+                    {open === true && <span className="ml-2 font-semibold text-sage">● Open now</span>}
+                    {open === false && <span className="ml-2 font-semibold text-terracotta">● Closed</span>}
                   </p>
-                  <p className="mt-1 text-xs italic text-night/70">💡 {p.localTip}</p>
+                  <p className="mt-1 text-xs italic text-ink/70">💡 {p.localTip}</p>
                 </div>
               </Popup>
             </Marker>
@@ -171,17 +171,17 @@ export function MapView({
           <Marker
             ref={focusMarkerRef}
             position={[focusPlace.lat, focusPlace.lng]}
-            icon={pin('★', '#FF007F', true)}
+            icon={pin('★', '#4A7C82', true)}
           >
             <Popup>
               <div className="min-w-[190px]">
-                <p className="font-display text-sm font-bold text-night">{focusPlace.name}</p>
-                <p className="mt-0.5 text-xs text-night/60">🕒 {focusPlace.openingHours}</p>
-                <p className="mt-1 text-xs italic text-night/70">💡 {focusPlace.localTip}</p>
+                <p className="font-display text-sm font-bold text-ink">{focusPlace.name}</p>
+                <p className="mt-0.5 text-xs text-ink/60">🕒 {focusPlace.openingHours}</p>
+                <p className="mt-1 text-xs italic text-ink/70">💡 {focusPlace.localTip}</p>
                 {onAddFocus && (
                   <button
                     onClick={() => onAddFocus(focusPlace.placeId)}
-                    className="mt-2 w-full rounded-lg bg-accent-gradient py-1 text-xs font-semibold text-white"
+                    className="mt-2 w-full rounded-lg bg-iznik py-1 text-xs font-semibold text-white"
                   >
                     ➕ Add to Today’s Path
                   </button>
@@ -196,7 +196,7 @@ export function MapView({
       {/* Fullscreen toggle (top-right) */}
       <button
         onClick={() => setFullscreen((f) => !f)}
-        className="absolute right-3 top-3 z-[1001] rounded-lg bg-night-800/90 px-3 py-2 text-sm font-semibold text-cream shadow-lg backdrop-blur transition-colors hover:bg-night-800"
+        className="absolute right-3 top-3 z-[1001] rounded-lg bg-surface-2/90 px-3 py-2 text-sm font-semibold text-ink shadow-lg backdrop-blur transition-colors hover:bg-surface-2"
         title={fullscreen ? 'Exit full screen' : 'Full screen'}
       >
         {fullscreen ? '✕ Close' : '⛶ Full screen'}

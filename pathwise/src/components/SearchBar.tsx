@@ -64,20 +64,20 @@ export function SearchBar({
         }}
         onFocus={() => setOpen(true)}
         placeholder={t('search.placeholder')}
-        className="w-full rounded-xl border border-white/10 bg-night-800 px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 outline-none focus:border-violet"
+        className="w-full rounded-xl border border-ink/10 bg-surface-2 px-4 py-2.5 text-sm text-ink placeholder:text-ink/40 outline-none focus:border-iznik"
       />
 
       {open && q.trim() && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 right-0 z-[1041] mt-1 max-h-96 overflow-y-auto rounded-xl border border-white/10 bg-night-800 shadow-2xl">
-            {loading && <p className="px-4 py-3 text-sm text-cream/40">…</p>}
+          <div className="absolute left-0 right-0 z-[1041] mt-1 max-h-96 overflow-y-auto rounded-xl border border-ink/10 bg-surface-2 shadow-2xl">
+            {loading && <p className="px-4 py-3 text-sm text-ink/40">…</p>}
             {!loading && !hasResults && (
-              <p className="px-4 py-4 text-sm text-cream/50">{t('search.empty')}</p>
+              <p className="px-4 py-4 text-sm text-ink/50">{t('search.empty')}</p>
             )}
 
             {places.map((p) => (
-              <div key={p.placeId} className="flex items-center justify-between gap-2 border-b border-white/5 px-4 py-2.5 hover:bg-white/5">
+              <div key={p.placeId} className="flex items-center justify-between gap-2 border-b border-ink/5 px-4 py-2.5 hover:bg-ink/5">
                 <button
                   onClick={() => {
                     onFocusPlace(p);
@@ -85,15 +85,15 @@ export function SearchBar({
                   }}
                   className="flex-1 text-left"
                 >
-                  <span className="block text-sm font-semibold text-cream">{p.name}</span>
-                  <span className="block text-xs text-cream/50">{HUB_LABEL[p.hub]} · ⭐ {p.rating}</span>
+                  <span className="block text-sm font-semibold text-ink">{p.name}</span>
+                  <span className="block text-xs text-ink/50">{HUB_LABEL[p.hub]} · ⭐ {p.rating}</span>
                 </button>
                 <button
                   onClick={() => {
                     onAddPlace(p.placeId);
                     setOpen(false);
                   }}
-                  className="flex-shrink-0 rounded-lg bg-accent-gradient px-2 py-1 text-xs font-semibold text-white"
+                  className="flex-shrink-0 rounded-lg bg-iznik px-2 py-1 text-xs font-semibold text-white"
                 >
                   {t('search.add')}
                 </button>
@@ -101,7 +101,7 @@ export function SearchBar({
             ))}
 
             {tours.length > 0 && (
-              <p className="border-b border-white/5 bg-night px-4 py-1.5 text-[10px] uppercase tracking-wide text-cream/40">
+              <p className="border-b border-ink/5 bg-white px-4 py-1.5 text-[10px] uppercase tracking-wide text-ink/40">
                 {t('search.tours')}
               </p>
             )}
@@ -112,10 +112,10 @@ export function SearchBar({
                   onUseTourHub(tr.hub);
                   setOpen(false);
                 }}
-                className="block w-full border-b border-white/5 px-4 py-2.5 text-left hover:bg-white/5"
+                className="block w-full border-b border-ink/5 px-4 py-2.5 text-left hover:bg-ink/5"
               >
-                <span className="block text-sm font-semibold text-cream">🎟️ {tr.title}</span>
-                <span className="block text-xs text-cream/50">{HUB_LABEL[tr.hub]} · {tr.durationHours}h</span>
+                <span className="block text-sm font-semibold text-ink">🎟️ {tr.title}</span>
+                <span className="block text-xs text-ink/50">{HUB_LABEL[tr.hub]} · {tr.durationHours}h</span>
               </button>
             ))}
           </div>

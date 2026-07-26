@@ -50,7 +50,7 @@ export function StartPointSelector({
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-night-800 p-4">
+    <div className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
       <h3 className="mb-2 font-display text-sm font-bold">{t(titleKey)}</h3>
       <div className={`grid gap-1.5 ${showAuto ? 'grid-cols-5' : 'grid-cols-4'}`}>
         {OPTIONS.map((o) => (
@@ -63,8 +63,8 @@ export function StartPointSelector({
             }}
             className={`rounded-lg border px-1 py-2 text-center text-xs transition-colors ${
               kind === o.id
-                ? 'border-emerald bg-emerald/15 text-cream'
-                : 'border-white/10 text-cream/70 hover:border-white/25'
+                ? 'border-sage bg-sage/15 text-ink'
+                : 'border-ink/10 text-ink/70 hover:border-ink/25'
             }`}
           >
             <div className="text-base">{o.icon}</div>
@@ -74,7 +74,7 @@ export function StartPointSelector({
       </div>
 
       {kind === 'gps' && gpsErr && (
-        <p className="mt-2 text-xs text-fuchsia">{gpsErr}</p>
+        <p className="mt-2 text-xs text-terracotta">{gpsErr}</p>
       )}
 
       {kind === 'hotel' && (
@@ -83,7 +83,7 @@ export function StartPointSelector({
             value={hotel}
             onChange={(e) => setHotel(e.target.value)}
             placeholder={t('startPoint.hotelPlaceholder')}
-            className="flex-1 rounded-lg border border-white/10 bg-night px-2 py-1.5 text-sm outline-none focus:border-violet"
+            className="flex-1 rounded-lg border border-ink/10 bg-white px-2 py-1.5 text-sm outline-none focus:border-iznik"
           />
           <button
             onClick={() =>
@@ -95,7 +95,7 @@ export function StartPointSelector({
                 lng: 28.9773,
               })
             }
-            className="rounded-lg bg-violet/30 px-3 text-sm font-semibold"
+            className="rounded-lg bg-iznik/30 px-3 text-sm font-semibold"
           >
             {t('startPoint.set')}
           </button>
@@ -109,7 +109,7 @@ export function StartPointSelector({
             if (h) onChange({ kind: 'transit', label: h.label, lat: h.lat, lng: h.lng });
           }}
           defaultValue=""
-          className="mt-2 w-full rounded-lg border border-white/10 bg-night px-2 py-1.5 text-sm outline-none focus:border-violet"
+          className="mt-2 w-full rounded-lg border border-ink/10 bg-white px-2 py-1.5 text-sm outline-none focus:border-iznik"
         >
           <option value="" disabled>{t('startPoint.choosePier')}</option>
           {TRANSIT_HUBS.map((t) => (
@@ -119,11 +119,11 @@ export function StartPointSelector({
       )}
 
       {kind === 'map' && (
-        <p className="mt-2 text-xs text-cream/50">{t('startPoint.mapTip')}</p>
+        <p className="mt-2 text-xs text-ink/50">{t('startPoint.mapTip')}</p>
       )}
 
       {value && (
-        <p className="mt-2 rounded-lg bg-emerald/10 px-2 py-1.5 text-xs text-emerald">
+        <p className="mt-2 rounded-lg bg-sage/10 px-2 py-1.5 text-xs text-sage">
           {t('startPoint.startingFrom')}: <span className="font-semibold">{value.label}</span>
         </p>
       )}

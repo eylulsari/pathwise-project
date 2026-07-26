@@ -26,12 +26,12 @@ export function DayTab({
       title={locked ? 'Premium' : undefined}
       className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
         isOver
-          ? 'bg-emerald text-white ring-2 ring-emerald/50'
+          ? 'bg-sage text-ink ring-2 ring-sage/50'
           : active
-            ? 'bg-accent-gradient text-white'
+            ? 'bg-iznik text-white'
             : locked
-              ? 'text-cream/30 hover:text-cream/50'
-              : 'text-cream/60 hover:text-cream'
+              ? 'text-ink/30 hover:text-ink/50'
+              : 'text-ink/60 hover:text-ink'
       }`}
     >
       {locked ? `🔒 ${label}` : label}

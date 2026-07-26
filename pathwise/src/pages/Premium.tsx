@@ -36,14 +36,14 @@ export default function Premium() {
     <div className="flex min-h-screen flex-col">
       <AppHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 p-4 md:p-6">
-        <div className="rounded-2xl bg-accent-gradient p-6 text-center text-white">
+        <div className="rounded-2xl bg-accent-gradient p-6 text-center text-ink shadow-soft">
           <h1 className="font-display text-3xl font-extrabold">{t('premium.title')}</h1>
-          <p className="mt-1 text-white/80">{t('premium.subtitle')}</p>
-          <p className="mt-3 inline-block rounded-full bg-white/15 px-3 py-1 text-sm">
+          <p className="mt-1 text-ink/70">{t('premium.subtitle')}</p>
+          <p className="mt-3 inline-block rounded-full bg-white/50 px-3 py-1 text-sm">
             {t('premium.current')}: <span className="font-bold">{isPremium ? t('premium.premium') : t('premium.free')}</span>
           </p>
           {user?.subscriptionTier !== 'premium' && user?.trialEndsAt && new Date(user.trialEndsAt) > new Date() && (
-            <p className="mt-2 text-xs text-white/80">
+            <p className="mt-2 text-xs text-ink/70">
               ⏳ {t('premium.trialActive')} — {t('premium.trialEnds')} {new Date(user.trialEndsAt).toLocaleDateString()}
             </p>
           )}
@@ -52,21 +52,21 @@ export default function Premium() {
         <ReferralPanel />
 
         {/* Comparison table */}
-        <div className="overflow-x-auto rounded-2xl border border-white/10 bg-night-800">
+        <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-surface-2">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-left">
-                <th className="px-4 py-3 font-semibold text-cream/70">{t('premium.feature')}</th>
-                <th className="px-4 py-3 font-semibold text-cream/70">{t('premium.free')}</th>
-                <th className="px-4 py-3 font-semibold text-violet">{t('premium.premium')}</th>
+              <tr className="border-b border-ink/10 text-left">
+                <th className="px-4 py-3 font-semibold text-ink/70">{t('premium.feature')}</th>
+                <th className="px-4 py-3 font-semibold text-ink/70">{t('premium.free')}</th>
+                <th className="px-4 py-3 font-semibold text-iznik">{t('premium.premium')}</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.label} className="border-b border-white/5">
-                  <td className="px-4 py-3 font-medium text-cream">{r.label}</td>
-                  <td className="px-4 py-3 text-cream/60">{r.free}</td>
-                  <td className="px-4 py-3 font-semibold text-emerald">{r.premium}</td>
+                <tr key={r.label} className="border-b border-ink/5">
+                  <td className="px-4 py-3 font-medium text-ink">{r.label}</td>
+                  <td className="px-4 py-3 text-ink/60">{r.free}</td>
+                  <td className="px-4 py-3 font-semibold text-sage">{r.premium}</td>
                 </tr>
               ))}
             </tbody>
@@ -78,7 +78,7 @@ export default function Premium() {
             <button
               onClick={() => change('free')}
               disabled={busy}
-              className="rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-cream/70 hover:text-cream"
+              className="rounded-xl border border-ink/15 px-6 py-3 text-sm font-semibold text-ink/70 hover:text-ink"
             >
               {busy ? t('premium.updating') : t('premium.downgrade')}
             </button>
@@ -87,10 +87,10 @@ export default function Premium() {
               {busy ? t('premium.updating') : t('premium.upgrade')}
             </button>
           )}
-          <p className="max-w-md text-center text-xs text-cream/40">{t('premium.paymentNote')}</p>
+          <p className="max-w-md text-center text-xs text-ink/40">{t('premium.paymentNote')}</p>
         </div>
 
-        <p className="text-center text-xs text-cream/30">Signed in as {user?.email}</p>
+        <p className="text-center text-xs text-ink/30">Signed in as {user?.email}</p>
       </main>
     </div>
   );

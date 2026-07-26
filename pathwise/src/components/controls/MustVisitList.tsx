@@ -23,10 +23,10 @@ export function MustVisitList({
       <div className="card-cream max-h-[85vh] w-full max-w-2xl overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-display text-xl font-bold text-night">{t('mustVisit.title')}</h3>
-            <p className="text-xs text-night/50">{t('mustVisit.subtitle')}</p>
+            <h3 className="font-display text-xl font-bold text-ink">{t('mustVisit.title')}</h3>
+            <p className="text-xs text-ink/50">{t('mustVisit.subtitle')}</p>
           </div>
-          <button onClick={onClose} className="text-night/40 hover:text-night">✕</button>
+          <button onClick={onClose} className="text-ink/40 hover:text-ink">✕</button>
         </div>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -39,15 +39,15 @@ export function MustVisitList({
                 key={id}
                 onClick={() => onToggle(id)}
                 className={`flex items-start gap-3 rounded-xl border-2 p-3 text-left transition-colors ${
-                  on ? 'border-emerald bg-emerald/10' : 'border-night/10 hover:border-night/25'
+                  on ? 'border-sage bg-sage/10' : 'border-ink/10 hover:border-ink/25'
                 }`}
               >
-                <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border-2 text-xs ${on ? 'border-emerald bg-emerald text-white' : 'border-night/30'}`}>
+                <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border-2 text-xs ${on ? 'border-sage bg-sage text-ink' : 'border-ink/30'}`}>
                   {on ? '✓' : ''}
                 </span>
                 <span>
-                  <span className="block font-semibold text-night">{place.name}</span>
-                  <span className="block text-xs text-night/50">
+                  <span className="block font-semibold text-ink">{place.name}</span>
+                  <span className="block text-xs text-ink/50">
                     {HUB_LABEL[place.hub]} · {place.entryFeeTry === 0 ? 'Free' : formatTry(place.entryFeeTry)}
                   </span>
                 </span>

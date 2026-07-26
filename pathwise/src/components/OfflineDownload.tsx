@@ -47,35 +47,35 @@ export function OfflineDownload({
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/80 hover:text-cream"
+        className="rounded-lg border border-ink/10 px-3 py-1.5 text-sm font-semibold text-ink/80 hover:text-ink"
       >
         📥 {t('offlineDl.button')}{downloaded.size > 0 ? ` (${downloaded.size})` : ''}
-        {syncing && <span className="ml-1 animate-pulse text-emerald">🔄</span>}
+        {syncing && <span className="ml-1 animate-pulse text-sage">🔄</span>}
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-[1041] mt-1 w-64 overflow-hidden rounded-xl border border-white/10 bg-night-800 shadow-xl">
-            <p className="border-b border-white/10 px-3 py-2 text-[10px] uppercase tracking-wide text-cream/40">
+          <div className="absolute right-0 z-[1041] mt-1 w-64 overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-xl">
+            <p className="border-b border-ink/10 px-3 py-2 text-[10px] uppercase tracking-wide text-ink/40">
               {t('offlineDl.title')}
             </p>
             {syncing && (
-              <p className="px-3 py-1.5 text-xs font-semibold text-emerald">🔄 {t('offlineDl.syncing')}</p>
+              <p className="px-3 py-1.5 text-xs font-semibold text-sage">🔄 {t('offlineDl.syncing')}</p>
             )}
             {days.map((d, i) => {
               const size = estimateDaySizeMb(d.itinerary);
               const on = downloaded.has(i);
               return (
                 <div key={i} className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-cream/80">
+                  <span className="text-ink/80">
                     {d.label}
-                    <span className="ml-1 text-cream/40">— {size} MB</span>
+                    <span className="ml-1 text-ink/40">— {size} MB</span>
                   </span>
                   <button
                     onClick={() => toggle(i, d.itinerary)}
                     disabled={!d.itinerary}
                     className={`rounded-lg px-2 py-1 text-xs font-semibold disabled:opacity-30 ${
-                      on ? 'bg-emerald/20 text-emerald' : 'bg-violet/20 text-cream'
+                      on ? 'bg-sage/20 text-sage' : 'bg-iznik/20 text-ink'
                     }`}
                   >
                     {on ? `✓ ${t('offlineDl.downloaded')}` : `⬇ ${t('offlineDl.download')}`}

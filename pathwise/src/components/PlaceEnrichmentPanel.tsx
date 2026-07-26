@@ -40,8 +40,8 @@ export function PlaceEnrichmentPanel({ place }: { place: Place }) {
           : null;
 
   return (
-    <section className="mt-4 rounded-xl border border-violet/20 bg-violet/5 p-3">
-      <h4 className="text-sm font-bold text-violet-deep">🌐 {t('enrich.title')}</h4>
+    <section className="mt-4 rounded-xl border border-iznik/20 bg-iznik/5 p-3">
+      <h4 className="text-sm font-bold text-iznik">🌐 {t('enrich.title')}</h4>
 
       {wikipedia && (
         <div className="mt-2">
@@ -53,12 +53,12 @@ export function PlaceEnrichmentPanel({ place }: { place: Place }) {
               className="mb-2 h-40 w-full rounded-lg object-cover"
             />
           )}
-          <p className="text-sm leading-relaxed text-night/80">{wikipedia.summary}</p>
+          <p className="text-sm leading-relaxed text-ink/80">{wikipedia.summary}</p>
           <a
             href={wikipedia.pageUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-1 inline-block text-[11px] font-semibold text-violet hover:text-fuchsia"
+            className="mt-1 inline-block text-[11px] font-semibold text-iznik hover:text-terracotta"
           >
             {/* Attribution is a licence requirement. */}
             {t('enrich.source')}: {wikipedia.attribution} ↗
@@ -67,7 +67,7 @@ export function PlaceEnrichmentPanel({ place }: { place: Place }) {
       )}
 
       {osm && (osm.openingHours || wheelchairLabel || osm.cuisine) && (
-        <div className="mt-3 space-y-1 border-t border-violet/15 pt-2 text-xs text-night/70">
+        <div className="mt-3 space-y-1 border-t border-iznik/15 pt-2 text-xs text-ink/70">
           {osm.openingHours && (
             <p>
               <span className="font-semibold">🕒 {t('enrich.hours')}:</span> {osm.openingHours}
@@ -79,7 +79,7 @@ export function PlaceEnrichmentPanel({ place }: { place: Place }) {
               <span className="font-semibold">🍽 {t('enrich.cuisine')}:</span> {osm.cuisine}
             </p>
           )}
-          <p className="text-[10px] text-night/40">{t('enrich.osmSource')}</p>
+          <p className="text-[10px] text-ink/40">{t('enrich.osmSource')}</p>
         </div>
       )}
     </section>

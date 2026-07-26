@@ -8,7 +8,7 @@ export function CurrencySelect({ className = '' }: { className?: string }) {
       value={currency.code}
       onChange={(e) => setCurrencyCode(e.target.value)}
       aria-label="Display currency"
-      className={`rounded-lg border border-white/15 bg-night px-2 py-1 text-xs font-semibold text-cream/80 outline-none focus:border-violet ${className}`}
+      className={`rounded-lg border border-ink/15 bg-white px-2 py-1 text-xs font-semibold text-ink/80 outline-none focus:border-iznik ${className}`}
     >
       {currencies.map((c) => (
         <option key={c.code} value={c.code}>

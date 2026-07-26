@@ -18,7 +18,7 @@ export const HUBS: HubMeta[] = [
     side: 'European',
     blurb: 'Byzantine + Ottoman monuments packed into a walkable peninsula.',
     center: [41.0086, 28.9785],
-    accent: '#FF7E5F',
+    accent: '#C56F52',
   },
   {
     id: 'karakoy-galata',
@@ -26,7 +26,7 @@ export const HUBS: HubMeta[] = [
     side: 'European',
     blurb: 'Galata Tower, third-wave coffee, galleries and baklava.',
     center: [41.0243, 28.9748],
-    accent: '#8B5CF6',
+    accent: '#4A7C82',
   },
   {
     id: 'kadikoy-moda',
@@ -34,7 +34,7 @@ export const HUBS: HubMeta[] = [
     side: 'Asian',
     blurb: 'The Asian side: markets, meyhanes and a seaside sunset.',
     center: [40.9887, 29.027],
-    accent: '#EC4899',
+    accent: '#C97B8E',
   },
   {
     id: 'balat-fener',
@@ -42,7 +42,7 @@ export const HUBS: HubMeta[] = [
     side: 'European',
     blurb: 'Rainbow houses, antique shops and Orthodox heritage.',
     center: [41.0292, 28.9492],
-    accent: '#10B981',
+    accent: '#A87F28',
   },
   {
     id: 'besiktas-bogaz',
@@ -50,7 +50,7 @@ export const HUBS: HubMeta[] = [
     side: 'European',
     blurb: 'Palaces, fish markets and the Bosphorus shoreline.',
     center: [41.0455, 29.0087],
-    accent: '#6B21A8',
+    accent: '#5E8C74',
   },
 ];
 

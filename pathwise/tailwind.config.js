@@ -4,26 +4,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ── Pathwise brand palette ──
-        night: {
-          DEFAULT: '#0D0B1D', // deep midnight navy (background)
-          800: '#131129',
+        // ── Pathwise "Pastel Istanbul" palette ──
+        // Warm ivory ground + three balanced Istanbul motif families:
+        // İznik tile (teal/blue), Bosphorus sunset (peach/salmon), historic
+        // texture (terracotta/mustard). Sage stays reserved for safety.
+        surface: {
+          DEFAULT: '#FAF6F0', // warm ivory — page ground
+          2: '#F3ECE2', // soft sand — panels & inset surfaces
         },
-        cream: '#FDF7EF', // warm cream (cards)
-        violet: {
-          DEFAULT: '#8B5CF6', // electric violet (accent gradient start)
-          deep: '#6B21A8',
+        ink: '#3D3229', // warm espresso — primary text (never pure black)
+        iznik: {
+          DEFAULT: '#4A7C82', // deep İznik blue — primary actions, links, active
+          soft: '#8FC4BE', // soft turquoise — hover / tints
         },
-        fuchsia: {
-          DEFAULT: '#EC4899', // neon pink/fuchsia (accent gradient end)
-          neon: '#FF007F',
+        sunset: {
+          DEFAULT: '#F4A896', // peach-salmon — badges, featured cards, CTA accents
+          soft: '#F8C9B4', // soft pink — gradient tail / gentle highlights
         },
-        coral: '#FF7E5F', // sunset coral (secondary accent)
-        emerald: '#10B981', // Solo-Verified / safety green
+        terracotta: '#D98868', // dusty terracotta — secondary accents, warnings
+        mustard: '#EAC873', // soft mustard — tags, secondary accents
+        sage: '#9CBBA0', // soft sage — Solo-Verified / safety (unchanged role)
       },
       backgroundImage: {
-        'accent-gradient': 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)',
-        'accent-gradient-deep': 'linear-gradient(135deg, #6B21A8 0%, #FF007F 100%)',
+        // Featured surfaces (badges, headers, highlight cards) — soft sunset.
+        'accent-gradient': 'linear-gradient(135deg, #F4A896 0%, #F8C9B4 100%)',
+        'accent-gradient-deep': 'linear-gradient(135deg, #D98868 0%, #F4A896 100%)',
+        // Brand wordmark — teal→terracotta reads cleanly on the ivory ground.
+        'brand-gradient': 'linear-gradient(135deg, #4A7C82 0%, #D98868 100%)',
+      },
+      boxShadow: {
+        // Soft "paper-on-paper" elevation — replaces the old neon glow.
+        soft: '0 4px 16px rgba(61, 50, 41, 0.08)',
+        'soft-lg': '0 8px 28px rgba(61, 50, 41, 0.10)',
       },
       fontFamily: {
         display: ['"Poppins"', 'system-ui', 'sans-serif'],

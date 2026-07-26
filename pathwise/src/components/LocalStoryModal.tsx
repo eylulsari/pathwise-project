@@ -61,60 +61,60 @@ export function LocalStoryModal({
       >
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-display text-xl font-bold text-night">{place.name}</h3>
-            <p className="text-xs text-night/50">{place.openingHours}</p>
+            <h3 className="font-display text-xl font-bold text-ink">{place.name}</h3>
+            <p className="text-xs text-ink/50">{place.openingHours}</p>
           </div>
-          <button onClick={onClose} className="text-night/40 hover:text-night">✕</button>
+          <button onClick={onClose} className="text-ink/40 hover:text-ink">✕</button>
         </div>
 
         <section className="mt-4">
-          <h4 className="text-sm font-bold text-violet-deep">📖 The story</h4>
-          <p className="mt-1 text-sm leading-relaxed text-night/80">
+          <h4 className="text-sm font-bold text-iznik">📖 The story</h4>
+          <p className="mt-1 text-sm leading-relaxed text-ink/80">
             {isPremium ? story.history : shortSummary}
           </p>
           {!isPremium && (
             <button
               onClick={() => { api.recordPaywall('story'); navigate('/premium'); }}
-              className="mt-1 text-xs font-semibold text-violet hover:text-fuchsia"
+              className="mt-1 text-xs font-semibold text-iznik hover:text-terracotta"
             >
               {t('premium.unlock')}
             </button>
           )}
         </section>
 
-        <section className="mt-4 rounded-xl bg-violet/10 p-3">
-          <h4 className="text-sm font-bold text-violet-deep">📸 Photo tip</h4>
-          <p className="mt-1 text-sm text-night/80">{story.photoTip}</p>
+        <section className="mt-4 rounded-xl bg-iznik/10 p-3">
+          <h4 className="text-sm font-bold text-iznik">📸 Photo tip</h4>
+          <p className="mt-1 text-sm text-ink/80">{story.photoTip}</p>
         </section>
 
         {/* Audio guide — full for premium, locked preview for free */}
         {!isPremium ? (
-          <section className="mt-4 rounded-xl border border-night/10 bg-night/5 p-4 text-center">
-            <p className="text-sm font-semibold text-night">🔒 {t('premium.fullAudio')}</p>
-            <p className="mt-1 text-xs text-night/60">{t('premium.shortOnly')}</p>
+          <section className="mt-4 rounded-xl border border-ink/10 bg-ink/5 p-4 text-center">
+            <p className="text-sm font-semibold text-ink">🔒 {t('premium.fullAudio')}</p>
+            <p className="mt-1 text-xs text-ink/60">{t('premium.shortOnly')}</p>
             <button onClick={() => { api.recordPaywall('story'); navigate('/premium'); }} className="btn-accent mt-3 px-4 py-2 text-xs">
               {t('premium.upgrade')}
             </button>
           </section>
         ) : (
-        <section className="mt-4 rounded-xl border border-night/10 p-3">
+        <section className="mt-4 rounded-xl border border-ink/10 p-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
                 if (progress >= 100) setProgress(0);
                 setPlaying((p) => !p);
               }}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-gradient text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-iznik text-white"
               aria-label={playing ? 'Pause' : 'Play'}
             >
               {playing ? '❚❚' : '▶'}
             </button>
             <div className="flex-1">
-              <div className="flex justify-between text-xs text-night/50">
+              <div className="flex justify-between text-xs text-ink/50">
                 <span>Audio guide preview</span>
                 <span>0:{String(elapsed).padStart(2, '0')} / 0:15</span>
               </div>
-              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-night/10">
+              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-ink/10">
                 <div
                   className="h-full rounded-full bg-accent-gradient transition-[width] duration-100"
                   style={{ width: `${progress}%` }}
@@ -122,11 +122,11 @@ export function LocalStoryModal({
               </div>
             </div>
           </div>
-          <p className="mt-3 min-h-[2.5rem] text-sm italic text-night/70">
+          <p className="mt-3 min-h-[2.5rem] text-sm italic text-ink/70">
             {transcript || 'Press play to hear the 15-second preview…'}
             {playing && <span className="animate-pulse">▍</span>}
           </p>
-          <p className="mt-1 text-[10px] uppercase tracking-wide text-night/30">
+          <p className="mt-1 text-[10px] uppercase tracking-wide text-ink/30">
             💎 Full guide — simulated preview (no audio file is played)
           </p>
         </section>

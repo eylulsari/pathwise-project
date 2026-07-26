@@ -69,10 +69,10 @@ export function NotificationBell() {
 
   return (
     <div className="relative">
-      <button onClick={openPanel} className="relative rounded-lg px-2 py-1.5 text-lg hover:bg-white/5" aria-label="Notifications">
+      <button onClick={openPanel} className="relative rounded-lg px-2 py-1.5 text-lg hover:bg-ink/5" aria-label="Notifications">
         🔔
         {count > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-fuchsia px-1 text-[10px] font-bold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-terracotta px-1 text-[10px] font-bold text-white">
             {count > 9 ? '9+' : count}
           </span>
         )}
@@ -81,26 +81,26 @@ export function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-[1041] mt-1 w-80 max-w-[90vw] overflow-hidden rounded-xl border border-white/10 bg-night-800 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
-              <span className="font-display text-sm font-bold text-cream">{t('notif.title')}</span>
+          <div className="absolute right-0 z-[1041] mt-1 w-80 max-w-[90vw] overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-ink/10 px-3 py-2">
+              <span className="font-display text-sm font-bold text-ink">{t('notif.title')}</span>
               <div className="flex items-center gap-2 text-xs">
-                <button onClick={markAll} className="text-cream/60 hover:text-cream">{t('notif.markAll')}</button>
-                <button onClick={() => setShowPrefs((s) => !s)} className="text-cream/60 hover:text-cream">⚙</button>
+                <button onClick={markAll} className="text-ink/60 hover:text-ink">{t('notif.markAll')}</button>
+                <button onClick={() => setShowPrefs((s) => !s)} className="text-ink/60 hover:text-ink">⚙</button>
               </div>
             </div>
 
             {showPrefs && (
-              <div className="border-b border-white/10 bg-night p-3">
-                <p className="mb-1.5 text-[10px] uppercase tracking-wide text-cream/40">{t('notif.prefs')}</p>
+              <div className="border-b border-ink/10 bg-white p-3">
+                <p className="mb-1.5 text-[10px] uppercase tracking-wide text-ink/40">{t('notif.prefs')}</p>
                 {PREF_TYPES.map((type) => (
-                  <label key={type} className="flex items-center justify-between py-1 text-xs text-cream/80">
+                  <label key={type} className="flex items-center justify-between py-1 text-xs text-ink/80">
                     <span>{ICONS[type]} {t(`notif.type.${type}`)}</span>
                     <input
                       type="checkbox"
                       checked={!muted.includes(type)}
                       onChange={() => togglePref(type)}
-                      className="accent-violet"
+                      className="accent-iznik"
                     />
                   </label>
                 ))}
@@ -109,21 +109,21 @@ export function NotificationBell() {
 
             <div className="max-h-80 overflow-y-auto">
               {items.length === 0 ? (
-                <p className="px-3 py-6 text-center text-sm text-cream/40">{t('notif.empty')}</p>
+                <p className="px-3 py-6 text-center text-sm text-ink/40">{t('notif.empty')}</p>
               ) : (
                 items.map((n) => (
                   <button
                     key={n.id}
                     onClick={() => click(n)}
-                    className={`flex w-full gap-2 border-b border-white/5 px-3 py-2.5 text-left hover:bg-white/5 ${n.read ? 'opacity-60' : ''}`}
+                    className={`flex w-full gap-2 border-b border-ink/5 px-3 py-2.5 text-left hover:bg-ink/5 ${n.read ? 'opacity-60' : ''}`}
                   >
                     <span className="text-lg">{ICONS[n.type] ?? '🔔'}</span>
                     <span className="flex-1">
-                      <span className="block text-sm font-semibold text-cream">
+                      <span className="block text-sm font-semibold text-ink">
                         {n.title}
-                        {!n.read && <span className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-fuchsia align-middle" />}
+                        {!n.read && <span className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-sunset align-middle" />}
                       </span>
-                      <span className="block text-xs text-cream/60">{n.body}</span>
+                      <span className="block text-xs text-ink/60">{n.body}</span>
                     </span>
                   </button>
                 ))

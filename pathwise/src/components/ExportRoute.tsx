@@ -42,15 +42,15 @@ export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/80 hover:text-cream"
+        className="rounded-lg border border-ink/10 px-3 py-1.5 text-sm font-semibold text-ink/80 hover:text-ink"
       >
         ⬇ Export ▾
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-[1041] mt-1 w-56 overflow-hidden rounded-xl border border-white/10 bg-night-800 shadow-xl">
-            <button onClick={onPdf} className="block w-full px-4 py-2.5 text-left text-sm text-cream/80 hover:bg-white/5">
+          <div className="absolute right-0 z-[1041] mt-1 w-56 overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-xl">
+            <button onClick={onPdf} className="block w-full px-4 py-2.5 text-left text-sm text-ink/80 hover:bg-ink/5">
               📄 Export PDF{!isPremium && !canExportPdf() ? ' 🔒' : ''}
             </button>
             <a
@@ -58,7 +58,7 @@ export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setOpen(false)}
-              className="block w-full px-4 py-2.5 text-left text-sm text-cream/80 hover:bg-white/5"
+              className="block w-full px-4 py-2.5 text-left text-sm text-ink/80 hover:bg-ink/5"
             >
               🗺️ Open in Google Maps
             </a>
@@ -67,7 +67,7 @@ export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
                 setOpen(false);
                 downloadIcs(itinerary);
               }}
-              className="block w-full px-4 py-2.5 text-left text-sm text-cream/80 hover:bg-white/5"
+              className="block w-full px-4 py-2.5 text-left text-sm text-ink/80 hover:bg-ink/5"
             >
               📅 Add to Calendar (.ics)
             </button>

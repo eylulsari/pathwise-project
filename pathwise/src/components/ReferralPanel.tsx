@@ -43,40 +43,40 @@ export function ReferralPanel() {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-night-800 p-4">
-      <h3 className="font-display text-sm font-bold text-cream">{t('premium.referTitle')}</h3>
-      <p className="mt-1 text-xs text-cream/60">{t('premium.referBody')}</p>
+    <div className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
+      <h3 className="font-display text-sm font-bold text-ink">{t('premium.referTitle')}</h3>
+      <p className="mt-1 text-xs text-ink/60">{t('premium.referBody')}</p>
 
       {data && (
         <>
           <div className="mt-3 flex items-center gap-2">
-            <code className="flex-1 rounded-lg border border-violet/40 bg-night px-3 py-2 text-center font-mono text-lg font-bold tracking-widest text-violet">
+            <code className="flex-1 rounded-lg border border-iznik/40 bg-white px-3 py-2 text-center font-mono text-lg font-bold tracking-widest text-iznik">
               {data.code}
             </code>
-            <button onClick={copy} className="rounded-lg bg-violet/20 px-3 py-2 text-xs font-semibold text-cream">
+            <button onClick={copy} className="rounded-lg bg-iznik/20 px-3 py-2 text-xs font-semibold text-ink">
               {copied ? t('premium.referCopied') : t('premium.referCopy')}
             </button>
           </div>
-          <p className="mt-1.5 text-xs text-cream/50">
+          <p className="mt-1.5 text-xs text-ink/50">
             👥 {data.redeemedCount} {t('premium.referJoined')}
           </p>
         </>
       )}
 
-      <div className="mt-4 border-t border-white/10 pt-3">
-        <p className="mb-1.5 text-xs font-semibold text-cream/70">{t('premium.referHave')}</p>
+      <div className="mt-4 border-t border-ink/10 pt-3">
+        <p className="mb-1.5 text-xs font-semibold text-ink/70">{t('premium.referHave')}</p>
         <div className="flex gap-2">
           <input
             value={redeemCode}
             onChange={(e) => setRedeemCode(e.target.value)}
             placeholder="PWXXXXXX"
-            className="flex-1 rounded-lg border border-white/10 bg-night px-3 py-2 text-sm uppercase outline-none focus:border-violet"
+            className="flex-1 rounded-lg border border-ink/10 bg-white px-3 py-2 text-sm uppercase outline-none focus:border-iznik"
           />
-          <button onClick={redeem} disabled={busy} className="rounded-lg bg-accent-gradient px-4 text-sm font-semibold text-white disabled:opacity-40">
+          <button onClick={redeem} disabled={busy} className="rounded-lg bg-iznik px-4 text-sm font-semibold text-white disabled:opacity-40">
             {t('premium.referRedeem')}
           </button>
         </div>
-        {redeemMsg && <p className="mt-1.5 text-xs font-semibold text-emerald">{redeemMsg}</p>}
+        {redeemMsg && <p className="mt-1.5 text-xs font-semibold text-sage">{redeemMsg}</p>}
       </div>
     </div>
   );

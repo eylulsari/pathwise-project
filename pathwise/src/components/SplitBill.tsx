@@ -31,49 +31,49 @@ export function SplitBill({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="card-cream w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
-          <h3 className="font-display text-xl font-bold text-night">💰 Split the Bill</h3>
+          <h3 className="font-display text-xl font-bold text-ink">💰 Split the Bill</h3>
           <div className="flex items-center gap-2">
-            <div className="[&_select]:border-night/15 [&_select]:bg-white [&_select]:text-night">
+            <div className="[&_select]:border-ink/15 [&_select]:bg-white [&_select]:text-ink">
               <CurrencySelect />
             </div>
-            <button onClick={onClose} className="text-night/40 hover:text-night">✕</button>
+            <button onClick={onClose} className="text-ink/40 hover:text-ink">✕</button>
           </div>
         </div>
 
         <div className="mt-4 space-y-2">
           {items.map((it) => (
-            <div key={it.id} className="flex items-center justify-between rounded-lg bg-night/5 px-3 py-2 text-sm text-night">
+            <div key={it.id} className="flex items-center justify-between rounded-lg bg-ink/5 px-3 py-2 text-sm text-ink">
               <span>{it.label}</span>
               <span className="flex items-center gap-2 font-semibold">
                 {formatTry(it.amount)}
-                <button onClick={() => setItems((p) => p.filter((x) => x.id !== it.id))} className="text-night/30 hover:text-fuchsia">✕</button>
+                <button onClick={() => setItems((p) => p.filter((x) => x.id !== it.id))} className="text-ink/30 hover:text-terracotta">✕</button>
               </span>
             </div>
           ))}
         </div>
 
         <div className="mt-3 flex gap-2">
-          <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Item" className="flex-1 rounded-lg border border-night/15 px-3 py-2 text-sm text-night outline-none focus:border-violet" />
-          <input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" placeholder="₺" className="w-24 rounded-lg border border-night/15 px-3 py-2 text-sm text-night outline-none focus:border-violet" />
-          <button onClick={add} className="rounded-lg bg-violet/20 px-3 text-sm font-semibold text-violet-deep">Add</button>
+          <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Item" className="flex-1 rounded-lg border border-ink/15 px-3 py-2 text-sm text-ink outline-none focus:border-iznik" />
+          <input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" placeholder="₺" className="w-24 rounded-lg border border-ink/15 px-3 py-2 text-sm text-ink outline-none focus:border-iznik" />
+          <button onClick={add} className="rounded-lg bg-iznik/20 px-3 text-sm font-semibold text-iznik">Add</button>
         </div>
 
-        <div className="mt-4 flex items-center justify-between rounded-xl bg-night/5 px-3 py-2">
-          <span className="text-sm font-semibold text-night">Split between</span>
+        <div className="mt-4 flex items-center justify-between rounded-xl bg-ink/5 px-3 py-2">
+          <span className="text-sm font-semibold text-ink">Split between</span>
           <div className="flex items-center gap-3">
-            <button onClick={() => setPeople((p) => Math.max(1, p - 1))} className="h-7 w-7 rounded-full bg-night/10 font-bold text-night">−</button>
-            <span className="w-6 text-center font-bold text-night">{people}</span>
-            <button onClick={() => setPeople((p) => p + 1)} className="h-7 w-7 rounded-full bg-night/10 font-bold text-night">+</button>
+            <button onClick={() => setPeople((p) => Math.max(1, p - 1))} className="h-7 w-7 rounded-full bg-ink/10 font-bold text-ink">−</button>
+            <span className="w-6 text-center font-bold text-ink">{people}</span>
+            <button onClick={() => setPeople((p) => p + 1)} className="h-7 w-7 rounded-full bg-ink/10 font-bold text-ink">+</button>
           </div>
         </div>
 
-        <div className="mt-4 rounded-xl bg-accent-gradient p-4 text-center text-white">
-          <p className="text-sm text-white/80">Each person pays</p>
+        <div className="mt-4 rounded-xl bg-accent-gradient p-4 text-center text-ink">
+          <p className="text-sm text-ink/70">Each person pays</p>
           <p className="font-display text-3xl font-bold">{format(perPerson)}</p>
           {currency.code !== 'TRY' && (
-            <p className="text-xs text-white/80">{formatTry(perPerson)}</p>
+            <p className="text-xs text-ink/70">{formatTry(perPerson)}</p>
           )}
-          <p className="text-xs text-white/70">Total {format(total)} ÷ {people}</p>
+          <p className="text-xs text-ink/60">Total {format(total)} ÷ {people}</p>
         </div>
       </div>
     </div>

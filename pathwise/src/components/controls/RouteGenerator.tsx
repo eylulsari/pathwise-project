@@ -46,7 +46,7 @@ export function RouteGenerator({
         : t('dash.evening');
 
   return (
-    <div className="space-y-5 rounded-2xl border border-white/10 bg-night-800 p-4">
+    <div className="space-y-5 rounded-2xl border border-ink/10 bg-surface-2 p-4">
       <h2 className="font-display text-lg font-bold">{t('dash.buildPath')}</h2>
 
       {/* Hub selector — no default Sultanahmet */}
@@ -59,8 +59,8 @@ export function RouteGenerator({
               onClick={() => onChange({ hub: h.id })}
               className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
                 config.hub === h.id
-                  ? 'border-transparent text-night'
-                  : 'border-white/10 text-cream/80 hover:border-white/25'
+                  ? 'border-transparent text-white'
+                  : 'border-ink/10 text-ink/80 hover:border-ink/25'
               }`}
               style={config.hub === h.id ? { background: h.accent } : undefined}
             >
@@ -75,9 +75,9 @@ export function RouteGenerator({
       <div>
         <div className="mb-1.5 flex items-center justify-between">
           <Label>
-            {t('dash.dailyBudget')}: <span className="text-cream">₺{config.budgetTry.toLocaleString('tr-TR')}{config.budgetTry >= 5000 ? '+' : ''}</span>
+            {t('dash.dailyBudget')}: <span className="text-ink">₺{config.budgetTry.toLocaleString('tr-TR')}{config.budgetTry >= 5000 ? '+' : ''}</span>
             {currency.code !== 'TRY' && (
-              <span className="ml-1 text-cream/50">≈ {format(config.budgetTry)}</span>
+              <span className="ml-1 text-ink/50">≈ {format(config.budgetTry)}</span>
             )}
           </Label>
           <CurrencySelect />
@@ -89,9 +89,9 @@ export function RouteGenerator({
           step={100}
           value={config.budgetTry}
           onChange={(e) => onChange({ budgetTry: Number(e.target.value) })}
-          className="w-full accent-fuchsia"
+          className="w-full accent-sunset"
         />
-        <div className="flex justify-between text-[10px] text-cream/40">
+        <div className="flex justify-between text-[10px] text-ink/40">
           <span>₺300</span>
           <span>₺5,000+</span>
         </div>
@@ -100,7 +100,7 @@ export function RouteGenerator({
       {/* Pace slider */}
       <div>
         <Label>
-          {t('dash.timeAvailable')}: <span className="text-cream">{config.paceHours}{config.paceHours >= 8 ? '+' : ''} {t('dash.hours')}</span>
+          {t('dash.timeAvailable')}: <span className="text-ink">{config.paceHours}{config.paceHours >= 8 ? '+' : ''} {t('dash.hours')}</span>
         </Label>
         <input
           type="range"
@@ -109,9 +109,9 @@ export function RouteGenerator({
           step={1}
           value={config.paceHours}
           onChange={(e) => onChange({ paceHours: Number(e.target.value) })}
-          className="w-full accent-violet"
+          className="w-full accent-iznik"
         />
-        <div className="flex justify-between text-[10px] text-cream/40">
+        <div className="flex justify-between text-[10px] text-ink/40">
           <span>2{t('dash.hours').charAt(0)} {t('dash.relaxed')}</span>
           <span>8+ {t('dash.packed')}</span>
         </div>
@@ -127,8 +127,8 @@ export function RouteGenerator({
               onClick={() => onChange({ group: g.id })}
               className={`rounded-lg border px-2 py-2 text-sm transition-colors ${
                 config.group === g.id
-                  ? 'border-violet bg-violet/20 text-cream'
-                  : 'border-white/10 text-cream/70 hover:border-white/25'
+                  ? 'border-iznik bg-iznik/20 text-ink'
+                  : 'border-ink/10 text-ink/70 hover:border-ink/25'
               }`}
             >
               <div>{g.icon}</div>
@@ -156,8 +156,8 @@ export function RouteGenerator({
                 }
                 className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                   on
-                    ? 'border-transparent bg-accent-gradient text-white'
-                    : 'border-white/15 text-cream/70 hover:border-white/30'
+                    ? 'border-transparent bg-iznik text-white'
+                    : 'border-ink/15 text-ink/70 hover:border-ink/30'
                 }`}
               >
                 {t(`interests.${i}`)}
@@ -177,8 +177,8 @@ export function RouteGenerator({
               onClick={() => onChange({ weather: w })}
               className={`flex-1 rounded-lg border px-2 py-1.5 text-sm transition-colors ${
                 config.weather === w
-                  ? 'border-coral bg-coral/20 text-cream'
-                  : 'border-white/10 text-cream/70'
+                  ? 'border-terracotta bg-terracotta/20 text-ink'
+                  : 'border-ink/10 text-ink/70'
               }`}
             >
               {w === 'sunny' ? `☀️ ${t('dash.sunny')}` : `🌧️ ${t('dash.rainy')}`}
@@ -186,7 +186,7 @@ export function RouteGenerator({
           ))}
         </div>
         <div className="mt-2">
-          <div className="flex justify-between text-xs text-cream/50">
+          <div className="flex justify-between text-xs text-ink/50">
             <span>{t('dash.start')}: {String(config.startHour).padStart(2, '0')}:00</span>
             <span>{timeOfDay}</span>
           </div>
@@ -197,7 +197,7 @@ export function RouteGenerator({
             step={1}
             value={config.startHour}
             onChange={(e) => onChange({ startHour: Number(e.target.value) })}
-            className="w-full accent-coral"
+            className="w-full accent-terracotta"
           />
         </div>
       </div>
@@ -210,5 +210,5 @@ export function RouteGenerator({
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-cream/50">{children}</p>;
+  return <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink/50">{children}</p>;
 }

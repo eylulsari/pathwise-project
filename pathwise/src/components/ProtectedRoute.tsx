@@ -10,7 +10,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-full items-center justify-center text-cream/60">
+      <div className="flex min-h-full items-center justify-center text-ink/60">
         <span className="animate-pulse">{t('common.loading')}</span>
       </div>
     );

@@ -38,12 +38,12 @@ export function TravelVibeQuiz({
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div className="card-cream w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
-          <h3 className="font-display text-xl font-bold text-night">{t('quiz.title')}</h3>
-          <button onClick={onClose} className="text-night/40 hover:text-night">✕</button>
+          <h3 className="font-display text-xl font-bold text-ink">{t('quiz.title')}</h3>
+          <button onClick={onClose} className="text-ink/40 hover:text-ink">✕</button>
         </div>
         <div className="mt-2 flex gap-1">
           {[0, 1, 2].map((s) => (
-            <div key={s} className={`h-1.5 flex-1 rounded-full ${s <= step ? 'bg-accent-gradient' : 'bg-night/10'}`} />
+            <div key={s} className={`h-1.5 flex-1 rounded-full ${s <= step ? 'bg-accent-gradient' : 'bg-ink/10'}`} />
           ))}
         </div>
 
@@ -69,22 +69,22 @@ export function TravelVibeQuiz({
 
         {step === 2 && (
           <Step title={t('quiz.budgetQ')}>
-            <p className="text-center font-display text-3xl font-bold text-night">
+            <p className="text-center font-display text-3xl font-bold text-ink">
               ₺{budget.toLocaleString('tr-TR')}{budget >= 5000 ? '+' : ''}
             </p>
             <input
               type="range" min={0} max={5000} step={250} value={budget}
               onChange={(e) => setBudget(Number(e.target.value))}
-              className="mt-3 w-full accent-fuchsia"
+              className="mt-3 w-full accent-sunset"
             />
-            <div className="flex justify-between text-xs text-night/40"><span>₺0</span><span>₺5,000+</span></div>
+            <div className="flex justify-between text-xs text-ink/40"><span>₺0</span><span>₺5,000+</span></div>
           </Step>
         )}
 
         <div className="mt-6 flex justify-between">
           <button
             onClick={() => (step === 0 ? onClose() : setStep((s) => s - 1))}
-            className="rounded-lg px-4 py-2 text-sm font-semibold text-night/60 hover:text-night"
+            className="rounded-lg px-4 py-2 text-sm font-semibold text-ink/60 hover:text-ink"
           >
             {step === 0 ? t('quiz.cancel') : t('quiz.back')}
           </button>
@@ -107,7 +107,7 @@ export function TravelVibeQuiz({
 function Step({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mt-5">
-      <h4 className="mb-3 text-center font-display text-lg font-semibold text-night">{title}</h4>
+      <h4 className="mb-3 text-center font-display text-lg font-semibold text-ink">{title}</h4>
       {children}
     </div>
   );
@@ -118,7 +118,7 @@ function Choice({ active, onClick, icon, label }: { active: boolean; onClick: ()
     <button
       onClick={onClick}
       className={`flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-sm font-semibold transition-colors ${
-        active ? 'border-violet bg-violet/10 text-night' : 'border-night/10 text-night/70 hover:border-night/25'
+        active ? 'border-iznik bg-iznik/10 text-ink' : 'border-ink/10 text-ink/70 hover:border-ink/25'
       }`}
     >
       <span className="text-2xl">{icon}</span>

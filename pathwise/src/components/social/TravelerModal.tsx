@@ -30,11 +30,11 @@ export function TravelerModal({
               {traveler.name.split(' ').map((n) => n[0]).join('')}
             </div>
             <div>
-              <h3 className="font-display text-xl font-bold text-night">{traveler.name}</h3>
-              <p className="text-sm text-night/60">
+              <h3 className="font-display text-xl font-bold text-ink">{traveler.name}</h3>
+              <p className="text-sm text-ink/60">
                 {traveler.age} · {traveler.nationality}
                 {traveler.soloVerified && (
-                  <span className="ml-2 rounded-full bg-emerald/15 px-2 py-0.5 text-xs font-semibold text-emerald">
+                  <span className="ml-2 rounded-full bg-sage/15 px-2 py-0.5 text-xs font-semibold text-sage">
                     ✓ Solo-Verified
                   </span>
                 )}
@@ -42,36 +42,36 @@ export function TravelerModal({
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="text-night/40 hover:text-night">✕</button>
+          <button onClick={onClose} className="text-ink/40 hover:text-ink">✕</button>
         </div>
 
-        <p className="mt-4 text-sm text-night/80">{traveler.bio}</p>
+        <p className="mt-4 text-sm text-ink/80">{traveler.bio}</p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {traveler.tags.map((t) => (
-            <span key={t} className="rounded-full bg-violet/10 px-2.5 py-1 text-xs font-semibold text-violet-deep">
+            <span key={t} className="rounded-full bg-iznik/10 px-2.5 py-1 text-xs font-semibold text-iznik">
               {t}
             </span>
           ))}
         </div>
 
         <section className="mt-5">
-          <h4 className="mb-2 text-sm font-bold text-night">{t('social.badges')}</h4>
+          <h4 className="mb-2 text-sm font-bold text-ink">{t('social.badges')}</h4>
           {badges.length ? (
             <div className="flex flex-wrap gap-2">
               {badges.map((b) => (
-                <span key={b.id} className="flex items-center gap-1 rounded-lg bg-night/5 px-2 py-1 text-xs text-night/80">
+                <span key={b.id} className="flex items-center gap-1 rounded-lg bg-ink/5 px-2 py-1 text-xs text-ink/80">
                   {b.emoji} {b.name}
                 </span>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-night/50">{t('social.noBadges')}</p>
+            <p className="text-xs text-ink/50">{t('social.noBadges')}</p>
           )}
         </section>
 
         <section className="mt-5">
-          <h4 className="mb-2 text-sm font-bold text-night">{t('social.visitedProvinces')}</h4>
+          <h4 className="mb-2 text-sm font-bold text-ink">{t('social.visitedProvinces')}</h4>
           <TurkeyMiniMap visited={traveler.visitedProvinces} />
         </section>
 
@@ -80,12 +80,12 @@ export function TravelerModal({
             onClick={onConnect}
             disabled={connected}
             className={`flex-1 rounded-xl py-3 text-sm font-semibold ${
-              connected ? 'bg-emerald/20 text-emerald' : 'btn-accent'
+              connected ? 'bg-sage/20 text-sage' : 'btn-accent'
             }`}
           >
             {connected ? t('social.connected') : t('social.connect')}
           </button>
-          <button className="flex-1 rounded-xl border-2 border-night/15 py-3 text-sm font-semibold text-night hover:border-night/30">
+          <button className="flex-1 rounded-xl border-2 border-ink/15 py-3 text-sm font-semibold text-ink hover:border-ink/30">
             {t('social.message')}
           </button>
         </div>

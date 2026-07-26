@@ -12,11 +12,11 @@ export function AppHeader() {
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-      isActive ? 'bg-violet/20 text-cream' : 'text-cream/60 hover:text-cream'
+      isActive ? 'bg-iznik/20 text-ink' : 'text-ink/60 hover:text-ink'
     }`;
 
   return (
-    <header className="sticky top-0 z-[900] flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-night/90 px-4 py-3 backdrop-blur md:px-6">
+    <header className="sticky top-0 z-[900] flex flex-wrap items-center justify-between gap-3 border-b border-ink/10 bg-surface/90 px-4 py-3 backdrop-blur md:px-6">
       <div className="flex items-center gap-4">
         <Link to="/dashboard" className="flex items-center gap-2">
           <span className="text-xl">🗺️</span>
@@ -30,7 +30,7 @@ export function AppHeader() {
             to="/premium"
             className={({ isActive }) =>
               `rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-                isActive ? 'bg-violet/20 text-cream' : 'text-violet hover:text-fuchsia'
+                isActive ? 'bg-iznik/20 text-ink' : 'text-iznik hover:text-terracotta'
               }`
             }
           >
@@ -46,12 +46,12 @@ export function AppHeader() {
         <NotificationBell />
         <LanguageToggle />
         <div className="flex items-center gap-2">
-          <span className="hidden text-sm text-cream/70 sm:inline">
+          <span className="hidden text-sm text-ink/70 sm:inline">
             {user?.name?.split(' ')[0]}
           </span>
           <button
             onClick={logout}
-            className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-cream/70 hover:text-cream"
+            className="rounded-lg border border-ink/10 px-3 py-1.5 text-sm font-semibold text-ink/70 hover:text-ink"
           >
             {t('common.logout')}
           </button>

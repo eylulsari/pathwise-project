@@ -33,8 +33,8 @@ export function exportItineraryPdf(itinerary: Itinerary): void {
 
   const html = `<!doctype html><html><head><title>Pathwise itinerary</title>
     <style>
-      body{font-family:system-ui,sans-serif;padding:32px;color:#131129}
-      h1{color:#8B5CF6} table{width:100%;border-collapse:collapse;margin-top:16px}
+      body{font-family:system-ui,sans-serif;padding:32px;color:#3D3229}
+      h1{color:#4A7C82} table{width:100%;border-collapse:collapse;margin-top:16px}
       td,th{border-bottom:1px solid #eee;padding:8px;text-align:left;font-size:14px}
       .total{margin-top:16px;font-weight:700}
     </style></head><body>

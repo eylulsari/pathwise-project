@@ -71,7 +71,7 @@ export default function Social() {
     setCheckIns((prev) => [
       {
         id: `me-${Date.now()}`,
-        traveler: { id: 'me', name: 'You', avatarColor: '#10B981' },
+        traveler: { id: 'me', name: 'You', avatarColor: '#6E8F74' },
         placeName: 'Right here',
         hub: 'kadikoy-moda',
         message: checkInText.trim(),
@@ -98,34 +98,34 @@ export default function Social() {
       <main className="mx-auto w-full max-w-6xl flex-1 space-y-8 p-4 md:p-6">
         <div>
           <h1 className="font-display text-2xl font-bold">{t('social.title')}</h1>
-          <p className="text-sm text-cream/60">{t('social.subtitle')}</p>
+          <p className="text-sm text-ink/60">{t('social.subtitle')}</p>
         </div>
 
         {/* "I'm Here" check-in composer */}
-        <section className="rounded-2xl border border-white/10 bg-night-800 p-4">
+        <section className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
           <div className="flex gap-2">
             <input
               value={checkInText}
               onChange={(e) => setCheckInText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && broadcastCheckIn()}
               placeholder={t('social.checkinPlaceholder')}
-              className="flex-1 rounded-xl border border-white/10 bg-night px-4 py-2.5 text-sm outline-none focus:border-emerald"
+              className="flex-1 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-sm outline-none focus:border-sage"
             />
-            <button onClick={broadcastCheckIn} className="rounded-xl bg-emerald px-4 py-2.5 text-sm font-semibold text-white">
+            <button onClick={broadcastCheckIn} className="rounded-xl bg-sage px-4 py-2.5 text-sm font-semibold text-ink">
               {t('social.imHere')}
             </button>
           </div>
 
           <div className="mt-4 space-y-2">
             {checkIns.map((c) => (
-              <div key={c.id} className="flex items-start gap-3 rounded-xl bg-night px-3 py-2">
+              <div key={c.id} className="flex items-start gap-3 rounded-xl bg-white px-3 py-2">
                 <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: c.traveler.avatarColor }}>
                   {c.traveler.name.split(' ').map((n) => n[0]).join('')}
                 </div>
                 <div className="flex-1 text-sm">
-                  <span className="font-semibold text-cream">{c.traveler.name}</span>
-                  <span className="text-cream/50"> · {c.placeName} · {c.minutesAgo === 0 ? 'now' : `${c.minutesAgo}m ago`}</span>
-                  <p className="text-cream/80">{c.message}</p>
+                  <span className="font-semibold text-ink">{c.traveler.name}</span>
+                  <span className="text-ink/50"> · {c.placeName} · {c.minutesAgo === 0 ? 'now' : `${c.minutesAgo}m ago`}</span>
+                  <p className="text-ink/80">{c.message}</p>
                 </div>
                 <ReportButton contentType="checkin" contentId={c.id} />
               </div>
@@ -152,21 +152,21 @@ export default function Social() {
                     {tr.name.split(' ').map((n) => n[0]).join('')}
                   </div>
                   <div>
-                    <p className="font-display font-bold text-night">{tr.name}</p>
-                    <p className="text-xs text-night/50">{tr.age} · {tr.nationality}</p>
+                    <p className="font-display font-bold text-ink">{tr.name}</p>
+                    <p className="text-xs text-ink/50">{tr.age} · {tr.nationality}</p>
                   </div>
-                  {tr.soloVerified && <span className="ml-auto text-emerald" title="Solo-Verified">✓</span>}
+                  {tr.soloVerified && <span className="ml-auto text-sage" title="Solo-Verified">✓</span>}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {tr.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="rounded-full bg-violet/10 px-2 py-0.5 text-[10px] font-semibold text-violet-deep">{tag}</span>
+                    <span key={tag} className="rounded-full bg-iznik/10 px-2 py-0.5 text-[10px] font-semibold text-iznik">{tag}</span>
                   ))}
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <button onClick={() => toggleConnect(tr.id)} className={`flex-1 rounded-lg py-2 text-xs font-semibold ${connected.has(tr.id) ? 'bg-emerald/20 text-emerald' : 'bg-accent-gradient text-white'}`}>
+                  <button onClick={() => toggleConnect(tr.id)} className={`flex-1 rounded-lg py-2 text-xs font-semibold ${connected.has(tr.id) ? 'bg-sage/20 text-sage' : 'bg-iznik text-white'}`}>
                     {connected.has(tr.id) ? t('social.connected') : t('social.connect')}
                   </button>
-                  <button onClick={() => setActive(tr)} className="flex-1 rounded-lg border border-night/15 py-2 text-xs font-semibold text-night hover:border-night/30">
+                  <button onClick={() => setActive(tr)} className="flex-1 rounded-lg border border-ink/15 py-2 text-xs font-semibold text-ink hover:border-ink/30">
                     {t('social.viewProfile')}
                   </button>
                 </div>
@@ -183,19 +183,19 @@ export default function Social() {
           <h2 className="mb-3 font-display text-lg font-bold">{t('social.communityRoutes')}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {routes.map((r) => (
-              <div key={r.id} className="rounded-2xl border border-white/10 bg-night-800 p-4">
+              <div key={r.id} className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-semibold text-cream">{r.title}</p>
-                    <p className="text-xs text-cream/50">by {r.authorName} · {HUB_LABEL[r.hub]}</p>
+                    <p className="font-semibold text-ink">{r.title}</p>
+                    <p className="text-xs text-ink/50">by {r.authorName} · {HUB_LABEL[r.hub]}</p>
                   </div>
-                  <span className="text-xs text-cream/50">{r.stops} stops · {r.distanceKm} km</span>
+                  <span className="text-xs text-ink/50">{r.stops} stops · {r.distanceKm} km</span>
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <button onClick={() => likeRoute(r.id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${r.liked ? 'bg-fuchsia/20 text-fuchsia' : 'border border-white/10 text-cream/70'}`}>
+                  <button onClick={() => likeRoute(r.id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${r.liked ? 'bg-sunset/20 text-terracotta' : 'border border-ink/10 text-ink/70'}`}>
                     {r.liked ? '❤️' : '🤍'} {r.likes}
                   </button>
-                  <button className="rounded-lg bg-violet/20 px-3 py-1.5 text-xs font-semibold text-cream">{t('social.clone')}</button>
+                  <button className="rounded-lg bg-iznik/20 px-3 py-1.5 text-xs font-semibold text-ink">{t('social.clone')}</button>
                   <span className="ml-auto self-center"><ReportButton contentType="route" contentId={r.id} /></span>
                 </div>
               </div>
@@ -228,7 +228,7 @@ export default function Social() {
 
 function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${active ? 'border-transparent bg-accent-gradient text-white' : 'border-white/15 text-cream/60 hover:border-white/30'}`}>
+    <button onClick={onClick} className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${active ? 'border-transparent bg-iznik text-white' : 'border-ink/15 text-ink/60 hover:border-ink/30'}`}>
       {label}
     </button>
   );
@@ -239,18 +239,18 @@ function ForumThread({ q }: { q: ForumQuestion }) {
   const [answers, setAnswers] = useState(q.answers);
   const [text, setText] = useState('');
   return (
-    <div className="rounded-2xl border border-white/10 bg-night-800 p-4">
+    <div className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
       <div className="flex items-start justify-between gap-2">
-        <p className="font-semibold text-cream">{q.question}</p>
+        <p className="font-semibold text-ink">{q.question}</p>
         <ReportButton contentType="forum" contentId={q.id} />
       </div>
-      <p className="text-xs text-cream/50">{q.authorName} · {q.minutesAgo}m ago</p>
-      <div className="mt-3 space-y-2 border-l-2 border-white/10 pl-3">
+      <p className="text-xs text-ink/50">{q.authorName} · {q.minutesAgo}m ago</p>
+      <div className="mt-3 space-y-2 border-l-2 border-ink/10 pl-3">
         {answers.map((a, i) => (
           <div key={i} className="text-sm">
-            <span className="font-semibold text-violet">{a.authorName}</span>
-            <span className="text-cream/50"> · {a.minutesAgo}m</span>
-            <p className="text-cream/80">{a.text}</p>
+            <span className="font-semibold text-iznik">{a.authorName}</span>
+            <span className="text-ink/50"> · {a.minutesAgo}m</span>
+            <p className="text-ink/80">{a.text}</p>
           </div>
         ))}
       </div>
@@ -265,7 +265,7 @@ function ForumThread({ q }: { q: ForumQuestion }) {
             }
           }}
           placeholder={t('social.quickAnswer')}
-          className="flex-1 rounded-lg border border-white/10 bg-night px-3 py-1.5 text-sm outline-none focus:border-violet"
+          className="flex-1 rounded-lg border border-ink/10 bg-white px-3 py-1.5 text-sm outline-none focus:border-iznik"
         />
       </div>
     </div>

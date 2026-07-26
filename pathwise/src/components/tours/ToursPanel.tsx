@@ -7,8 +7,8 @@ import { useT } from '../../i18n';
 
 const SOURCE_BADGE: Record<string, string> = {
   GetYourGuide: 'bg-orange-500/20 text-orange-300',
-  TripAdvisor: 'bg-emerald/20 text-emerald',
-  Pathwise: 'bg-violet/20 text-violet',
+  TripAdvisor: 'bg-sage/20 text-sage',
+  Pathwise: 'bg-iznik/20 text-iznik',
 };
 
 /** Curated + live tours. "Sync Live Tours" pulls partner-API tours; a tour
@@ -46,13 +46,13 @@ export function ToursPanel({
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-night-800 p-4">
+    <div className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="font-display text-sm font-bold">Curated & live tours</h3>
         <button
           onClick={syncLive}
           disabled={syncing || offline}
-          className="rounded-lg border border-violet/40 px-2.5 py-1 text-xs font-semibold text-cream hover:bg-violet/10 disabled:opacity-40"
+          className="rounded-lg border border-iznik/40 px-2.5 py-1 text-xs font-semibold text-ink hover:bg-iznik/10 disabled:opacity-40"
         >
           {offline ? '📴 Offline' : syncing ? '🔄 Syncing…' : synced ? '✓ Synced' : '🔄 Sync Live Tours'}
         </button>
@@ -63,13 +63,13 @@ export function ToursPanel({
           <button
             key={tour.id}
             onClick={() => setDetail(tour)}
-            className="w-full rounded-xl border border-white/10 bg-night p-3 text-left transition-colors hover:border-white/25"
+            className="w-full rounded-xl border border-ink/10 bg-white p-3 text-left transition-colors hover:border-ink/25"
           >
             <div className="flex items-start justify-between gap-2">
-              <span className="font-semibold text-cream">{tour.title}</span>
+              <span className="font-semibold text-ink">{tour.title}</span>
               <span className="flex flex-shrink-0 gap-1">
                 {tour.isSponsored && (
-                  <span className="rounded-full bg-coral/20 px-2 py-0.5 text-[10px] font-semibold text-coral">
+                  <span className="rounded-full bg-terracotta/20 px-2 py-0.5 text-[10px] font-semibold text-terracotta">
                     {t('tours.sponsored')}
                   </span>
                 )}
@@ -78,7 +78,7 @@ export function ToursPanel({
                 </span>
               </span>
             </div>
-            <p className="mt-1 text-xs text-cream/50">
+            <p className="mt-1 text-xs text-ink/50">
               {HUB_LABEL[tour.hub]} · {tour.durationHours}h · ⭐ {tour.rating} · {formatTry(tour.priceTry)}
             </p>
           </button>
@@ -88,28 +88,28 @@ export function ToursPanel({
       {/* Slide-over detail */}
       {detail && (
         <div className="fixed inset-0 z-[1100] flex justify-end bg-black/60" onClick={() => setDetail(null)}>
-          <div className="h-full w-full max-w-md overflow-y-auto bg-night-800 p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="h-full w-full max-w-md overflow-y-auto bg-surface-2 p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between">
-              <h3 className="font-display text-xl font-bold text-cream">{detail.title}</h3>
-              <button onClick={() => setDetail(null)} className="text-cream/40 hover:text-cream">✕</button>
+              <h3 className="font-display text-xl font-bold text-ink">{detail.title}</h3>
+              <button onClick={() => setDetail(null)} className="text-ink/40 hover:text-ink">✕</button>
             </div>
-            <p className="mt-1 text-sm text-cream/60">
+            <p className="mt-1 text-sm text-ink/60">
               {HUB_LABEL[detail.hub]} · {detail.durationHours}h · ⭐ {detail.rating} · {formatTry(detail.priceTry)}
             </p>
             <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${SOURCE_BADGE[detail.source]}`}>
               via {detail.source}
             </span>
             {detail.isSponsored && (
-              <span className="ml-2 rounded-full bg-coral/20 px-2 py-0.5 text-xs font-semibold text-coral">
+              <span className="ml-2 rounded-full bg-terracotta/20 px-2 py-0.5 text-xs font-semibold text-terracotta">
                 {t('tours.sponsored')}
               </span>
             )}
 
-            <h4 className="mt-5 text-sm font-bold text-cream">Stops</h4>
+            <h4 className="mt-5 text-sm font-bold text-ink">Stops</h4>
             <ol className="mt-2 space-y-2">
               {detail.stopNames.map((s, i) => (
-                <li key={i} className="flex items-center gap-3 rounded-lg bg-night px-3 py-2 text-sm text-cream/80">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-gradient text-xs font-bold text-white">{i + 1}</span>
+                <li key={i} className="flex items-center gap-3 rounded-lg bg-white px-3 py-2 text-sm text-ink/80">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-iznik text-xs font-bold text-white">{i + 1}</span>
                   {s}
                 </li>
               ))}
@@ -130,7 +130,7 @@ export function ToursPanel({
               target="_blank"
               rel="noopener noreferrer sponsored"
               onClick={() => api.recordAffiliateClick(detail.id, detail.source)}
-              className="mt-2 block w-full rounded-xl border border-emerald/40 py-3 text-center text-sm font-semibold text-emerald hover:bg-emerald/10"
+              className="mt-2 block w-full rounded-xl border border-sage/40 py-3 text-center text-sm font-semibold text-sage hover:bg-sage/10"
             >
               {t('tours.reserve')}
             </a>

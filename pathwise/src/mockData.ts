@@ -36,7 +36,7 @@ export const TRAVELERS: Traveler[] = [
     name: 'Mara Lindqvist',
     age: 27,
     nationality: 'Sweden',
-    avatarColor: '#8B5CF6',
+    avatarColor: '#4A7C82',
     tags: ['#SoloVerified', '#PhotoNomad', '#CultureSeeker'],
     bio: 'Slow-traveling photographer chasing golden hour across the Bosphorus.',
     soloVerified: true,
@@ -48,7 +48,7 @@ export const TRAVELERS: Traveler[] = [
     name: 'Diego Fernández',
     age: 31,
     nationality: 'Spain',
-    avatarColor: '#EC4899',
+    avatarColor: '#C56F52',
     tags: ['#Foodie', '#Backpacker'],
     bio: 'Here for the meyhanes and the meze. Will travel for good rakı.',
     soloVerified: true,
@@ -60,7 +60,7 @@ export const TRAVELERS: Traveler[] = [
     name: 'Yuki Tanaka',
     age: 24,
     nationality: 'Japan',
-    avatarColor: '#10B981',
+    avatarColor: '#6E8F74',
     tags: ['#SoloVerified', '#CultureSeeker', '#SlowTravel'],
     bio: 'Architecture student mapping every Sinan mosque in the city.',
     soloVerified: true,
@@ -72,7 +72,7 @@ export const TRAVELERS: Traveler[] = [
     name: 'Amara Okafor',
     age: 29,
     nationality: 'Nigeria',
-    avatarColor: '#FF7E5F',
+    avatarColor: '#B5654A',
     tags: ['#Foodie', '#PhotoNomad'],
     bio: 'Food writer collecting street-food stories one simit at a time.',
     soloVerified: false,
@@ -84,7 +84,7 @@ export const TRAVELERS: Traveler[] = [
     name: 'Liam O’Connor',
     age: 26,
     nationality: 'Ireland',
-    avatarColor: '#6B21A8',
+    avatarColor: '#3F6E8C',
     tags: ['#Backpacker', '#SlowTravel'],
     bio: 'Six months overland from Dublin to Istanbul. Not stopping yet.',
     soloVerified: true,
@@ -94,10 +94,10 @@ export const TRAVELERS: Traveler[] = [
 ];
 
 export const CHECK_INS: CheckIn[] = [
-  { id: 'c1', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#8B5CF6' }, placeName: 'Galata Tower', hub: 'karakoy-galata', message: 'Golden hour is unreal up here 🌇', minutesAgo: 8 },
-  { id: 'c2', traveler: { id: 't2', name: 'Diego Fernández', avatarColor: '#EC4899' }, placeName: 'Çiya Sofrası', hub: 'kadikoy-moda', message: 'Anyone want to split a table? So much food.', minutesAgo: 21 },
-  { id: 'c3', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#FF7E5F' }, placeName: 'Kadıköy Market', hub: 'kadikoy-moda', message: 'Pickle shop tour starting now 🥒', minutesAgo: 34 },
-  { id: 'c4', traveler: { id: 't3', name: 'Yuki Tanaka', avatarColor: '#10B981' }, placeName: 'Balat Colorful Houses', hub: 'balat-fener', message: 'Sketching the terraces, come say hi.', minutesAgo: 52 },
+  { id: 'c1', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#4A7C82' }, placeName: 'Galata Tower', hub: 'karakoy-galata', message: 'Golden hour is unreal up here 🌇', minutesAgo: 8 },
+  { id: 'c2', traveler: { id: 't2', name: 'Diego Fernández', avatarColor: '#C56F52' }, placeName: 'Çiya Sofrası', hub: 'kadikoy-moda', message: 'Anyone want to split a table? So much food.', minutesAgo: 21 },
+  { id: 'c3', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A' }, placeName: 'Kadıköy Market', hub: 'kadikoy-moda', message: 'Pickle shop tour starting now 🥒', minutesAgo: 34 },
+  { id: 'c4', traveler: { id: 't3', name: 'Yuki Tanaka', avatarColor: '#6E8F74' }, placeName: 'Balat Colorful Houses', hub: 'balat-fener', message: 'Sketching the terraces, come say hi.', minutesAgo: 52 },
 ];
 
 export const COMMUNITY_ROUTES: CommunityRoute[] = [

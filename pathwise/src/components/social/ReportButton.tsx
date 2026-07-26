@@ -31,14 +31,14 @@ export function ReportButton({
   }
 
   if (done) {
-    return <span className="text-[10px] font-semibold text-emerald">✓ {t('report.thanks')}</span>;
+    return <span className="text-[10px] font-semibold text-sage">✓ {t('report.thanks')}</span>;
   }
 
   return (
     <div className="relative inline-block">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="text-[10px] font-semibold text-cream/40 hover:text-fuchsia"
+        className="text-[10px] font-semibold text-ink/40 hover:text-terracotta"
         title={t('report.report')}
       >
         🚩 {t('report.report')}
@@ -46,8 +46,8 @@ export function ReportButton({
       {open && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-[1041] mt-1 w-44 overflow-hidden rounded-xl border border-white/10 bg-night-800 shadow-xl">
-            <p className="px-3 py-2 text-[10px] uppercase tracking-wide text-cream/40">
+          <div className="absolute right-0 z-[1041] mt-1 w-44 overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-xl">
+            <p className="px-3 py-2 text-[10px] uppercase tracking-wide text-ink/40">
               {t('report.reason')}
             </p>
             {REASONS.map((r) => (
@@ -55,7 +55,7 @@ export function ReportButton({
                 key={r}
                 disabled={busy}
                 onClick={() => submit(r)}
-                className="block w-full px-3 py-2 text-left text-xs text-cream/80 hover:bg-white/5"
+                className="block w-full px-3 py-2 text-left text-xs text-ink/80 hover:bg-ink/5"
               >
                 {t(`report.${r}`)}
               </button>
