@@ -140,3 +140,20 @@ hub-budget, quiz-vibe, factory, auth, weather).
 28 feature specs live in `pathwise/e2e/{planning,social,extras}-features.spec.ts`
 (plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
 `cd pathwise && npm run e2e`.
+
+## Information architecture — current flows (2026-07-27)
+- **Sign-up → first route:** Landing CTA → auth form → `Create account` lands
+  **directly on `/dashboard`** (no `/success` interstitial), where Day 1's route
+  **auto-generates**. ~2 clicks to a live plan. Sign-in follows the same path.
+- **Dashboard ordering is state-aware** (`showResultsFirst = day.itinerary || day.loading`):
+  - With a route (the usual case) → **results-first**: Today's Path leads, Map
+    next, the build/discovery controls become a secondary rail — on mobile *and*
+    desktop (`xl:grid-cols-[minmax(340px,420px)_1fr_320px]`).
+  - No route (error / offline-without-cache) → **discovery-first**: the controls
+    (RouteGenerator, Vibe Quiz, Must-Visit) lead so the user can build one.
+- **Must-Visit picks auto-apply** on picker close (no extra "Generate" tap) with
+  a "Route updated · N stops added" toast.
+- **Social / Profile** are one click from the persistent top nav on every screen
+  (there is no bottom nav). No shortcut needed.
+- These flows are exercised by the regression suite (e.g. the reorder does not
+  change any role/text selectors, so all 43 specs still pass).
