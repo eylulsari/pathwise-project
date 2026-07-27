@@ -495,6 +495,10 @@ export default function Dashboard() {
     }
   }
 
+  // Results-first when the user has (or is generating) a route; discovery-first
+  // only in the genuine no-route states (error, or offline with no cached plan).
+  const showResultsFirst = !!day.itinerary || day.loading;
+
   return (
     <div className="flex min-h-screen flex-col">
       <AppHeader />
@@ -564,10 +568,16 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2 xl:h-[calc(100vh-155px)] xl:grid-cols-[330px_minmax(340px,400px)_1fr]">
-        {/* Left rail: controls — on mobile these fine-tuning tools drop below the
-            already-generated plan + map (results-first); desktop layout unchanged. */}
-        <div className="order-3 space-y-4 overflow-y-auto pr-1 lg:order-none">
+      <div
+        className={`grid flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2 xl:h-[calc(100vh-155px)] ${
+          showResultsFirst
+            ? 'xl:grid-cols-[minmax(340px,420px)_1fr_320px]' // Today's Path | Map | controls
+            : 'xl:grid-cols-[330px_minmax(340px,400px)_1fr]' // controls | Today's Path | Map
+        }`}
+      >
+        {/* Controls / discovery tools. When a route exists they become the
+            secondary rail (last); with no route they lead (natural DOM order). */}
+        <div className={`space-y-4 overflow-y-auto pr-1 ${showResultsFirst ? 'order-3' : ''}`}>
           <RouteGenerator
             config={day.config}
             onChange={updateConfig}
@@ -601,8 +611,8 @@ export default function Dashboard() {
           <SurvivalWidget />
         </div>
 
-        {/* Middle: Today's Path — first thing on mobile (the actual result). */}
-        <div className="order-1 overflow-y-auto pr-1 lg:order-none">
+        {/* Today's Path — leads (first) whenever a route exists or is loading. */}
+        <div className={`overflow-y-auto pr-1 ${showResultsFirst ? 'order-1' : ''}`}>
           {undoVisible && day.undoStack.length > 0 && (
             <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-iznik/40 bg-iznik/10 px-3 py-2 text-sm">
               <span className="text-ink/90">✏️ {t('dash.routeUpdated')}</span>
@@ -642,8 +652,8 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Right: Map — second on mobile, right after the plan. */}
-        <div className="relative order-2 h-[60vh] lg:order-none xl:h-full">
+        {/* Map — sits right after the plan in results-first mode. */}
+        <div className={`relative h-[60vh] xl:h-full ${showResultsFirst ? 'order-2' : ''}`}>
           <MapView
             itinerary={day.itinerary}
             selectedPlaceId={selectedPlaceId}
