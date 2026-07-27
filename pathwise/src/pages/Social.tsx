@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type {
   CheckIn,
   CommunityRoute,
@@ -25,6 +26,7 @@ const ALL_TAGS: TravelTag[] = [
 
 export default function Social() {
   const { t } = useT();
+  const navigate = useNavigate();
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [travelers, setTravelers] = useState<Traveler[]>([]);
   const [routes, setRoutes] = useState<CommunityRoute[]>([]);
@@ -90,6 +92,14 @@ export default function Social() {
           : r,
       ),
     );
+  }
+
+  // Clone a community route into the user's own plan: hand its hub off to the
+  // dashboard (same localStorage handoff the poll winner uses) which rebuilds
+  // Today's Path around that neighborhood.
+  function cloneRoute(hub: CommunityRoute['hub']) {
+    localStorage.setItem('pathwise.cloneHub', hub);
+    navigate('/dashboard');
   }
 
   return (
@@ -195,7 +205,7 @@ export default function Social() {
                   <button onClick={() => likeRoute(r.id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${r.liked ? 'bg-sunset/20 text-terracotta' : 'border border-ink/10 text-ink/70'}`}>
                     {r.liked ? '❤️' : '🤍'} {r.likes}
                   </button>
-                  <button className="rounded-lg bg-iznik/20 px-3 py-1.5 text-xs font-semibold text-ink">{t('social.clone')}</button>
+                  <button onClick={() => cloneRoute(r.hub)} className="rounded-lg bg-iznik/20 px-3 py-1.5 text-xs font-semibold text-ink">{t('social.clone')}</button>
                   <span className="ml-auto self-center"><ReportButton contentType="route" contentId={r.id} /></span>
                 </div>
               </div>

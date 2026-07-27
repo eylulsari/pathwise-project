@@ -257,6 +257,16 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [day.itinerary]);
 
+  // "Clone This Route" on the Social page → rebuild Today's Path on that hub.
+  useEffect(() => {
+    const hub = localStorage.getItem('pathwise.cloneHub');
+    if (hub && !isOffline) {
+      localStorage.removeItem('pathwise.cloneHub');
+      useTourHub(hub as Hub);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fetch real OSRM walking geometry whenever the visible itinerary changes.
   useEffect(() => {
     const stops = (day.itinerary?.stops ?? [])
