@@ -92,6 +92,11 @@ services:
       - "5173:5173"
     volumes:
       - ./pathwise/src:/app/src
+      # Bind-mount the build config too, so theme/PostCSS edits reach the
+      # running dev server (editing only /src otherwise leaves a stale config
+      # baked into the image → e.g. `@apply` on new tokens fails).
+      - ./pathwise/tailwind.config.js:/app/tailwind.config.js
+      - ./pathwise/postcss.config.js:/app/postcss.config.js
 
 volumes:
   pathwise-pgdata:
