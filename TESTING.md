@@ -80,7 +80,7 @@ hub-budget, quiz-vibe, factory, auth, weather).
 | Check-in "I'm Here" composer (#28) | ⚠️ | posts to the feed, but client-only on mock data (not persisted) |
 | Buddy connect + tag filter + TravelerModal + Turkey map (#29) | ⚠️ | works on mock travelers; "connect" persisted to localStorage only, not backend |
 | Community route **like** (#30) | ⚠️ | client-only optimistic toggle on mock data (no backend persist) |
-| Community route **Clone** (#30) | ❌ | **dead button — no `onClick` handler** ([Social.tsx:198](pathwise/src/pages/Social.tsx#L198)); renders but does nothing |
+| Community route **Clone** (#30) | ✅ | **fixed 2026-07-27** (commit `fix(social): wire the community "Clone This Route" button`) — now hands the route's hub to the dashboard and rebuilds Today's Path |
 | Forum quick answer (#31) | ⚠️ | answer appears, client-only on mock (not persisted; no "ask new question" UI) |
 | Report content / moderation (#32) | ✅ | **real backend** `reportContent` → "✓ Reported" |
 | Poll winner → Today's Path (#27) | ✅ | real poll backend + cross-page localStorage handoff injects the winner |
@@ -88,9 +88,9 @@ hub-budget, quiz-vibe, factory, auth, weather).
 
 ---
 
-## Findings (non-crash, worth fixing)
-- **Community "Clone This Route" button is not wired** — no `onClick` ([Social.tsx:198](pathwise/src/pages/Social.tsx#L198)). Either implement clone (copy the community route into the user's plan) or hide the button.
-- **Frontend container drifts from repo config** — see environment finding above (Tailwind config not bind-mounted).
+## Findings
+- ~~Community "Clone This Route" button is not wired~~ — **RESOLVED 2026-07-27**: wired to clone the route's hub into Today's Path.
+- ~~Frontend container drifts from repo config~~ — **RESOLVED 2026-07-27**: `docker-compose.yml` now bind-mounts `tailwind.config.js` + `postcss.config.js`.
 
 ---
 
@@ -130,9 +130,13 @@ hub-budget, quiz-vibe, factory, auth, weather).
   Rebuild the image or add the mount so it doesn't regress.
 
 ### Open follow-ups
-1. Wire or hide the community "Clone This Route" button ([Social.tsx:198](pathwise/src/pages/Social.tsx#L198)).
-2. Bind-mount `tailwind.config.js` + `postcss.config.js` into the frontend
-   container (or rebuild) so config edits reach the running app.
+1. ~~Wire the community "Clone This Route" button~~ — done 2026-07-27.
+2. ~~Bind-mount config into the frontend container~~ — done 2026-07-27.
 3. Install `@typescript-eslint/parser` (+ plugin) so `npm run lint` runs.
 4. (Optional) Promote the mock-served social/tours/profile data to real backend
    endpoints when those modules are built.
+
+## Regression suite
+28 feature specs live in `pathwise/e2e/{planning,social,extras}-features.spec.ts`
+(plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
+`cd pathwise && npm run e2e`.
