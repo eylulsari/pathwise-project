@@ -132,7 +132,7 @@ hub-budget, quiz-vibe, factory, auth, weather).
 ### Open follow-ups
 1. ~~Wire the community "Clone This Route" button~~ — done 2026-07-27.
 2. ~~Bind-mount config into the frontend container~~ — done 2026-07-27.
-3. Install `@typescript-eslint/parser` (+ plugin) so `npm run lint` runs.
+3. ~~Install `@typescript-eslint/parser` (+ plugin) so `npm run lint` runs~~ — done 2026-07-28: parser + typescript-eslint / react-hooks / react-refresh plugins wired; `npm run lint` passes (0 errors, 2 non-blocking warnings).
 4. (Optional) Promote the mock-served social/tours/profile data to real backend
    endpoints when those modules are built.
 
