@@ -31,7 +31,7 @@ export function StartPointSelector({
     { id: 'map', label: t('startPoint.pickMap'), icon: '🗺️' },
   ];
 
-  function useGps() {
+  function requestGps() {
     setGpsErr(null);
     if (!navigator.geolocation) {
       setGpsErr('Geolocation unavailable in this browser.');
@@ -58,7 +58,7 @@ export function StartPointSelector({
             key={o.id}
             onClick={() => {
               setKind(o.id);
-              if (o.id === 'gps') useGps();
+              if (o.id === 'gps') requestGps();
               if (o.id === 'auto') onChange(null); // clear → engine auto-picks
             }}
             className={`rounded-lg border px-1 py-2 text-center text-xs transition-colors ${

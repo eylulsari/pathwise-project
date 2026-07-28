@@ -262,7 +262,7 @@ export default function Dashboard() {
     const hub = localStorage.getItem('pathwise.cloneHub');
     if (hub && !isOffline) {
       localStorage.removeItem('pathwise.cloneHub');
-      useTourHub(hub as Hub);
+      applyTourHub(hub as Hub);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -417,7 +417,7 @@ export default function Dashboard() {
   }
 
   // Tour "Set as Today's Itinerary" → focus this day on the tour's hub.
-  function useTourHub(hub: Hub) {
+  function applyTourHub(hub: Hub) {
     const nextConfig = { ...day.config, hub };
     patchDay(activeDay, { config: nextConfig });
     generateFor(activeDay, { ...buildRequest({ ...day, config: nextConfig }) });
@@ -564,7 +564,7 @@ export default function Dashboard() {
         <SearchBar
           onFocusPlace={setSearchFocus}
           onAddPlace={addToPath}
-          onUseTourHub={useTourHub}
+          onUseTourHub={applyTourHub}
         />
       </div>
 
@@ -607,7 +607,7 @@ export default function Dashboard() {
             titleKey="endPoint.title"
             showAuto
           />
-          <ToursPanel onUseTourHub={useTourHub} offline={isOffline} />
+          <ToursPanel onUseTourHub={applyTourHub} offline={isOffline} />
           <SurvivalWidget />
         </div>
 
