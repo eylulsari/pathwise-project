@@ -46,6 +46,22 @@ import { ExportRoute } from '../components/ExportRoute';
 import { OfflineToggle } from '../components/OfflineToggle';
 import { OfflineDownload } from '../components/OfflineDownload';
 import { HUB_LABEL } from '../utils/format';
+import { DayCelebration } from '../components/DayCelebration';
+import { BADGES } from '../mockData';
+
+// A themed Passport badge to celebrate per hub (mock badge set — visual only).
+const HUB_BADGE: Record<string, string> = {
+  sultanahmet: 'old-city-master',
+  'karakoy-galata': 'kahve-guru',
+  'kadikoy-moda': 'market-forager',
+  'balat-fener': 'sunset-chaser',
+  'besiktas-bogaz': 'ferry-hopper',
+};
+
+function badgeForHub(hub: string): { emoji: string; name: string } | null {
+  const b = BADGES.find((x) => x.id === HUB_BADGE[hub]);
+  return b ? { emoji: b.emoji, name: b.name } : null;
+}
 
 interface DayState {
   config: RouteConfig;
@@ -110,6 +126,11 @@ export default function Dashboard() {
   // Must-Visit selections at the moment the picker opened — compared on close
   // so we can auto-apply + report what changed without an extra Generate tap.
   const mustVisitSnapshot = useRef<string[]>([]);
+  // Route-completion celebration: stops ticked off + a guard so the confetti
+  // fires once per generated plan.
+  const [visited, setVisited] = useState<Set<string>>(new Set());
+  const [celebrating, setCelebrating] = useState(false);
+  const celebratedFor = useRef<string | null>(null);
 
   const day = days[activeDay];
 
@@ -317,6 +338,24 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [day.itinerary, day.config.hub]);
 
+  // Reset the visited ticks whenever the day changes or a new plan is generated.
+  useEffect(() => {
+    setVisited(new Set());
+    setCelebrating(false);
+  }, [activeDay, day.itinerary?.generatedAt]);
+
+  // Every real stop ticked → fire the completion celebration (once per plan).
+  useEffect(() => {
+    const it = day.itinerary;
+    if (!it) return;
+    const realIds = it.stops.filter((s) => s.place).map((s) => s.place!.placeId);
+    if (realIds.length === 0) return;
+    if (realIds.every((id) => visited.has(id)) && celebratedFor.current !== it.generatedAt) {
+      celebratedFor.current = it.generatedAt;
+      setCelebrating(true);
+    }
+  }, [visited, day.itinerary]);
+
   function updateConfig(patch: Partial<RouteConfig>) {
     patchDay(activeDay, { config: { ...day.config, ...patch } });
   }
@@ -359,6 +398,14 @@ export default function Dashboard() {
       ? day.mustVisitIds.filter((x) => x !== id)
       : [...day.mustVisitIds, id];
     patchDay(activeDay, { mustVisitIds: next });
+  }
+
+  function toggleVisited(placeId: string) {
+    setVisited((prev) => {
+      const next = new Set(prev);
+      next.has(placeId) ? next.delete(placeId) : next.add(placeId);
+      return next;
+    });
   }
 
   function showToast(msg: string) {
@@ -648,6 +695,8 @@ export default function Dashboard() {
               suggestion={suggestion}
               onAddSuggestion={addSuggestion}
               onDismissSuggestion={dismissSuggestion}
+              visited={visited}
+              onToggleVisited={toggleVisited}
             />
           )}
         </div>
@@ -687,6 +736,19 @@ export default function Dashboard() {
       )}
       {journalPlace && (
         <JournalModal place={journalPlace} onClose={() => setJournalPlace(null)} />
+      )}
+
+      {celebrating && day.itinerary && (
+        <DayCelebration
+          itinerary={day.itinerary}
+          badge={badgeForHub(day.itinerary.hub)}
+          onClose={() => setCelebrating(false)}
+          onAddJournal={() => {
+            const first = day.itinerary?.stops.find((s) => s.place)?.place;
+            setCelebrating(false);
+            if (first) setJournalPlace(first);
+          }}
+        />
       )}
 
       {/* Transient action feedback (e.g. must-visit picks applied) */}

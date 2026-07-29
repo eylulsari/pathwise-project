@@ -32,6 +32,8 @@ export function TodayPath({
   suggestion,
   onAddSuggestion,
   onDismissSuggestion,
+  visited,
+  onToggleVisited,
 }: {
   itinerary: Itinerary;
   selectedPlaceId: string | null;
@@ -44,6 +46,9 @@ export function TodayPath({
   suggestion?: NearbySuggestion | null;
   onAddSuggestion?: () => void;
   onDismissSuggestion?: () => void;
+  /** Set of placeIds the user has marked visited (for the completion celebration). */
+  visited?: Set<string>;
+  onToggleVisited?: (placeId: string) => void;
 }) {
   const { t } = useT();
   const [storyPlace, setStoryPlace] = useState<Place | null>(null);
@@ -90,6 +95,8 @@ export function TodayPath({
               onReserve={onReserve}
               onJournal={onJournal}
               onToggleAnchor={onToggleAnchor}
+              visited={stop.place ? visited?.has(stop.place.placeId) : false}
+              onToggleVisited={onToggleVisited}
             />
           ))}
         </ol>
@@ -129,6 +136,8 @@ function StopRow({
   onReserve,
   onJournal,
   onToggleAnchor,
+  visited,
+  onToggleVisited,
 }: {
   stop: ItineraryStop;
   active: boolean;
@@ -137,6 +146,8 @@ function StopRow({
   onReserve?: (place: Place) => void;
   onJournal?: (place: Place) => void;
   onToggleAnchor?: (place: Place, currentArrival: string) => void;
+  visited?: boolean;
+  onToggleVisited?: (placeId: string) => void;
 }) {
   const { t } = useT();
 
@@ -155,7 +166,7 @@ function StopRow({
   }
 
   const place = stop.place!;
-  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} onJournal={onJournal} onToggleAnchor={onToggleAnchor} />;
+  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} onJournal={onJournal} onToggleAnchor={onToggleAnchor} visited={visited} onToggleVisited={onToggleVisited} />;
 }
 
 function SortableStopRow({
@@ -167,6 +178,8 @@ function SortableStopRow({
   onReserve,
   onJournal,
   onToggleAnchor,
+  visited,
+  onToggleVisited,
 }: {
   stop: ItineraryStop;
   place: Place;
@@ -176,6 +189,8 @@ function SortableStopRow({
   onReserve?: (place: Place) => void;
   onJournal?: (place: Place) => void;
   onToggleAnchor?: (place: Place, currentArrival: string) => void;
+  visited?: boolean;
+  onToggleVisited?: (placeId: string) => void;
 }) {
   const { t } = useT();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -193,10 +208,26 @@ function SortableStopRow({
         onClick={onSelect}
         className={`rounded-xl border p-3 transition-colors ${
           active ? 'border-iznik bg-iznik/10' : 'border-ink/10 bg-surface-2 hover:border-ink/20'
-        }`}
+        } ${visited ? 'opacity-70' : ''}`}
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-2">
+            {/* Visited toggle — completing all stops triggers the celebration */}
+            {onToggleVisited && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleVisited(place.placeId);
+                }}
+                aria-label={t('today.markVisited')}
+                title={visited ? t('today.visited') : t('today.markVisited')}
+                className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold transition-colors ${
+                  visited ? 'border-sage bg-sage text-ink' : 'border-ink/25 text-transparent hover:border-sage'
+                }`}
+              >
+                ✓
+              </button>
+            )}
             {/* Drag handle */}
             <button
               {...attributes}
@@ -213,7 +244,7 @@ function SortableStopRow({
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-iznik text-xs font-bold text-white">
                   {stop.order}
                 </span>
-                <h3 className="font-semibold text-ink">{place.name}</h3>
+                <h3 className={`font-semibold text-ink ${visited ? 'line-through decoration-sage decoration-2' : ''}`}>{place.name}</h3>
               </div>
               <p className="mt-1 text-xs text-ink/50">
                 🕒 {stop.arrivalTime}–{stop.departureTime} · {formatDuration(stop.durationMinutes)}
