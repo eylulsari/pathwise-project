@@ -1,9 +1,13 @@
 /**
- * Domain shapes for the AI assistant. Deliberately provider-agnostic — the
- * Gemini wire format lives in the infrastructure client, not here.
+ * Domain shapes for the AI assistant. Deliberately provider-agnostic — each
+ * provider's wire format lives in its infrastructure client, not here.
  */
 
-/** One turn of chat history, in Gemini's content shape (role + text parts). */
+/**
+ * One turn of chat history (role + text parts). This is Gemini's content shape
+ * and it stays the canonical internal format — the client already ships it and
+ * GroqClient translates it to OpenAI messages on the way out.
+ */
 export interface ChatTurn {
   role: 'user' | 'model';
   parts: { text: string }[];
@@ -22,12 +26,15 @@ export interface PlaceSuggestion {
   safety: 'safe' | 'caution';
 }
 
+/** Which path produced an answer: a live LLM, or the canned fallback. */
+export type AssistantSource = 'groq' | 'gemini' | 'fallback';
+
 /** What POST /assistant/chat returns. `source` lets the client/tests tell a
- *  live Gemini answer from the canned fallback. */
+ *  live LLM answer from the canned fallback, and which provider served it. */
 export interface AssistantReply {
   answer: string;
   suggestion?: PlaceSuggestion;
-  source: 'gemini' | 'fallback';
+  source: AssistantSource;
 }
 
 /** Normalised input the service works with (after DTO validation). */

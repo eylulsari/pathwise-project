@@ -12,7 +12,7 @@ import { AuthUser } from '../../../auth/domain/auth-user';
 /**
  * Per-user hourly cap on assistant messages. Runs AFTER JwtAuthGuard (which sets
  * `req.user`), so it keys off the authenticated user id. Kept well under
- * Gemini's own free-tier limits because every user shares one API key.
+ * the provider's own free-tier limits because every user shares one API key.
  */
 const CHAT_HOURLY_LIMIT = 25;
 

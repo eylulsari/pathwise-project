@@ -3,8 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { PlacesService } from '../../places/application/places.service';
 import { Place } from '../../places/domain/place';
 import { GeminiClient, GeminiTool } from '../infrastructure/gemini/gemini.client';
+import { GroqClient, GroqTool } from '../infrastructure/groq/groq.client';
 import {
   AssistantReply,
+  AssistantSource,
   ChatInput,
   PlaceSuggestion,
 } from '../domain/assistant.types';
@@ -13,7 +15,11 @@ import {
 // fast, no "thinking" token overhead — matters because users share one key.
 // Note: gemini-2.5-flash is now 404 for new keys; gemini-flash-latest works but
 // burns extra thinking tokens. Override via GEMINI_MODEL if a better one ships.
-const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite';
+// Groq's small gpt-oss tier: the free/fast analogue of Gemini's flash-lite, and
+// the migration target Groq names for the llama-3.x models it deprecated on
+// 2026-06-17. Override via GROQ_MODEL — see console.groq.com/docs/models.
+const DEFAULT_GROQ_MODEL = 'openai/gpt-oss-20b';
 // How many real places we inject as grounding data per request.
 const MAX_INJECTED_PLACES = 8;
 
@@ -21,8 +27,12 @@ const MAX_INJECTED_PLACES = 8;
  * Orchestrates a grounded, Istanbul-only chat turn:
  *  1. server-side keyword/hub filter → 5–8 REAL places from the dataset
  *  2. inject them (+ the user's active plan) into the system instruction
- *  3. call Gemini with a `suggest_place` tool
+ *  3. call the configured LLM with a `suggest_place` tool
  *  4. validate any suggested placeId against the dataset before returning a card
+ *
+ * Provider is chosen by which key is configured — Groq first, then Gemini. Both
+ * clients expose the same result contract, so only the tool declaration and the
+ * reported `source` differ between them.
  *
  * Never load-bearing: no key, or any failure, degrades to a canned answer that
  * ALSO references a real place — the chat window must never break.
@@ -35,39 +45,61 @@ export class AssistantService {
     private readonly config: ConfigService,
     private readonly places: PlacesService,
     private readonly gemini: GeminiClient,
+    private readonly groq: GroqClient,
   ) {}
 
   async chat(input: ChatInput): Promise<AssistantReply> {
-    const key = this.config.get<string>('GEMINI_API_KEY');
-    if (!key) {
-      this.logger.warn('GEMINI_API_KEY not set — using fallback assistant');
+    const groqKey = this.config.get<string>('GROQ_API_KEY');
+    const geminiKey = this.config.get<string>('GEMINI_API_KEY');
+
+    // Groq wins when both are set: AI Studio now issues `AQ.`-prefixed auth keys
+    // and a subset of accounts 401 on every Gemini endpoint (see .env.example).
+    const provider: AssistantSource = groqKey ? 'groq' : geminiKey ? 'gemini' : 'fallback';
+    const key = provider === 'groq' ? groqKey : geminiKey;
+
+    if (provider === 'fallback' || !key) {
+      this.logger.warn('No GROQ_API_KEY or GEMINI_API_KEY set — using fallback assistant');
       return this.fallback(input.message);
     }
 
     try {
-      return await this.callGemini(key, input);
+      return await this.callProvider(provider, key, input);
     } catch (err) {
-      this.logger.warn(`Gemini call failed, using fallback: ${String(err)}`);
+      this.logger.warn(`${provider} call failed, using fallback: ${String(err)}`);
       return this.fallback(input.message);
     }
   }
 
   // ── Live path ──────────────────────────────────────────────────────
-  private async callGemini(key: string, input: ChatInput): Promise<AssistantReply> {
-    const model = this.config.get<string>('GEMINI_MODEL') || DEFAULT_MODEL;
+  private async callProvider(
+    provider: 'groq' | 'gemini',
+    key: string,
+    input: ChatInput,
+  ): Promise<AssistantReply> {
     const all = await this.places.findAll();
     const relevant = selectRelevantPlaces(input.message, all);
+    const systemInstruction = buildSystemInstruction(relevant, input.activePlan);
+    const contents = [
+      ...input.conversationHistory,
+      { role: 'user' as const, parts: [{ text: input.message }] },
+    ];
 
-    const result = await this.gemini.generate({
-      apiKey: key,
-      model,
-      systemInstruction: buildSystemInstruction(relevant, input.activePlan),
-      contents: [
-        ...input.conversationHistory,
-        { role: 'user', parts: [{ text: input.message }] },
-      ],
-      tools: [SUGGEST_PLACE_TOOL],
-    });
+    const result =
+      provider === 'groq'
+        ? await this.groq.generate({
+            apiKey: key,
+            model: this.config.get<string>('GROQ_MODEL') || DEFAULT_GROQ_MODEL,
+            systemInstruction,
+            contents,
+            tools: [SUGGEST_PLACE_TOOL_OPENAI],
+          })
+        : await this.gemini.generate({
+            apiKey: key,
+            model: this.config.get<string>('GEMINI_MODEL') || DEFAULT_GEMINI_MODEL,
+            systemInstruction,
+            contents,
+            tools: [SUGGEST_PLACE_TOOL],
+          });
 
     let suggestion: PlaceSuggestion | undefined;
     if (result.functionCall?.name === 'suggest_place') {
@@ -81,7 +113,7 @@ export class AssistantService {
         ? `I'd suggest ${suggestion.name} — ${suggestion.reason}`
         : 'Tell me what you feel like — a view, a cheap eat, something indoors — and I will point you to a real spot.');
 
-    return { answer, suggestion, source: 'gemini' };
+    return { answer, suggestion, source: provider };
   }
 
   /**
@@ -141,7 +173,7 @@ export class AssistantService {
         : { answer, source: 'fallback' };
 
     // Keyword sets are bilingual (EN + TR) — the app ships in both languages,
-    // and the fallback should still land a real place when Gemini is off.
+    // and the fallback should still land a real place when the LLM is off.
     const has = (...kws: string[]) => kws.some((k) => q.includes(k));
 
     if (has('sunset', 'golden', 'gün batımı', 'günbatımı')) {
@@ -304,33 +336,59 @@ function safetyOf(p: Place): 'safe' | 'caution' {
   return 'safe';
 }
 
-// ── Gemini tool declaration ───────────────────────────────────────────
+// ── Tool declaration, once per provider dialect ───────────────────────
+// Same tool, two wire formats: Gemini wants an OpenAPI subset with UPPERCASE
+// type names, OpenAI/Groq want plain JSON Schema. The prose is shared so the
+// two declarations can't drift apart.
+
+const SUGGEST_PLACE_NAME = 'suggest_place';
+const SUGGEST_PLACE_DESCRIPTION =
+  'Recommend ONE specific place from the provided PLACES list for the user to add to their Istanbul day. Only call this with a placeId that appears in that list.';
+const PLACE_ID_DESCRIPTION =
+  'The exact placeId (the id= value) of a place from the PLACES list.';
+const REASON_DESCRIPTION = "One short sentence on why this place fits the user's request.";
+const SAFETY_DESCRIPTION = 'Solo-traveller safety hint for this spot.';
+const SUGGEST_PLACE_REQUIRED = ['placeId', 'reason'];
 
 const SUGGEST_PLACE_TOOL: GeminiTool = {
   functionDeclarations: [
     {
-      name: 'suggest_place',
-      description:
-        "Recommend ONE specific place from the provided PLACES list for the user to add to their Istanbul day. Only call this with a placeId that appears in that list.",
+      name: SUGGEST_PLACE_NAME,
+      description: SUGGEST_PLACE_DESCRIPTION,
       parameters: {
         type: 'OBJECT',
         properties: {
-          placeId: {
-            type: 'STRING',
-            description: 'The exact placeId (the id= value) of a place from the PLACES list.',
-          },
-          reason: {
-            type: 'STRING',
-            description: "One short sentence on why this place fits the user's request.",
-          },
+          placeId: { type: 'STRING', description: PLACE_ID_DESCRIPTION },
+          reason: { type: 'STRING', description: REASON_DESCRIPTION },
           safety: {
             type: 'STRING',
             enum: ['safe', 'caution'],
-            description: 'Solo-traveller safety hint for this spot.',
+            description: SAFETY_DESCRIPTION,
           },
         },
-        required: ['placeId', 'reason'],
+        required: SUGGEST_PLACE_REQUIRED,
       },
     },
   ],
+};
+
+const SUGGEST_PLACE_TOOL_OPENAI: GroqTool = {
+  type: 'function',
+  function: {
+    name: SUGGEST_PLACE_NAME,
+    description: SUGGEST_PLACE_DESCRIPTION,
+    parameters: {
+      type: 'object',
+      properties: {
+        placeId: { type: 'string', description: PLACE_ID_DESCRIPTION },
+        reason: { type: 'string', description: REASON_DESCRIPTION },
+        safety: {
+          type: 'string',
+          enum: ['safe', 'caution'],
+          description: SAFETY_DESCRIPTION,
+        },
+      },
+      required: SUGGEST_PLACE_REQUIRED,
+    },
+  },
 };

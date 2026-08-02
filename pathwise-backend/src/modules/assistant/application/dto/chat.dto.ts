@@ -10,14 +10,14 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-/** One text part of a chat turn (Gemini `parts` shape). */
+/** One text part of a chat turn (the canonical `parts` shape — see ChatTurn). */
 export class ChatPartDto {
   @IsString()
   @MaxLength(4000)
   text: string;
 }
 
-/** One history turn. `role` matches Gemini: 'user' or 'model'. */
+/** One history turn. `role` is 'user' or 'model' (translated per provider). */
 export class ChatTurnDto {
   @IsIn(['user', 'model'])
   role: 'user' | 'model';

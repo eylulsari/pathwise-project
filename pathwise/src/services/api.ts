@@ -516,9 +516,9 @@ export const api = {
 
   // ═════════════════════════════════════════════════════════════════
   // AI ASSISTANT — real backend chat, grounded in the place dataset and
-  // powered by Google Gemini. The backend degrades to canned answers when
-  // the key is missing or the API fails, so this always resolves with a
-  // usable reply; the component handles transport errors gracefully.
+  // powered by an LLM the backend picks (Groq, else Gemini). It degrades to
+  // canned answers when no key is set or the API fails, so this always
+  // resolves with a usable reply; the component handles transport errors.
   // ═════════════════════════════════════════════════════════════════
   async askAssistant(
     message: string,
@@ -527,7 +527,7 @@ export const api = {
   ): Promise<{
     answer: string;
     suggestion?: AiSuggestion;
-    source?: 'gemini' | 'fallback';
+    source?: 'groq' | 'gemini' | 'fallback';
   }> {
     return http('/assistant/chat', {
       method: 'POST',
@@ -536,7 +536,7 @@ export const api = {
   },
 };
 
-/** One turn of chat history in the backend/Gemini shape. */
+/** One turn of chat history in the backend's canonical shape. */
 export interface AiChatTurn {
   role: 'user' | 'model';
   parts: { text: string }[];
