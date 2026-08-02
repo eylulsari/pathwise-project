@@ -19,6 +19,7 @@ import { PollsModule } from './modules/polls/polls.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { SafetyModule } from './modules/safety/safety.module';
+import { SocialModule } from './modules/social/social.module';
 import { CurrencyModule } from './modules/currency/currency.module';
 import { WeatherModule } from './modules/weather/weather.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
@@ -47,6 +48,7 @@ import { AssistantModule } from './modules/assistant/assistant.module';
     AnalyticsModule,
     ReviewsModule,
     SafetyModule,
+    SocialModule,
     CurrencyModule,
     WeatherModule,
     AssistantModule,
