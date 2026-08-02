@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { SubscriptionTier, User } from '../domain/user';
+import { SafetyPreferences, SubscriptionTier, User } from '../domain/user';
 import {
   CreateUserData,
   USER_REPOSITORY,
@@ -68,6 +68,20 @@ export class UsersService {
     const base = Math.max(Date.now(), user.trialEndsAt?.getTime() ?? 0);
     const until = new Date(base + days * 86400 * 1000);
     const updated = await this.users.setTrialEndsAt(id, until);
+    return updated.toPublic();
+  }
+
+  /**
+   * Update the opt-in women-traveler preferences. Every key is optional: an
+   * omitted preference is left untouched, so a user can flip one switch
+   * without being forced to restate (or state at all) the others.
+   *
+   * ⚠️ Self-declaration only — nothing here is verified. See the note on
+   * `SafetyPreferences` before building anything that treats it as a
+   * trust/identity signal.
+   */
+  async updateSafetyPreferences(id: string, prefs: Partial<SafetyPreferences>) {
+    const updated = await this.users.setSafetyPreferences(id, prefs);
     return updated.toPublic();
   }
 

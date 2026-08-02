@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SubscriptionTier, User } from '../../domain/user';
+import { SafetyPreferences, SubscriptionTier, User } from '../../domain/user';
 import {
   CreateUserData,
   UserRepositoryPort,
@@ -31,6 +31,9 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
       bio: row.bio,
       subscriptionTier: row.subscriptionTier ?? 'free',
       trialEndsAt: row.trialEndsAt ?? null,
+      identifiesAsWoman: row.identifiesAsWoman ?? null,
+      visibleToWomenOnly: row.visibleToWomenOnly ?? false,
+      showWomenOnly: row.showWomenOnly ?? false,
       createdAt: row.createdAt,
     });
   }
@@ -82,6 +85,24 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
 
   async setTrialEndsAt(id: string, trialEndsAt: Date | null): Promise<User> {
     await this.repo.update({ id }, { trialEndsAt });
+    const row = await this.repo.findOne({ where: { id } });
+    return this.toDomain(row as UserOrmEntity);
+  }
+
+  /**
+   * Partial update — only the keys the user actually submitted are written, so
+   * leaving a preference out never silently resets it (and `identifiesAsWoman`
+   * can be set back to `null` = "not stated" without clearing the switches).
+   */
+  async setSafetyPreferences(
+    id: string,
+    prefs: Partial<SafetyPreferences>,
+  ): Promise<User> {
+    const patch: Partial<UserOrmEntity> = {};
+    if ('identifiesAsWoman' in prefs) patch.identifiesAsWoman = prefs.identifiesAsWoman ?? null;
+    if ('visibleToWomenOnly' in prefs) patch.visibleToWomenOnly = !!prefs.visibleToWomenOnly;
+    if ('showWomenOnly' in prefs) patch.showWomenOnly = !!prefs.showWomenOnly;
+    if (Object.keys(patch).length > 0) await this.repo.update({ id }, patch);
     const row = await this.repo.findOne({ where: { id } });
     return this.toDomain(row as UserOrmEntity);
   }

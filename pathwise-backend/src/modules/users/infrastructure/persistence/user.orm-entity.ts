@@ -45,6 +45,20 @@ export class UserOrmEntity {
   @Column({ type: 'timestamptz', nullable: true })
   trialEndsAt: Date | null;
 
+  // ── Opt-in women-traveler mode (self-declared, NOT verified) ──────
+  // Migration: AddWomenTravelerPreferencesToUsers. See the ethical note on
+  // `SafetyPreferences` in the domain model before touching these.
+  // `null` here means "not stated" and is deliberately distinct from `false`,
+  // so the column stays nullable — do not add a NOT NULL default.
+  @Column({ type: 'boolean', nullable: true })
+  identifiesAsWoman: boolean | null;
+
+  @Column({ type: 'boolean', default: false })
+  visibleToWomenOnly: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  showWomenOnly: boolean;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }

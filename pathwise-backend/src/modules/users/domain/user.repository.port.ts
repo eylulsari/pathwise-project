@@ -1,4 +1,4 @@
-import { SubscriptionTier, User } from './user';
+import { SafetyPreferences, SubscriptionTier, User } from './user';
 
 /** DI token for the repository port (interfaces vanish at runtime). */
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY');
@@ -24,4 +24,9 @@ export interface UserRepositoryPort {
   save(user: User): Promise<User>;
   setSubscriptionTier(id: string, tier: SubscriptionTier): Promise<User>;
   setTrialEndsAt(id: string, trialEndsAt: Date | null): Promise<User>;
+  /** Partial update of the opt-in women-traveler preferences. */
+  setSafetyPreferences(
+    id: string,
+    prefs: Partial<SafetyPreferences>,
+  ): Promise<User>;
 }
