@@ -30,6 +30,14 @@ export const CURRENT_WEATHER = {
 };
 
 // ── Travelers (buddy network) ──────────────────────────────────────
+// Offline fallback for `GET /social/travelers` — kept in sync with the backend
+// seed in `modules/social/infrastructure/persistence/traveler.dataset.ts`.
+//
+// ⚠️ `identifiesAsWoman` below is DEMO SEED DATA, hand-assigned on purpose. It
+// is NOT inferred from names, avatars or any other attribute — this product
+// never guesses gender. In production the value only ever comes from the
+// account holder ticking the opt-in box themselves, and it is never verified.
+// Travelers who have stated nothing simply omit the field.
 export const TRAVELERS: Traveler[] = [
   {
     id: 't1',
@@ -42,6 +50,7 @@ export const TRAVELERS: Traveler[] = [
     soloVerified: true,
     visitedProvinces: ['İstanbul', 'İzmir', 'Antalya', 'Nevşehir'],
     badges: ['old-city-master', 'ferry-hopper'],
+    identifiesAsWoman: true,
   },
   {
     id: 't2',
@@ -66,6 +75,7 @@ export const TRAVELERS: Traveler[] = [
     soloVerified: true,
     visitedProvinces: ['İstanbul', 'Edirne', 'Bursa'],
     badges: ['old-city-master'],
+    identifiesAsWoman: true,
   },
   {
     id: 't4',
@@ -78,6 +88,7 @@ export const TRAVELERS: Traveler[] = [
     soloVerified: false,
     visitedProvinces: ['İstanbul', 'Gaziantep'],
     badges: ['kahve-guru', 'ferry-hopper'],
+    identifiesAsWoman: true,
   },
   {
     id: 't5',

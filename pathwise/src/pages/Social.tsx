@@ -13,6 +13,7 @@ import { TravelerModal } from '../components/social/TravelerModal';
 import { ReportButton } from '../components/social/ReportButton';
 import { PollSection } from '../components/social/PollSection';
 import { HUB_LABEL } from '../utils/format';
+import { useAuth } from '../context/AuthContext';
 import { useT } from '../i18n';
 
 const ALL_TAGS: TravelTag[] = [
@@ -36,11 +37,22 @@ export default function Social() {
   const [connected, setConnected] = useState<Set<string>>(new Set());
   const [active, setActive] = useState<Traveler | null>(null);
   const [checkInText, setCheckInText] = useState('');
+  const [womenOnlyApplied, setWomenOnlyApplied] = useState(false);
+
+  // Opt-in women-traveler mode. The chip is independent of the tag chips (they
+  // combine), and it starts on for users who chose that in their profile.
+  const { user } = useAuth();
+  const womenModeEligible =
+    user?.identifiesAsWoman === true &&
+    (user?.visibleToWomenOnly === true || user?.showWomenOnly === true);
+  const [womenOnly, setWomenOnly] = useState(false);
+  useEffect(() => {
+    setWomenOnly(user?.showWomenOnly === true);
+  }, [user?.showWomenOnly]);
 
   const didEmit = useRef(false);
   useEffect(() => {
     api.getCheckIns().then(setCheckIns);
-    api.getTravelers().then(setTravelers);
     api.getCommunityRoutes().then(setRoutes);
     api.getForum().then(setForum);
     // A nearby check-in → Notification Center (B6). Guard the StrictMode
@@ -51,6 +63,24 @@ export default function Social() {
     }
   }, []);
 
+  // The buddy list is refetched when the women-traveler filter changes: the
+  // backend owns that filter (it also decides whether to honour it at all),
+  // while the tag filter stays a client-side narrowing of the result.
+  useEffect(() => {
+    let active = true;
+    api
+      .getTravelers({ womenOnly, eligible: womenModeEligible })
+      .then((res) => {
+        if (!active) return;
+        setTravelers(res.travelers);
+        setWomenOnlyApplied(res.womenOnlyApplied);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [womenOnly, womenModeEligible]);
+
   const filtered = useMemo(
     () => (filter ? travelers.filter((t) => t.tags.includes(filter)) : travelers),
     [travelers, filter],
@@ -60,10 +90,14 @@ export default function Social() {
     setConnected((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
-      // Persist connected buddy names so other features (e.g. the SOS
-      // "share my location" alert) can target them without a global store.
-      const names = travelers.filter((t) => next.has(t.id)).map((t) => t.name);
-      localStorage.setItem('pathwise.buddies', JSON.stringify(names));
+      // Persist connected buddies so other features (e.g. the SOS "share my
+      // location" alert) can target them without a global store. Stored as
+      // objects since SOS can narrow the share to women travelers; readers
+      // still accept the old plain-string format (see SosButton).
+      const buddies = travelers
+        .filter((t) => next.has(t.id))
+        .map((t) => ({ name: t.name, identifiesAsWoman: t.identifiesAsWoman === true }));
+      localStorage.setItem('pathwise.buddies', JSON.stringify(buddies));
       return next;
     });
   }
@@ -149,11 +183,26 @@ export default function Social() {
             <h2 className="font-display text-lg font-bold">{t('social.travelersNearby')}</h2>
             <div className="flex flex-wrap gap-1.5">
               <FilterChip label={t('social.all')} active={filter === null} onClick={() => setFilter(null)} />
-              {ALL_TAGS.map((t) => (
-                <FilterChip key={t} label={t} active={filter === t} onClick={() => setFilter(t)} />
+              {ALL_TAGS.map((tag) => (
+                <FilterChip key={tag} label={tag} active={filter === tag} onClick={() => setFilter(tag)} />
               ))}
+              {/* Independent of the tag chips above — the two combine. */}
+              <FilterChip
+                label={t('social.womenFilter')}
+                active={womenOnly}
+                disabled={!womenModeEligible}
+                title={womenModeEligible ? undefined : t('social.womenNotOptedIn')}
+                onClick={() => setWomenOnly((v) => !v)}
+              />
             </div>
           </div>
+
+          {/* The filter must never read as a vetted/verified set of people. */}
+          {womenOnly && (
+            <p className="mb-3 rounded-xl bg-mustard/15 px-3 py-2 text-xs leading-relaxed text-ink/70">
+              {womenOnlyApplied ? t('social.womenDisclaimer') : t('social.womenNotOptedIn')}
+            </p>
+          )}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((tr) => (
               <div key={tr.id} className="card-cream p-4">
@@ -165,7 +214,15 @@ export default function Social() {
                     <p className="font-display font-bold text-ink">{tr.name}</p>
                     <p className="text-xs text-ink/50">{tr.age} · {tr.nationality}</p>
                   </div>
-                  {tr.soloVerified && <span className="ml-auto text-sage" title="Solo-Verified">✓</span>}
+                  <span className="ml-auto flex items-center gap-1">
+                    {/* Reciprocity: the backend only sends `identifiesAsWoman`
+                        to viewers who opted in themselves, so this badge is
+                        invisible to everyone else. */}
+                    {tr.identifiesAsWoman && (
+                      <span title={t('social.womenBadgeTitle')}>🚺</span>
+                    )}
+                    {tr.soloVerified && <span className="text-sage" title="Solo-Verified">✓</span>}
+                  </span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {tr.tags.slice(0, 3).map((tag) => (
@@ -236,9 +293,30 @@ export default function Social() {
   );
 }
 
-function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+function FilterChip({
+  label,
+  active,
+  onClick,
+  disabled,
+  title,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+  title?: string;
+}) {
   return (
-    <button onClick={onClick} className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${active ? 'border-transparent bg-iznik text-white' : 'border-ink/15 text-ink/60 hover:border-ink/30'}`}>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+        active
+          ? 'border-transparent bg-iznik text-white'
+          : 'border-ink/15 text-ink/60 hover:border-ink/30'
+      } ${disabled ? 'cursor-not-allowed opacity-40 hover:border-ink/15' : ''}`}
+    >
       {label}
     </button>
   );

@@ -222,7 +222,27 @@ export interface AuthUser {
   subscriptionTier: SubscriptionTier;
   trialEndsAt?: string | null;
   isPremium?: boolean; // backend-computed (tier OR active trial/reward window)
+  /**
+   * Opt-in women-traveler mode — all three are optional and default to
+   * unset/off. `identifiesAsWoman: null` means "not stated", which is
+   * deliberately distinct from `false`.
+   *
+   * ⚠️ Self-declared, NOT verified: no identity check backs these values, so
+   * never render them as a safety guarantee (see `SafetyPreferences` on the
+   * backend). Every surface exposing them carries the disclaimer string
+   * `social.womenDisclaimer`.
+   */
+  identifiesAsWoman?: boolean | null;
+  visibleToWomenOnly?: boolean;
+  showWomenOnly?: boolean;
   createdAt: string;
+}
+
+/** Partial patch for `PATCH /users/me/safety-preferences`. */
+export interface SafetyPreferencesInput {
+  identifiesAsWoman?: boolean | null;
+  visibleToWomenOnly?: boolean;
+  showWomenOnly?: boolean;
 }
 
 export interface UsageInfo {
@@ -270,6 +290,21 @@ export interface Traveler {
   soloVerified: boolean;
   visitedProvinces: string[]; // Turkish province names
   badges: string[]; // badge ids earned
+  /**
+   * Self-declared women-traveler status. Absent when the traveler has not
+   * stated anything — and also absent for viewers who have not opted in
+   * themselves, since the backend redacts it (reciprocity).
+   *
+   * ⚠️ Self-declared, NOT verified — never render as a safety guarantee.
+   */
+  identifiesAsWoman?: boolean;
+}
+
+/** Response of `GET /social/travelers`. */
+export interface TravelerListResult {
+  travelers: Traveler[];
+  /** False when the backend refused the filter (viewer has not opted in). */
+  womenOnlyApplied: boolean;
 }
 
 export interface CheckIn {

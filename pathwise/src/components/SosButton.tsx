@@ -6,10 +6,29 @@ import { useT } from '../i18n';
 
 type Stage = 'idle' | 'confirm' | 'locating' | 'result';
 
-/** Connected buddies persisted by the Social page (names only, demo). */
-function connectedBuddies(): string[] {
+interface ConnectedBuddy {
+  name: string;
+  /** Self-declared women-traveler status — see the note in SosButton below. */
+  identifiesAsWoman: boolean;
+}
+
+/**
+ * Connected buddies persisted by the Social page (demo — no backend table).
+ * Accepts both the current object format and the original plain-string one so
+ * a user who connected buddies before this change keeps their list.
+ */
+function connectedBuddies(): ConnectedBuddy[] {
   try {
-    return JSON.parse(localStorage.getItem('pathwise.buddies') ?? '[]');
+    const raw: unknown = JSON.parse(localStorage.getItem('pathwise.buddies') ?? '[]');
+    if (!Array.isArray(raw)) return [];
+    return raw.map((entry) =>
+      typeof entry === 'string'
+        ? { name: entry, identifiesAsWoman: false }
+        : {
+            name: String((entry as ConnectedBuddy)?.name ?? ''),
+            identifiesAsWoman: (entry as ConnectedBuddy)?.identifiesAsWoman === true,
+          },
+    );
   } catch {
     return [];
   }
@@ -26,8 +45,15 @@ export function SosButton() {
   const [stage, setStage] = useState<Stage>('idle');
   const [pos, setPos] = useState<{ lat: number; lng: number } | null>(null);
   const [shared, setShared] = useState(false);
+  // Optional narrowing of the share. Off by default: in an emergency the
+  // widest reach is the safer default, so this is never pre-selected.
+  //
+  // ⚠️ Filters on a SELF-DECLARED flag — no identity verification backs it.
+  const [womenBuddiesOnly, setWomenBuddiesOnly] = useState(false);
 
-  const buddies = connectedBuddies();
+  const allBuddies = connectedBuddies();
+  const womenBuddies = allBuddies.filter((b) => b.identifiesAsWoman);
+  const buddies = womenBuddiesOnly ? womenBuddies : allBuddies;
   const nearest = pos
     ? [...POLICE_STATIONS].sort(
         (a, b) => haversineMeters(pos, a) - haversineMeters(pos, b),
@@ -59,7 +85,12 @@ export function SosButton() {
   async function share() {
     if (!pos) return;
     await api
-      .sendSosAlert({ lat: pos.lat, lng: pos.lng, share: true, sharedWithUserIds: buddies })
+      .sendSosAlert({
+        lat: pos.lat,
+        lng: pos.lng,
+        share: true,
+        sharedWithUserIds: buddies.map((b) => b.name),
+      })
       .catch(() => {});
     window.dispatchEvent(new Event('pw-notify')); // refresh the bell
     setShared(true);
@@ -129,9 +160,29 @@ export function SosButton() {
                     ✓ {buddies.length > 0 ? t('sos.shared') : t('sos.sharedNoBuddies')}
                   </p>
                 ) : (
-                  <button onClick={share} className="btn-accent w-full py-2.5 text-sm">
-                    📍 {t('sos.share')}{buddies.length > 0 ? ` (${buddies.length})` : ''}
-                  </button>
+                  <div className="space-y-2">
+                    <button onClick={share} className="btn-accent w-full py-2.5 text-sm">
+                      📍 {t('sos.share')}{buddies.length > 0 ? ` (${buddies.length})` : ''}
+                    </button>
+                    {/* Sub-option of "share my location" — narrows the same
+                        connected-buddy list, no extra backend table needed. */}
+                    {allBuddies.length > 0 && (
+                      <label className="flex cursor-pointer items-start gap-2 px-1 text-xs text-ink/70">
+                        <input
+                          type="checkbox"
+                          checked={womenBuddiesOnly}
+                          onChange={(e) => setWomenBuddiesOnly(e.target.checked)}
+                          className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 accent-iznik"
+                        />
+                        <span>
+                          {t('sos.shareWomenOnly')}
+                          {womenBuddiesOnly && womenBuddies.length === 0 && (
+                            <span className="block text-terracotta">{t('sos.shareWomenNone')}</span>
+                          )}
+                        </span>
+                      </label>
+                    )}
+                  </div>
                 )}
                 <p className="text-center text-[10px] text-ink/40">{t('sos.demoNote')}</p>
               </div>

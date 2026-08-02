@@ -186,6 +186,9 @@ export const translations = {
       shared: 'Location shared with your buddies',
       sharedNoBuddies: 'Location recorded (connect buddies in Social to alert them)',
       demoNote: 'Demo — real SMS/authority alerting is a later phase.',
+      shareWomenOnly: 'Share only with my connected women travel buddies',
+      shareWomenNone:
+        'None of your connected buddies are self-declared women travelers.',
     },
     reservation: {
       add: '📎 Reserve',
@@ -309,6 +312,13 @@ export const translations = {
       visitedProvinces: 'Visited provinces',
       noBadges: 'No badges yet — just getting started.',
       provincesVisited: 'provinces visited',
+      // ── Opt-in women-traveler mode ──
+      womenFilter: '🚺 Women travelers',
+      womenDisclaimer:
+        'This mode relies entirely on voluntary self-declaration — no identity verification is performed.',
+      womenNotOptedIn:
+        'Turn on “I identify as a woman” in your profile to use this filter.',
+      womenBadgeTitle: 'Self-declared woman traveler (not verified)',
     },
     premium: {
       nav: '💎 Premium',
@@ -369,6 +379,25 @@ export const translations = {
       saved: 'Saved',
       visited: 'Visited',
       notYet: 'Not yet',
+      // ── Privacy & safety (opt-in women-traveler mode) ──
+      safetyTitle: '🔒 Privacy & safety',
+      safetyIntro:
+        'All optional. Nothing here is required, everything is off by default, and you can turn it off again at any time.',
+      identifiesAsWoman: 'I identify as a woman',
+      identifiesAsWomanHint:
+        'Optional — you can leave this blank. Used only for the women-traveler mode below.',
+      visibleToWomenOnly: 'Show me only to women travelers',
+      visibleToWomenOnlyHint:
+        'Hides your card from travelers who have not made the same declaration.',
+      showWomenOnly: 'Show me only women travelers',
+      showWomenOnlyHint:
+        'Adds the 🚺 filter to the Buddy Finder and turns it on by default.',
+      safetyDisclaimer:
+        '⚠️ Self-declaration only: Pathwise performs no identity verification, so this is not a guarantee about anyone you meet. Take the same precautions you would otherwise.',
+      safetySaved: '✓ Saved',
+      safetySaveError: 'Could not save — try again.',
+      safetyRequiresDeclaration:
+        'Available once you tick “I identify as a woman”.',
     },
   },
 
@@ -553,6 +582,9 @@ export const translations = {
       shared: 'Konum, gezgin arkadaşlarınla paylaşıldı',
       sharedNoBuddies: 'Konum kaydedildi (arkadaşlarını uyarmak için Sosyal’dan bağlan)',
       demoNote: 'Demo — gerçek SMS/yetkili bildirimi sonraki bir faza bırakıldı.',
+      shareWomenOnly: 'Sadece bağlı kadın gezgin arkadaşlarımla paylaş',
+      shareWomenNone:
+        'Bağlı arkadaşlarının hiçbiri kendini kadın gezgin olarak beyan etmemiş.',
     },
     reservation: {
       add: '📎 Rezervasyon',
@@ -676,6 +708,13 @@ export const translations = {
       visitedProvinces: 'Ziyaret edilen iller',
       noBadges: 'Henüz rozet yok — daha yeni başlıyor.',
       provincesVisited: 'il ziyaret edildi',
+      // ── Opsiyonel kadın gezgin modu ──
+      womenFilter: '🚺 Kadın Gezginler',
+      womenDisclaimer:
+        'Bu mod tamamen gönüllü kendini-beyan sistemine dayanır, kimlik doğrulaması yapılmaz.',
+      womenNotOptedIn:
+        'Bu filtreyi kullanmak için profilinde “Kendimi kadın olarak tanımlıyorum” seçeneğini aç.',
+      womenBadgeTitle: 'Kendi beyanına göre kadın gezgin (doğrulanmamıştır)',
     },
     premium: {
       nav: '💎 Premium',
@@ -736,6 +775,25 @@ export const translations = {
       saved: 'Kaydedildi',
       visited: 'Ziyaret edildi',
       notYet: 'Henüz değil',
+      // ── Gizlilik ve güvenlik (opsiyonel kadın gezgin modu) ──
+      safetyTitle: '🔒 Gizlilik ve güvenlik',
+      safetyIntro:
+        'Tamamı isteğe bağlıdır. Hiçbiri zorunlu değildir, varsayılan olarak kapalıdır ve istediğin zaman kapatabilirsin.',
+      identifiesAsWoman: 'Kendimi kadın olarak tanımlıyorum',
+      identifiesAsWomanHint:
+        'İsteğe bağlı — boş bırakabilirsin. Yalnızca aşağıdaki kadın gezgin modu için kullanılır.',
+      visibleToWomenOnly: 'Beni sadece kadın gezginlere göster',
+      visibleToWomenOnlyHint:
+        'Aynı beyanı yapmamış gezginlerin listesinde kartın görünmez.',
+      showWomenOnly: 'Bana sadece kadın gezginleri göster',
+      showWomenOnlyHint:
+        'Gezgin Bul ekranına 🚺 filtresini ekler ve varsayılan olarak açar.',
+      safetyDisclaimer:
+        '⚠️ Yalnızca kendini-beyan: Pathwise kimlik doğrulaması yapmaz, bu nedenle tanıştığın kişiler hakkında bir garanti değildir. Her zamanki güvenlik önlemlerini almayı sürdür.',
+      safetySaved: '✓ Kaydedildi',
+      safetySaveError: 'Kaydedilemedi — tekrar dene.',
+      safetyRequiresDeclaration:
+        '“Kendimi kadın olarak tanımlıyorum” seçildiğinde kullanılabilir.',
     },
   },
 } as const;

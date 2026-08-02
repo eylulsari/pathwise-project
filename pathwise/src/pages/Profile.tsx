@@ -3,6 +3,7 @@ import type { Badge, Hub, JournalSummary, ProfileStats } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { AppHeader } from '../components/AppHeader';
+import { SafetyPreferences } from '../components/SafetyPreferences';
 import { BUCKET_LIST_IDS, PAST_TRIPS } from '../mockData';
 import { PLACES_BY_ID } from '../hubData';
 import { HUB_LABEL, formatTry, formatKm } from '../utils/format';
@@ -190,6 +191,10 @@ export default function Profile() {
             })}
           </div>
         )}
+
+        {/* Opt-in women-traveler mode — outside the tabs so it is reachable
+            from any tab and never buried behind a content switch. */}
+        <SafetyPreferences />
       </main>
     </div>
   );

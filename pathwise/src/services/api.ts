@@ -28,7 +28,7 @@ import type {
   ProfileStats,
   SavedTrip,
   Tour,
-  Traveler,
+  TravelerListResult,
   UsageInfo,
 } from '../types';
 import { PLACES, PLACES_BY_ID } from '../hubData';
@@ -165,6 +165,19 @@ export const api = {
 
   async me(): Promise<AuthUser> {
     return http<AuthUser>('/users/me');
+  },
+
+  /**
+   * Opt-in women-traveler preferences. Send only the keys that changed —
+   * omitted preferences are left untouched server-side.
+   */
+  async updateSafetyPreferences(
+    input: import('../types').SafetyPreferencesInput,
+  ): Promise<AuthUser> {
+    return http<AuthUser>('/users/me/safety-preferences', {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    });
   },
 
   // ═════════════════════════════════════════════════════════════════
@@ -397,8 +410,38 @@ export const api = {
   async getCheckIns(): Promise<CheckIn[]> {
     return delay(CHECK_INS);
   },
-  async getTravelers(): Promise<Traveler[]> {
-    return delay(TRAVELERS);
+  /**
+   * Traveler Buddy Finder — now a real endpoint so the opt-in women-traveler
+   * filter is enforced server-side (the caller's own preferences decide what
+   * they see; the query string alone is not trusted).
+   *
+   * `eligible` only shapes the offline fallback below — the live path derives
+   * it from the authenticated user's stored profile.
+   */
+  async getTravelers(
+    opts: { womenOnly?: boolean; eligible?: boolean } = {},
+  ): Promise<TravelerListResult> {
+    const qs = opts.womenOnly ? '?womenOnly=true' : '';
+    try {
+      return await http<TravelerListResult>(`/social/travelers${qs}`);
+    } catch {
+      // Offline / backend down → mirror the server rule over the local mock so
+      // the page still renders. (The per-traveler `visibleToWomenOnly` opt-out
+      // is a server-side concept and is not modelled in the mock dataset.)
+      const womenOnlyApplied = !!opts.womenOnly && !!opts.eligible;
+      const travelers = womenOnlyApplied
+        ? TRAVELERS.filter((t) => t.identifiesAsWoman === true)
+        : TRAVELERS;
+      // Redact the declaration for viewers who have not opted in themselves.
+      const visible = opts.eligible
+        ? travelers
+        : travelers.map((t) => {
+            const copy = { ...t };
+            delete copy.identifiesAsWoman;
+            return copy;
+          });
+      return delay({ travelers: visible, womenOnlyApplied });
+    }
   },
   async getCommunityRoutes(): Promise<CommunityRoute[]> {
     return delay(COMMUNITY_ROUTES);
