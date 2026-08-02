@@ -129,6 +129,12 @@ hub-budget, quiz-vibe, factory, auth, weather).
   `tailwind.config.js` (not bind-mounted); it was `docker cp`'d in for this run.
   Rebuild the image or add the mount so it doesn't regress.
 
+### Route completion celebration (commit `14cd2bd`) — ⚠️ untested
+Confetti + summary card when every stop on Today's Path is ticked off.
+Type-checks and is wired end-to-end in the code (`DayCelebration.tsx`,
+Dashboard state + once-per-plan guard, TodayPath visited toggle), but it has
+**never been driven in a browser** and has no e2e spec.
+
 ### Open follow-ups
 1. ~~Wire the community "Clone This Route" button~~ — done 2026-07-27.
 2. ~~Bind-mount config into the frontend container~~ — done 2026-07-27.
@@ -136,10 +142,68 @@ hub-budget, quiz-vibe, factory, auth, weather).
 4. (Optional) Promote the mock-served social/tours/profile data to real backend
    endpoints when those modules are built.
 
+### Opt-in women-traveler safety mode (2026-08-02)
+
+Optional, self-declared mode added across profile → buddy finder → SOS. Three
+independent preferences on the user (`identifiesAsWoman`, `visibleToWomenOnly`,
+`showWomenOnly`), all unset/off by default; nobody is ever asked for a gender.
+
+> **This is a self-declaration system — no identity verification is performed.**
+> The disclaimer ("Bu mod tamamen gönüllü kendini-beyan sistemine dayanır,
+> kimlik doğrulaması yapılmaz") renders next to the filter and in the profile
+> panel. A future real verification mechanism must use a separate field — see
+> the `TODO(verification)` notes in `user.ts`, `traveler.ts` and the migration.
+
+| Feature | Status | Notes |
+|---|---|---|
+| `PATCH /users/me/safety-preferences` (partial update) | ✅ | real backend, driven against the live stack |
+| `GET /social/travelers?womenOnly=` filter | ✅ | **8 unit tests** + live API run |
+| Profile › Privacy & safety panel (3 checkboxes + disclaimer) | ⛔ | coded, type-checked + linted; not yet driven in a browser |
+| Buddy Finder 🚺 chip + disclaimer + reciprocal badge | ⛔ | coded, type-checked + linted; not yet driven in a browser |
+| SOS "share only with connected women buddies" sub-option | ⛔ | coded, type-checked + linted; not yet driven in a browser |
+
+**API verification against the running stack (2026-08-02)** — a fresh account
+walked through the whole flow, 7/7 as designed:
+
+| # | Step | Result |
+|---|---|---|
+| 1 | register | `identifiesAsWoman: null`, both switches `false` — nothing preselected |
+| 2 | list buddies, not opted in | `t1,t2,t4,t5` — `t3` (women-only visibility) hidden; no `identifiesAsWoman` on any payload |
+| 3 | `?womenOnly=true`, not opted in | **refused** — full list returned, `womenOnlyApplied: false` |
+| 4 | opt in (declaration + showWomenOnly) | persisted |
+| 5 | `?womenOnly=true`, opted in | `t1,t3,t4` — only declared travelers; `visibleToWomenOnly` never serialised |
+| 6 | patch one switch only | the other two preferences untouched |
+| 7 | withdraw declaration | declaration back to `null`, both switches cleared |
+
+**Reciprocity rule (enforced server-side, covered by the unit tests):** a viewer
+who has not opted in themselves cannot (a) see travelers who chose women-only
+visibility, (b) read `identifiesAsWoman` off any payload, or (c) apply the
+`womenOnly` filter — (c) is refused explicitly because list membership would
+otherwise leak exactly what (b) redacts. `visibleToWomenOnly` is never exposed
+to anyone.
+
+**Backend suite is now 39 tests** (was 31), 6 suites, no DB needed.
+
 ## Regression suite
 28 feature specs live in `pathwise/e2e/{planning,social,extras}-features.spec.ts`
 (plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
 `cd pathwise && npm run e2e`.
+
+**Last full run — 2026-08-02, after the women-traveler mode:** 42 passed, 1
+flaky (`social-features.spec.ts:70` poll-winner → Today's Path timed out once,
+passed on retry — the same drag/timing sensitivity already noted for #5, not
+related to this feature). Backend `npm test`: 39/39. Frontend `npm run lint`:
+0 errors (2 pre-existing warnings). `tsc --noEmit`: clean both sides.
+
+> Known pre-existing lint error, unrelated and untouched:
+> `hub-budget.strategy.ts:3` imports `Interest` without using it, so
+> `pathwise-backend`'s `npm run lint` exits non-zero.
+
+### Not yet covered
+- No e2e spec drives the women-traveler UI (profile panel → 🚺 chip → SOS
+  sub-option). The filter's *logic* is covered by unit tests + the live API
+  run above; the *UI wiring* is not.
+- No e2e spec covers the route-completion celebration either (see below).
 
 ## Information architecture — current flows (2026-07-27)
 - **Sign-up → first route:** Landing CTA → auth form → `Create account` lands
