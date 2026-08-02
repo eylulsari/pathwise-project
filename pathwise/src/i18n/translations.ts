@@ -10,6 +10,7 @@ export const translations = {
       appName: 'Pathwise',
       logout: 'Log out',
       loading: 'Loading your Istanbul…',
+      sectionUnavailable: 'This section is temporarily unavailable.',
     },
     nav: { plan: 'Plan', social: 'Social', profile: 'Profile' },
     landing: {
@@ -406,6 +407,7 @@ export const translations = {
       appName: 'Pathwise',
       logout: 'Çıkış',
       loading: 'İstanbul’un yükleniyor…',
+      sectionUnavailable: 'Bu bölüm şu anda kullanılamıyor.',
     },
     nav: { plan: 'Planla', social: 'Sosyal', profile: 'Profil' },
     landing: {

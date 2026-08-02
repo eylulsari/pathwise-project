@@ -47,6 +47,7 @@ import { OfflineToggle } from '../components/OfflineToggle';
 import { OfflineDownload } from '../components/OfflineDownload';
 import { HUB_LABEL } from '../utils/format';
 import { DayCelebration } from '../components/DayCelebration';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { BADGES } from '../mockData';
 
 // A themed Passport badge to celebrate per hub (mock badge set — visual only).
@@ -328,10 +329,17 @@ export default function Dashboard() {
       return;
     }
     let active = true;
-    api.suggestNearby(day.config.hub, ids).then((s) => {
-      if (!active) return;
-      setSuggestion(s && !dismissedSuggestions.has(s.place.placeId) ? s : null);
-    });
+    api
+      .suggestNearby(day.config.hub, ids)
+      .then((s) => {
+        if (!active) return;
+        setSuggestion(s && !dismissedSuggestions.has(s.place.placeId) ? s : null);
+      })
+      // A missing suggestion is not an error worth surfacing — the panel just
+      // stays hidden. Without this an unhandled rejection reaches the console.
+      .catch(() => {
+        if (active) setSuggestion(null);
+      });
     return () => {
       active = false;
     };
@@ -738,17 +746,21 @@ export default function Dashboard() {
         <JournalModal place={journalPlace} onClose={() => setJournalPlace(null)} />
       )}
 
+      {/* Bonus flourish, and the least-exercised path in the app — if it throws,
+          skip it silently rather than taking the dashboard down with it. */}
       {celebrating && day.itinerary && (
-        <DayCelebration
-          itinerary={day.itinerary}
-          badge={badgeForHub(day.itinerary.hub)}
-          onClose={() => setCelebrating(false)}
-          onAddJournal={() => {
-            const first = day.itinerary?.stops.find((s) => s.place)?.place;
-            setCelebrating(false);
-            if (first) setJournalPlace(first);
-          }}
-        />
+        <ErrorBoundary label="day-celebration" fallback={null}>
+          <DayCelebration
+            itinerary={day.itinerary}
+            badge={badgeForHub(day.itinerary.hub)}
+            onClose={() => setCelebrating(false)}
+            onAddJournal={() => {
+              const first = day.itinerary?.stops.find((s) => s.place)?.place;
+              setCelebrating(false);
+              if (first) setJournalPlace(first);
+            }}
+          />
+        </ErrorBoundary>
       )}
 
       {/* Transient action feedback (e.g. must-visit picks applied) */}
