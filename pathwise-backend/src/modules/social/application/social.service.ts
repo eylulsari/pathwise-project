@@ -71,11 +71,10 @@ export class SocialService {
 
   /** (2) Strip the declaration for viewers who have not made one themselves. */
   private toPublic(traveler: Traveler, eligible: boolean): PublicTraveler {
-    const { visibleToWomenOnly: _hidden, ...rest } = traveler;
-    if (!eligible) {
-      const { identifiesAsWoman: _undisclosed, ...redacted } = rest;
-      return redacted;
-    }
-    return rest;
+    const view: Traveler = { ...traveler };
+    // Never exposed to anyone — it is the traveler's own visibility setting.
+    delete view.visibleToWomenOnly;
+    if (!eligible) delete view.identifiesAsWoman;
+    return view;
   }
 }
