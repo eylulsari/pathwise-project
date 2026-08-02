@@ -69,7 +69,7 @@ hub-budget, quiz-vibe, factory, auth, weather).
 | Group polls — create / vote / tally | ✅ | real backend polls |
 | SOS — confirm, emergency info, share location | ✅ | real backend sos alert |
 | Premium/paywall (trial→free→premium, Day 2 lock, optimize limit) | ✅ | real subscription + usage |
-| AI Assistant (Gemini chat) | ✅ | real backend round-trip (GEMINI_API_KEY set); no fallback error |
+| AI Assistant (chat) | ⚠️ | **superseded 2026-08-03** — the Gemini key now 401s (see the pre-demo section); the chat still answers via the grounded canned fallback |
 | Journal (photo/note/rating per stop) | ✅ | real backend upsert (modal closes on success) |
 | Profile tabs — passport / visited / past trips | ⚠️ | tabs render; badges & sample past-trips are mock data (`getBadges`, `getPastTrips`); stats real |
 | Language toggle EN/TR | ✅ | client i18n |
@@ -204,6 +204,80 @@ related to this feature). Backend `npm test`: 39/39. Frontend `npm run lint`:
   sub-option). The filter's *logic* is covered by unit tests + the live API
   run above; the *UI wiring* is not.
 - No e2e spec covers the route-completion celebration either (see below).
+
+## Pre-demo hardening pass (2026-08-03)
+
+No new features — stabilisation only, ahead of a live demo. Full stack rebuilt
+from zero (`docker compose down -v` → `up --build`): all four services healthy,
+**no errors or warnings** in the boot logs, backend ready in ~30 s.
+
+### AI assistant safety net — ✅ verified degraded-mode
+With **no working LLM key** (no `GROQ_API_KEY`; the `AQ.`-prefixed
+`GEMINI_API_KEY` 401s), three real questions were driven through
+`POST /api/assistant/chat` on the live stack:
+
+| Question | HTTP | `source` | Answer |
+|---|---|---|---|
+| "What if it rains?" | 200 | `fallback` | Hagia Sophia (indoor) |
+| "Best sunset spot?" | 200 | `fallback` | Gülhane Park |
+| "Cheap eats nearby" | 200 | `fallback` | Moda Dondurma |
+
+Every reply carried a **real** `placeId` from the dataset. Backend logged
+`WARN … using fallback`; **0 ERROR lines**. The UI shows a normal answer — no
+error state is reachable from a provider failure.
+
+> `ChatRateLimitGuard` now **fails open** when Redis is unreachable. It
+> previously threw, which would have turned a Redis hiccup into a hard 500 on
+> every chat message.
+
+### Crash containment — ✅ new `ErrorBoundary`
+There was **no error boundary anywhere**: any render-time throw white-screened
+the whole app. Added `components/ErrorBoundary.tsx` and wrapped
+(a) each route, so a crash is scoped to one page and the others stay navigable,
+(b) `DayCelebration` with `fallback={null}` — the confetti silently skips,
+(c) `SafetyPreferences` with a quiet "temporarily unavailable" notice.
+
+**Verified by deliberately throwing** inside `SafetyPreferences`: `/profile`
+still rendered with the fallback notice, and `/dashboard` stayed fully usable.
+The deliberate throw was then reverted.
+
+### Fixed: unhandled rejection on the dashboard
+`POST /itinerary/suggest-nearby` answers `200` with an **empty body** when there
+is nothing to suggest; `http()` called `res.json()` on it and threw
+`Unexpected end of JSON input` as an unhandled rejection (red console error on
+every dashboard load). `http()` now tolerates an empty body, and the caller has
+a `.catch`. The dashboard console is clean.
+
+### Screen sweep — ✅ all clean
+Landing · SignUp · Dashboard · Dashboard+assistant · Social · Profile, checked
+for console errors, uncaught errors, failed requests, 5xx, broken images,
+unlabelled buttons and text leaking `undefined` / `NaN` / `[object Object]` /
+raw i18n keys. **All six clean** after the fix above.
+
+Separately, an i18n audit across 60 files found **294 distinct `t()` keys, all
+present in both `en` and `tr`** — no screen can render a raw key.
+
+### Status of the two half-finished features
+Neither was rewritten (deliberately — too close to the demo); both are now
+contained so they cannot take a page down.
+
+| Feature | Status |
+|---|---|
+| Route-completion celebration | ⚠️ still not driven in a browser; now crash-contained (`fallback={null}`) |
+| Women-traveler mode UI (profile panel, 🚺 chip, SOS sub-option) | ⚠️ still no e2e spec; profile panel crash-contained. Backend logic remains ✅ (8 unit tests + live API run) |
+
+### Regression after the pass
+`npm run e2e`: **43/43 passed, 0 flaky.** Backend `npm test`: **39/39**.
+`tsc --noEmit`: clean both sides. Frontend `npm run lint`: 0 errors (2
+pre-existing warnings). Backend `npm run lint`: the 1 known pre-existing
+`hub-budget.strategy.ts` error, untouched.
+
+> **Demo risk to know about:** the story-modal "Live details" panel depends on
+> live Wikipedia/OSM calls and was the flaky test in the earlier run of the day.
+> If those APIs are slow during the demo the panel may lag; everything else is
+> served locally.
+
+---
 
 ## Information architecture — current flows (2026-07-27)
 - **Sign-up → first route:** Landing CTA → auth form → `Create account` lands
