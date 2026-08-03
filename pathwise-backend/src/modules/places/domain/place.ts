@@ -34,4 +34,20 @@ export interface Place {
   isSunsetSpot: boolean; // pushed toward end of day
   museumPass: boolean; // covered by the Istanbul Museum Pass (IBB)
   localTip: string;
+
+  // ── Extended (optional) attributes ────────────────────────────────
+  // Additive metadata layered on top of the Google/IBB-shaped core above.
+  // All optional so the original curated dataset and every consumer (route
+  // engine, tests) keep compiling unchanged; newer hubs populate them fully.
+  // Mirrors the frontend `Place` shape so itinerary responses round-trip.
+  neighborhood?: string; // fine-grained district within the hub
+  crowdLevel?: 'low' | 'medium' | 'high';
+  safetyScore?: number; // solo-traveler safety score, 0–100
+  isSoloVerified?: boolean;
+  transitNoteBefore?: string; // transit micro-tip from the previous stop
+  insiderTip?: string; // specific actionable tip (distinct from localTip)
+  photoGoldenHour?: string;
+  priceTier?: 1 | 2 | 3 | 4;
+  emoji?: string;
+  source?: string;
 }

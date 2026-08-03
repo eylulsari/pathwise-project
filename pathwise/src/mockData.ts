@@ -109,6 +109,9 @@ export const CHECK_INS: CheckIn[] = [
   { id: 'c2', traveler: { id: 't2', name: 'Diego Fernández', avatarColor: '#C56F52' }, placeName: 'Çiya Sofrası', hub: 'kadikoy-moda', message: 'Anyone want to split a table? So much food.', minutesAgo: 21 },
   { id: 'c3', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A' }, placeName: 'Kadıköy Market', hub: 'kadikoy-moda', message: 'Pickle shop tour starting now 🥒', minutesAgo: 34 },
   { id: 'c4', traveler: { id: 't3', name: 'Yuki Tanaka', avatarColor: '#6E8F74' }, placeName: 'Balat Colorful Houses', hub: 'balat-fener', message: 'Sketching the terraces, come say hi.', minutesAgo: 52 },
+  { id: 'c5', traveler: { id: 't5', name: 'Liam O’Connor', avatarColor: '#3F6E8C' }, placeName: 'Moda Pier', hub: 'kadikoy-moda', message: 'End of the deck, 270° of water. Staying for sunset ⚓', minutesAgo: 66 },
+  { id: 'c6', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#4A7C82' }, placeName: 'Spice Bazaar', hub: 'sultanahmet', message: 'Bought saffron on Hasırcılar instead of inside — half the price 🌶️', minutesAgo: 88 },
+  { id: 'c7', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A' }, placeName: 'Yeldeğirmeni Murals', hub: 'kadikoy-moda', message: 'Following the mural trail street by street, it just keeps going 🎨', minutesAgo: 104 },
 ];
 
 export const COMMUNITY_ROUTES: CommunityRoute[] = [
@@ -126,6 +129,8 @@ export const FORUM_QUESTIONS: ForumQuestion[] = [
     minutesAgo: 12,
     answers: [
       { authorName: 'Yuki T.', text: 'Yes if you hit Hagia Sophia + Topkapı + one more. Skips the queues too.', minutesAgo: 9 },
+      { authorName: 'Amara O.', text: 'Worth checking what it actually covers first — the Basilica Cistern is run separately and is not included, so budget that ticket on top.', minutesAgo: 6 },
+      { authorName: 'Mara L.', text: 'It is valid 5 days from first use, so a 2-day trip wastes most of it unless you go hard on the Sultanahmet museums both days.', minutesAgo: 4 },
     ],
   },
   {
@@ -136,6 +141,37 @@ export const FORUM_QUESTIONS: ForumQuestion[] = [
     answers: [
       { authorName: 'Diego F.', text: 'Night ferries stop ~midnight; after that use BiTaksi, not street taxis.', minutesAgo: 33 },
       { authorName: 'Mara L.', text: 'Marmaray runs late on weekends — check the last train time.', minutesAgo: 28 },
+      { authorName: 'Selin K.', text: 'If you are already on the Asian side you rarely need any of that — Kadife Sk. to most of Moda is a 15-min walk on lit, busy streets.', minutesAgo: 21 },
+    ],
+  },
+  {
+    id: 'q3',
+    authorName: 'Hannah (Germany)',
+    question: 'How much cash should I carry? Is card accepted everywhere?',
+    minutesAgo: 95,
+    answers: [
+      { authorName: 'Diego F.', text: 'Card works almost everywhere including tiny cafés. Keep ~500₺ cash for market stalls, the kumpir row and street simit.', minutesAgo: 80 },
+      { authorName: 'Yuki T.', text: 'Skip the airport exchange booths — the rate is far better at the döviz offices in Eminönü or Kadıköy.', minutesAgo: 74 },
+    ],
+  },
+  {
+    id: 'q4',
+    authorName: 'Marco (Italy)',
+    question: 'Istanbulkart — one card for two people, or one each?',
+    minutesAgo: 150,
+    answers: [
+      { authorName: 'Selin K.', text: 'One card can pay for several people — just tap once per person at the turnstile. Buy it from the machines at any metro or ferry entrance.', minutesAgo: 141 },
+      { authorName: 'Amara O.', text: 'It covers ferries, tram, metro, funicular and buses, and transfers within two hours are discounted, so it pays for itself on day one.', minutesAgo: 132 },
+    ],
+  },
+  {
+    id: 'q5',
+    authorName: 'Chen (Singapore)',
+    question: 'Rainy day in Istanbul — what actually stays good in the wet?',
+    minutesAgo: 210,
+    answers: [
+      { authorName: 'Mara L.', text: 'Basilica Cistern and the Museum of Turkish & Islamic Arts are both fully indoors and two minutes apart on the Hippodrome.', minutesAgo: 198 },
+      { authorName: 'Tom (UK)', text: 'The Grand Bazaar and Spice Bazaar are covered too — a wet afternoon is honestly the best time to go, far fewer people.', minutesAgo: 190 },
     ],
   },
 ];

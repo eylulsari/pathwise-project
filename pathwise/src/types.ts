@@ -46,6 +46,31 @@ export interface Place {
   isSunsetSpot: boolean;
   museumPass: boolean;
   localTip: string;
+
+  // ── Extended (optional) attributes ────────────────────────────────
+  // Additive metadata layered on top of the Google/IBB-shaped core above.
+  // All optional so the original 30 curated places and every existing
+  // consumer keep compiling unchanged; newer hubs populate them in full.
+  /** Fine-grained district within the hub (e.g. 'Nişantaşı', 'Büyükada'). */
+  neighborhood?: string;
+  /** Typical crowd density — drives pacing/queue hints in the UI. */
+  crowdLevel?: 'low' | 'medium' | 'high';
+  /** Solo-traveler safety score, 0–100 (IBB/community sourced). */
+  safetyScore?: number;
+  /** Flagged as vetted-comfortable for solo (esp. female) travelers. */
+  isSoloVerified?: boolean;
+  /** How to get here from the typical previous stop (transit micro-tip). */
+  transitNoteBefore?: string;
+  /** Specific, actionable local insider tip (distinct from localTip). */
+  insiderTip?: string;
+  /** When/where the best light is for photos at this spot. */
+  photoGoldenHour?: string;
+  /** Relative price tier 1 ($) – 4 ($$$$). */
+  priceTier?: 1 | 2 | 3 | 4;
+  /** Display emoji for map pins / lists. */
+  emoji?: string;
+  /** Provenance label for the record (e.g. 'Google Places', 'IBB'). */
+  source?: string;
 }
 
 // ── Itinerary (mirrors backend response) ───────────────────────────
