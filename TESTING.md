@@ -69,7 +69,7 @@ hub-budget, quiz-vibe, factory, auth, weather).
 | Group polls — create / vote / tally | ✅ | real backend polls |
 | SOS — confirm, emergency info, share location | ✅ | real backend sos alert |
 | Premium/paywall (trial→free→premium, Day 2 lock, optimize limit) | ✅ | real subscription + usage |
-| AI Assistant (chat) | ⚠️ | **superseded 2026-08-03** — the Gemini key now 401s (see the pre-demo section); the chat still answers via the grounded canned fallback |
+| AI Assistant (chat) | ✅ | **live on Groq since 2026-08-03** — real round-trip, `source: "groq"` (see the Groq section) |
 | Journal (photo/note/rating per stop) | ✅ | real backend upsert (modal closes on success) |
 | Profile tabs — passport / visited / past trips | ⚠️ | tabs render; badges & sample past-trips are mock data (`getBadges`, `getPastTrips`); stats real |
 | Language toggle EN/TR | ✅ | client i18n |
@@ -256,6 +256,36 @@ raw i18n keys. **All six clean** after the fix above.
 
 Separately, an i18n audit across 60 files found **294 distinct `t()` keys, all
 present in both `en` and `tr`** — no screen can render a raw key.
+
+### Groq provider — ✅ live and verified (2026-08-03)
+
+`GROQ_API_KEY` set in the root `.env`; `GROQ_MODEL` unset, so the code default
+`openai/gpt-oss-20b` applies. Three real questions on the live stack:
+
+| Question | `source` | Answer | Card |
+|---|---|---|---|
+| "Kadıköy'de ucuz bir kahvaltı nerede yapabilirim?" | `groq` | "…Kadıköy Market offers a lively breakfast spread with affordable options…" | Kadıköy Market (Çarşı) |
+| "I have 2 hours before sunset and I am in Galata…" | `groq` | "…panoramic sunset view over the Bosphorus…" | Galata Tower |
+| "Yağmur yağıyor, Sultanahmet'te kapalı bir yer öner" | `groq` | "…A magnificent indoor museum to explore while staying dry." | Hagia Sophia |
+
+Each answer is dynamic and context-specific (not the canned set), each card
+carries a real `placeId`, and the backend logged **0 ERROR lines** with no
+fallback warnings. Gemini is no longer configured (`GEMINI_API_KEY` empty), so
+the chain is now Groq → canned fallback.
+
+> **Gotcha that cost a debugging round:** container environment variables are
+> fixed at **creation** time. Editing `.env` while the stack is up changes
+> nothing, and `docker compose restart` does not help either — it restarts the
+> process, not the container. The key was present in `.env` and correctly
+> resolved by `docker compose config`, yet `printenv` inside the running backend
+> showed `GROQ_API_KEY` with **length 0**, because that container had been
+> created 3 minutes before the file was saved. Fix: `docker compose down` +
+> `up` (or `up -d`, which recreates on config change).
+
+> **Known behaviour:** the system instruction is English and does not tell the
+> model to reply in the user's language, so a Turkish question currently gets an
+> English answer (see the third row above). Not a fault — just decide before
+> demoing in Turkish.
 
 ### Status of the two half-finished features
 Neither was rewritten (deliberately — too close to the demo); both are now
