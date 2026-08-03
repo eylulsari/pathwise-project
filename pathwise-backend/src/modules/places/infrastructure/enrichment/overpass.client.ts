@@ -46,7 +46,7 @@ export class OverpassClient {
       const body = (await res.json()) as { elements?: OverpassElement[] };
       elements = body.elements ?? [];
     } catch (err) {
-      this.logger.warn(`Overpass fetch failed for "${name}": ${String(err)}`);
+      this.logger.warn(`Overpass fetch failed for "${_name}": ${String(err)}`);
       return null;
     }
 
