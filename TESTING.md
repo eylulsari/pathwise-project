@@ -287,6 +287,49 @@ the chain is now Groq → canned fallback.
 > English answer (see the third row above). Not a fault — just decide before
 > demoing in Turkish.
 
+### Final polish pass (2026-08-03, later same day)
+
+**🔴 Fixed a real 500 — `ReferenceError: name is not defined`.**
+`OverpassClient.fetchNearbyTags` takes `_name`, but its catch block logged
+`${name}`. TypeScript did not catch it because no `lib` is set in
+`pathwise-backend/tsconfig.json`, so `name` resolved to the DOM global
+`window.name`; in Node it does not exist. Effect: **whenever the Overpass call
+failed, the error handler itself threw**, and
+`GET /api/places/:placeId/enrichment` returned **HTTP 500** instead of
+degrading to `null`. Four of the six allowlisted landmarks (Blue Mosque,
+Basilica Cistern, Grand Bazaar, Galata Tower) were 500ing — i.e. the Local
+Story "Live details" panel was broken for them. This is also the most likely
+cause of the long-standing flakiness of the enrichment e2e test.
+
+After the one-word fix, all six return **200 with both `wikipedia` and `osm`
+populated**, and a non-allowlisted place (`saltgalata`) correctly returns 200
+with nulls.
+
+### Turkish consistency of the Local Story panel — ✅ already Turkish
+- `WikipediaClient` queries **`tr.wikipedia.org`**, so titles and summaries come
+  back in Turkish ("Ayasofya", "Galata Kulesi", full Turkish summary text).
+- The panel chrome is fully `t()`-driven (title, source, hours, cuisine,
+  wheelchair labels), so it follows the EN/TR toggle.
+- Remaining English is source data, not chrome: OSM `openingHours`
+  (`Mon–Sun 09:00–19:30`) and `cuisine` tags. Judged acceptable — that is raw
+  OpenStreetMap data.
+- Wikipedia enrichment is limited to a **6-place allowlist** by design
+  (`WIKI_TITLES`); other places show OSM-only or nothing. Not a fault, but worth
+  knowing which stops to open during a demo.
+
+### Final screen sweep — ✅ 7/7 clean
+Landing · SignUp · Dashboard · AI assistant window · **Local Story modal** ·
+Social · Profile — checked for console errors, uncaught errors, 5xx responses,
+broken images, and text leaking `undefined` / `NaN` / `[object Object]` / raw
+i18n keys. **All clean.** The Local Story modal now reaches the "Live details"
+heading in the browser, confirming the enrichment fix end-to-end. The
+SafetyPreferences panel rendered normally (not its boundary fallback).
+
+### Regression
+`npm run e2e`: **43/43** (42 passed + 1 flaky, passed on retry — the check-in
+composer, a known timing-sensitive spec). Backend `npm test`: **39/39**.
+`nest build` and `tsc --noEmit`: clean both sides.
+
 ### Status of the two half-finished features
 Neither was rewritten (deliberately — too close to the demo); both are now
 contained so they cannot take a page down.
