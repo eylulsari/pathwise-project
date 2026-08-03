@@ -282,10 +282,23 @@ the chain is now Groq → canned fallback.
 > created 3 minutes before the file was saved. Fix: `docker compose down` +
 > `up` (or `up -d`, which recreates on config change).
 
-> **Known behaviour:** the system instruction is English and does not tell the
-> model to reply in the user's language, so a Turkish question currently gets an
-> English answer (see the third row above). Not a fault — just decide before
-> demoing in Turkish.
+> **Known behaviour — the assistant answers in English, deliberately.**
+> A "reply in the user's language" rule was added to the system instruction on
+> 2026-08-03, measured, and then **reverted** before the demo. Findings worth
+> keeping:
+> - Groq returns **no prose at all** alongside a tool call
+>   (`finish_reason: tool_calls`, `content: undefined`), so the user-visible
+>   sentence is *always* the service's synthesised English template
+>   `` `I'd suggest ${name} — ${reason}` ``.
+> - The rule works in a short prompt (the tool's `reason` came back in fluent
+>   Turkish) but was ignored **6/6** through the real service prompt (7 rules +
+>   8 injected place lines dilute it) on `openai/gpt-oss-20b`.
+> - So the rule alone cannot produce a Turkish reply, and a Turkish `reason`
+>   inside an English template reads worse than consistent English.
+>
+> A proper fix needs both a localised template **and** a reliably localised
+> `reason` (a larger model, e.g. `openai/gpt-oss-120b`, is the cheapest lever —
+> `GROQ_MODEL` is env-only). Left for after the demo.
 
 ### Final polish pass (2026-08-03, later same day)
 
