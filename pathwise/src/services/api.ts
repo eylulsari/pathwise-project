@@ -25,6 +25,8 @@ import type {
   PastTrip,
   Place,
   PlaceEnrichment,
+  PointsAward,
+  PointsSummary,
   ProfileStats,
   SavedTrip,
   Tour,
@@ -202,9 +204,32 @@ export const api = {
   async recordPaywall(feature: 'day' | 'story' | 'pdf'): Promise<void> {
     await http('/analytics/paywall', { method: 'POST', body: JSON.stringify({ feature }) }).catch(() => {});
   },
-  /** A7 — record an affiliate/partner link click. */
-  async recordAffiliateClick(tourId: string, source: string): Promise<void> {
-    await http('/analytics/affiliate-click', { method: 'POST', body: JSON.stringify({ tourId, source }) }).catch(() => {});
+  /**
+   * A7 — record an affiliate/partner link click, which is also the "Reserve"
+   * action that earns reward points. Returns the award so the caller can toast
+   * the exact figure the server credited; `null` if the call failed, in which
+   * case the booking link still opens (the reward is a bonus, not a gate).
+   */
+  async recordAffiliateClick(tourId: string, source: string): Promise<PointsAward | null> {
+    return http<PointsAward>('/analytics/affiliate-click', {
+      method: 'POST',
+      body: JSON.stringify({ tourId, source }),
+    }).catch(() => null);
+  },
+
+  // ═════════════════════════════════════════════════════════════════
+  // REWARD POINTS — accrual + visibility (no catalogue/spending yet).
+  // ═════════════════════════════════════════════════════════════════
+  async getPoints(): Promise<PointsSummary> {
+    return http<PointsSummary>('/points/me');
+  },
+  /**
+   * Finished every stop on the day's route. The server throttles this to once
+   * per day and answers `awarded: 0` (not an error) when it declines, so the
+   * caller just skips the toast.
+   */
+  async awardRouteCompletion(): Promise<PointsAward | null> {
+    return http<PointsAward>('/points/route-completed', { method: 'POST' }).catch(() => null);
   },
 
   // ── SOS / safety (Phase 2) ──

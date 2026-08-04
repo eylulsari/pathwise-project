@@ -260,7 +260,46 @@ export interface AuthUser {
   identifiesAsWoman?: boolean | null;
   visibleToWomenOnly?: boolean;
   showWomenOnly?: boolean;
+  /** Reward-points balance (see `PointsSummary`). */
+  points?: number;
   createdAt: string;
+}
+
+// ── Reward points ──────────────────────────────────────────────────
+/**
+ * Accrual only for now: points are earned and shown, but there is no reward
+ * catalogue and nothing to spend them on yet. The backend keeps a ledger
+ * (`point_transactions`) so a real discount/perk system can be built on top
+ * without losing the history — see `domain/points.ts` on the backend.
+ */
+export type PointAction =
+  | 'tour_reserved'
+  | 'referral'
+  | 'route_completed'
+  | 'review';
+
+export interface PointTransaction {
+  id: string;
+  action: PointAction;
+  points: number;
+  reference: string | null;
+  createdAt: string;
+}
+
+/** Response of `GET /points/me`. */
+export interface PointsSummary {
+  points: number;
+  /** The server's price list — the UI renders "what earns points" from this. */
+  values: Record<PointAction, number>;
+  recent: PointTransaction[];
+}
+
+/** Response of any endpoint that grants points. */
+export interface PointsAward {
+  action: PointAction;
+  /** 0 when the award was declined (e.g. the daily completion throttle). */
+  awarded: number;
+  totalPoints: number;
 }
 
 /** Partial patch for `PATCH /users/me/safety-preferences`. */

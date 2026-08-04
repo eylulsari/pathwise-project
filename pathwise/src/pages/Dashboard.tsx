@@ -373,8 +373,18 @@ export default function Dashboard() {
       // Persist the unlock here, at the moment the day is actually completed.
       setUnlockedBadge(unlockBadgeForHub(it.hub));
       setCelebrating(true);
+      // …and claim the reward points. The server throttles this to once a day
+      // and answers `awarded: 0` when it declines, so a repeat completion just
+      // shows no toast instead of an error.
+      void api.awardRouteCompletion().then((award) => {
+        if (award && award.awarded > 0) {
+          showToast(`🎉 +${award.awarded} ${t('points.earnedSuffix')}`);
+        }
+      });
     }
-  }, [visited, day.itinerary]);
+    // `t` is a dependency only because the toast is translated; the
+    // once-per-plan guard above means a language switch cannot re-fire this.
+  }, [visited, day.itinerary, t]);
 
   function updateConfig(patch: Partial<RouteConfig>) {
     patchDay(activeDay, { config: { ...day.config, ...patch } });

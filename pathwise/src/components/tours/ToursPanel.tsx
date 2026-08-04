@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Hub, Tour } from '../../types';
 import { api } from '../../services/api';
 import { HUB_LABEL, formatTry } from '../../utils/format';
@@ -26,10 +26,31 @@ export function ToursPanel({
   const [syncing, setSyncing] = useState(false);
   const [synced, setSynced] = useState(false);
   const [detail, setDetail] = useState<Tour | null>(null);
+  // Reward-points feedback for "Reserve". Local to this panel: the booking
+  // link opens a new tab, so the toast has to survive on the page behind it.
+  const [pointsToast, setPointsToast] = useState<string | null>(null);
+  const toastTimer = useRef<number | null>(null);
 
   useEffect(() => {
     api.getCuratedTours().then(setTours);
+    return () => {
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    };
   }, []);
+
+  /**
+   * Reserving a tour earns points. The award is granted server-side by the
+   * same call that records the affiliate click, so the toast shows the figure
+   * the server actually credited rather than a hardcoded one. A failure is
+   * silent by design — the user came here to book, and the reward is a bonus.
+   */
+  async function claimReservationPoints(tour: Tour) {
+    const award = await api.recordAffiliateClick(tour.id, tour.source);
+    if (!award || award.awarded <= 0) return;
+    setPointsToast(`🎉 +${award.awarded} ${t('points.earnedSuffix')}`);
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setPointsToast(null), 3200);
+  }
 
   // Premium is ad-free: sponsored cards are hidden. Otherwise sponsored first.
   const visibleTours = useMemo(() => {
@@ -124,17 +145,30 @@ export function ToursPanel({
             >
               Set as Today’s Itinerary
             </button>
-            {/* Affiliate booking link (mock ?ref=pathwise → revenue share). */}
+            {/* Affiliate booking link (mock ?ref=pathwise → revenue share).
+                Also the action that earns reward points. */}
             <a
               href={detail.affiliateUrl}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              onClick={() => api.recordAffiliateClick(detail.id, detail.source)}
+              onClick={() => void claimReservationPoints(detail)}
               className="mt-2 block w-full rounded-xl border border-sage/40 py-3 text-center text-sm font-semibold text-sage hover:bg-sage/10"
             >
               {t('tours.reserve')}
             </a>
+            <p className="mt-1.5 text-center text-[11px] text-ink/40">
+              {t('points.reserveHint')}
+            </p>
           </div>
+        </div>
+      )}
+
+      {pointsToast && (
+        <div
+          role="status"
+          className="fixed bottom-24 left-1/2 z-[1200] -translate-x-1/2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-soft-lg"
+        >
+          {pointsToast}
         </div>
       )}
     </div>

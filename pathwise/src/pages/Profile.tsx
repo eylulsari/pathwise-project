@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { SafetyPreferences } from '../components/SafetyPreferences';
+import { PointsCard } from '../components/PointsCard';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { BUCKET_LIST_IDS, PAST_TRIPS } from '../mockData';
 import { PLACES_BY_ID } from '../hubData';
@@ -98,6 +99,12 @@ export default function Profile() {
             </div>
           )}
         </div>
+
+        {/* Reward points — above the tabs so the balance is visible on arrival
+            rather than hidden behind a tab switch. */}
+        <ErrorBoundary label="points-card" fallback={null}>
+          <PointsCard />
+        </ErrorBoundary>
 
         {/* Tabs */}
         <div className="flex gap-2 border-b border-ink/10">

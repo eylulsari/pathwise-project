@@ -365,6 +365,77 @@ pre-existing warnings). Backend `npm run lint`: the 1 known pre-existing
 
 ---
 
+## Reward points (Görev 1 — 2026-08-04)
+
+Points accrue on four actions and are shown on the profile. **Accrual only —
+there is no reward catalogue and nothing to spend them on yet**, which the UI
+says out loud (`points.whatForBody`); the backend keeps a `point_transactions`
+ledger so a real discount/perk system can be built on the balance later.
+
+| Action | Points | Where it is granted |
+|---|---|---|
+| Reserve a tour/activity | 25 | `POST /analytics/affiliate-click` (the existing A7 click record) |
+| Referral redeemed | 50 **to both sides** | `ReferralService.redeem` |
+| Finish a day's route | 30 | `POST /points/route-completed`, max once/day |
+| Review a place | 15 | `ReviewsService.create`, **first review only** |
+
+Two guards worth knowing about, both deliberate and both narrow:
+- **Route completion is throttled per calendar day (UTC)**, because completion
+  is detected in the browser and the endpoint is therefore reachable at will.
+  A declined award answers `200 { awarded: 0 }`, not an error, so the client
+  just skips the toast. Real per-itinerary idempotency is a `TODO(idempotency)`
+  in `points.service.ts` — it needs the itinerary to exist server-side, which
+  it does not yet.
+- **Reviews are an upsert**, so editing a review must not re-earn; only the
+  insert path awards.
+
+### Backend unit tests — 51/51 (was 39)
+`points.service.spec.ts` adds **12 tests**: the award/ledger/balance path, the
+`isSameUtcDay` boundary cases (same day, across UTC midnight, same day-number
+in different months), and the throttle's edges — declined award writes no
+ledger row, an unrelated action today does not block a completion, yesterday's
+completion does not, and the throttle is per user rather than global.
+
+### Live API run against the running stack (2026-08-04) — 8/8 as designed
+| # | Step | Result |
+|---|---|---|
+| 1 | fresh account | `0` |
+| 2 | reserve a tour | `+25` → total 25 |
+| 3 | complete a route | `+30` → total 55 |
+| 4 | complete again, same day | `+0` → total 55 (throttled, no error) |
+| 5 | first review | `pointsAwarded: 15` |
+| 6 | edit the same review | `pointsAwarded: 0` |
+| 7 | `GET /users/me` | `points: 70` — balance and ledger agree |
+| 8 | ledger contents | 3 rows, each carrying its reference (`gyg-101`, `hagiasophia`) |
+
+Referral was driven separately with two accounts: B redeems A's code →
+**both** sides land on 50, a second redemption is refused
+("You have already used a referral code") and awards nothing further.
+
+### E2E — `e2e/points.spec.ts` (3 new specs)
+Zero balance + the honest "what are points for?" copy; the earn list rendered
+from the **server's** price list (25/50/30/15); and reserving a tour →
+`+25 points earned` toast → profile balance 25 with the award itemised.
+
+> Selector note: dnd-kit renders its own empty `role="status"` live region on
+> the dashboard, so a toast assertion must match on text, not on the role.
+
+### Not covered
+- No spec drives the **route-completion → points** path end-to-end (it needs
+  every stop ticked off; the award is covered by the unit tests and the live
+  API run above).
+- Leaving a review awards points but shows **no toast** — only the Reserve
+  button does, per the feature request. The points still appear on the profile.
+
+### Full regression after Görev 1 (2026-08-04)
+`npx playwright test`: **51 tests, all passed, 0 flaky** (43 baseline + 4
+safety/celebration + 3 points + 1 temporary `_probe.spec.ts`, which is a
+leftover selector probe and should be deleted). Backend `npm test`: **51/51**.
+`tsc --noEmit` clean both sides; `nest build` clean; frontend `npm run lint`
+0 errors (the same 2 pre-existing warnings).
+
+---
+
 ## Information architecture — current flows (2026-07-27)
 - **Sign-up → first route:** Landing CTA → auth form → `Create account` lands
   **directly on `/dashboard`** (no `/success` interstitial), where Day 1's route

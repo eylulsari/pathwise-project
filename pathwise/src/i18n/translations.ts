@@ -212,6 +212,26 @@ export const translations = {
       sponsored: 'Sponsored',
       reserve: '🎟️ Reserve Spot',
     },
+    // Reward points — accrual only, no catalogue yet. The copy must not
+    // promise a specific discount; see the note on PointsCard.
+    points: {
+      title: '🏅 Reward points',
+      balanceLabel: 'Earned across the app',
+      unit: 'points',
+      earnedSuffix: 'points earned',
+      reserveHint: 'Reserving earns you reward points',
+      whatFor: 'What are points for?',
+      whatForBody:
+        'Nothing to spend them on just yet — you are building up a balance. Points are meant to become discounts and partner perks later, and everything you earn now is kept, so nothing is lost in the meantime.',
+      howToEarn: 'How you earn them',
+      recent: 'Recent activity',
+      action: {
+        tourReserved: 'Reserve a tour or activity',
+        referral: 'Invite a friend who joins',
+        routeCompleted: 'Finish a day’s route',
+        review: 'Review a place you visited',
+      },
+    },
     anchor: {
       lock: 'Lock time',
       locked: 'Locked',
@@ -608,6 +628,24 @@ export const translations = {
     tours: {
       sponsored: 'Sponsorlu',
       reserve: '🎟️ Yer Ayırt',
+    },
+    points: {
+      title: '🏅 Ödül puanları',
+      balanceLabel: 'Uygulama genelinde kazandıkların',
+      unit: 'puan',
+      earnedSuffix: 'puan kazandın',
+      reserveHint: 'Yer ayırtmak ödül puanı kazandırır',
+      whatFor: 'Puanların ne işe yarıyor?',
+      whatForBody:
+        'Şimdilik harcayabileceğin bir yer yok — bakiye biriktiriyorsun. Puanlar ileride indirimlere ve partner ayrıcalıklarına dönüşecek; şimdi kazandığın her puan saklanıyor, bu sürede hiçbir şey kaybolmuyor.',
+      howToEarn: 'Nasıl kazanırsın',
+      recent: 'Son hareketler',
+      action: {
+        tourReserved: 'Bir tur veya aktiviteye yer ayırt',
+        referral: 'Katılan bir arkadaş davet et',
+        routeCompleted: 'Bir günün rotasını tamamla',
+        review: 'Gittiğin bir mekana yorum yaz',
+      },
     },
     anchor: {
       lock: 'Saati sabitle',
