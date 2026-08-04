@@ -49,8 +49,9 @@ import { HUB_LABEL } from '../utils/format';
 import { DayCelebration } from '../components/DayCelebration';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { BADGES } from '../mockData';
+import { earnBadge } from '../utils/badgeStore';
 
-// A themed Passport badge to celebrate per hub (mock badge set — visual only).
+// The Passport badge each hub completes.
 const HUB_BADGE: Record<string, string> = {
   sultanahmet: 'old-city-master',
   'karakoy-galata': 'kahve-guru',
@@ -59,9 +60,15 @@ const HUB_BADGE: Record<string, string> = {
   'besiktas-bogaz': 'ferry-hopper',
 };
 
-function badgeForHub(hub: string): { emoji: string; name: string } | null {
-  const b = BADGES.find((x) => x.id === HUB_BADGE[hub]);
-  return b ? { emoji: b.emoji, name: b.name } : null;
+/**
+ * Record the hub's badge as earned and return it ONLY when this is a genuine
+ * first unlock — the celebration card claims "Badge unlocked", so it must not
+ * say that for a badge the passport already shows as earned.
+ */
+function unlockBadgeForHub(hub: string): { emoji: string; name: string } | null {
+  const badge = BADGES.find((x) => x.id === HUB_BADGE[hub]);
+  if (!badge || badge.earned) return null; // already in the catalogue as earned
+  return earnBadge(badge.id) ? { emoji: badge.emoji, name: badge.name } : null;
 }
 
 interface DayState {
@@ -132,6 +139,8 @@ export default function Dashboard() {
   const [visited, setVisited] = useState<Set<string>>(new Set());
   const [celebrating, setCelebrating] = useState(false);
   const celebratedFor = useRef<string | null>(null);
+  // Set only when finishing the day genuinely unlocked a new Passport badge.
+  const [unlockedBadge, setUnlockedBadge] = useState<{ emoji: string; name: string } | null>(null);
 
   const day = days[activeDay];
 
@@ -350,6 +359,7 @@ export default function Dashboard() {
   useEffect(() => {
     setVisited(new Set());
     setCelebrating(false);
+    setUnlockedBadge(null);
   }, [activeDay, day.itinerary?.generatedAt]);
 
   // Every real stop ticked → fire the completion celebration (once per plan).
@@ -360,6 +370,8 @@ export default function Dashboard() {
     if (realIds.length === 0) return;
     if (realIds.every((id) => visited.has(id)) && celebratedFor.current !== it.generatedAt) {
       celebratedFor.current = it.generatedAt;
+      // Persist the unlock here, at the moment the day is actually completed.
+      setUnlockedBadge(unlockBadgeForHub(it.hub));
       setCelebrating(true);
     }
   }, [visited, day.itinerary]);
@@ -752,7 +764,7 @@ export default function Dashboard() {
         <ErrorBoundary label="day-celebration" fallback={null}>
           <DayCelebration
             itinerary={day.itinerary}
-            badge={badgeForHub(day.itinerary.hub)}
+            badge={unlockedBadge}
             onClose={() => setCelebrating(false)}
             onAddJournal={() => {
               const first = day.itinerary?.stops.find((s) => s.place)?.place;

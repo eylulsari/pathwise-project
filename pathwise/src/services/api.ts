@@ -32,6 +32,7 @@ import type {
   UsageInfo,
 } from '../types';
 import { PLACES, PLACES_BY_ID } from '../hubData';
+import { withEarnedBadges } from '../utils/badgeStore';
 import {
   BADGES,
   CHECK_INS,
@@ -458,8 +459,9 @@ export const api = {
   // ═════════════════════════════════════════════════════════════════
   // PROFILE — user aggregate tables (badges, past trips, stats)
   // ═════════════════════════════════════════════════════════════════
+  /** Catalogue is mock, but badges the user actually unlocked are merged in. */
   async getBadges(): Promise<Badge[]> {
-    return delay(BADGES);
+    return delay(withEarnedBadges(BADGES));
   },
   async getPastTrips(): Promise<PastTrip[]> {
     return delay(PAST_TRIPS);
