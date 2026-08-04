@@ -17,6 +17,7 @@ import { ReferralModule } from './modules/referral/referral.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PollsModule } from './modules/polls/polls.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { PointsModule } from './modules/points/points.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { SafetyModule } from './modules/safety/safety.module';
 import { SocialModule } from './modules/social/social.module';
@@ -46,6 +47,7 @@ import { AssistantModule } from './modules/assistant/assistant.module';
     NotificationsModule,
     PollsModule,
     AnalyticsModule,
+    PointsModule,
     ReviewsModule,
     SafetyModule,
     SocialModule,

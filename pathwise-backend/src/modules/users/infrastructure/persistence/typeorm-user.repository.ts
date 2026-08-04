@@ -34,6 +34,7 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
       identifiesAsWoman: row.identifiesAsWoman ?? null,
       visibleToWomenOnly: row.visibleToWomenOnly ?? false,
       showWomenOnly: row.showWomenOnly ?? false,
+      points: row.points ?? 0,
       createdAt: row.createdAt,
     });
   }
@@ -103,6 +104,17 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
     if ('visibleToWomenOnly' in prefs) patch.visibleToWomenOnly = !!prefs.visibleToWomenOnly;
     if ('showWomenOnly' in prefs) patch.showWomenOnly = !!prefs.showWomenOnly;
     if (Object.keys(patch).length > 0) await this.repo.update({ id }, patch);
+    const row = await this.repo.findOne({ where: { id } });
+    return this.toDomain(row as UserOrmEntity);
+  }
+
+  /**
+   * `points = points + :delta` in SQL rather than loading the row and saving
+   * it back, so concurrent awards (e.g. a referral landing while the user
+   * finishes a route) both count instead of one overwriting the other.
+   */
+  async addPoints(id: string, delta: number): Promise<User> {
+    await this.repo.increment({ id }, 'points', delta);
     const row = await this.repo.findOne({ where: { id } });
     return this.toDomain(row as UserOrmEntity);
   }

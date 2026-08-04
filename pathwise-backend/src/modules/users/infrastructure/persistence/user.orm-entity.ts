@@ -59,6 +59,13 @@ export class UserOrmEntity {
   @Column({ type: 'boolean', default: false })
   showWomenOnly: boolean;
 
+  // ── Reward points (Phase 3) ───────────────────────────────────────
+  // Denormalised balance. Migration: AddRewardPoints. Written only by
+  // PointsService, which records the matching `point_transactions` row in the
+  // same flow — do not increment this column from anywhere else.
+  @Column({ type: 'int', default: 0 })
+  points: number;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }

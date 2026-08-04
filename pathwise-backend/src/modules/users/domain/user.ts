@@ -53,6 +53,8 @@ export interface UserProps {
   identifiesAsWoman?: boolean | null;
   visibleToWomenOnly?: boolean;
   showWomenOnly?: boolean;
+  /** Reward-points balance (Phase 3). Explained by `point_transactions`. */
+  points?: number;
   createdAt: Date;
 }
 
@@ -70,6 +72,12 @@ export class User {
   identifiesAsWoman: boolean | null;
   visibleToWomenOnly: boolean;
   showWomenOnly: boolean;
+  /**
+   * Reward-points balance. Denormalised for cheap reads; the authoritative
+   * history is the `point_transactions` ledger owned by the points module —
+   * never write this field from anywhere but `PointsService`.
+   */
+  points: number;
   readonly createdAt: Date;
 
   constructor(props: UserProps) {
@@ -86,6 +94,7 @@ export class User {
     this.identifiesAsWoman = props.identifiesAsWoman ?? null;
     this.visibleToWomenOnly = props.visibleToWomenOnly ?? false;
     this.showWomenOnly = props.showWomenOnly ?? false;
+    this.points = props.points ?? 0;
     this.createdAt = props.createdAt;
   }
 
@@ -127,6 +136,7 @@ export class User {
       identifiesAsWoman: this.identifiesAsWoman,
       visibleToWomenOnly: this.visibleToWomenOnly,
       showWomenOnly: this.showWomenOnly,
+      points: this.points,
       createdAt: this.createdAt,
     };
   }

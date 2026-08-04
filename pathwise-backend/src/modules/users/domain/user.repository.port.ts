@@ -29,4 +29,9 @@ export interface UserRepositoryPort {
     id: string,
     prefs: Partial<SafetyPreferences>,
   ): Promise<User>;
+  /**
+   * Atomically add to the reward-points balance. A relative increment (not a
+   * read-modify-write) so two awards landing at once cannot lose one another.
+   */
+  addPoints(id: string, delta: number): Promise<User>;
 }

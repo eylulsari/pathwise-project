@@ -85,6 +85,17 @@ export class UsersService {
     return updated.toPublic();
   }
 
+  /**
+   * Add to the reward-points balance.
+   *
+   * Intentionally thin and unguarded: the rules about *when* points are earned
+   * belong to `PointsService`, which is also what writes the ledger row that
+   * explains the increment. Nothing else should call this.
+   */
+  addPoints(id: string, delta: number): Promise<User> {
+    return this.users.addPoints(id, delta);
+  }
+
   /** Set an absolute trial end (used by A6 to assign the signup trial). */
   async setTrialEndsAt(id: string, until: Date | null) {
     const updated = await this.users.setTrialEndsAt(id, until);
