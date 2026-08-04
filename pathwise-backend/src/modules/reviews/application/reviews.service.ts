@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PlaceReviewOrmEntity } from '../infrastructure/persistence/place-review.orm-entity';
+import { PointsService } from '../../points/application/points.service';
 
 /**
  * Real user reviews for places (Phase 3). One review per user+place (upsert);
@@ -12,6 +13,7 @@ export class ReviewsService {
   constructor(
     @InjectRepository(PlaceReviewOrmEntity)
     private readonly reviews: Repository<PlaceReviewOrmEntity>,
+    private readonly points: PointsService,
   ) {}
 
   async listForPlace(placeId: string) {
@@ -38,6 +40,12 @@ export class ReviewsService {
     };
   }
 
+  /**
+   * Leave or update a review. Reward points are granted for the *first* review
+   * of a place only — this is an upsert, so editing an existing review must not
+   * re-earn (otherwise the same review could be edited repeatedly to farm
+   * points). `pointsAwarded` is 0 on the update path.
+   */
   async create(
     userId: string,
     authorName: string,
@@ -46,6 +54,7 @@ export class ReviewsService {
     comment: string,
   ) {
     const existing = await this.reviews.findOne({ where: { userId, placeId } });
+    let pointsAwarded = 0;
     if (existing) {
       existing.rating = rating;
       existing.comment = comment;
@@ -54,8 +63,10 @@ export class ReviewsService {
       await this.reviews.save(
         this.reviews.create({ userId, authorName, placeId, rating, comment, helpfulCount: 0 }),
       );
+      const award = await this.points.award(userId, 'review', placeId);
+      pointsAwarded = award.awarded;
     }
-    return this.listForPlace(placeId);
+    return { ...(await this.listForPlace(placeId)), pointsAwarded };
   }
 
   async markHelpful(reviewId: string) {

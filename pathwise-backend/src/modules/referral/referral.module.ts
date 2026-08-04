@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from '../users/users.module';
+import { PointsModule } from '../points/points.module';
 import { ReferralService } from './application/referral.service';
 import { ReferralController } from './infrastructure/http/referral.controller';
 import {
@@ -12,6 +13,7 @@ import {
   imports: [
     TypeOrmModule.forFeature([ReferralCodeOrmEntity, ReferralRedemptionOrmEntity]),
     UsersModule,
+    PointsModule,
   ],
   controllers: [ReferralController],
   providers: [ReferralService],

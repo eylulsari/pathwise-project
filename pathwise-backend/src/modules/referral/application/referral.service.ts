@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersService } from '../../users/application/users.service';
+import { PointsService } from '../../points/application/points.service';
 import {
   ReferralCodeOrmEntity,
   ReferralRedemptionOrmEntity,
@@ -26,6 +27,7 @@ export class ReferralService {
     @InjectRepository(ReferralRedemptionOrmEntity)
     private readonly redemptions: Repository<ReferralRedemptionOrmEntity>,
     private readonly users: UsersService,
+    private readonly points: PointsService,
   ) {}
 
   private gen(): string {
@@ -70,6 +72,18 @@ export class ReferralService {
     // Reward both — extends the shared premium/trial window.
     const me = await this.users.grantPremiumDays(newUserId, REWARD_DAYS);
     await this.users.grantPremiumDays(owner.userId, REWARD_DAYS);
-    return { rewardedDays: REWARD_DAYS, user: me };
+
+    // …and both sides also earn reward points. Safe to award unconditionally:
+    // the duplicate/self-referral checks above already ran, and a redemption
+    // row can only exist once per new user, so this path is reached once.
+    const award = await this.points.award(newUserId, 'referral', owner.code);
+    await this.points.award(owner.userId, 'referral', owner.code);
+
+    return {
+      rewardedDays: REWARD_DAYS,
+      user: me,
+      pointsAwarded: award.awarded,
+      totalPoints: award.totalPoints,
+    };
   }
 }
