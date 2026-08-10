@@ -14,7 +14,7 @@ microservice without a rewrite.
                               │
 ┌──────────────────────────────────────────────────────────┐
 │                  Backend (NestJS monolith)                │
-│  auth │ users │ itinerary │ places │ social │ profile     │
+│  auth │ users │ itinerary │ places │ social │ points │ …   │
 │                                                            │
 │   PostgreSQL (TypeORM)          Redis (refresh + cache)   │
 └──────────────────────────────────────────────────────────┘
@@ -54,6 +54,36 @@ adapter in `infrastructure/` implements it (e.g. `UserRepositoryPort` ←
 `RouteStrategyFactory` returns the correct strategy for a given `mode` string
 (`"hub-budget"` | `"quiz-vibe"`).
 
+### Pure domain scoring — buddy matching
+`social/domain/matching.ts` holds the compatibility score as **pure functions**
+with no framework imports, so the whole economy is testable without a DB, a
+container or a clock. `MatchingService` (application) does nothing but assemble
+the caller's profile out of three modules — styles from `users`, preferred hubs
+and budget level derived from `trips` — and hand it to those functions.
+
+The score is a weighted sum of three components normalised to 0–100:
+
+| Component | Weight | Source |
+| --------- | ------ | ------ |
+| Shared style tags | 50 | `users.travelStyles` (quiz-derived + hand-edited) |
+| Overlapping preferred hubs | 30 | derived from the user's saved trips |
+| Budget proximity | 20 | derived from average trip spend |
+
+The weights are the entire tuning surface. Two rules matter more than the
+numbers: **filtering and ranking are separate** (ranking only reorders what the
+tag/women-traveler filters already allowed, so it can never surface someone a
+filter excluded), and **missing data is skipped rather than scored as zero** —
+the remaining weights are renormalised, and a user with nothing to compare gets
+`null` rather than a fabricated percentage.
+
+### Ledger over counter — reward points
+`users.points` is a denormalised balance for cheap reads, but every change is
+also written to the append-only `point_transactions` table, so the balance
+stays reconstructable and explainable. Only `PointsService` writes either.
+Points accrue on four actions and are granted by the module that owns each
+action (analytics/affiliate, referral, reviews, and a points endpoint for route
+completion). There is no reward catalogue yet — accrual and visibility only.
+
 ### Validation & cross-cutting
 - `class-validator` DTOs + global `ValidationPipe({ whitelist: true })`.
 - Global exception filter → consistent error envelope.
@@ -79,6 +109,7 @@ adapter in `infrastructure/` implements it (e.g. `UserRepositoryPort` ←
 ```
 users ──1:N── trips ──1:N── itineraries ──1:N── itinerary_stops
   │                                                    │
+  ├──1:N── point_transactions (append-only ledger)      │
   ├──1:N── check_ins ─────────────────────────────────┘ (place_id)
   ├──1:N── badges (earned + in-progress)
   └──M:N── buddy_connections (users ↔ users)
@@ -86,6 +117,13 @@ users ──1:N── trips ──1:N── itineraries ──1:N── itinerar
 community_routes ──1:N── route_likes
 forum_questions  ──1:N── forum_answers
 ```
+
+> **Built vs. planned.** `users`, `trips`, `point_transactions`,
+> `place_reviews`, `trip_journal_entries`, `referral_codes`/`redemptions`,
+> `content_reports`, `affiliate_clicks`, polls and notifications are real
+> tables. `check_ins`, `badges`, `buddy_connections`, `community_routes` and
+> the forum are still served from the frontend mock layer — the diagram shows
+> the intended shape, and `api.ts` marks each swap point.
 
 SQL/PostgreSQL was chosen because users, trips, itineraries, check-ins and
 badges have clear relational structure and referential integrity needs.

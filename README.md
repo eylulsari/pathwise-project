@@ -60,8 +60,12 @@ npm run dev
 ## Testing
 
 ```bash
-# Backend unit tests (route engine, factory, auth) — no DB needed
+# Backend — unit tests (route engine, matching, points, auth). No DB needed.
 cd pathwise-backend && npm test
+cd pathwise-backend && npm run lint && npx tsc --noEmit
+
+# Frontend — types + lint
+cd pathwise && npm run typecheck && npm run lint
 
 # Frontend E2E (real browser) — needs the stack running first
 docker compose up -d
@@ -70,6 +74,15 @@ cd pathwise && npm run e2e        # or: npm run e2e:ui
 
 The E2E suite (`pathwise/e2e/`) drives a real Chromium through onboarding →
 dashboard and asserts the Leaflet map + Today's Path render with live data.
+See [TESTING.md](./TESTING.md) for what has actually been exercised end-to-end.
+
+> Use `npm run typecheck` (`tsc -b`), **not** `tsc --noEmit`, on the frontend.
+> The root `tsconfig.json` is solution-style (`"files": []` + project
+> references), so `tsc --noEmit` silently checks nothing.
+
+> If the stack is up and healthy but every request from the host fails, it is
+> almost certainly the IPv6 `localhost` path, not the app — try `127.0.0.1`
+> (see the environment note in TESTING.md).
 
 ## Documentation
 
