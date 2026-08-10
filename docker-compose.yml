@@ -49,7 +49,11 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       BACKEND_PORT: ${BACKEND_PORT:-3000}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      # Both spellings of the dev host: a browser opened on 127.0.0.1 sends a
+      # different Origin than one opened on localhost, and either is a normal
+      # way to reach the dev server. Allowing only one turns a host-name choice
+      # into a wall of CORS failures that look like the app is broken.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
       POSTGRES_USER: ${POSTGRES_USER:-pathwise}

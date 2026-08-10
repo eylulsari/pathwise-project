@@ -81,8 +81,14 @@ See [TESTING.md](./TESTING.md) for what has actually been exercised end-to-end.
 > references), so `tsc --noEmit` silently checks nothing.
 
 > If the stack is up and healthy but every request from the host fails, it is
-> almost certainly the IPv6 `localhost` path, not the app — try `127.0.0.1`
-> (see the environment note in TESTING.md).
+> almost certainly the IPv6 `localhost` path, not the app — `localhost`
+> resolves to `::1` first on Windows and the WSL port relay can go stale after
+> a sleep/resume. Check with `curl http://127.0.0.1:3000/api/health`; if that
+> works, either restart Docker Desktop, or run locally against IPv4 by setting
+> **in your own untracked `.env`** `VITE_API_URL=http://127.0.0.1:3000/api` and
+> running the suite with `E2E_BASE_URL=http://127.0.0.1:5173`. The committed
+> config stays on `localhost` so CI and other machines are unaffected; the
+> backend allows both origins.
 
 ## Documentation
 

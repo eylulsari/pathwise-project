@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # This repo's default branch is `master`. It said `main` for months, so no
+    # push ever triggered CI — and since the workflow is solo-developer with no
+    # PRs, that meant CI effectively never ran at all.
+    branches: [master]
   pull_request:
 
 jobs:
@@ -20,11 +23,12 @@ jobs:
           cache: npm
           cache-dependency-path: pathwise-backend/package-lock.json
       - run: npm ci
+      - run: npm run lint
       - run: npm run build
       - run: npm test # unit tests use in-memory data + mocks — no DB needed
 
   frontend:
-    name: Frontend (type-check + build)
+    name: Frontend (lint + type-check + i18n + build)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -37,7 +41,13 @@ jobs:
           cache: npm
           cache-dependency-path: pathwise/package-lock.json
       - run: npm ci
-      - run: npm run build # runs `tsc -b` (type-check) then `vite build`
+      - run: npm run lint
+      # Explicit step so a type error is reported as a type error rather than
+      # as a build failure. `tsc -b`, NOT `tsc --noEmit`: the root tsconfig is
+      # solution-style ("files": [] + references), so --noEmit checks nothing.
+      - run: npm run typecheck
+      - run: npm run i18n:check # a missing translation silently ships English
+      - run: npm run build
 
   e2e:
     name: E2E (Playwright against full stack)

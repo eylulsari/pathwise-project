@@ -2,15 +2,20 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * E2E config. Runs against the already-running stack (docker compose up -d):
- *   frontend → http://127.0.0.1:5173,  backend → http://127.0.0.1:3000/api
+ *   frontend → http://localhost:5173,  backend → http://localhost:3000/api
  * Start the stack first, then `npm run e2e`.
  *
- * ⚠️ 127.0.0.1, not `localhost`, on purpose. Docker Desktop publishes ports on
- * both stacks, but `localhost` resolves to ::1 first on Windows, and the WSL
- * relay holding that IPv6 listener goes stale across a host sleep/resume — the
- * container stays healthy while every `localhost` request dies. Pinning IPv4
- * removes a whole class of "the stack is up but nothing responds" dead ends.
- * Override with E2E_BASE_URL if you need to point elsewhere.
+ * The default deliberately matches CI and `.env.example`, so the committed
+ * config is the same everywhere.
+ *
+ * ⚠️ Local escape hatch: on Windows, `localhost` resolves to ::1 first, and the
+ * WSL relay holding that IPv6 listener can go stale across a host sleep — the
+ * containers stay healthy while every `localhost` request dies. That is a host
+ * problem, not a repo one. Work around it *locally* with
+ *   E2E_BASE_URL=http://127.0.0.1:5173
+ * and a matching VITE_API_URL in your own (untracked) .env — do not pin IPv4
+ * here, or CI and everyone else's localhost setup inherit a machine's quirk.
+ * The backend already allows both origins, so either spelling passes CORS.
  */
 export default defineConfig({
   testDir: './e2e',
@@ -23,7 +28,7 @@ export default defineConfig({
   retries: 1,
   reporter: [['list']],
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:5173',
+    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
