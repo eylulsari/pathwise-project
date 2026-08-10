@@ -1,12 +1,14 @@
 import { SocialService } from './social.service';
+import { TRAVELER_SEED } from '../infrastructure/persistence/traveler.dataset';
 
 /**
- * Opt-in women-traveler mode. The seed (traveler.dataset.ts) is:
- *   t1 Mara   — declared, visible to all
- *   t2 Diego  — no declaration
- *   t3 Yuki   — declared, visibleToWomenOnly
- *   t4 Amara  — declared, visible to all
- *   t5 Liam   — no declaration
+ * Opt-in women-traveler mode.
+ *
+ * Expectations are DERIVED FROM THE SEED rather than hardcoded as id lists:
+ * the seed is demo content that grows, and a test that fails because someone
+ * added a traveler is a test that will eventually be silenced rather than
+ * read. What is asserted here is the *rule*, not the roster — with a couple of
+ * explicit spot-checks so the intent stays legible.
  */
 describe('SocialService — women-traveler filter', () => {
   const service = new SocialService();
@@ -15,35 +17,48 @@ describe('SocialService — women-traveler filter', () => {
 
   const ids = (r: { travelers: { id: string }[] }) => r.travelers.map((t) => t.id);
 
+  const declared = TRAVELER_SEED.filter((t) => t.identifiesAsWoman === true);
+  const womenOnlyVisible = TRAVELER_SEED.filter((t) => t.visibleToWomenOnly);
+  const openToAll = TRAVELER_SEED.filter((t) => !t.visibleToWomenOnly);
+
+  it('has a seed that can actually exercise both sides of the rule', () => {
+    // Guards the tests below: if the seed ever loses its variety they would
+    // start passing vacuously.
+    expect(declared.length).toBeGreaterThan(1);
+    expect(womenOnlyVisible.length).toBeGreaterThan(1);
+    expect(TRAVELER_SEED.length).toBeGreaterThan(womenOnlyVisible.length);
+  });
+
   it('returns everyone discoverable when no filter is applied', () => {
-    // t3 opted out of the default list; the other four stay.
-    expect(ids(service.listTravelers({}, browsing))).toEqual([
-      't1',
-      't2',
-      't4',
-      't5',
-    ]);
+    expect(ids(service.listTravelers({}, browsing))).toEqual(
+      openToAll.map((t) => t.id),
+    );
   });
 
   it('keeps only self-declared travelers when the filter is on', () => {
     const result = service.listTravelers({ womenOnly: true }, optedIn);
     expect(result.womenOnlyApplied).toBe(true);
-    expect(ids(result)).toEqual(['t1', 't3', 't4']);
+    expect(ids(result)).toEqual(declared.map((t) => t.id));
     // Nobody without a declaration leaks in.
-    expect(ids(result)).not.toContain('t2');
-    expect(ids(result)).not.toContain('t5');
+    for (const t of TRAVELER_SEED.filter((x) => x.identifiesAsWoman !== true)) {
+      expect(ids(result)).not.toContain(t.id);
+    }
   });
 
   it('is off by default — an unset filter never narrows the list', () => {
     const result = service.listTravelers({}, optedIn);
     expect(result.womenOnlyApplied).toBe(false);
-    expect(ids(result)).toContain('t2');
-    expect(ids(result)).toContain('t5');
+    expect(ids(result)).toContain('t2'); // Diego, no declaration
+    expect(ids(result)).toContain('t5'); // Liam, no declaration
   });
 
   it('hides visibleToWomenOnly travelers from viewers who have not opted in', () => {
-    expect(ids(service.listTravelers({}, browsing))).not.toContain('t3');
-    expect(ids(service.listTravelers({}, optedIn))).toContain('t3');
+    const browsingIds = ids(service.listTravelers({}, browsing));
+    const optedInIds = ids(service.listTravelers({}, optedIn));
+    for (const t of womenOnlyVisible) {
+      expect(browsingIds).not.toContain(t.id);
+      expect(optedInIds).toContain(t.id);
+    }
   });
 
   it('refuses the filter for viewers who have not opted in themselves', () => {
@@ -74,6 +89,72 @@ describe('SocialService — women-traveler filter', () => {
       { womenOnly: true, tag: '#Foodie' },
       optedIn,
     );
-    expect(ids(result)).toEqual(['t4']); // Amara: declared + #Foodie
+    const expected = declared
+      .filter((t) => t.tags.includes('#Foodie'))
+      .map((t) => t.id);
+    expect(ids(result)).toEqual(expected);
+    expect(expected.length).toBeGreaterThan(0); // the filter must not be vacuous
+  });
+});
+
+/**
+ * The seed is demo *content*, but buddy matching reads it as *data* — a gap in
+ * it shows up as an empty filter or a ranking that cannot separate anyone.
+ * These assert the spread the matching feature depends on.
+ */
+describe('traveler seed — coverage the matcher depends on', () => {
+  const HUBS = [
+    'sultanahmet',
+    'karakoy-galata',
+    'kadikoy-moda',
+    'balat-fener',
+    'besiktas-bogaz',
+  ] as const;
+  const TAGS = [
+    '#SoloVerified',
+    '#Foodie',
+    '#Backpacker',
+    '#CultureSeeker',
+    '#PhotoNomad',
+    '#SlowTravel',
+  ] as const;
+
+  it('gives every traveler the inputs the scorer needs', () => {
+    for (const t of TRAVELER_SEED) {
+      expect(t.preferredHubs.length).toBeGreaterThan(0);
+      expect(t.budgetLevel).not.toBeNull();
+      expect(t.tags.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('covers every hub at least twice, so trip history separates the list', () => {
+    for (const hub of HUBS) {
+      const count = TRAVELER_SEED.filter((t) => t.preferredHubs.includes(hub)).length;
+      expect(count).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('covers every tag at least three times, so no style filter lands empty', () => {
+    for (const tag of TAGS) {
+      const count = TRAVELER_SEED.filter((t) => t.tags.includes(tag)).length;
+      expect(count).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('represents all three budget levels', () => {
+    for (const level of ['budget', 'mid', 'comfort'] as const) {
+      expect(TRAVELER_SEED.some((t) => t.budgetLevel === level)).toBe(true);
+    }
+  });
+
+  it('does not make #SoloVerified read as a gendered marker', () => {
+    const solo = TRAVELER_SEED.filter((t) => t.tags.includes('#SoloVerified'));
+    expect(solo.some((t) => t.identifiesAsWoman === true)).toBe(true);
+    expect(solo.some((t) => t.identifiesAsWoman === undefined)).toBe(true);
+  });
+
+  it('has unique ids', () => {
+    const ids = TRAVELER_SEED.map((t) => t.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });

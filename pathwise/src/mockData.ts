@@ -1,6 +1,6 @@
 import type {
   Badge,
-  CheckIn,
+  CheckInSeed,
   CommunityRoute,
   ForumQuestion,
   PastTrip,
@@ -50,6 +50,8 @@ export const TRAVELERS: Traveler[] = [
     soloVerified: true,
     visitedProvinces: ['İstanbul', 'İzmir', 'Antalya', 'Nevşehir'],
     badges: ['old-city-master', 'ferry-hopper'],
+    preferredHubs: ['karakoy-galata', 'balat-fener'],
+    budgetLevel: 'mid',
     identifiesAsWoman: true,
   },
   {
@@ -63,6 +65,9 @@ export const TRAVELERS: Traveler[] = [
     soloVerified: true,
     visitedProvinces: ['İstanbul', 'Çanakkale', 'Muğla'],
     badges: ['kahve-guru'],
+    preferredHubs: ['kadikoy-moda', 'besiktas-bogaz'],
+    budgetLevel: 'budget',
+    // No declaration — stays out of the women-traveler list.
   },
   {
     id: 't3',
@@ -75,6 +80,8 @@ export const TRAVELERS: Traveler[] = [
     soloVerified: true,
     visitedProvinces: ['İstanbul', 'Edirne', 'Bursa'],
     badges: ['old-city-master'],
+    preferredHubs: ['sultanahmet', 'balat-fener'],
+    budgetLevel: 'budget',
     identifiesAsWoman: true,
   },
   {
@@ -88,6 +95,8 @@ export const TRAVELERS: Traveler[] = [
     soloVerified: false,
     visitedProvinces: ['İstanbul', 'Gaziantep'],
     badges: ['kahve-guru', 'ferry-hopper'],
+    preferredHubs: ['kadikoy-moda', 'sultanahmet'],
+    budgetLevel: 'mid',
     identifiesAsWoman: true,
   },
   {
@@ -101,17 +110,175 @@ export const TRAVELERS: Traveler[] = [
     soloVerified: true,
     visitedProvinces: ['İstanbul', 'Kars', 'Trabzon'],
     badges: [],
+    preferredHubs: ['kadikoy-moda', 'karakoy-galata'],
+    budgetLevel: 'budget',
+    // No declaration.
+  },
+  {
+    id: 't6',
+    name: 'Sofia Marchetti',
+    age: 33,
+    nationality: 'Italy',
+    avatarColor: '#A8574C',
+    tags: ['#Foodie', '#CultureSeeker'],
+    bio: 'Restoring frescoes back home. Here to argue that Istanbul does breakfast better than Rome.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Konya', 'Hatay'],
+    badges: ['old-city-master', 'kahve-guru'],
+    preferredHubs: ['sultanahmet', 'karakoy-galata'],
+    budgetLevel: 'comfort',
+    identifiesAsWoman: true,
+  },
+  {
+    id: 't7',
+    name: 'Noah Weber',
+    age: 28,
+    nationality: 'Germany',
+    avatarColor: '#5B7A99',
+    tags: ['#Backpacker', '#PhotoNomad'],
+    bio: 'Shooting film only, 36 frames a day. Balat eats most of them.',
+    soloVerified: false,
+    visitedProvinces: ['İstanbul', 'Eskişehir'],
+    badges: [],
+    preferredHubs: ['balat-fener', 'kadikoy-moda'],
+    budgetLevel: 'budget',
+    // No declaration.
+  },
+  {
+    id: 't8',
+    name: 'Priya Raghunathan',
+    age: 30,
+    nationality: 'India',
+    avatarColor: '#7C6A9C',
+    tags: ['#CultureSeeker', '#SlowTravel'],
+    bio: 'Two weeks, four museums, zero rushing. Ask me about the Museum Pass maths.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'İzmir', 'Denizli'],
+    badges: ['old-city-master'],
+    preferredHubs: ['sultanahmet', 'besiktas-bogaz'],
+    budgetLevel: 'mid',
+    identifiesAsWoman: true,
+  },
+  {
+    id: 't9',
+    name: 'Tom Whitaker',
+    age: 35,
+    nationality: 'United Kingdom',
+    avatarColor: '#4F7C5E',
+    tags: ['#SoloVerified', '#Foodie'],
+    bio: 'Third trip this year. Working my way along the Bosphorus one fish restaurant at a time.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Muğla', 'Antalya'],
+    badges: ['ferry-hopper', 'kahve-guru'],
+    preferredHubs: ['besiktas-bogaz', 'karakoy-galata'],
+    budgetLevel: 'comfort',
+    // No declaration.
+  },
+  {
+    id: 't10',
+    name: 'Elif Şahin',
+    age: 25,
+    nationality: 'Türkiye',
+    avatarColor: '#C98A3E',
+    tags: ['#SoloVerified', '#PhotoNomad', '#Foodie'],
+    bio: 'Kadıköy local. Happy to show you the streets the guidebooks skip.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Çanakkale', 'Sinop', 'Ordu'],
+    badges: ['kahve-guru', 'ferry-hopper'],
+    preferredHubs: ['kadikoy-moda', 'balat-fener'],
+    budgetLevel: 'budget',
+    identifiesAsWoman: true,
+  },
+  {
+    id: 't11',
+    name: 'Marcus Andersen',
+    age: 41,
+    nationality: 'Denmark',
+    avatarColor: '#3E6B77',
+    tags: ['#SlowTravel', '#CultureSeeker'],
+    bio: 'One neighbourhood per trip. This one is Balat and I am not done with it.',
+    soloVerified: false,
+    visitedProvinces: ['İstanbul', 'Bursa'],
+    badges: ['old-city-master'],
+    preferredHubs: ['balat-fener', 'sultanahmet'],
+    budgetLevel: 'comfort',
+    // No declaration.
+  },
+  {
+    id: 't12',
+    name: 'Camila Rojas',
+    age: 27,
+    nationality: 'Colombia',
+    avatarColor: '#B85C7A',
+    tags: ['#Backpacker', '#Foodie'],
+    bio: 'Hostel-hopping across the Balkans. Istanbul was meant to be three days, it has been three weeks.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Edirne'],
+    badges: [],
+    preferredHubs: ['kadikoy-moda', 'karakoy-galata'],
+    budgetLevel: 'budget',
+    identifiesAsWoman: true,
+  },
+  {
+    id: 't13',
+    name: 'Hana Kovač',
+    age: 32,
+    nationality: 'Croatia',
+    avatarColor: '#6B8E8A',
+    tags: ['#PhotoNomad', '#SlowTravel'],
+    bio: 'Ferry commuter by choice. Best light in this city is from the water.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'İzmir'],
+    badges: ['ferry-hopper'],
+    preferredHubs: ['karakoy-galata', 'besiktas-bogaz'],
+    budgetLevel: 'mid',
+    identifiesAsWoman: true,
+  },
+  {
+    id: 't14',
+    name: 'Kenji Mori',
+    age: 38,
+    nationality: 'Japan',
+    avatarColor: '#8A6B4F',
+    tags: ['#SoloVerified', '#CultureSeeker', '#PhotoNomad'],
+    bio: 'Calligrapher. Came for the Ottoman archives, stayed for the tea gardens.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Konya', 'Nevşehir'],
+    badges: ['old-city-master', 'kahve-guru'],
+    preferredHubs: ['sultanahmet', 'karakoy-galata'],
+    budgetLevel: 'comfort',
+    // No declaration.
   },
 ];
 
-export const CHECK_INS: CheckIn[] = [
+/**
+ * Check-in feed.
+ *
+ * Authored as "how long ago", then given a real `createdAt` when served (see
+ * `api.getCheckIns`). The stored minute count is the source of truth for the
+ * *shape* of the feed — a spread from minutes to hours old — while the
+ * timestamp is computed relative to now, so the feed never looks stale and
+ * anything that reasons about time (how recently someone was here) has a real
+ * instant to work with instead of a frozen integer.
+ *
+ * The spread is deliberate: entries under ~2h old, a cluster either side of
+ * that mark, and clearly old ones, so a "still around / long gone" distinction
+ * has something to distinguish.
+ */
+export const CHECK_INS: CheckInSeed[] = [
   { id: 'c1', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#4A7C82' }, placeName: 'Galata Tower', hub: 'karakoy-galata', message: 'Golden hour is unreal up here 🌇', minutesAgo: 8 },
   { id: 'c2', traveler: { id: 't2', name: 'Diego Fernández', avatarColor: '#C56F52' }, placeName: 'Çiya Sofrası', hub: 'kadikoy-moda', message: 'Anyone want to split a table? So much food.', minutesAgo: 21 },
   { id: 'c3', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A' }, placeName: 'Kadıköy Market', hub: 'kadikoy-moda', message: 'Pickle shop tour starting now 🥒', minutesAgo: 34 },
+  { id: 'c8', traveler: { id: 't10', name: 'Elif Şahin', avatarColor: '#C98A3E' }, placeName: 'Moda Sahili', hub: 'kadikoy-moda', message: 'Çay ve simit, sahilde. Yerliyim, soru sorabilirsiniz ☕', minutesAgo: 41 },
   { id: 'c4', traveler: { id: 't3', name: 'Yuki Tanaka', avatarColor: '#6E8F74' }, placeName: 'Balat Colorful Houses', hub: 'balat-fener', message: 'Sketching the terraces, come say hi.', minutesAgo: 52 },
+  { id: 'c9', traveler: { id: 't9', name: 'Tom Whitaker', avatarColor: '#4F7C5E' }, placeName: 'Ortaköy Sahili', hub: 'besiktas-bogaz', message: 'Bridge view table just opened up, two seats free 🌉', minutesAgo: 58 },
   { id: 'c5', traveler: { id: 't5', name: 'Liam O’Connor', avatarColor: '#3F6E8C' }, placeName: 'Moda Pier', hub: 'kadikoy-moda', message: 'End of the deck, 270° of water. Staying for sunset ⚓', minutesAgo: 66 },
-  { id: 'c6', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#4A7C82' }, placeName: 'Spice Bazaar', hub: 'sultanahmet', message: 'Bought saffron on Hasırcılar instead of inside — half the price 🌶️', minutesAgo: 88 },
-  { id: 'c7', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A' }, placeName: 'Yeldeğirmeni Murals', hub: 'kadikoy-moda', message: 'Following the mural trail street by street, it just keeps going 🎨', minutesAgo: 104 },
+  { id: 'c10', traveler: { id: 't7', name: 'Noah Weber', avatarColor: '#5B7A99' }, placeName: 'Fener Greek School', hub: 'balat-fener', message: 'Last two frames on this roll. Red brick against grey sky, worth the walk up.', minutesAgo: 95 },
+  { id: 'c11', traveler: { id: 't6', name: 'Sofia Marchetti', avatarColor: '#A8574C' }, placeName: 'Hagia Sophia', hub: 'sultanahmet', message: 'Queue is twenty minutes at this hour, not the two you read about.', minutesAgo: 112 },
+  { id: 'c6', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#4A7C82' }, placeName: 'Spice Bazaar', hub: 'sultanahmet', message: 'Bought saffron on Hasırcılar instead of inside — half the price 🌶️', minutesAgo: 128 },
+  { id: 'c12', traveler: { id: 't12', name: 'Camila Rojas', avatarColor: '#B85C7A' }, placeName: 'Karaköy Lokantası', hub: 'karakoy-galata', message: 'Lunch menu is the cheap way into this place. Gone now, but go.', minutesAgo: 155 },
+  { id: 'c7', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A' }, placeName: 'Yeldeğirmeni Murals', hub: 'kadikoy-moda', message: 'Following the mural trail street by street, it just keeps going 🎨', minutesAgo: 184 },
+  { id: 'c13', traveler: { id: 't14', name: 'Kenji Mori', avatarColor: '#8A6B4F' }, placeName: 'Süleymaniye Mosque', hub: 'sultanahmet', message: 'Courtyard was empty at opening. Headed back to the tea garden now.', minutesAgo: 240 },
 ];
 
 export const COMMUNITY_ROUTES: CommunityRoute[] = [
