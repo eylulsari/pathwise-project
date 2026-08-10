@@ -360,6 +360,8 @@ export const translations = {
         'Turn on “I identify as a woman” in your profile to use this filter.',
       womenBadgeTitle: 'Self-declared woman traveler (not verified)',
       rightHere: 'Right here',
+      checkinPosting: 'Posting…',
+      checkinFailed: 'Could not post that check-in — try again.',
       // Buddy matching (Görev 2)
       matchLabel: 'Match',
       matchShared: 'You both like',
@@ -799,6 +801,8 @@ export const translations = {
         'Bu filtreyi kullanmak için profilinde “Kendimi kadın olarak tanımlıyorum” seçeneğini aç.',
       womenBadgeTitle: 'Kendi beyanına göre kadın gezgin (doğrulanmamıştır)',
       rightHere: 'Tam burada',
+      checkinPosting: 'Gönderiliyor…',
+      checkinFailed: 'Check-in gönderilemedi — tekrar dene.',
       // Gezgin eşleştirme (Görev 2)
       matchLabel: 'Uyum',
       matchShared: 'İkinizin de sevdiği',

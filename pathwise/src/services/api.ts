@@ -38,7 +38,6 @@ import { PLACES, PLACES_BY_ID } from '../hubData';
 import { withEarnedBadges } from '../utils/badgeStore';
 import {
   BADGES,
-  CHECK_INS,
   COMMUNITY_ROUTES,
   CURATED_TOURS,
   CURRENT_WEATHER,
@@ -436,31 +435,44 @@ export const api = {
   },
 
   // ═════════════════════════════════════════════════════════════════
-  // SOCIAL — Firebase/PostgreSQL shaped (check-ins, buddies, routes, forum)
-  //   return http<CheckIn[]>('/social/check-ins');
+  // SOCIAL — check-ins are a real endpoint; buddies/routes/forum below
+  // still read from the mock layer (each documents its swap point).
   // ═════════════════════════════════════════════════════════════════
   /**
-   * The check-in feed. The mock stores "how long ago"; the real timestamp is
-   * resolved here, against the clock at fetch time, so the feed is always
-   * plausibly fresh and callers can reason about recency properly. A real
-   * `GET /social/check-ins` would return `createdAt` directly and this
-   * mapping would simply disappear.
+   * The check-in feed — real, persisted, and merged with the curated seed by
+   * the server. `createdAt` arrives authoritative; nothing is derived here.
+   *
+   * Place name and coordinates are still resolved locally: the backend's place
+   * dataset is a subset of `hubData`, so resolving server-side would leave
+   * several seed check-ins nameless and unpinned.
    */
   async getCheckIns(): Promise<CheckIn[]> {
-    const now = Date.now();
-    const resolved = CHECK_INS.map((c) => {
-      // Name and coordinates come from the referenced place, so the card's
-      // label and the map's pin are the same fact read twice.
-      const place = PLACES_BY_ID[c.placeId];
+    const rows = await http<Omit<CheckIn, 'placeName' | 'lat' | 'lng'>[]>(
+      '/social/check-ins',
+    );
+    return rows.map((c) => {
+      const place = c.placeId ? PLACES_BY_ID[c.placeId] : undefined;
       return {
         ...c,
-        createdAt: new Date(now - c.minutesAgo * 60_000).toISOString(),
-        placeName: place?.name ?? c.placeId,
+        // No place → the composer's "right here" entry. The caller supplies
+        // the label; falling back to the raw id would leak an internal value.
+        placeName: place?.name ?? '',
         lat: place?.lat,
         lng: place?.lng,
       };
     });
-    return delay(resolved);
+  },
+
+  /**
+   * Post a check-in. The author is taken from the JWT server-side — the body
+   * carries only the message, so nobody can post as somebody else.
+   */
+  async createCheckIn(message: string): Promise<CheckIn> {
+    const row = await http<Omit<CheckIn, 'placeName' | 'lat' | 'lng'>>(
+      '/social/check-ins',
+      { method: 'POST', body: JSON.stringify({ message }) },
+    );
+    return { ...row, placeName: '' };
   },
   /**
    * Traveler Buddy Finder — now a real endpoint so the opt-in women-traveler

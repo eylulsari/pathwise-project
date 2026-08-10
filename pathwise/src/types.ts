@@ -399,41 +399,31 @@ export interface TravelerListResult {
 }
 
 /**
- * A check-in as authored in the mock dataset: "this happened N minutes ago".
- * Relative on purpose — a fixed timestamp would age into a feed of stale
- * entries the moment the demo data stops being edited.
+ * A check-in, as `GET /social/check-ins` returns it.
+ *
+ * The feed is the union of curated demo entries (whose `createdAt` the server
+ * derives from a relative offset, so the feed never ages into all-stale) and
+ * real persisted check-ins (whose `createdAt` is a database timestamp). The
+ * presence rule reads `createdAt` only and does not care which it got.
  */
-export interface CheckInSeed {
+export interface CheckIn {
   id: string;
   traveler: Pick<Traveler, 'id' | 'name' | 'avatarColor'>;
-  /**
-   * A real place from `hubData`. The name and coordinates are resolved from it
-   * when the feed is served, so the label on a card and the pin on the map can
-   * never disagree — and so a check-in cannot reference a place that does not
-   * exist.
-   */
-  placeId: string;
-  hub: Hub;
+  /** `null` when the author did not pick a place ("right here"). */
+  placeId: string | null;
+  hub: Hub | null;
   message: string;
-  minutesAgo: number;
-}
-
-/**
- * A check-in as served. `createdAt` is resolved against the clock at fetch
- * time, so anything reasoning about recency has a real instant rather than a
- * frozen integer — and swapping in a real backend feed becomes a change of
- * source, not a change of shape.
- */
-export interface CheckIn extends CheckInSeed {
-  /** ISO timestamp, derived from `minutesAgo` when the feed is served. */
+  /** ISO timestamp — authoritative, and the only input the presence rule needs. */
   createdAt: string;
-  /** Resolved from `placeId`. */
-  placeName: string;
   /**
-   * Resolved from `placeId`. Absent for a check-in with no known place — the
-   * composer's own "right here" entry — which appears in the feed but not on
-   * the map rather than being pinned at a guessed location.
+   * Resolved client-side from `placeId` against `hubData`.
+   *
+   * Deliberately NOT resolved by the server: the backend's place dataset is a
+   * subset of the frontend's, so resolving there would leave several seed
+   * check-ins without a name or a pin.
    */
+  placeName: string;
+  /** Absent when there is no place — such an entry shows in the feed, not on the map. */
   lat?: number;
   lng?: number;
 }

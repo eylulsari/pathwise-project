@@ -45,6 +45,8 @@ export default function Social() {
   const [connected, setConnected] = useState<Set<string>>(new Set());
   const [active, setActive] = useState<Traveler | null>(null);
   const [checkInText, setCheckInText] = useState('');
+  const [posting, setPosting] = useState(false);
+  const [postFailed, setPostFailed] = useState(false);
   const [womenOnlyApplied, setWomenOnlyApplied] = useState(false);
 
   // Opt-in women-traveler mode. The chip is independent of the tag chips (they
@@ -119,24 +121,28 @@ export default function Social() {
     });
   }
 
-  function broadcastCheckIn() {
-    if (!checkInText.trim()) return;
-    setCheckIns((prev) => [
-      {
-        id: `me-${Date.now()}`,
-        traveler: { id: 'me', name: 'You', avatarColor: '#6E8F74' },
-        hub: 'kadikoy-moda',
-        message: checkInText.trim(),
-        minutesAgo: 0,
-        createdAt: new Date().toISOString(),
-        // No resolved place, so this one shows in the feed (as live) but is
-        // not pinned — better than guessing a location for it.
-        placeId: '',
-        placeName: t('social.rightHere'),
-      },
-      ...prev,
-    ]);
-    setCheckInText('');
+  /**
+   * Post a check-in, then re-read the feed from the server.
+   *
+   * Refetching rather than splicing the response into local state: the server
+   * owns the ordering (it merges the curated seed with every persisted row),
+   * and reproducing that merge on the client would be a second implementation
+   * of the same rule, free to drift. The cost is one extra request on an
+   * action that happens rarely.
+   */
+  async function broadcastCheckIn() {
+    const message = checkInText.trim();
+    if (!message || posting) return;
+    setPosting(true);
+    try {
+      await api.createCheckIn(message);
+      setCheckIns(await api.getCheckIns());
+      setCheckInText('');
+    } catch {
+      setPostFailed(true);
+    } finally {
+      setPosting(false);
+    }
   }
 
   function likeRoute(id: string) {
@@ -172,14 +178,23 @@ export default function Social() {
             <input
               value={checkInText}
               onChange={(e) => setCheckInText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && broadcastCheckIn()}
+              onKeyDown={(e) => e.key === 'Enter' && void broadcastCheckIn()}
               placeholder={t('social.checkinPlaceholder')}
               className="flex-1 rounded-xl border border-ink/10 bg-white px-4 py-2.5 text-sm outline-none focus:border-sage"
             />
-            <button onClick={broadcastCheckIn} className="rounded-xl bg-sage px-4 py-2.5 text-sm font-semibold text-ink">
-              {t('social.imHere')}
+            <button
+              onClick={() => void broadcastCheckIn()}
+              disabled={posting}
+              className="rounded-xl bg-sage px-4 py-2.5 text-sm font-semibold text-ink disabled:opacity-50"
+            >
+              {posting ? t('social.checkinPosting') : t('social.imHere')}
             </button>
           </div>
+          {postFailed && (
+            <p className="mt-2 text-xs font-semibold text-terracotta">
+              {t('social.checkinFailed')}
+            </p>
+          )}
 
           <div className="mt-4 space-y-2">
             {checkIns.map((c) => {
@@ -199,7 +214,8 @@ export default function Social() {
                   </div>
                   <div className="flex-1 text-sm">
                     <span className="font-semibold text-ink">{c.traveler.name}</span>
-                    <span className="text-ink/50"> · {c.placeName} · {formatAge(c.createdAt)}</span>
+                    {/* No place → an unplaced "right here" check-in. */}
+                    <span className="text-ink/50"> · {c.placeName || t('social.rightHere')} · {formatAge(c.createdAt)}</span>
                     {live ? (
                       <span className="ml-2 whitespace-nowrap rounded-full bg-sage/20 px-2 py-0.5 text-[10px] font-semibold text-sage">
                         🟢 {t('presence.available')}
