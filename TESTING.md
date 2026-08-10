@@ -518,6 +518,29 @@ parity — the IPv4 workaround lives only in an untracked local `.env`.
 | Backend `lint` / `tsc --noEmit` / `nest build` | ✅ all exit 0 |
 | Frontend `typecheck` / `lint` / `i18n:check` | ✅ exit 0 / 0 errors (2 pre-existing warnings) / 350 keys |
 
+### CI — running for the first time (2026-08-11)
+The workflow had **never executed once** (`total_count: 1` after this push):
+it triggered on `main` while the branch is `master`, and no PR was ever
+opened. After the fix it ran on push and went **green on all three jobs** —
+Backend, Frontend (lint + typecheck + i18n + build), and E2E against the full
+docker stack. Run: `6d13741`.
+
+> **It caught a regression on its very first run, which is the point.**
+> The preceding commit documented `AUTH_THROTTLE_LIMIT` by pinning it to the
+> production value of 10. `.env.example` is copied verbatim into `.env` by CI,
+> so that overrode compose's dev default of 100 and capped the auth endpoints
+> at 10 req/min — and the E2E suite registers a fresh account per spec.
+> Reproduced locally before fixing: at limit 10, registrations 1–10 return 201
+> and 11–15 return **429**. The example now carries the dev value with the
+> production caveat in the comment, as `DB_SYNCHRONIZE` already does.
+>
+> Note the symptom: throttling surfaces as **every sign-up timing out**, not as
+> a visible 429 — the same shape as the earlier CORS failure that took out 49
+> of 50 specs. Two different causes, one symptom; measure before concluding.
+>
+> A local gate cannot catch this class of bug: a developer's own `.env`
+> predates the change, so only CI's `cp .env.example .env` exercises it.
+
 ### Still not covered
 - No spec asserts the **"% match" bar** or the **travel-style picker** in a
   browser; both are verified only at the API level.
