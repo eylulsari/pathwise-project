@@ -427,12 +427,107 @@ from the **server's** price list (25/50/30/15); and reserving a tour →
 - Leaving a review awards points but shows **no toast** — only the Reserve
   button does, per the feature request. The points still appear on the profile.
 
-### Full regression after Görev 1 (2026-08-04)
-`npx playwright test`: **51 tests, all passed, 0 flaky** (43 baseline + 4
-safety/celebration + 3 points + 1 temporary `_probe.spec.ts`, which is a
-leftover selector probe and should be deleted). Backend `npm test`: **51/51**.
-`tsc --noEmit` clean both sides; `nest build` clean; frontend `npm run lint`
-0 errors (the same 2 pre-existing warnings).
+### Full regression after Görev 1 (2026-08-04) — ⚠️ RETRACTED, see 2026-08-11
+> ~~`npx playwright test`: **51 tests, all passed, 0 flaky**.~~
+>
+> **This line was never true and was never observed.** The command was piped
+> through `tail`, so the exit code read back was *tail's* (always 0) and the
+> captured output was empty. Two of the four specs added that day had in fact
+> been failing since the moment they were written. Corrected below.
+
+Backend `npm test`: **51/51** (this figure was read from Jest's own summary
+and is accurate). `nest build` clean; frontend `npm run lint` 0 errors.
+The `tsc --noEmit` claim is retracted separately — see the note below.
+
+---
+
+## Buddy matching, data enrichment and toolchain (2026-08-11)
+
+Covers the eight commits made after Görev 1 that had never been logged here,
+plus a hygiene pass that closed the gate.
+
+### Two corrections to earlier entries in this file
+
+**1. "`tsc --noEmit` clean both sides" was meaningless on the frontend.**
+The root `pathwise/tsconfig.json` is solution-style (`"files": []` plus project
+references), so `tsc --noEmit` type-checked **zero files**. Proven by putting
+`const x: number = "not a number"` in `Social.tsx` — it passed. Every
+"type-check clean" note dated on or before 2026-08-04 therefore says nothing
+about the frontend. Build mode (`tsc -b`) is what walks the references; it is
+now `npm run typecheck`, is a named CI step, and the tree is genuinely clean
+under it. The backend's own config is a normal one, so backend `tsc --noEmit`
+figures were always real.
+
+**2. The 2026-08-04 e2e figure was retracted** (see above): piping through
+`tail` returned tail's exit code, so a red suite read as green.
+
+> **Lesson worth keeping:** never read a test result through a pipe. Redirect
+> to a file and capture `$?` from the command itself, or read the reporter's
+> own summary line.
+
+### Feature work
+
+| Feature | Status | Notes |
+|---|---|---|
+| **Buddy compatibility score** (`social/domain/matching.ts`) | ✅ | pure weighted sum: styles 50, hubs 30, budget 20; **20 unit tests**; 5-step live API run |
+| Ranking on `GET /social/travelers` | ✅ | filters run first and are untouched; ranking only reorders |
+| Missing-data handling | ✅ | components are skipped and weights renormalised; a viewer with nothing to compare gets `null`, and the UI shows no percentage rather than a fabricated one |
+| **Travel styles** — quiz auto-fill + manual picker | ✅ | live API: quiz derives 3 tags, picker removes one, invalid tags and `#SoloVerified` refused |
+| Match score UI on buddy cards | ⚠️ | API verified; the "% match" bar and the style picker have still not been *looked at* in a browser — no spec asserts them |
+| **Traveler seed 5 → 14** | ✅ | built to exercise the scorer: every hub preferred by ≥2, every tag on ≥3, all budget levels at every hub; **6 new specs guard that spread** so demo data cannot quietly stop being able to separate the list |
+| Check-in feed 7 → 13, with real `createdAt` | ✅ | resolved against the clock at fetch time; the stored `minutesAgo` had frozen the feed |
+| Community routes 4 → 10, tours 6 → 11, 3 new forum threads | ✅ | routes now cover every hub twice — "Clone this route" hands a hub to the dashboard, so a hub with no route was unreachable |
+| Women-traveler specs rewritten to derive from the seed | ✅ | they asserted hardcoded id lists, which growing the demo data would have broken |
+
+### Toolchain — three checks that were reporting success without working
+
+| Check | Was | Now |
+|---|---|---|
+| Frontend types | checked 0 files | `npm run typecheck` (`tsc -b`), CI step, clean |
+| Backend `lib` | unset → DOM globals type-checked in Node code (the root cause of the old Overpass 500) | `"lib": ["ES2021"]`; tree clean without the DOM |
+| Backend lint | permanently red on one unused import, so exit codes meant nothing | **0 errors**; `no-unused-vars` taught the `_` prefix convention the code already used |
+| Translations | a missing key silently ships English, or the raw key | `npm run i18n:check` fails the build; **350 keys**, both languages |
+| CI | `on.push.branches: [main]` while the branch is `master`, and no PRs → **CI had never run** | triggers on `master`; both jobs lint; frontend also typechecks and i18n-checks |
+
+### Fixed: the women-traveler specs never passed
+Four faults, all in the test, none in the product — see commit
+`test(e2e): fix the women-traveler specs, which never passed`. The most
+interesting one: the spec expected the 🚺 chip to enable on the declaration
+alone, but the reciprocity rule requires a switch as well. **The app was right
+and the test was wrong**, which is the opposite of how it was recorded.
+
+### Fixed: a CORS/host mismatch that failed 49 of 50 specs
+Moving the Playwright base URL to `127.0.0.1` (to dodge a stale WSL relay on
+one machine) left `CORS_ORIGINS` allowing only `localhost`, so every sign-up
+was blocked and the suite read as a total wipeout. `CORS_ORIGINS` now allows
+both spellings, and the committed base URL is back on `localhost` for CI
+parity — the IPv4 workaround lives only in an untracked local `.env`.
+
+> **Environment note (2026-08-11):** on this Windows host, `localhost` resolves
+> to `::1` first and the WSL port relay went stale across a multi-day sleep —
+> containers healthy, every `localhost` request dead, `127.0.0.1` fine.
+> Diagnose with `curl http://127.0.0.1:3000/api/health`; fix by restarting
+> Docker Desktop, or work around it locally with `E2E_BASE_URL` plus a matching
+> `VITE_API_URL` in your own `.env`.
+
+### Regression — 2026-08-11
+| Suite | Result |
+|---|---|
+| **E2E `npx playwright test`** | ✅ **50/50 passed, 0 flaky** — `PLAYWRIGHT_EXIT=0`, read from Playwright directly (54.6 s) |
+| Backend `npm test` | ✅ **78/78**, 8 suites (was 39 before Görev 1) |
+| Backend `lint` / `tsc --noEmit` / `nest build` | ✅ all exit 0 |
+| Frontend `typecheck` / `lint` / `i18n:check` | ✅ exit 0 / 0 errors (2 pre-existing warnings) / 350 keys |
+
+### Still not covered
+- No spec asserts the **"% match" bar** or the **travel-style picker** in a
+  browser; both are verified only at the API level.
+- No spec drives **route completion → points** end-to-end (unit tests + a live
+  API run cover the award itself).
+- **Görev 3** ("🟢 available now" live status) is not started. The groundwork
+  is in place: check-ins now carry a real `createdAt`.
+- Four specs were flaky under heavy parallel load in an earlier run
+  (`survival widget`, `weather widget`, `time anchor`, `poll winner`); all
+  passed first-try in the clean run.
 
 ---
 
