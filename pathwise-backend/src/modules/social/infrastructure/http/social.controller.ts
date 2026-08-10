@@ -1,12 +1,25 @@
-import { Body, Controller, Get, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   IsArray,
   IsIn,
   IsInt,
   IsString,
   Max,
+  MaxLength,
   Min,
+  MinLength,
 } from 'class-validator';
+import { CheckInsService } from '../../application/check-ins.service';
 import {
   mergeTravelStyles,
   QuizAnswers,
@@ -21,6 +34,19 @@ import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard
 import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
 import { AuthUser } from '../../../auth/domain/auth-user';
 import { TravelTag } from '../../domain/traveler';
+
+/**
+ * A check-in as posted.
+ *
+ * Message only — deliberately. The author is taken from the JWT, never from
+ * the body: accepting a userId here would let any caller post as anyone else.
+ */
+class CreateCheckInDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(280)
+  message: string;
+}
 
 class TravelStylesDto {
   @IsArray()
@@ -48,8 +74,31 @@ export class SocialController {
   constructor(
     private readonly social: SocialService,
     private readonly matching: MatchingService,
+    private readonly checkIns: CheckInsService,
     private readonly users: UsersService,
   ) {}
+
+  /**
+   * GET /api/social/check-ins — the feed: curated demo entries plus every
+   * persisted user check-in, newest first.
+   */
+  @Get('check-ins')
+  listCheckIns() {
+    return this.checkIns.list();
+  }
+
+  /**
+   * POST /api/social/check-ins — post a check-in as the signed-in user.
+   *
+   * The author comes from `@CurrentUser()` (the verified JWT), matching how
+   * every other authored endpoint in this codebase works. The body carries the
+   * message and nothing else.
+   */
+  @Post('check-ins')
+  @HttpCode(HttpStatus.CREATED)
+  createCheckIn(@CurrentUser() user: AuthUser, @Body() dto: CreateCheckInDto) {
+    return this.checkIns.create(user.id, user.name, dto.message.trim());
+  }
 
   /**
    * GET /api/social/travelers?womenOnly=true&tag=%23Foodie
