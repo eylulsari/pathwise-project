@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PlacesService } from '../../../places/application/places.service';
-import { Hub, Interest, Place } from '../../../places/domain/place';
+import { Hub, Place } from '../../../places/domain/place';
 import { haversineMeters, LatLng } from '../../domain/geo';
 import {
   GroupType,

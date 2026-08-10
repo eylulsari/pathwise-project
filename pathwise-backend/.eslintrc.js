@@ -11,5 +11,12 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
+    // The codebase already marks deliberately-unused parameters with a leading
+    // underscore (`_name`, `_id`) to satisfy a signature it does not control.
+    // Teach the linter that convention instead of leaving those as errors.
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+    ],
   },
 };

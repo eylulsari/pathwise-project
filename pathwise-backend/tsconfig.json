@@ -7,6 +7,12 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
+    // Node has no DOM. Without this, `lib` defaults to include the DOM and
+    // browser globals type-check happily in server code that will throw at
+    // runtime — that is exactly how a `${name}` typo inside a catch block
+    // (resolving to the DOM's `window.name`) turned an Overpass failure into
+    // an HTTP 500 instead of a graceful null. Keep DOM out.
+    "lib": ["ES2021"],
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
