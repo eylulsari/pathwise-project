@@ -281,11 +281,22 @@ export const CHECK_INS: CheckInSeed[] = [
   { id: 'c13', traveler: { id: 't14', name: 'Kenji Mori', avatarColor: '#8A6B4F' }, placeName: 'Süleymaniye Mosque', hub: 'sultanahmet', message: 'Courtyard was empty at opening. Headed back to the tea garden now.', minutesAgo: 240 },
 ];
 
+/**
+ * Community routes. Authored by the travelers in `TRAVELERS`, and covering
+ * every hub at least twice — "Clone this route" hands the hub to the dashboard,
+ * so a hub missing here is a hub the feature can never reach.
+ */
 export const COMMUNITY_ROUTES: CommunityRoute[] = [
   { id: 'r1', title: 'Asian-side food crawl', authorName: 'Diego F.', hub: 'kadikoy-moda', stops: 5, distanceKm: 2.1, likes: 128, liked: false, tags: ['food', 'market'] },
   { id: 'r2', title: 'Galata golden-hour loop', authorName: 'Mara L.', hub: 'karakoy-galata', stops: 4, distanceKm: 1.6, likes: 96, liked: false, tags: ['photo', 'history'] },
   { id: 'r3', title: 'Balat rainbow morning', authorName: 'Yuki T.', hub: 'balat-fener', stops: 5, distanceKm: 1.9, likes: 74, liked: false, tags: ['photo', 'art'] },
   { id: 'r4', title: 'Old City in one day', authorName: 'Amara O.', hub: 'sultanahmet', stops: 6, distanceKm: 2.8, likes: 203, liked: false, tags: ['history', 'photo'] },
+  { id: 'r5', title: 'Bosphorus villages by ferry', authorName: 'Tom W.', hub: 'besiktas-bogaz', stops: 4, distanceKm: 3.2, likes: 152, liked: false, tags: ['nature', 'photo'] },
+  { id: 'r6', title: 'The Sinan circuit', authorName: 'Kenji M.', hub: 'sultanahmet', stops: 5, distanceKm: 2.4, likes: 88, liked: false, tags: ['history'] },
+  { id: 'r7', title: 'Moda, slowly', authorName: 'Marcus A.', hub: 'kadikoy-moda', stops: 3, distanceKm: 1.4, likes: 61, liked: false, tags: ['nature', 'food'] },
+  { id: 'r8', title: 'Karaköy uphill: coffee, art, baklava', authorName: 'Camila R.', hub: 'karakoy-galata', stops: 5, distanceKm: 1.8, likes: 117, liked: false, tags: ['food', 'art'] },
+  { id: 'r9', title: 'Fener antiques & spice hunt', authorName: 'Elif Ş.', hub: 'balat-fener', stops: 4, distanceKm: 1.5, likes: 79, liked: false, tags: ['market', 'art'] },
+  { id: 'r10', title: 'Ortaköy to Bebek waterfront', authorName: 'Hana K.', hub: 'besiktas-bogaz', stops: 4, distanceKm: 2.6, likes: 94, liked: false, tags: ['photo', 'nature'] },
 ];
 
 export const FORUM_QUESTIONS: ForumQuestion[] = [
@@ -341,6 +352,36 @@ export const FORUM_QUESTIONS: ForumQuestion[] = [
       { authorName: 'Tom (UK)', text: 'The Grand Bazaar and Spice Bazaar are covered too — a wet afternoon is honestly the best time to go, far fewer people.', minutesAgo: 190 },
     ],
   },
+  {
+    id: 'q6',
+    authorName: 'Camila (Colombia)',
+    question: 'Solo female traveller — is Kadıköy fine to walk alone in the evening?',
+    minutesAgo: 265,
+    answers: [
+      { authorName: 'Elif Ş.', text: 'Local here. Çarşı, Kadife Sk. and the Moda seafront are busy and lit well past midnight — normal city awareness is enough. The quiet residential streets uphill are where I would take a taxi instead.', minutesAgo: 250 },
+      { authorName: 'Priya R.', text: 'Same experience over two weeks. The one thing I would add: ferries stop around midnight, so decide your way back before you settle in somewhere.', minutesAgo: 244 },
+    ],
+  },
+  {
+    id: 'q7',
+    authorName: 'Noah (Germany)',
+    question: 'Best time of day to photograph Balat without the crowds?',
+    minutesAgo: 320,
+    answers: [
+      { authorName: 'Mara L.', text: 'Before 09:00 on a weekday. By eleven the stepped street with the coloured houses has a queue for the same photo.', minutesAgo: 305 },
+      { authorName: 'Hana K.', text: 'Late afternoon works too, and the light is better — just start from Ayvansaray and walk up, most groups come the other way.', minutesAgo: 298 },
+    ],
+  },
+  {
+    id: 'q8',
+    authorName: 'Marcus (Denmark)',
+    question: 'Is the Bosphorus ferry worth it over a paid cruise?',
+    minutesAgo: 400,
+    answers: [
+      { authorName: 'Tom W.', text: 'The public ferry costs a fraction and follows most of the same shoreline. The paid cruise buys you commentary and a guaranteed seat, not a better view.', minutesAgo: 388 },
+      { authorName: 'Elif Ş.', text: 'Take the Şehir Hatları line and sit on the right heading north. It is what locals do, and your Istanbulkart already covers it.', minutesAgo: 371 },
+    ],
+  },
 ];
 
 // ── Profile ────────────────────────────────────────────────────────
@@ -371,6 +412,9 @@ export const CURATED_TOURS: Tour[] = [
   { id: 'tour1', title: 'Imperial Istanbul: Old City Highlights', hub: 'sultanahmet', source: 'Pathwise', durationHours: 6, priceTry: 1900, rating: 4.8, stopNames: ['Hagia Sophia', 'Blue Mosque', 'Topkapı Palace', 'Grand Bazaar'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour1?ref=pathwise', isSponsored: true },
   { id: 'tour2', title: 'Bosphorus & Palaces Afternoon', hub: 'besiktas-bogaz', source: 'Pathwise', durationHours: 5, priceTry: 1650, rating: 4.6, stopNames: ['Dolmabahçe Palace', 'Ortaköy Mosque', 'Bebek Seaside'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour2?ref=pathwise', isSponsored: false },
   { id: 'tour3', title: 'Balat Photo Walk', hub: 'balat-fener', source: 'Pathwise', durationHours: 3, priceTry: 900, rating: 4.7, stopNames: ['Colorful Houses', 'Fener Patriarchate', 'Antique Shops'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour3?ref=pathwise', isSponsored: false },
+  { id: 'tour4', title: 'Kadıköy Market & Meze Evening', hub: 'kadikoy-moda', source: 'Pathwise', durationHours: 4, priceTry: 1250, rating: 4.7, stopNames: ['Kadıköy Market', 'Pickle row', 'Çiya Sofrası', 'Moda Pier'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour4?ref=pathwise', isSponsored: false },
+  { id: 'tour5', title: 'Galata After Dark: Rooftops & Meyhane', hub: 'karakoy-galata', source: 'Pathwise', durationHours: 4, priceTry: 1400, rating: 4.5, stopNames: ['Galata Tower', 'Serdar-ı Ekrem', 'Nevizade meyhane'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour5?ref=pathwise', isSponsored: false },
+  { id: 'tour6', title: 'Old City on a Budget (Walking Only)', hub: 'sultanahmet', source: 'Pathwise', durationHours: 4, priceTry: 550, rating: 4.4, stopNames: ['Hippodrome', 'Blue Mosque courtyard', 'Spice Bazaar', 'Gülhane Park'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour6?ref=pathwise', isSponsored: false },
 ];
 
 // Returned by "🔄 Sync Live Tours" — pretends to sync from partner APIs.
@@ -378,6 +422,8 @@ export const LIVE_TOURS: Tour[] = [
   { id: 'live1', title: 'Sunset Bosphorus Cruise (Small Group)', hub: 'besiktas-bogaz', source: 'GetYourGuide', durationHours: 2, priceTry: 1200, rating: 4.9, stopNames: ['Ortaköy', 'Bebek', 'Rumeli Hisarı'], live: true, affiliateUrl: 'https://www.getyourguide.com/mock/live1?ref=pathwise', isSponsored: true },
   { id: 'live2', title: 'Street Food Tour of Kadıköy', hub: 'kadikoy-moda', source: 'TripAdvisor', durationHours: 4, priceTry: 1450, rating: 4.8, stopNames: ['Çarşı', 'Çiya Sofrası', 'Ali Usta', 'Fish sandwich pier'], live: true, affiliateUrl: 'https://www.tripadvisor.com/mock/live2?ref=pathwise', isSponsored: false },
   { id: 'live3', title: 'Hidden Galata Coffee & Baklava', hub: 'karakoy-galata', source: 'GetYourGuide', durationHours: 3, priceTry: 1100, rating: 4.7, stopNames: ['Karaköy Güllüoğlu', 'SALT Galata', 'Galata Tower'], live: true, affiliateUrl: 'https://www.getyourguide.com/mock/live3?ref=pathwise', isSponsored: false },
+  { id: 'live4', title: 'Balat & Fener Photo Safari', hub: 'balat-fener', source: 'TripAdvisor', durationHours: 3, priceTry: 950, rating: 4.6, stopNames: ['Merdivenli Yokuş', 'Fener Greek School', 'Ayvansaray shoreline'], live: true, affiliateUrl: 'https://www.tripadvisor.com/mock/live4?ref=pathwise', isSponsored: false },
+  { id: 'live5', title: 'Sultanahmet Early-Bird, Skip-the-Line', hub: 'sultanahmet', source: 'GetYourGuide', durationHours: 3, priceTry: 1750, rating: 4.8, stopNames: ['Hagia Sophia', 'Basilica Cistern', 'Topkapı Palace'], live: true, affiliateUrl: 'https://www.getyourguide.com/mock/live5?ref=pathwise', isSponsored: false },
 ];
 
 // ── City Survival & Etiquette widget ───────────────────────────────
