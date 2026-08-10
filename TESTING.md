@@ -473,7 +473,7 @@ figures were always real.
 | Ranking on `GET /social/travelers` | ✅ | filters run first and are untouched; ranking only reorders |
 | Missing-data handling | ✅ | components are skipped and weights renormalised; a viewer with nothing to compare gets `null`, and the UI shows no percentage rather than a fabricated one |
 | **Travel styles** — quiz auto-fill + manual picker | ✅ | live API: quiz derives 3 tags, picker removes one, invalid tags and `#SoloVerified` refused |
-| Match score UI on buddy cards | ⚠️ | API verified; the "% match" bar and the style picker have still not been *looked at* in a browser — no spec asserts them |
+| Match score UI on buddy cards | ✅ | was ⚠️ (API-only) until 2026-08-11; now driven in a browser by `presence-matching.spec.ts` |
 | **Traveler seed 5 → 14** | ✅ | built to exercise the scorer: every hub preferred by ≥2, every tag on ≥3, all budget levels at every hub; **6 new specs guard that spread** so demo data cannot quietly stop being able to separate the list |
 | Check-in feed 7 → 13, with real `createdAt` | ✅ | resolved against the clock at fetch time; the stored `minutesAgo` had frozen the feed |
 | Community routes 4 → 10, tours 6 → 11, 3 new forum threads | ✅ | routes now cover every hub twice — "Clone this route" hands a hub to the dashboard, so a hub with no route was unreachable |
@@ -541,13 +541,56 @@ docker stack. Run: `6d13741`.
 > A local gate cannot catch this class of bug: a developer's own `.env`
 > predates the change, so only CI's `cp .env.example .env` exercises it.
 
+---
+
+## Görev 3 — "🟢 available now" presence (2026-08-11)
+
+A liveness layer over check-ins: a traveler stays marked available for
+**2 hours** after checking in, then fades to "checked in earlier".
+
+| Piece | Status | Notes |
+|---|---|---|
+| `utils/presence.ts` — the rule | ✅ | pure, framework-free, `now` is a parameter; `PRESENCE_WINDOW_MINUTES` is the single tuning point |
+| Live/stale badge on feed cards | ✅ | e2e asserts **both** states are on screen |
+| Check-in map on the Social page | ✅ | its own small Leaflet map, not an overlay on the dashboard's route map |
+| Pulsing pins for live, static for stale | ✅ | e2e asserts both pin classes exist |
+| Composer check-in reads as live at once | ✅ | e2e |
+
+**Design notes worth keeping**
+- **No WebSocket, deliberately.** Presence here means "posted a check-in
+  recently" — a fact about a timestamp, not a live connection. A socket would
+  imply a precision the feature does not have: a check-in says where someone
+  *was*. Comparing against a window keeps the promise honest.
+- **The UI never claims to know where anyone is.** Copy stays in the "posted
+  from" register and the map carries an explicit "nobody's location is
+  tracked" line. This is not a tracker and must not grow into one by accident.
+- **Live vs stale differs in motion, size AND opacity** — never colour alone,
+  so the distinction survives for viewers who cannot separate the two hues.
+  `prefers-reduced-motion` drops the animation and keeps the other two.
+- Check-ins now reference a real `placeId` instead of a free-text place name;
+  the label and the map pin are the same fact read twice, and a check-in can
+  no longer point at a place that does not exist. Two seed entries referenced
+  places absent from the dataset (Fener Greek School, Süleymaniye) and were
+  repointed at real ones.
+- Presence is recomputed per render rather than stored — a cached flag would
+  go stale exactly when it matters.
+
+### Closed: the ⚠️ matching-UI gap
+`e2e/presence-matching.spec.ts` now drives the two surfaces that were
+API-verified only: a new account shows **no** percentage (the UI must not
+invent one) and is nudged to add styles; picking `#Foodie` in the profile
+makes the buddy list rank, show a "% match", and put the best match first.
+
 ### Still not covered
-- No spec asserts the **"% match" bar** or the **travel-style picker** in a
-  browser; both are verified only at the API level.
+- ~~No spec asserts the "% match" bar or the travel-style picker~~ — **closed
+  2026-08-11**, see the Görev 3 section.
+- ~~Görev 3 is not started~~ — **done 2026-08-11**.
 - No spec drives **route completion → points** end-to-end (unit tests + a live
   API run cover the award itself).
-- **Görev 3** ("🟢 available now" live status) is not started. The groundwork
-  is in place: check-ins now carry a real `createdAt`.
+- The presence window is never crossed *during* a test: the seed provides both
+  states, but nothing asserts that a live check-in becomes stale after two
+  hours. `isLive` takes `now` as a parameter precisely so that is testable —
+  it needs a unit-test runner on the frontend, which does not exist yet.
 - Four specs were flaky under heavy parallel load in an earlier run
   (`survival widget`, `weather widget`, `time anchor`, `poll winner`); all
   passed first-try in the clean run.
