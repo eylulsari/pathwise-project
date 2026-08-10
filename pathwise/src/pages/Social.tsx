@@ -10,6 +10,9 @@ import type {
 import { api } from '../services/api';
 import { AppHeader } from '../components/AppHeader';
 import { TravelerModal } from '../components/social/TravelerModal';
+import { CheckInMap } from '../components/social/CheckInMap';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import { formatAge, isLive } from '../utils/presence';
 import { ReportButton } from '../components/social/ReportButton';
 import { PollSection } from '../components/social/PollSection';
 import { HUB_LABEL } from '../utils/format';
@@ -122,11 +125,14 @@ export default function Social() {
       {
         id: `me-${Date.now()}`,
         traveler: { id: 'me', name: 'You', avatarColor: '#6E8F74' },
-        placeName: 'Right here',
         hub: 'kadikoy-moda',
         message: checkInText.trim(),
         minutesAgo: 0,
         createdAt: new Date().toISOString(),
+        // No resolved place, so this one shows in the feed (as live) but is
+        // not pinned — better than guessing a location for it.
+        placeId: '',
+        placeName: t('social.rightHere'),
       },
       ...prev,
     ]);
@@ -176,21 +182,47 @@ export default function Social() {
           </div>
 
           <div className="mt-4 space-y-2">
-            {checkIns.map((c) => (
-              <div key={c.id} className="flex items-start gap-3 rounded-xl bg-white px-3 py-2">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: c.traveler.avatarColor }}>
-                  {c.traveler.name.split(' ').map((n) => n[0]).join('')}
+            {checkIns.map((c) => {
+              // Recomputed on every render rather than stored: presence is a
+              // function of the clock, so a cached flag would go stale exactly
+              // when it matters.
+              const live = isLive(c.createdAt);
+              return (
+                <div
+                  key={c.id}
+                  data-testid="checkin-row"
+                  data-presence={live ? 'live' : 'stale'}
+                  className={`flex items-start gap-3 rounded-xl bg-white px-3 py-2 ${live ? '' : 'opacity-60'}`}
+                >
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: c.traveler.avatarColor }}>
+                    {c.traveler.name.split(' ').map((n) => n[0]).join('')}
+                  </div>
+                  <div className="flex-1 text-sm">
+                    <span className="font-semibold text-ink">{c.traveler.name}</span>
+                    <span className="text-ink/50"> · {c.placeName} · {formatAge(c.createdAt)}</span>
+                    {live ? (
+                      <span className="ml-2 whitespace-nowrap rounded-full bg-sage/20 px-2 py-0.5 text-[10px] font-semibold text-sage">
+                        🟢 {t('presence.available')}
+                      </span>
+                    ) : (
+                      <span className="ml-2 whitespace-nowrap rounded-full bg-ink/5 px-2 py-0.5 text-[10px] font-semibold text-ink/40">
+                        {t('presence.stale')}
+                      </span>
+                    )}
+                    <p className="text-ink/80">{c.message}</p>
+                  </div>
+                  <ReportButton contentType="checkin" contentId={c.id} />
                 </div>
-                <div className="flex-1 text-sm">
-                  <span className="font-semibold text-ink">{c.traveler.name}</span>
-                  <span className="text-ink/50"> · {c.placeName} · {c.minutesAgo === 0 ? 'now' : `${c.minutesAgo}m ago`}</span>
-                  <p className="text-ink/80">{c.message}</p>
-                </div>
-                <ReportButton contentType="checkin" contentId={c.id} />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
+
+        {/* Who is out there right now. Contained: a Leaflet failure must not
+            take the rest of the social page with it. */}
+        <ErrorBoundary label="checkin-map" fallback={null}>
+          <CheckInMap checkIns={checkIns} />
+        </ErrorBoundary>
 
         {/* Traveler cards + filter */}
         <section>

@@ -214,6 +214,17 @@ export const translations = {
     },
     // Reward points — accrual only, no catalogue yet. The copy must not
     // promise a specific discount; see the note on PointsCard.
+    // Check-in presence. The wording must stay in the "was here recently"
+    // register — nothing here tracks anyone's live location.
+    presence: {
+      available: 'Available now',
+      stale: 'Checked in earlier',
+      mapTitle: '📍 Who’s out right now',
+      activeNow: 'active now',
+      windowNote: 'active for 2h after a check-in',
+      disclaimer:
+        'A pin shows where someone posted from, not where they are now. Nobody’s location is tracked.',
+    },
     styles: {
       title: '🧭 Travel styles',
       intro:
@@ -348,6 +359,7 @@ export const translations = {
       womenNotOptedIn:
         'Turn on “I identify as a woman” in your profile to use this filter.',
       womenBadgeTitle: 'Self-declared woman traveler (not verified)',
+      rightHere: 'Right here',
       // Buddy matching (Görev 2)
       matchLabel: 'Match',
       matchShared: 'You both like',
@@ -643,6 +655,15 @@ export const translations = {
       sponsored: 'Sponsorlu',
       reserve: '🎟️ Yer Ayırt',
     },
+    presence: {
+      available: 'Şu an müsait',
+      stale: 'Daha önce buradaydı',
+      mapTitle: '📍 Şu an kimler dışarıda',
+      activeNow: 'şu an aktif',
+      windowNote: 'check-in’den sonra 2 saat aktif',
+      disclaimer:
+        'Pin, kişinin nereden paylaştığını gösterir; şu an nerede olduğunu değil. Kimsenin konumu takip edilmiyor.',
+    },
     styles: {
       title: '🧭 Seyahat stilin',
       intro:
@@ -777,6 +798,7 @@ export const translations = {
       womenNotOptedIn:
         'Bu filtreyi kullanmak için profilinde “Kendimi kadın olarak tanımlıyorum” seçeneğini aç.',
       womenBadgeTitle: 'Kendi beyanına göre kadın gezgin (doğrulanmamıştır)',
+      rightHere: 'Tam burada',
       // Gezgin eşleştirme (Görev 2)
       matchLabel: 'Uyum',
       matchShared: 'İkinizin de sevdiği',
