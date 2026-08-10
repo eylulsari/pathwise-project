@@ -448,10 +448,18 @@ export const api = {
    */
   async getCheckIns(): Promise<CheckIn[]> {
     const now = Date.now();
-    const resolved = CHECK_INS.map((c) => ({
-      ...c,
-      createdAt: new Date(now - c.minutesAgo * 60_000).toISOString(),
-    }));
+    const resolved = CHECK_INS.map((c) => {
+      // Name and coordinates come from the referenced place, so the card's
+      // label and the map's pin are the same fact read twice.
+      const place = PLACES_BY_ID[c.placeId];
+      return {
+        ...c,
+        createdAt: new Date(now - c.minutesAgo * 60_000).toISOString(),
+        placeName: place?.name ?? c.placeId,
+        lat: place?.lat,
+        lng: place?.lng,
+      };
+    });
     return delay(resolved);
   },
   /**

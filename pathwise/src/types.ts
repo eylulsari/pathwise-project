@@ -406,7 +406,13 @@ export interface TravelerListResult {
 export interface CheckInSeed {
   id: string;
   traveler: Pick<Traveler, 'id' | 'name' | 'avatarColor'>;
-  placeName: string;
+  /**
+   * A real place from `hubData`. The name and coordinates are resolved from it
+   * when the feed is served, so the label on a card and the pin on the map can
+   * never disagree — and so a check-in cannot reference a place that does not
+   * exist.
+   */
+  placeId: string;
   hub: Hub;
   message: string;
   minutesAgo: number;
@@ -421,6 +427,15 @@ export interface CheckInSeed {
 export interface CheckIn extends CheckInSeed {
   /** ISO timestamp, derived from `minutesAgo` when the feed is served. */
   createdAt: string;
+  /** Resolved from `placeId`. */
+  placeName: string;
+  /**
+   * Resolved from `placeId`. Absent for a check-in with no known place — the
+   * composer's own "right here" entry — which appears in the feed but not on
+   * the map rather than being pinned at a guessed location.
+   */
+  lat?: number;
+  lng?: number;
 }
 
 export interface CommunityRoute {
