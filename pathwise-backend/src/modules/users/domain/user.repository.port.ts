@@ -34,4 +34,6 @@ export interface UserRepositoryPort {
    * read-modify-write) so two awards landing at once cannot lose one another.
    */
   addPoints(id: string, delta: number): Promise<User>;
+  /** Replace the travel-style tags (buddy-matching vocabulary). */
+  setTravelStyles(id: string, styles: string[]): Promise<User>;
 }

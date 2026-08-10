@@ -86,6 +86,15 @@ export class UsersService {
   }
 
   /**
+   * Replace the travel-style tags. The vocabulary and every rule about what a
+   * valid tag is belong to the social module (`domain/travel-style.ts`) — this
+   * layer only persists what it is handed.
+   */
+  setTravelStyles(id: string, styles: string[]): Promise<User> {
+    return this.users.setTravelStyles(id, styles);
+  }
+
+  /**
    * Add to the reward-points balance.
    *
    * Intentionally thin and unguarded: the rules about *when* points are earned

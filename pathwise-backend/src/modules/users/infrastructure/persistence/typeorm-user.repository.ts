@@ -113,6 +113,12 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
    * it back, so concurrent awards (e.g. a referral landing while the user
    * finishes a route) both count instead of one overwriting the other.
    */
+  async setTravelStyles(id: string, styles: string[]): Promise<User> {
+    await this.repo.update({ id }, { travelStyles: styles });
+    const row = await this.repo.findOne({ where: { id } });
+    return this.toDomain(row as UserOrmEntity);
+  }
+
   async addPoints(id: string, delta: number): Promise<User> {
     await this.repo.increment({ id }, 'points', delta);
     const row = await this.repo.findOne({ where: { id } });
