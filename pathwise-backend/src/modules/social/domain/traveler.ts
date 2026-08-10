@@ -1,3 +1,6 @@
+import { Hub } from '../../places/domain/place';
+import { BudgetLevel } from './matching';
+
 /**
  * Domain model — framework-free. Mirrors the frontend `Traveler` shape so the
  * buddy list can be served from the API instead of the frontend mock layer.
@@ -25,6 +28,16 @@ export interface Traveler {
   soloVerified: boolean;
   visitedProvinces: string[];
   badges: string[];
+
+  // ── Compatibility inputs (see domain/matching.ts) ──────────────────
+  /**
+   * Neighbourhoods this traveler gravitates to. For the seed these are stated
+   * directly; for a real user they are derived from their saved trips, which
+   * is why the matcher treats both sides as the same `MatchProfile` shape.
+   */
+  preferredHubs: Hub[];
+  /** Coarse spending band. `null` = unknown, which the matcher skips. */
+  budgetLevel: BudgetLevel | null;
 
   // ── Opt-in women-traveler mode ────────────────────────────────────
   /**

@@ -13,5 +13,8 @@ import { TRIP_REPOSITORY } from './domain/trip.repository.port';
     TripsService,
     { provide: TRIP_REPOSITORY, useClass: TypeOrmTripRepository },
   ],
+  // Exported so buddy matching can derive preferred hubs / budget level from
+  // a user's saved trips (SocialModule → MatchingService).
+  exports: [TripsService],
 })
 export class TripsModule {}
