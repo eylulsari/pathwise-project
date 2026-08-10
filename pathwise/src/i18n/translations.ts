@@ -214,6 +214,14 @@ export const translations = {
     },
     // Reward points — accrual only, no catalogue yet. The copy must not
     // promise a specific discount; see the note on PointsCard.
+    styles: {
+      title: '🧭 Travel styles',
+      intro:
+        'These decide who you are matched with in the Buddy Finder. The Vibe Quiz adds to them automatically — this is where you can remove one or add your own.',
+      emptyHint: 'Nothing picked yet — buddies cannot be ranked for you.',
+      saving: 'Saving…',
+      saved: '✓ Saved',
+    },
     points: {
       title: '🏅 Reward points',
       balanceLabel: 'Earned across the app',
@@ -340,6 +348,12 @@ export const translations = {
       womenNotOptedIn:
         'Turn on “I identify as a woman” in your profile to use this filter.',
       womenBadgeTitle: 'Self-declared woman traveler (not verified)',
+      // Buddy matching (Görev 2)
+      matchLabel: 'Match',
+      matchShared: 'You both like',
+      matchHow: 'Based on your travel styles, neighbourhoods and budget',
+      matchEmptyProfile:
+        'Add your travel styles in your profile (or take the Vibe Quiz) and these travelers will be ranked by how well they match you.',
     },
     premium: {
       nav: '💎 Premium',
@@ -629,6 +643,14 @@ export const translations = {
       sponsored: 'Sponsorlu',
       reserve: '🎟️ Yer Ayırt',
     },
+    styles: {
+      title: '🧭 Seyahat stilin',
+      intro:
+        'Gezgin Bul’da kiminle eşleştiğini bunlar belirler. Vibe Quiz bunlara otomatik ekleme yapar — buradan çıkarabilir ya da kendin ekleyebilirsin.',
+      emptyHint: 'Henüz hiçbiri seçilmedi — gezginler sana göre sıralanamaz.',
+      saving: 'Kaydediliyor…',
+      saved: '✓ Kaydedildi',
+    },
     points: {
       title: '🏅 Ödül puanları',
       balanceLabel: 'Uygulama genelinde kazandıkların',
@@ -755,6 +777,12 @@ export const translations = {
       womenNotOptedIn:
         'Bu filtreyi kullanmak için profilinde “Kendimi kadın olarak tanımlıyorum” seçeneğini aç.',
       womenBadgeTitle: 'Kendi beyanına göre kadın gezgin (doğrulanmamıştır)',
+      // Gezgin eşleştirme (Görev 2)
+      matchLabel: 'Uyum',
+      matchShared: 'İkinizin de sevdiği',
+      matchHow: 'Seyahat stillerin, semtlerin ve bütçene göre',
+      matchEmptyProfile:
+        'Profilinde seyahat stillerini ekle (ya da Vibe Quiz’i çöz) — bu gezginler sana ne kadar uyduklarına göre sıralansın.',
     },
     premium: {
       nav: '💎 Premium',

@@ -34,6 +34,11 @@ export default function Social() {
   const [forum, setForum] = useState<ForumQuestion[]>([]);
 
   const [filter, setFilter] = useState<TravelTag | null>(null);
+  // Whether the server could score this user at all (needs travel styles, or
+  // saved trips to derive hubs/budget from). Drives the "improve your matches"
+  // nudge — a thin profile should say so rather than show weak percentages
+  // with no explanation.
+  const [canMatch, setCanMatch] = useState(true);
   const [connected, setConnected] = useState<Set<string>>(new Set());
   const [active, setActive] = useState<Traveler | null>(null);
   const [checkInText, setCheckInText] = useState('');
@@ -72,8 +77,17 @@ export default function Social() {
       .getTravelers({ womenOnly, eligible: womenModeEligible })
       .then((res) => {
         if (!active) return;
+        // Already ranked by the server (best match first) — the tag filter
+        // below only narrows it and preserves that order.
         setTravelers(res.travelers);
         setWomenOnlyApplied(res.womenOnlyApplied);
+        const profile = res.viewerProfile;
+        setCanMatch(
+          !profile ||
+            profile.styles.length > 0 ||
+            profile.preferredHubs.length > 0 ||
+            profile.budgetLevel !== null,
+        );
       })
       .catch(() => {});
     return () => {
@@ -112,6 +126,7 @@ export default function Social() {
         hub: 'kadikoy-moda',
         message: checkInText.trim(),
         minutesAgo: 0,
+        createdAt: new Date().toISOString(),
       },
       ...prev,
     ]);
@@ -203,6 +218,12 @@ export default function Social() {
               {womenOnlyApplied ? t('social.womenDisclaimer') : t('social.womenNotOptedIn')}
             </p>
           )}
+          {/* Nothing to match on yet — say so instead of showing a bare list. */}
+          {!canMatch && (
+            <p className="mb-3 rounded-xl bg-iznik/10 px-3 py-2 text-xs leading-relaxed text-ink/70">
+              {t('social.matchEmptyProfile')}
+            </p>
+          )}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((tr) => (
               <div key={tr.id} className="card-cream p-4">
@@ -224,6 +245,26 @@ export default function Social() {
                     {tr.soloVerified && <span className="text-sage" title="Solo-Verified">✓</span>}
                   </span>
                 </div>
+                {/* Compatibility. Rendered only when the server could
+                    actually compute one — never a made-up number. */}
+                {typeof tr.matchScore === 'number' && (
+                  <div className="mt-2.5" title={matchTitle(tr, t)}>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-[11px] font-semibold text-ink/60">
+                        {t('social.matchLabel')}
+                      </span>
+                      <span className="font-display text-sm font-bold text-iznik">
+                        %{tr.matchScore}
+                      </span>
+                    </div>
+                    <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-ink/10">
+                      <div
+                        className="h-full rounded-full bg-accent-gradient"
+                        style={{ width: `${tr.matchScore}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
                 <div className="mt-2 flex flex-wrap gap-1">
                   {tr.tags.slice(0, 3).map((tag) => (
                     <span key={tag} className="rounded-full bg-iznik/10 px-2 py-0.5 text-[10px] font-semibold text-iznik">{tag}</span>
@@ -291,6 +332,17 @@ export default function Social() {
       )}
     </div>
   );
+}
+
+/**
+ * Hover text explaining a score. The percentage on its own is a black box;
+ * naming the shared tags is what makes it trustworthy.
+ */
+function matchTitle(tr: Traveler, t: (key: string) => string): string {
+  const shared = tr.sharedStyles ?? [];
+  return shared.length > 0
+    ? `${t('social.matchShared')}: ${shared.join(', ')}`
+    : t('social.matchHow');
 }
 
 function FilterChip({

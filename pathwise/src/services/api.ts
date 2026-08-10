@@ -31,6 +31,7 @@ import type {
   SavedTrip,
   Tour,
   TravelerListResult,
+  TravelTag,
   UsageInfo,
 } from '../types';
 import { PLACES, PLACES_BY_ID } from '../hubData';
@@ -438,8 +439,20 @@ export const api = {
   // SOCIAL — Firebase/PostgreSQL shaped (check-ins, buddies, routes, forum)
   //   return http<CheckIn[]>('/social/check-ins');
   // ═════════════════════════════════════════════════════════════════
+  /**
+   * The check-in feed. The mock stores "how long ago"; the real timestamp is
+   * resolved here, against the clock at fetch time, so the feed is always
+   * plausibly fresh and callers can reason about recency properly. A real
+   * `GET /social/check-ins` would return `createdAt` directly and this
+   * mapping would simply disappear.
+   */
   async getCheckIns(): Promise<CheckIn[]> {
-    return delay(CHECK_INS);
+    const now = Date.now();
+    const resolved = CHECK_INS.map((c) => ({
+      ...c,
+      createdAt: new Date(now - c.minutesAgo * 60_000).toISOString(),
+    }));
+    return delay(resolved);
   },
   /**
    * Traveler Buddy Finder — now a real endpoint so the opt-in women-traveler
@@ -474,6 +487,39 @@ export const api = {
       return delay({ travelers: visible, womenOnlyApplied });
     }
   },
+  // ── Travel styles — the vocabulary buddy matching compares on ──
+  /** The pickable tags, served so the client can never offer an invalid one. */
+  async getTravelStyleOptions(): Promise<TravelTag[]> {
+    const r = await http<{ styles: TravelTag[] }>('/social/travel-styles');
+    return r.styles;
+  },
+  /** Manual picker — replaces the list, the only way to REMOVE a tag. */
+  async setTravelStyles(styles: TravelTag[]): Promise<TravelTag[]> {
+    const r = await http<{ styles: TravelTag[] }>('/social/me/travel-styles', {
+      method: 'PUT',
+      body: JSON.stringify({ styles }),
+    });
+    return r.styles;
+  },
+  /**
+   * Auto-fill from a completed Vibe Quiz. The server unions the derived tags
+   * into what is already stored, so this never wipes a manual choice. Errors
+   * are swallowed: this rides along with route generation and must not be able
+   * to break it.
+   */
+  async applyQuizTravelStyles(quiz: {
+    mood: string;
+    pace: string;
+    budgetTry: number;
+  }): Promise<TravelTag[] | null> {
+    return http<{ styles: TravelTag[] }>('/social/me/travel-styles/from-quiz', {
+      method: 'POST',
+      body: JSON.stringify(quiz),
+    })
+      .then((r) => r.styles)
+      .catch(() => null);
+  },
+
   async getCommunityRoutes(): Promise<CommunityRoute[]> {
     return delay(COMMUNITY_ROUTES);
   },

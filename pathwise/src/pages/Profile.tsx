@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { SafetyPreferences } from '../components/SafetyPreferences';
 import { PointsCard } from '../components/PointsCard';
+import { TravelStylesPicker } from '../components/TravelStylesPicker';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { BUCKET_LIST_IDS, PAST_TRIPS } from '../mockData';
 import { PLACES_BY_ID } from '../hubData';
@@ -104,6 +105,11 @@ export default function Profile() {
             rather than hidden behind a tab switch. */}
         <ErrorBoundary label="points-card" fallback={null}>
           <PointsCard />
+        </ErrorBoundary>
+
+        {/* Travel styles — what buddy matching compares on. */}
+        <ErrorBoundary label="travel-styles" fallback={null}>
+          <TravelStylesPicker />
         </ErrorBoundary>
 
         {/* Tabs */}

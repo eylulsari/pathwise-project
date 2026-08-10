@@ -483,6 +483,11 @@ export default function Dashboard() {
     const it = await generateFor(activeDay, req);
     // Reflect the quiz-derived hub/budget back into the visible controls.
     if (it) updateConfig({ hub: it.hub, budgetTry: result.budgetTry });
+    // The quiz is also the only place the app learns the user's travel style,
+    // so feed it into the profile that drives buddy matching. Fire-and-forget:
+    // it must never delay or fail the route the user actually asked for. The
+    // server unions the derived tags in, so hand-picked ones survive.
+    void api.applyQuizTravelStyles(result);
   }
 
   // AI "Add to Today's Path" → lock the place in and regenerate this day.

@@ -362,22 +362,65 @@ export interface Traveler {
    * ⚠️ Self-declared, NOT verified — never render as a safety guarantee.
    */
   identifiesAsWoman?: boolean;
+
+  // ── Buddy matching (see the backend's domain/matching.ts) ──────────
+  /** Neighbourhoods this traveler gravitates to. */
+  preferredHubs: Hub[];
+  /** Coarse spending band; `null` = unknown, which the matcher skips. */
+  budgetLevel: BudgetLevel | null;
+  /**
+   * Compatibility with the signed-in user, 0–100. `null` means there was
+   * nothing to compare (a brand-new account) — render no percentage at all
+   * rather than inventing one.
+   */
+  matchScore?: number | null;
+  /** The style tags both sides share — what makes the number explainable. */
+  sharedStyles?: TravelTag[];
 }
+
+/** Coarse spending band used by buddy matching. */
+export type BudgetLevel = 'budget' | 'mid' | 'comfort';
 
 /** Response of `GET /social/travelers`. */
 export interface TravelerListResult {
+  /** Already ranked by `matchScore`, best first. */
   travelers: Traveler[];
   /** False when the backend refused the filter (viewer has not opted in). */
   womenOnlyApplied: boolean;
+  /**
+   * What the server knows about the caller. Lets the UI explain a thin
+   * ranking instead of silently showing weak percentages.
+   */
+  viewerProfile?: {
+    styles: TravelTag[];
+    preferredHubs: Hub[];
+    budgetLevel: BudgetLevel | null;
+  };
 }
 
-export interface CheckIn {
+/**
+ * A check-in as authored in the mock dataset: "this happened N minutes ago".
+ * Relative on purpose — a fixed timestamp would age into a feed of stale
+ * entries the moment the demo data stops being edited.
+ */
+export interface CheckInSeed {
   id: string;
   traveler: Pick<Traveler, 'id' | 'name' | 'avatarColor'>;
   placeName: string;
   hub: Hub;
   message: string;
   minutesAgo: number;
+}
+
+/**
+ * A check-in as served. `createdAt` is resolved against the clock at fetch
+ * time, so anything reasoning about recency has a real instant rather than a
+ * frozen integer — and swapping in a real backend feed becomes a change of
+ * source, not a change of shape.
+ */
+export interface CheckIn extends CheckInSeed {
+  /** ISO timestamp, derived from `minutesAgo` when the feed is served. */
+  createdAt: string;
 }
 
 export interface CommunityRoute {
