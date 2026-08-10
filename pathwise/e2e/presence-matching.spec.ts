@@ -60,6 +60,43 @@ test('a fresh check-in from the composer is marked available immediately', async
   await expect(mine).toHaveAttribute('data-presence', 'live');
 });
 
+test('a posted check-in survives a full page reload', async ({ page }) => {
+  await signUp(page, 'persist');
+  await page.goto('/social');
+  await expect(rows(page).first()).toBeVisible({ timeout: 20_000 });
+
+  // A seed entry, 8 minutes old — the newest of the curated ones.
+  const NEWEST_SEED = 'Golden hour is unreal up here 🌇';
+  const message = `persisted at ${Date.now()}`;
+
+  await page.getByPlaceholder(/.+/).first().fill(message);
+  await page.getByRole('button', { name: /I.m Here/i }).click();
+  await expect(page.getByText(message)).toBeVisible({ timeout: 15_000 });
+
+  // The point of the test: reload, so nothing survives in memory. Anything
+  // still on screen came back from the database.
+  await page.reload();
+  await expect(rows(page).first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText(message)).toBeVisible({ timeout: 15_000 });
+
+  // A just-posted check-in is live, and the curated seed is still there beside
+  // it — the feed merges both sources rather than replacing one.
+  const mine = rows(page).filter({ hasText: message });
+  await expect(mine).toHaveAttribute('data-presence', 'live');
+  await expect(page.getByText(NEWEST_SEED)).toBeVisible();
+
+  // Ordering: mine is newer than every seed entry, so it sits above them.
+  //
+  // Asserted by relative position rather than "is row 0", and never by an
+  // exact row count: the feed is shared, so a parallel spec posting its own
+  // check-in legitimately changes both the count and who is literally first.
+  const texts = await rows(page).allTextContents();
+  const mineAt = texts.findIndex((t) => t.includes(message));
+  const seedAt = texts.findIndex((t) => t.includes(NEWEST_SEED));
+  expect(mineAt).toBeGreaterThanOrEqual(0);
+  expect(seedAt).toBeGreaterThan(mineAt);
+});
+
 test('the check-in map renders pins, and only recent ones pulse', async ({ page }) => {
   await signUp(page, 'map');
   await page.goto('/social');

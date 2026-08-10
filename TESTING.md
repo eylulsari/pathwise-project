@@ -581,6 +581,85 @@ API-verified only: a new account shows **no** percentage (the UI must not
 invent one) and is nudged to add styles; picking `#Foodie` in the profile
 makes the buddy list rank, show a "% match", and put the best match first.
 
+---
+
+## Check-ins: mock → real persistence (2026-08-11)
+
+The check-in flow already worked; what it lacked was **persistence**. A posted
+check-in lived in React state and vanished on reload. It is now a vertical
+slice: entity + migration + repository + service + `GET`/`POST` endpoints, with
+`api.ts` calling the real API and the frontend mock deleted.
+
+| Piece | Status |
+|---|---|
+| `check_ins` table + migration `1730000003000-CreateCheckIns` | ✅ |
+| `GET /api/social/check-ins` — seed ∪ persisted, newest first | ✅ |
+| `POST /api/social/check-ins` — author from the JWT | ✅ |
+| `api.getCheckIns()` / `api.createCheckIn()` wired; `CHECK_INS` mock deleted | ✅ |
+| Görev 3 presence untouched | ✅ seed `createdAt` still derived from a relative offset at read time; real rows use the DB timestamp |
+
+**Decisions, and why**
+- **Place names resolve on the client, not the server.** The backend's place
+  dataset holds 28 of the frontend's 41 places — four check-in locations are
+  missing from it. Resolving server-side would leave those nameless and
+  unpinned, so the API returns `placeId` and the client resolves against
+  `hubData`. (The dataset divergence is pre-existing and left alone.)
+- **The seed is merged, not replaced.** Its authors are demo travelers with no
+  user accounts, so a persisted-only feed would be empty for a fresh account
+  and presence would have nothing to distinguish. Same pattern as
+  `traveler.dataset.ts`.
+- **`avatarColor` is derived from the user id**, not stored — it is
+  presentation, and a column would mean a migration plus a default for every
+  existing row. Deterministic, so the feed does not flicker between reloads.
+- **`authorName` is denormalised** at write time: the feed is a historical
+  record and should keep saying who posted after a rename or a deletion.
+- **The composer still collects only a message.** Adding a place picker would
+  be a new feature; `placeId`/`hub` are null, so such a check-in shows in the
+  feed and not on the map rather than being pinned at a guessed location.
+
+### Persistence proved, not assumed — live API run (8/8)
+"POST returned 201" is not evidence that anything was stored, so each step
+re-reads through a separate request:
+
+| # | Step | Result |
+|---|---|---|
+| 1 | feed before | 13 seed, 0 real |
+| 2 | POST a check-in | `201` |
+| 3 | **separate GET** | **found** — author from the JWT, `placeId: null` |
+| 4 | ordering | top of the feed (newest `createdAt`) |
+| 5 | seed survives | 14 total = 13 seed + 1 real |
+| 6 | **re-login, new token** | still there |
+| 7 | a *different* user's GET | sees it — the feed is shared |
+| 8 | body carrying `userId`/`traveler` | **`400 Bad Request`** — rejected outright, not silently stripped |
+
+Step 8 is stronger than expected: the global `ValidationPipe` forbids
+non-whitelisted properties, so a spoofed author cannot even be ignored — it is
+refused. Combined with step 3, the "author comes from the session" rule holds
+from both directions.
+
+### E2E — `a posted check-in survives a full page reload`
+Posts, **reloads the page** (so nothing survives in memory), and asserts the
+message is back from the database, marked live, and above the newest seed
+entry, with the seed still present.
+
+> **First version of this test was flaky and the assertion was wrong, not the
+> feature.** It asserted an exact row count (`seedRowsBefore + 1`) and failed
+> 15 vs 16 — the feed is *shared*, so a parallel spec posting its own check-in
+> legitimately changes the count and who is literally first. Rewritten to
+> assert relative position and membership. Anything asserting a global count
+> on this feed will flake under `fullyParallel`.
+
+### Regression — 2026-08-11 (after this change)
+| Suite | Result |
+|---|---|
+| **E2E** | ✅ **55 tests: 54 passed, 1 flaky, 0 failed** — `PLAYWRIGHT_EXIT=0` |
+| Backend `npm test` | ✅ 78/78 |
+| Backend lint / tsc | ✅ exit 0 |
+| Frontend typecheck / lint / i18n | ✅ exit 0 / 0 errors / **359 keys** |
+
+The flaky one is `social-features.spec.ts:70` (poll winner → Today's Path),
+recorded as timing-sensitive since 2026-08-02 and unrelated to check-ins.
+
 ### Still not covered
 - ~~No spec asserts the "% match" bar or the travel-style picker~~ — **closed
   2026-08-11**, see the Görev 3 section.
