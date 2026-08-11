@@ -35,7 +35,9 @@ async function bootstrap() {
     .map((o) => o.trim());
   app.enableCors({ origin: origins, credentials: true });
 
-  const port = config.get<number>('BACKEND_PORT') ?? 3000;
+  // PORT first: most managed hosts (Render, Heroku, Fly) assign it and expect
+  // the process to bind to it. BACKEND_PORT stays for docker-compose.
+  const port = config.get<number>('PORT') ?? config.get<number>('BACKEND_PORT') ?? 3000;
   await app.listen(port);
   Logger.log(`🚀 Pathwise API ready at http://localhost:${port}/api`, 'Bootstrap');
 }

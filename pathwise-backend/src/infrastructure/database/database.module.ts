@@ -23,6 +23,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         database: config.get<string>('POSTGRES_DB', 'pathwise'),
         autoLoadEntities: true,
         synchronize: config.get<string>('DB_SYNCHRONIZE', 'true') === 'true',
+        // Managed Postgres often requires TLS, and its certificate is signed
+        // by a chain Node does not trust by default — hence rejectUnauthorized.
+        // Off unless asked for, so local Docker is unaffected.
+        ssl:
+          config.get<string>('DB_SSL', 'false') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
       }),
     }),
   ],

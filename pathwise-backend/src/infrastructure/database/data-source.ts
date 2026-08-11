@@ -15,4 +15,8 @@ export default new DataSource({
   entities: ['dist/**/*.orm-entity.js'],
   migrations: ['dist/infrastructure/database/migrations/*.js'],
   synchronize: false,
+  // Mirrors DatabaseModule: managed Postgres usually needs TLS, and the CLI
+  // runs migrations against the same server the app will connect to.
+  ssl:
+    process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });

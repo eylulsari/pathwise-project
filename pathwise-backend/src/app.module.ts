@@ -1,6 +1,9 @@
-import { Module } from '@nestjs/common';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
@@ -27,9 +30,45 @@ import { AssistantModule } from './modules/assistant/assistant.module';
 
 // Feature modules (modular monolith — each is a clean boundary).
 
+/**
+ * Serve the built frontend from this same process — the production topology.
+ *
+ * Single-origin on purpose: the refresh token is an httpOnly `SameSite=Lax`
+ * cookie, and Safari, Firefox and Brave all block that cookie on a cross-site
+ * XHR. Hosting the SPA and the API on one origin keeps it first-party, so the
+ * auth code needs no `SameSite=None` concession and no third-party-cookie bet.
+ *
+ * ⚠️ Registered ONLY when a built client is actually present. In local dev
+ * there is no `client/` directory — Vite serves the app on its own port — so
+ * this returns nothing and the dev/E2E topology is completely unaffected.
+ *
+ * `exclude` matters more than it looks: without it the catch-all would answer
+ * unmatched `/api/...` requests with `index.html`, so a wrong endpoint would
+ * return HTML instead of a JSON 404 and the client would fail with
+ * "Unexpected token <" instead of a readable error.
+ */
+function serveClientIfBuilt(): DynamicModule[] {
+  const clientPath = join(__dirname, '..', 'client');
+  if (!existsSync(join(clientPath, 'index.html'))) return [];
+  return [
+    ServeStaticModule.forRoot({
+      rootPath: clientPath,
+      // Everything under /api belongs to Nest, never to the static handler.
+      exclude: ['/api/(.*)'],
+      serveStaticOptions: {
+        // Deep links (/social, /profile, …) are client-side routes: fall back
+        // to the SPA shell rather than 404ing on a file that never existed.
+        fallthrough: true,
+      },
+    }),
+  ];
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // Production only — see serveClientIfBuilt(). Empty in dev.
+    ...serveClientIfBuilt(),
     // Global rate limit: 100 requests / 60s per IP (auth routes tighten this).
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     DatabaseModule,

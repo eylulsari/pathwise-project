@@ -1,0 +1,96 @@
+# ─────────────────────────────────────────────────────────────
+# Pathwise — Render Blueprint (free tier)
+#
+# ONE web service, not two. The container serves the API under /api and the
+# built SPA at everything else, because the refresh token is an httpOnly
+# SameSite=Lax cookie and Safari, Firefox and Brave all block that cookie on
+# cross-site requests. Same origin keeps it first-party, so the auth code
+# needs no SameSite=None concession.
+#
+# No Redis: it was removed from the project. Caches and quota counters are
+# in-process (correct for a single instance — see ARCHITECTURE.md), and
+# refresh tokens live in Postgres.
+#
+# Secrets are declared but NOT set here (`sync: false`) — Render prompts for
+# them in the dashboard on first deploy. Never commit real values.
+# ─────────────────────────────────────────────────────────────
+databases:
+  - name: pathwise-db
+    plan: free
+    databaseName: pathwise
+    user: pathwise
+
+services:
+  - type: web
+    name: pathwise
+    runtime: docker
+    plan: free
+    # Repo root: the image builds both halves (see Dockerfile).
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # Render restarts the service if this stops answering. It is also what the
+    # free tier pings when waking the instance.
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # No PORT entry needed: Render injects it, and main.ts reads PORT before
+      # BACKEND_PORT precisely so nothing has to be wired here.
+
+      # ── Database (wired by Render, never typed by hand) ──
+      - key: POSTGRES_HOST
+        fromDatabase: { name: pathwise-db, property: host }
+      - key: POSTGRES_PORT
+        fromDatabase: { name: pathwise-db, property: port }
+      - key: POSTGRES_USER
+        fromDatabase: { name: pathwise-db, property: user }
+      - key: POSTGRES_PASSWORD
+        fromDatabase: { name: pathwise-db, property: password }
+      - key: POSTGRES_DB
+        fromDatabase: { name: pathwise-db, property: database }
+
+      # Schema comes from migrations only — the container runs
+      # `migration:run:prod` before starting. Never let TypeORM improvise
+      # against a production database.
+      - key: DB_SYNCHRONIZE
+        value: "false"
+      # Managed Postgres terminates TLS with a chain Node does not trust by
+      # default. Flip to "false" if you connect over Render's private network
+      # and it refuses SSL.
+      - key: DB_SSL
+        value: "true"
+
+      # Same origin, so CORS is never exercised in production — the browser
+      # does not send a cross-origin request to begin with. Declared (unset)
+      # only so a future split-origin setup has an obvious knob rather than
+      # needing a code change. Safe to leave blank.
+      - key: CORS_ORIGINS
+        sync: false
+
+      # Production value. docker-compose raises it for dev/CI, where the E2E
+      # suite registers an account per spec and would throttle itself.
+      - key: AUTH_THROTTLE_LIMIT
+        value: "10"
+
+      - key: JWT_ACCESS_TTL
+        value: 15m
+      - key: JWT_REFRESH_TTL
+        value: 7d
+
+      # ── Secrets: set these in the dashboard ──
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      # Optional. Missing keys degrade gracefully: the assistant falls back to
+      # canned answers, weather to a static payload.
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
