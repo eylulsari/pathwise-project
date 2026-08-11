@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Put,
   Query,
@@ -20,6 +22,8 @@ import {
   MinLength,
 } from 'class-validator';
 import { CheckInsService } from '../../application/check-ins.service';
+import { ForumService } from '../../application/forum.service';
+import { CommunityRoutesService } from '../../application/community-routes.service';
 import {
   mergeTravelStyles,
   QuizAnswers,
@@ -46,6 +50,14 @@ class CreateCheckInDto {
   @MinLength(1)
   @MaxLength(280)
   message: string;
+}
+
+/** A forum answer. Author from the JWT; the body carries only the text. */
+class CreateForumAnswerDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(1000)
+  text: string;
 }
 
 class TravelStylesDto {
@@ -75,6 +87,8 @@ export class SocialController {
     private readonly social: SocialService,
     private readonly matching: MatchingService,
     private readonly checkIns: CheckInsService,
+    private readonly forum: ForumService,
+    private readonly routes: CommunityRoutesService,
     private readonly users: UsersService,
   ) {}
 
@@ -98,6 +112,53 @@ export class SocialController {
   @HttpCode(HttpStatus.CREATED)
   createCheckIn(@CurrentUser() user: AuthUser, @Body() dto: CreateCheckInDto) {
     return this.checkIns.create(user.id, user.name, dto.message.trim());
+  }
+
+  // ── Q&A forum ───────────────────────────────────────────────────
+  /** GET /api/social/forum — seed threads with every persisted answer merged. */
+  @Get('forum')
+  listForum() {
+    return this.forum.list();
+  }
+
+  /**
+   * POST /api/social/forum/:questionId/answers — answer a thread.
+   * Returns the whole updated thread, so the client re-renders from the server
+   * rather than guessing where its answer belongs in the order.
+   */
+  @Post('forum/:questionId/answers')
+  @HttpCode(HttpStatus.CREATED)
+  answerForum(
+    @CurrentUser() user: AuthUser,
+    @Param('questionId') questionId: string,
+    @Body() dto: CreateForumAnswerDto,
+  ) {
+    return this.forum.answer(questionId, user.id, user.name, dto.text.trim());
+  }
+
+  // ── Community routes ────────────────────────────────────────────
+  /** GET /api/social/community-routes — likes and `liked` are per viewer. */
+  @Get('community-routes')
+  listCommunityRoutes(@CurrentUser() user: AuthUser) {
+    return this.routes.list(user.id);
+  }
+
+  /**
+   * PUT /api/social/community-routes/:id/like — like it.
+   *
+   * PUT, not a toggling POST: liking is idempotent, so a retry or a double
+   * click cannot inflate the count or silently undo the like. The client sends
+   * DELETE to take it back, which makes the intent explicit on the wire.
+   */
+  @Put('community-routes/:id/like')
+  likeRoute(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.routes.like(user.id, id);
+  }
+
+  /** DELETE /api/social/community-routes/:id/like — take the like back. */
+  @Delete('community-routes/:id/like')
+  unlikeRoute(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.routes.unlike(user.id, id);
   }
 
   /**
