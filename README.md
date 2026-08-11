@@ -16,7 +16,7 @@ interactive map, and connects solo travelers with verified buddies.
 | Frontend  | React + TypeScript + Vite + Tailwind CSS + react-leaflet         |
 | Backend   | NestJS + TypeScript (modular monolith, hexagonal architecture)   |
 | Database  | PostgreSQL (TypeORM)                                              |
-| Cache/JWT | Redis (refresh-token store + cache)                              |
+| Cache     | In-process, single-instance by design (see ARCHITECTURE)         |
 | Auth      | JWT (short-lived access + refresh token)                         |
 | Infra     | Docker + Docker Compose (multi-stage backend Dockerfile)         |
 
@@ -25,7 +25,7 @@ interactive map, and connects solo travelers with verified buddies.
 ```
 pathwise/            # Frontend (Vite React app)
 pathwise-backend/    # Backend (NestJS modular monolith)
-docker-compose.yml   # Brings up frontend + backend + postgres + redis
+docker-compose.yml   # Brings up frontend + backend + postgres
 .env.example         # Copy to .env
 ```
 
@@ -54,8 +54,8 @@ npm install
 npm run dev
 ```
 
-> Local backend needs PostgreSQL + Redis running. The easiest path is
-> `docker compose up postgres redis` and then run the backend from your host.
+> Local backend needs PostgreSQL running. The easiest path is
+> `docker compose up postgres` and then run the backend from your host.
 
 ## Testing
 

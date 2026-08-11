@@ -739,6 +739,77 @@ and that taking the like back returns the count to where it started.
 | Backend lint / tsc | ✅ exit 0 |
 | Frontend typecheck / lint / i18n | ✅ exit 0 / 0 errors / **360 keys** |
 
+---
+
+## Redis removed (2026-08-11)
+
+Dropped entirely: the client, the module, the config, the compose service and
+the volume. It was going to cost money (or an unreliable free tier) on the
+hosting this deploys to, and its work split cleanly in two.
+
+| What Redis did | Where it went |
+|---|---|
+| Refresh-token store (rotation + revocation) | **Postgres** — `refresh_tokens`, migration `1730000005000` |
+| Caches: currency, weather, place enrichment | **In-process** `MemoryStoreService` |
+| Quotas: assistant chat, optimize limit, paywall tallies | **In-process** `MemoryStoreService` |
+| Global HTTP throttler | *nothing to do* — `ThrottlerModule` never used Redis; it was always in-memory |
+
+The nine consumers only ever touched a **six-method facade**
+(`setWithTtl / get / del / exists / increment / getCount`), and `ioredis` was
+imported by exactly two files. So the swap was an implementation change, not a
+rewrite: consumer logic is untouched.
+
+> ### ⚠️ Single-instance by design — a documented trade, not hidden debt
+> In-process cache and quotas are **correct for one instance**. Run two and
+> each keeps its own: the caches merely get less efficient (survivable), but
+> **the quota counters become wrong** — an hourly cap of N turns into N *per
+> instance*. Restarts also reset both, which is harmless (caches re-fetch,
+> quotas reset in the user's favour, and every cached call already has a
+> fallback).
+>
+> **The trigger to revisit is scaling past one instance**, not time passing.
+> At that point the quota counters need a shared store again; the facade is
+> narrow precisely so that stays a one-file change. Refresh tokens are *not*
+> affected — they are in Postgres and already multi-instance safe.
+
+### What got better, not just cheaper
+- **Sessions now survive a backend restart.** In Redis they did not — on a
+  free tier that sleeps, that meant silent logouts. Verified below.
+- **The hang risk is gone.** `maxRetriesPerRequest: null` made ioredis queue
+  commands forever when Redis was unreachable, so `/auth/register`,
+  `/currency/rates` and `/weather` *hung* rather than failing — and the
+  `try/catch` degradation those services appear to have never fired, because
+  nothing threw. With no client, there is nothing to hang.
+- Postgres has no TTL, so `expiresAt` is explicit and checked on every
+  validation; the repository prunes a user's expired rows when it writes a new
+  one, avoiding a scheduler.
+
+### Verification against the Redis-free stack
+`docker compose up -d --build` with **three** services (postgres, backend,
+frontend) — the orphaned `pathwise-redis` container was removed too.
+
+| # | Check | Result |
+|---|---|---|
+| 1 | app boots with no Redis anywhere | ✅ clean boot, 0 errors |
+| 2 | register → refresh → logout → refresh → login | ✅ `201` → `200` → `204` → **`401`** (revocation works) → `200` |
+| 3 | `refresh_tokens` table real and populated | ✅ correct columns, unique `(userId, jti)`, rows present |
+| 4 | **login → restart backend → refresh** | ✅ **`200`, new access token** — the session survived |
+
+> Two probe mistakes worth recording, because both looked like product bugs:
+> the first logout probe sent only the cookie and got a `401` (logout needs the
+> access token too), and the first restart probe called refresh *before*
+> restarting without saving the rotated cookie, so it presented an
+> already-revoked token afterwards. Both were fixed and re-run; neither was the
+> app.
+
+### Regression — Redis-free stack
+| Suite | Result |
+|---|---|
+| **E2E** | ✅ **57/57, 0 flaky** — `PLAYWRIGHT_EXIT=0` (1.4 m) |
+| Backend `npm test` | ✅ 78/78 |
+| Backend lint / tsc | ✅ exit 0 |
+| Frontend typecheck / lint / i18n | ✅ exit 0 / 0 errors / 360 keys |
+
 ### Still not covered
 - ~~No spec asserts the "% match" bar or the travel-style picker~~ — **closed
   2026-08-11**, see the Görev 3 section.

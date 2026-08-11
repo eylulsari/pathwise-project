@@ -16,7 +16,7 @@ microservice without a rewrite.
 │                  Backend (NestJS monolith)                │
 │  auth │ users │ itinerary │ places │ social │ points │ …   │
 │                                                            │
-│   PostgreSQL (TypeORM)          Redis (refresh + cache)   │
+│   PostgreSQL (TypeORM)      in-process cache (1 instance) │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -76,6 +76,19 @@ filter excluded), and **missing data is skipped rather than scored as zero** —
 the remaining weights are renormalised, and a user with nothing to compare gets
 `null` rather than a fabricated percentage.
 
+### In-process cache — a single-instance choice, on purpose
+Caches (currency rates, weather, place enrichment) and quota counters
+(assistant chat, optimize limit, paywall tallies) live in
+`MemoryStoreService`, not Redis. Dropping Redis removed a managed service the
+free hosting tier charges for, and the app's only genuinely stateful use of it
+(refresh tokens) moved to Postgres — where it is *more* durable.
+
+**This is correct for one instance and wrong for several.** Each process would
+keep its own cache (merely less efficient) and its own counters (a limit of N
+per hour would become N *per instance* — actually wrong). Scaling out means
+putting the quota counters back on a shared store; the service is a narrow
+six-method facade precisely so that stays a one-file change.
+
 ### Ledger over counter — reward points
 `users.points` is a denormalised balance for cheap reads, but every change is
 also written to the append-only `point_transactions` table, so the balance
@@ -94,11 +107,17 @@ completion). There is no reward catalogue yet — accrual and visibility only.
 1. `register` / `login` → **access token (~15m)** in the JSON body; **refresh
    token** delivered as an `httpOnly`, `sameSite=lax` cookie scoped to
    `/api/auth` (safe from XSS — JS never sees it).
-2. Refresh token JTI stored in **Redis** (allows rotation + revocation).
-3. `refresh` reads the cookie, verifies against Redis, rotates the token and
+2. Refresh token JTI stored in **Postgres** (`refresh_tokens`), which allows
+   rotation + revocation **and survives a restart**.
+3. `refresh` reads the cookie, verifies the JTI, rotates the token and
    re-sets the cookie. The frontend `api.ts` auto-runs this on any `401` and
    retries the original request once.
-4. `logout` revokes the refresh JTI in Redis and clears the cookie.
+4. `logout` deletes the refresh JTI row and clears the cookie.
+
+> Postgres has no TTL, so `expiresAt` is stored explicitly and checked on
+> every validation — a row outliving its token must never authenticate. The
+> repository prunes a user's expired rows when it writes a new one, which
+> keeps the table bounded without a scheduler.
 
 **Hardening:** `helmet` security headers, and `@nestjs/throttler` rate limiting
 (100 req/min globally, 10 req/min on the auth endpoints) via a global
