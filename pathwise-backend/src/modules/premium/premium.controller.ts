@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '../auth/infrastructure/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/infrastructure/decorators/current-user.decorator';
 import { AuthUser } from '../auth/domain/auth-user';
 import { PremiumGuard } from '../../common/guards/premium.guard';
-import { RedisService } from '../../infrastructure/redis/redis.service';
+import { MemoryStoreService } from '../../infrastructure/cache/memory-store.service';
 import { NotificationsService } from '../notifications/application/notifications.service';
 import {
   FREE_OPTIMIZE_LIMIT,
@@ -28,7 +28,7 @@ export class PremiumController {
   constructor(
     private readonly users: UsersService,
     private readonly places: PlacesService,
-    private readonly redis: RedisService,
+    private readonly store: MemoryStoreService,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -44,7 +44,7 @@ export class PremiumController {
   @Get('usage')
   async usage(@CurrentUser() user: AuthUser) {
     const full = await this.users.findById(user.id);
-    const used = await this.redis.getCount(optimizeDailyKey(user.id));
+    const used = await this.store.getCount(optimizeDailyKey(user.id));
 
     // A6 — if the trial ends within 24h, drop a one-time reminder (B6).
     if (full.trialEndsAt) {

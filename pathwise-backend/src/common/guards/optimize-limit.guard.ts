@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { UsersService } from '../../modules/users/application/users.service';
-import { RedisService } from '../../infrastructure/redis/redis.service';
+import { MemoryStoreService } from '../../infrastructure/cache/memory-store.service';
 import {
   FREE_OPTIMIZE_LIMIT,
   optimizeDailyKey,
@@ -28,7 +28,7 @@ export class OptimizeLimitGuard implements CanActivate {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly users: UsersService,
-    private readonly redis: RedisService,
+    private readonly store: MemoryStoreService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -40,10 +40,10 @@ export class OptimizeLimitGuard implements CanActivate {
     if (!user || user.isPremium) return true; // premium → unlimited
 
     const key = optimizeDailyKey(userId);
-    const used = await this.redis.increment(key, secondsUntilMidnight());
+    const used = await this.store.increment(key, secondsUntilMidnight());
     if (used > FREE_OPTIMIZE_LIMIT) {
       // A6 — count the paywall hit.
-      await this.redis.increment('paywall:optimize', 90 * 86400);
+      await this.store.increment('paywall:optimize', 90 * 86400);
       throw new HttpException(
         {
           statusCode: HttpStatus.PAYMENT_REQUIRED,

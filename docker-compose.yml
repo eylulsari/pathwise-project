@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────
-# Pathwise — full stack: frontend, backend, postgres, redis
+# Pathwise — full stack: frontend, backend, postgres
 # Bring everything up with:  docker compose up --build
 # ─────────────────────────────────────────────────────────────
 services:
@@ -21,20 +21,6 @@ services:
       timeout: 5s
       retries: 10
 
-  redis:
-    image: redis:7-alpine
-    container_name: pathwise-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - pathwise-redisdata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   backend:
     build:
       context: ./pathwise-backend
@@ -43,8 +29,6 @@ services:
     restart: unless-stopped
     depends_on:
       postgres:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-development}
@@ -60,8 +44,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pathwise_dev_password}
       POSTGRES_DB: ${POSTGRES_DB:-pathwise}
       DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-true}
-      REDIS_HOST: ${REDIS_HOST:-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change_me_access_secret}
       JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_me_refresh_secret}
@@ -107,4 +89,3 @@ services:
 
 volumes:
   pathwise-pgdata:
-  pathwise-redisdata:

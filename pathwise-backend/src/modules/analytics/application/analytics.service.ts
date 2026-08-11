@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
+import { MemoryStoreService } from '../../../infrastructure/cache/memory-store.service';
 import { AffiliateClickOrmEntity } from '../infrastructure/persistence/affiliate-click.orm-entity';
 
 /** Premium-only features whose paywall hits we count (A6). */
@@ -13,24 +13,24 @@ const TTL_90_DAYS = 90 * 86400;
 /**
  * Usage analytics (A6). Counts how often each premium-only feature blocked a
  * user (paywall hit) so we can see which drives the most upgrade intent.
- * Backed by Redis counters.
+ * Backed by in-process counters (reset on restart — analytics, not billing).
  */
 @Injectable()
 export class AnalyticsService {
   constructor(
-    private readonly redis: RedisService,
+    private readonly store: MemoryStoreService,
     @InjectRepository(AffiliateClickOrmEntity)
     private readonly clicks: Repository<AffiliateClickOrmEntity>,
   ) {}
 
   async recordPaywall(feature: string): Promise<void> {
-    await this.redis.increment(`paywall:${feature}`, TTL_90_DAYS);
+    await this.store.increment(`paywall:${feature}`, TTL_90_DAYS);
   }
 
   async paywallStats(): Promise<Record<string, number>> {
     const out: Record<string, number> = {};
     for (const f of PAYWALL_FEATURES) {
-      out[f] = await this.redis.getCount(`paywall:${f}`);
+      out[f] = await this.store.getCount(`paywall:${f}`);
     }
     return out;
   }

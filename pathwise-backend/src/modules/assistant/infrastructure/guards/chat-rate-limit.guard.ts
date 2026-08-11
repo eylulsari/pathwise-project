@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { RedisService } from '../../../../infrastructure/redis/redis.service';
+import { MemoryStoreService } from '../../../../infrastructure/cache/memory-store.service';
 import { AuthUser } from '../../../auth/domain/auth-user';
 
 /**
@@ -21,7 +21,7 @@ const CHAT_HOURLY_LIMIT = 25;
 export class ChatRateLimitGuard implements CanActivate {
   private readonly logger = new Logger(ChatRateLimitGuard.name);
 
-  constructor(private readonly redis: RedisService) {}
+  constructor(private readonly store: MemoryStoreService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request & { user?: AuthUser }>();
@@ -29,11 +29,11 @@ export class ChatRateLimitGuard implements CanActivate {
     if (!userId) return true; // JwtAuthGuard should have set it; fail open.
 
     // Fixed 1-hour window: the counter's TTL is set on first increment.
-    // Redis being down must not take the chat down with it — the cap protects a
-    // shared free-tier key, it is not a security control, so fail open.
+    // The cap protects a shared free-tier key; it is not a security control,
+    // so a counter failure must not take the chat down with it — fail open.
     let used: number;
     try {
-      used = await this.redis.increment(`assistant:rate:${userId}`, 3600);
+      used = await this.store.increment(`assistant:rate:${userId}`, 3600);
     } catch (err) {
       this.logger.warn(`Rate-limit counter unavailable, allowing request: ${String(err)}`);
       return true;

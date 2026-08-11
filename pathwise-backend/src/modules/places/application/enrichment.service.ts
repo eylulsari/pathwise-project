@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
+import { MemoryStoreService } from '../../../infrastructure/cache/memory-store.service';
 import { PlacesService } from './places.service';
 import { OverpassClient } from '../infrastructure/enrichment/overpass.client';
 import { WikipediaClient } from '../infrastructure/enrichment/wikipedia.client';
@@ -29,7 +29,7 @@ const WIKI_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
 /**
  * Enrichment layer that sits *beside* the PlaceRepositoryPort/Strategy path.
  * It composes live OSM (Overpass) and Wikipedia data for a place, cached in
- * Redis. Every external failure degrades to null for that slice — callers keep
+ * the in-process cache. Every external failure degrades to null for that slice — callers keep
  * their curated mock values, so nothing here is load-bearing.
  */
 @Injectable()
@@ -40,7 +40,7 @@ export class EnrichmentService {
     private readonly places: PlacesService,
     private readonly overpass: OverpassClient,
     private readonly wikipedia: WikipediaClient,
-    private readonly redis: RedisService,
+    private readonly store: MemoryStoreService,
   ) {}
 
   async getEnrichment(placeId: string): Promise<PlaceEnrichment> {
@@ -78,9 +78,9 @@ export class EnrichmentService {
   }
 
   /**
-   * Read-through Redis cache. Caches both hits and misses (misses briefly, as
+   * Read-through in-process cache. Caches both hits and misses (misses briefly, as
    * `null`) so a landmark with no OSM tags doesn't hammer Overpass every load.
-   * Redis errors are swallowed — the fetch still runs.
+   * Cache errors are swallowed — the fetch still runs.
    */
   private async cached<T>(
     key: string,
@@ -88,10 +88,10 @@ export class EnrichmentService {
     fetcher: () => Promise<T | null>,
   ): Promise<T | null> {
     try {
-      const hit = await this.redis.get(key);
+      const hit = await this.store.get(key);
       if (hit !== null) return JSON.parse(hit) as T | null;
     } catch (err) {
-      this.logger.warn(`Redis read failed for ${key}: ${String(err)}`);
+      this.logger.warn(`Cache read failed for ${key}: ${String(err)}`);
     }
 
     const value = await fetcher();
@@ -99,9 +99,9 @@ export class EnrichmentService {
     try {
       // Cache a miss for a shorter window (1 day) than a hit.
       const effectiveTtl = value === null ? 24 * 60 * 60 : ttl;
-      await this.redis.setWithTtl(key, JSON.stringify(value), effectiveTtl);
+      await this.store.setWithTtl(key, JSON.stringify(value), effectiveTtl);
     } catch (err) {
-      this.logger.warn(`Redis write failed for ${key}: ${String(err)}`);
+      this.logger.warn(`Cache write failed for ${key}: ${String(err)}`);
     }
     return value;
   }

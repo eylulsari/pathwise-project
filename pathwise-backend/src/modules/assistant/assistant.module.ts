@@ -8,7 +8,7 @@ import { ChatRateLimitGuard } from './infrastructure/guards/chat-rate-limit.guar
 
 /**
  * AI assistant backed by Groq or Google Gemini — whichever key is configured
- * (Groq first). ConfigService (keys/models) and Redis (rate limit) are global.
+ * (Groq first). ConfigService (keys/models) and the memory store (rate limit) are global.
  * PlacesModule is imported for its exported PlacesService — the grounding data
  * source. Degrades to a canned answer when no key is set or the LLM call fails;
  * never load-bearing.

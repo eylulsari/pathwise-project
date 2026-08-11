@@ -1,19 +1,19 @@
 import { ConfigService } from '@nestjs/config';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
+import { MemoryStoreService } from '../../../infrastructure/cache/memory-store.service';
 import { WeatherService } from './weather.service';
 
-/** In-memory Redis stub so caching logic is exercised without a server. */
-function fakeRedis(): RedisService {
+/** A real MemoryStoreService — the cache is in-process now, so no stub needed. */
+function newStore(): MemoryStoreService {
   const store = new Map<string, string>();
   return {
     get: async (k: string) => store.get(k) ?? null,
     setWithTtl: async (k: string, v: string) => void store.set(k, v),
-  } as unknown as RedisService;
+  } as unknown as MemoryStoreService;
 }
 
-function makeService(key: string | undefined, redis = fakeRedis()) {
+function makeService(key: string | undefined, store = newStore()) {
   const config = { get: () => key } as unknown as ConfigService;
-  return new WeatherService(config, redis);
+  return new WeatherService(config, store);
 }
 
 // The exact OpenWeatherMap payload shape (real values captured from Istanbul).
@@ -67,18 +67,18 @@ describe('WeatherService', () => {
   });
 
   it('serves the cached payload on a second call (source: cache)', async () => {
-    const redis = fakeRedis();
+    const store = newStore();
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: async () => OWM_PAYLOAD,
     }) as unknown as typeof fetch;
 
-    const svc = makeService('valid-key', redis);
+    const svc = makeService('valid-key', store);
     const first = await svc.getCurrent();
     const second = await svc.getCurrent();
 
     expect(first.source).toBe('live');
     expect(second.source).toBe('cache');
-    expect(global.fetch).toHaveBeenCalledTimes(1); // second call hit Redis
+    expect(global.fetch).toHaveBeenCalledTimes(1); // second call hit the cache
   });
 });

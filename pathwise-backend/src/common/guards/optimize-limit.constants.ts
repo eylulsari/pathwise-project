@@ -1,7 +1,7 @@
 /** Free users may run the route optimizer this many times per day. */
 export const FREE_OPTIMIZE_LIMIT = 3;
 
-/** Redis key for a user's optimize count on a given day (resets at midnight). */
+/** Counter key for a user's optimize count on a given day (resets at midnight). */
 export function optimizeDailyKey(userId: string, date = new Date()): string {
   const day = date.toISOString().slice(0, 10); // YYYY-MM-DD
   return `optimize:${userId}:${day}`;

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
+import { MemoryStoreService } from '../../../infrastructure/cache/memory-store.service';
 
 export type CrowdLevel = 'Low' | 'Moderate' | 'High';
 
@@ -49,7 +49,7 @@ export class WeatherService {
 
   constructor(
     private readonly config: ConfigService,
-    private readonly redis: RedisService,
+    private readonly store: MemoryStoreService,
   ) {}
 
   /**
@@ -59,10 +59,10 @@ export class WeatherService {
    */
   async getCurrent(): Promise<WeatherCrowd> {
     try {
-      const cached = await this.redis.get(CACHE_KEY);
+      const cached = await this.store.get(CACHE_KEY);
       if (cached) return { ...(JSON.parse(cached) as WeatherCrowd), source: 'cache' };
     } catch (err) {
-      this.logger.warn(`Redis read failed, fetching fresh weather: ${String(err)}`);
+      this.logger.warn(`Cache read failed, fetching fresh weather: ${String(err)}`);
     }
 
     const key = this.config.get<string>('OPENWEATHER_API_KEY');
@@ -96,9 +96,9 @@ export class WeatherService {
       };
 
       try {
-        await this.redis.setWithTtl(CACHE_KEY, JSON.stringify(payload), CACHE_TTL_SECONDS);
+        await this.store.setWithTtl(CACHE_KEY, JSON.stringify(payload), CACHE_TTL_SECONDS);
       } catch (err) {
-        this.logger.warn(`Redis write failed (weather still served): ${String(err)}`);
+        this.logger.warn(`Cache write failed (weather still served): ${String(err)}`);
       }
       return payload;
     } catch (err) {

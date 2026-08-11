@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
+import { MemoryStoreService } from '../../../infrastructure/cache/memory-store.service';
 
 /** Currencies the display converter offers (base is always TRY). */
 export const SUPPORTED_SYMBOLS = ['USD', 'EUR', 'GBP'] as const;
@@ -36,19 +36,19 @@ const FRANKFURTER_URL =
 export class CurrencyService {
   private readonly logger = new Logger(CurrencyService.name);
 
-  constructor(private readonly redis: RedisService) {}
+  constructor(private readonly store: MemoryStoreService) {}
 
   /**
-   * Live TRY exchange rates, cached in Redis for an hour. Any failure (network,
-   * bad payload, Redis) degrades silently to the static fallback table so the
+   * Live TRY exchange rates, cached in process for an hour. Any failure (network,
+   * bad payload, cache) degrades silently to the static fallback table so the
    * converter keeps working — this integration is never load-bearing.
    */
   async getRates(): Promise<CurrencyRates> {
     try {
-      const cached = await this.redis.get(CACHE_KEY);
+      const cached = await this.store.get(CACHE_KEY);
       if (cached) return { ...(JSON.parse(cached) as CurrencyRates), source: 'cache' };
     } catch (err) {
-      this.logger.warn(`Redis read failed, fetching fresh rates: ${String(err)}`);
+      this.logger.warn(`Cache read failed, fetching fresh rates: ${String(err)}`);
     }
 
     try {
@@ -60,9 +60,9 @@ export class CurrencyService {
       const payload: CurrencyRates = { base: 'TRY', date: body.date, rates, source: 'live' };
 
       try {
-        await this.redis.setWithTtl(CACHE_KEY, JSON.stringify(payload), CACHE_TTL_SECONDS);
+        await this.store.setWithTtl(CACHE_KEY, JSON.stringify(payload), CACHE_TTL_SECONDS);
       } catch (err) {
-        this.logger.warn(`Redis write failed (rates still served): ${String(err)}`);
+        this.logger.warn(`Cache write failed (rates still served): ${String(err)}`);
       }
       return payload;
     } catch (err) {
