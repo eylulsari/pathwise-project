@@ -660,6 +660,85 @@ entry, with the seed still present.
 The flaky one is `social-features.spec.ts:70` (poll winner → Today's Path),
 recorded as timing-sensitive since 2026-08-02 and unrelated to check-ins.
 
+---
+
+## Forum answers + route likes: mock → real (2026-08-11)
+
+Both behaviours already worked and neither survived a reload. Same vertical
+slice as check-ins, plus one thing check-ins did not have: **a toggle**.
+
+| Piece | Status |
+|---|---|
+| `forum_answers` + `route_likes` + migration `1730000004000` | ✅ |
+| `GET /social/forum`, `POST /social/forum/:questionId/answers` | ✅ |
+| `GET /social/community-routes`, `PUT`/`DELETE .../:id/like` | ✅ |
+| `api.ts` swapped; `FORUM_QUESTIONS` and `COMMUNITY_ROUTES` mocks deleted | ✅ |
+| Clone-this-route untouched | ✅ it only reads `hub` → localStorage → dashboard; no contact with likes |
+
+**Scope, deliberately narrow**
+- **Questions stay seed-only, answers persist.** There is no "ask a question"
+  UI, so persisting questions would be adding a feature, not making one
+  durable. Same for routes: no "publish a route" UI, so only the *liking*
+  got a table.
+- Both merge seed with persisted at read time, as check-ins do, so a fresh
+  account never opens onto an empty forum.
+
+**Likes: a toggle, not a tally**
+- `UNIQUE(userId, routeId)` is the guarantee, not a nicety — it is what makes
+  "one like per person" true rather than intended.
+- The write is `PUT` + `DELETE`, **not a toggling `POST`**. Both are
+  idempotent, so a retry or a double-fire cannot inflate the count or silently
+  undo a like. Insert uses `ON CONFLICT DO NOTHING`, so two simultaneous likes
+  cannot both land — no read-modify-write race.
+- **The count is derived on every read**: `seedLikes + COUNT(route_likes)`.
+  Nothing anywhere increments a stored total, so it cannot drift from the rows
+  behind it. `seedLikes` is static demo data and is never written to.
+
+> A toggling POST would have made the "like twice → count unchanged" test pass
+> for the wrong reason: the second call would *unlike*, and the count would
+> return to where it started. PUT keeps it at one like, which is what the test
+> is actually meant to prove.
+
+### Live API run — 16/16
+Forum: answer persisted into **q1 only** (verified it leaked into no other
+thread), seed answers intact (18 → 19), author taken from the JWT, unknown
+thread → `404`.
+
+Likes, on `r1` (seed baseline 128):
+
+| Step | likes |
+|---|---|
+| start | 128, `liked: false` |
+| A likes | 129 |
+| **A likes again** | **129** — idempotent |
+| A likes a third time | **129** |
+| B likes | 130 |
+| A unlikes | 129 |
+| **A unlikes again** | **129** — idempotent |
+| separate GET as B | 129, `B.liked: true` |
+| unknown route | `404` |
+
+### E2E — `e2e/social-persistence.spec.ts` (2 specs)
+Both **reload the page** before asserting. The forum spec checks the answer
+returns, sits in its own thread, has not leaked into another, and that the
+seed answers are still beside it. The like spec checks the like and the count
+survive a reload, that liking again via the API leaves the count unchanged,
+and that taking the like back returns the count to where it started.
+
+> **These surfaces are shared**, so the specs assert *this user's* own
+> contribution and the deltas it causes — never a global count or "is first",
+> and they deliberately use a thread and a route that `social-features.spec.ts`
+> does not touch, so parallel workers cannot collide. This is the same lesson
+> the check-in persistence spec learned the hard way.
+
+### Regression — 2026-08-11 (after this change)
+| Suite | Result |
+|---|---|
+| **E2E** | ✅ **57 tests, 57 passed, 0 flaky** — `PLAYWRIGHT_EXIT=0` (1.6 m) |
+| Backend `npm test` | ✅ 78/78 |
+| Backend lint / tsc | ✅ exit 0 |
+| Frontend typecheck / lint / i18n | ✅ exit 0 / 0 errors / **360 keys** |
+
 ### Still not covered
 - ~~No spec asserts the "% match" bar or the travel-style picker~~ — **closed
   2026-08-11**, see the Görev 3 section.
