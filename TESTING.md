@@ -810,6 +810,82 @@ frontend) — the orphaned `pathwise-redis` container was removed too.
 | Backend lint / tsc | ✅ exit 0 |
 | Frontend typecheck / lint / i18n | ✅ exit 0 / 0 errors / 360 keys |
 
+---
+
+## Deploy readiness — single-origin production build (2026-08-12)
+
+Repo-side only; the actual deploy is done from the Render dashboard.
+
+**One service, not two.** The production image serves the API under `/api` and
+the built SPA at everything else. This is a requirement, not a preference: the
+refresh token is an httpOnly `SameSite=Lax` cookie, and Safari, Firefox and
+Brave block that cookie on cross-site requests — a split origin would log
+users out every 15 minutes on exactly the phones this is aimed at.
+
+| Piece | Where |
+|---|---|
+| Production image | **new root `Dockerfile`** — builds SPA → builds API → lean runtime |
+| Static serving + SPA fallback | `ServeStaticModule`, registered **only when `client/index.html` exists** |
+| Migrations on boot | `npm run migration:run:prod && node dist/main.js`, `DB_SYNCHRONIZE=false` |
+| Blueprint | `render.yaml` — one web service + free Postgres, no Redis, no static site |
+
+**Dev and E2E are untouched.** `pathwise-backend/Dockerfile` was deliberately
+left alone, so docker-compose, hot reload and the two-origin E2E topology work
+exactly as before. The static handler returns nothing in dev because there is
+no `client/` directory.
+
+### Two traps found while building it
+- **`npm run migration:run` cannot run in the production image.** It starts
+  with `nest build`, and `@nestjs/cli` is a devDependency that `npm prune
+  --omit=dev` removes. Added `migration:run:prod`, which runs the migration
+  against the already-built `dist/`.
+- **`npm ci` died with npm's "Exit handler never called"** in the client
+  stage. Cause: `@playwright/test` is a devDependency whose postinstall pulls
+  ~150 MB of browsers. Fixed with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` — the
+  image builds the SPA, it never tests it.
+
+### The production path was actually run, not just compiled
+Image built (`DOCKER_BUILD_EXIT=0`, 385 MB) and run against Postgres:
+
+| Check | Result |
+|---|---|
+| `/social` direct hit | **200, `text/html`**, contains the SPA root div |
+| `/profile`, `/premium`, `/auth`, `/dashboard` | **200** each |
+| `/api/health`, `/api/places` | **200** |
+| **`/api/nope`** | **404 `application/json`** — the `exclude` works; API 404s are not swallowed into `index.html` |
+| register | **201**, cookie `pw_refresh` set `HttpOnly`, path `/api/auth`, `secure` |
+| refresh with that cookie | **200** |
+
+> That `/api/nope` row is the one worth keeping. Without `exclude`, the
+> catch-all answers unmatched API routes with `index.html`, and the client
+> fails with "Unexpected token <" instead of a readable error.
+
+**Auth code was not touched** — that is the whole point of single-origin. The
+cookie stays `SameSite=Lax` and first-party. Verified: no diff under
+`src/modules/auth/`.
+
+### Also changed
+- `main.ts` reads `PORT` before `BACKEND_PORT` (managed hosts assign `PORT`),
+  which removed a fragile self-referencing `fromService` from `render.yaml`.
+- `DB_SSL` flag on both `DatabaseModule` and the migration `data-source`,
+  defaulting off. Managed Postgres usually needs TLS with
+  `rejectUnauthorized: false`; this is the first thing to flip if the deployed
+  service cannot reach its database.
+- `CORS_ORIGINS` is declared but unset — same origin means CORS is never
+  exercised. `enableCors` stays in `main.ts` because **local dev is still two
+  origins** (5173 ↔ 3000) and the E2E suite depends on it.
+
+### Regression — deploy-readiness round
+| Suite | Result |
+|---|---|
+| **E2E** | ✅ **57 tests: 56 passed, 1 flaky, 0 failed** — `PLAYWRIGHT_EXIT=0` (2.0 m) |
+| Backend `npm test` | ✅ 78/78 |
+| Backend lint / tsc | ✅ exit 0 |
+| Frontend typecheck / lint / i18n | ✅ exit 0 / 0 errors / 360 keys |
+
+The flaky one is `social-features.spec.ts:70` (poll winner), recorded as
+timing-sensitive since 2026-08-02 and unrelated.
+
 ### Still not covered
 - ~~No spec asserts the "% match" bar or the travel-style picker~~ — **closed
   2026-08-11**, see the Görev 3 section.

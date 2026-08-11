@@ -90,6 +90,56 @@ See [TESTING.md](./TESTING.md) for what has actually been exercised end-to-end.
 > config stays on `localhost` so CI and other machines are unaffected; the
 > backend allows both origins.
 
+## Deploy (Render, free tier)
+
+One web service serves **both halves**: the API under `/api`, the built SPA at
+everything else. That is deliberate — the refresh token is an httpOnly
+`SameSite=Lax` cookie, and Safari, Firefox and Brave block that cookie on
+cross-site requests, so a split frontend/backend origin would silently log
+users out every 15 minutes. No Redis (removed), no separate static site.
+
+`render.yaml` is a Blueprint: Render reads it and creates the service plus a
+free Postgres, so nothing below has to be clicked together by hand.
+
+### Steps
+
+1. **New → Blueprint** in the Render dashboard, point it at this repo.
+   It picks up `render.yaml` and proposes `pathwise` (web) + `pathwise-db`.
+2. Render prompts for the values marked `sync: false`. Set:
+
+   | Variable | Required? | Notes |
+   | -------- | --------- | ----- |
+   | `JWT_ACCESS_SECRET` | **yes** | any long random string |
+   | `JWT_REFRESH_SECRET` | **yes** | a *different* long random string |
+   | `GROQ_API_KEY` | no | AI assistant; without it the assistant returns canned answers |
+   | `OPENWEATHER_API_KEY` | no | weather widget; without it a static payload is used |
+   | `GEMINI_API_KEY` | no | secondary LLM, only tried if Groq fails |
+   | `CORS_ORIGINS` | no | leave blank — same origin, so CORS is never exercised |
+
+   Everything else (database credentials, `DB_SYNCHRONIZE=false`, `DB_SSL`,
+   `AUTH_THROTTLE_LIMIT`, token TTLs) is already in `render.yaml`. **Database
+   credentials are wired by Render itself** — never paste them.
+3. **Apply**. First build takes a few minutes (it builds the SPA and the API).
+4. On boot the container runs `npm run migration:run:prod` before starting, so
+   the schema is created by migrations. `DB_SYNCHRONIZE` stays `false` — TypeORM
+   never improvises against production.
+5. Check `https://<your-service>.onrender.com/api/health` → `{"status":"ok"}`.
+   Then open the root URL; deep links like `/social` work directly.
+
+### Things worth knowing
+
+- **The free instance sleeps** after ~15 minutes idle. The first request then
+  takes ~50 seconds while it wakes. `healthCheckPath: /api/health` is what
+  Render pings.
+- **Sessions survive restarts** — refresh tokens are rows in Postgres, so a
+  sleep/wake cycle does not log anyone out.
+- **`DB_SSL` defaults to `true`** here. If Render's private network refuses
+  SSL, set it to `false` in the dashboard; it is the first thing to try if the
+  service cannot reach the database.
+- **Caches and quota counters are in-process**, which is correct for the single
+  free instance. Scaling to more than one requires a shared store again — see
+  ARCHITECTURE.md.
+
 ## Documentation
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — patterns, module boundaries, data model
