@@ -362,6 +362,7 @@ export const translations = {
       rightHere: 'Right here',
       checkinPosting: 'Posting…',
       checkinFailed: 'Could not post that check-in — try again.',
+      answerFailed: 'Could not post that answer — try again.',
       // Buddy matching (Görev 2)
       matchLabel: 'Match',
       matchShared: 'You both like',
@@ -803,6 +804,7 @@ export const translations = {
       rightHere: 'Tam burada',
       checkinPosting: 'Gönderiliyor…',
       checkinFailed: 'Check-in gönderilemedi — tekrar dene.',
+      answerFailed: 'Cevap gönderilemedi — tekrar dene.',
       // Gezgin eşleştirme (Görev 2)
       matchLabel: 'Uyum',
       matchShared: 'İkinizin de sevdiği',

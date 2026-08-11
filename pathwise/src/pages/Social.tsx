@@ -145,14 +145,23 @@ export default function Social() {
     }
   }
 
-  function likeRoute(id: string) {
-    setRoutes((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? { ...r, liked: !r.liked, likes: r.likes + (r.liked ? -1 : 1) }
-          : r,
-      ),
-    );
+  /**
+   * Like / unlike a route.
+   *
+   * The count on screen is always the server's — it is derived there from the
+   * like rows, so adding or subtracting one locally would be a second, drifting
+   * implementation of the same number. A failed call simply leaves the card as
+   * it was rather than showing a like that did not happen.
+   */
+  async function likeRoute(id: string) {
+    const current = routes.find((r) => r.id === id);
+    if (!current) return;
+    try {
+      const updated = await api.likeCommunityRoute(id, !current.liked);
+      setRoutes((prev) => prev.map((r) => (r.id === id ? updated : r)));
+    } catch {
+      /* leave the card untouched — the server rejected or is unreachable */
+    }
   }
 
   // Clone a community route into the user's own plan: hand its hub off to the
@@ -348,7 +357,7 @@ export default function Social() {
                   <span className="text-xs text-ink/50">{r.stops} stops · {r.distanceKm} km</span>
                 </div>
                 <div className="mt-3 flex gap-2">
-                  <button onClick={() => likeRoute(r.id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${r.liked ? 'bg-sunset/20 text-terracotta' : 'border border-ink/10 text-ink/70'}`}>
+                  <button onClick={() => void likeRoute(r.id)} className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${r.liked ? 'bg-sunset/20 text-terracotta' : 'border border-ink/10 text-ink/70'}`}>
                     {r.liked ? '❤️' : '🤍'} {r.likes}
                   </button>
                   <button onClick={() => cloneRoute(r.hub)} className="rounded-lg bg-iznik/20 px-3 py-1.5 text-xs font-semibold text-ink">{t('social.clone')}</button>
@@ -424,20 +433,43 @@ function FilterChip({
 
 function ForumThread({ q }: { q: ForumQuestion }) {
   const { t } = useT();
-  const [answers, setAnswers] = useState(q.answers);
+  // Seeded from the prop, then replaced by whatever the server returns — the
+  // POST answers with the whole updated thread, so the client never has to
+  // work out where its own answer belongs in the order.
+  const [thread, setThread] = useState(q);
   const [text, setText] = useState('');
+  const [posting, setPosting] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => setThread(q), [q]);
+
+  async function submit() {
+    const body = text.trim();
+    if (!body || posting) return;
+    setPosting(true);
+    setFailed(false);
+    try {
+      setThread(await api.answerForum(q.id, body));
+      setText('');
+    } catch {
+      setFailed(true);
+    } finally {
+      setPosting(false);
+    }
+  }
+
   return (
-    <div className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
+    <div className="rounded-2xl border border-ink/10 bg-surface-2 p-4" data-testid="forum-thread">
       <div className="flex items-start justify-between gap-2">
-        <p className="font-semibold text-ink">{q.question}</p>
-        <ReportButton contentType="forum" contentId={q.id} />
+        <p className="font-semibold text-ink">{thread.question}</p>
+        <ReportButton contentType="forum" contentId={thread.id} />
       </div>
-      <p className="text-xs text-ink/50">{q.authorName} · {q.minutesAgo}m ago</p>
+      <p className="text-xs text-ink/50">{thread.authorName} · {formatAge(thread.createdAt)}</p>
       <div className="mt-3 space-y-2 border-l-2 border-ink/10 pl-3">
-        {answers.map((a, i) => (
+        {thread.answers.map((a, i) => (
           <div key={i} className="text-sm">
             <span className="font-semibold text-iznik">{a.authorName}</span>
-            <span className="text-ink/50"> · {a.minutesAgo}m</span>
+            <span className="text-ink/50"> · {formatAge(a.createdAt)}</span>
             <p className="text-ink/80">{a.text}</p>
           </div>
         ))}
@@ -446,16 +478,15 @@ function ForumThread({ q }: { q: ForumQuestion }) {
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && text.trim()) {
-              setAnswers((prev) => [...prev, { authorName: 'You', text: text.trim(), minutesAgo: 0 }]);
-              setText('');
-            }
-          }}
+          onKeyDown={(e) => e.key === 'Enter' && void submit()}
+          disabled={posting}
           placeholder={t('social.quickAnswer')}
-          className="flex-1 rounded-lg border border-ink/10 bg-white px-3 py-1.5 text-sm outline-none focus:border-iznik"
+          className="flex-1 rounded-lg border border-ink/10 bg-white px-3 py-1.5 text-sm outline-none focus:border-iznik disabled:opacity-50"
         />
       </div>
+      {failed && (
+        <p className="mt-2 text-xs font-semibold text-terracotta">{t('social.answerFailed')}</p>
+      )}
     </div>
   );
 }

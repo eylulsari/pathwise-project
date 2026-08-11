@@ -1,11 +1,12 @@
 /**
  * Central data layer. Every data access in the app goes through here.
  *
- * - Auth + itinerary + places call the real Pathwise backend over HTTP.
- * - Social / profile / tours / weather are served from the mock modules with a
- *   simulated network delay; each function documents the real endpoint it would
- *   hit (Firebase/Postgres, GetYourGuide, OpenWeatherMap) in a comment so the
- *   swap to live data is a one-function change.
+ * - Auth, itinerary, places and the social graph (check-ins, buddies, forum,
+ *   community routes) call the real Pathwise backend over HTTP.
+ * - Profile aggregates, tours and the offline weather fallback are still
+ *   served from the mock modules with a simulated network delay; each of those
+ *   documents the real endpoint it would hit (GetYourGuide, OpenWeatherMap) so
+ *   the swap to live data stays a one-function change.
  */
 import type {
   AiSuggestion,
@@ -38,10 +39,8 @@ import { PLACES, PLACES_BY_ID } from '../hubData';
 import { withEarnedBadges } from '../utils/badgeStore';
 import {
   BADGES,
-  COMMUNITY_ROUTES,
   CURATED_TOURS,
   CURRENT_WEATHER,
-  FORUM_QUESTIONS,
   LIVE_TOURS,
   PAST_TRIPS,
   PROFILE_STATS,
@@ -540,11 +539,34 @@ export const api = {
       .catch(() => null);
   },
 
+  /** Routes are a curated seed; `likes` and `liked` are computed per viewer. */
   async getCommunityRoutes(): Promise<CommunityRoute[]> {
-    return delay(COMMUNITY_ROUTES);
+    return http<CommunityRoute[]>('/social/community-routes');
   },
+  /**
+   * Like / unlike a route.
+   *
+   * PUT and DELETE rather than one toggling POST: both are idempotent, so a
+   * double click or a retry cannot inflate the count or silently undo the
+   * like. Returns the route as the server now sees it, so the count on screen
+   * is the server's, never one the client incremented itself.
+   */
+  async likeCommunityRoute(routeId: string, liked: boolean): Promise<CommunityRoute> {
+    return http<CommunityRoute>(`/social/community-routes/${routeId}/like`, {
+      method: liked ? 'PUT' : 'DELETE',
+    });
+  },
+
+  /** Seed threads with every persisted answer merged in. */
   async getForum(): Promise<ForumQuestion[]> {
-    return delay(FORUM_QUESTIONS);
+    return http<ForumQuestion[]>('/social/forum');
+  },
+  /** Answer a thread; the author comes from the JWT. Returns the whole thread. */
+  async answerForum(questionId: string, text: string): Promise<ForumQuestion> {
+    return http<ForumQuestion>(`/social/forum/${questionId}/answers`, {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    });
   },
 
   // ═════════════════════════════════════════════════════════════════

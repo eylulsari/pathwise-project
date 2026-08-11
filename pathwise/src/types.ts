@@ -435,7 +435,13 @@ export interface CommunityRoute {
   hub: Hub;
   stops: number;
   distanceKm: number;
+  /**
+   * Static demo baseline + how many people actually liked it. Derived by the
+   * server on every read — no total is stored anywhere, so it cannot drift
+   * away from the rows behind it.
+   */
   likes: number;
+  /** Whether the signed-in viewer has liked it. */
   liked: boolean;
   tags: Interest[];
 }
@@ -457,12 +463,27 @@ export interface Poll {
   createdAt: string;
 }
 
+/**
+ * A Q&A thread, as `GET /social/forum` returns it.
+ *
+ * Questions are a curated seed (there is no "ask a question" UI); **answers**
+ * are persisted and merged into their thread by the server. Both carry a real
+ * `createdAt` — seed entries have theirs derived from a relative offset at
+ * read time, so a thread never ages into claiming to be days old.
+ */
+export interface ForumAnswer {
+  authorName: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface ForumQuestion {
   id: string;
   authorName: string;
   question: string;
-  minutesAgo: number;
-  answers: { authorName: string; text: string; minutesAgo: number }[];
+  createdAt: string;
+  /** Oldest first — a thread reads top to bottom. */
+  answers: ForumAnswer[];
 }
 
 // ── Profile ────────────────────────────────────────────────────────
