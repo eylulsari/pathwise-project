@@ -886,6 +886,87 @@ cookie stays `SameSite=Lax` and first-party. Verified: no diff under
 The flaky one is `social-features.spec.ts:70` (poll winner), recorded as
 timing-sensitive since 2026-08-02 and unrelated.
 
+---
+
+## Deploy failure: the schema had no migrations (2026-08-12)
+
+The first Render deploy died at startup:
+`42P01 relation "users" does not exist`, from
+`AddSubscriptionTierToUsers1730000000000`.
+
+### Root cause — measured, not guessed
+Entities define **18 tables**. Migrations created **5**. The remaining
+**13 — including `users`** — had never had a migration at all; they only ever
+existed because dev runs `DB_SYNCHRONIZE=true` and TypeORM built them from the
+entities.
+
+So the migration list opens with `ALTER TABLE "users"` against a database
+where nothing has created `users`. Locally that ALTER succeeded on a table
+synchronize had already made, which is precisely why six migrations could be
+written, reviewed and pushed without anyone noticing the base was missing.
+
+Reproduced on an empty local database with synchronize off — the identical
+error, on the very first migration, transaction rolled back.
+
+### Fix
+`1729999000000-CreateBaselineSchema` — dated **before** the existing six so a
+clean database builds the base first. It creates `users` in its
+**pre-migration shape**: no `subscriptionTier`, no women-traveler preferences,
+no `points`, because the later migrations still add those and should keep
+saying when each arrived. (`trialEndsAt` is in the baseline — no migration
+ever added it.) Every statement is `IF NOT EXISTS`, so a dev database that
+already recorded all six runs it afterwards as a harmless no-op.
+
+### Verified on a genuinely empty database
+| Check | Result |
+|---|---|
+| `npm run migration:run` from empty | ✅ **7/7 executed**, exit 0, 0 errors |
+| Resulting tables | ✅ **18**, exactly the entity set |
+| `users` columns | ✅ all 15 — baseline + the three later migrations |
+| **`npm run migration:run:prod`** (the exact command Render runs) from empty | ✅ exit 0, 7 applied, 19 tables |
+| App boots with `DB_SYNCHRONIZE=false` on that schema | ✅ health 200, **register 201**, places 200, check-ins 401 (auth required) |
+| Rows actually written | ✅ 1 `users`, 1 `refresh_tokens` |
+
+> `register` is the assertion that matters: it inserts into `users` *and*
+> `refresh_tokens`, so it exercises the baseline and the newest migration in
+> one call.
+
+### Render's database needs no cleanup
+The failed run left it **effectively empty**: TypeORM creates its `migrations`
+bookkeeping table outside the transaction, then rolls back the failed
+migration. Confirmed locally — after the failure the database held exactly one
+table (`migrations`) with **zero rows**. So the next deploy starts from a clean
+slate and applies all seven. No manual reset needed.
+
+### Prevention
+CONTRIBUTING now documents the trap and gives the empty-database verification
+command. The rule: **a dev database can never validate a migration set**,
+because synchronize has already built everything and every statement is
+`IF NOT EXISTS`.
+
+### Regression after the fix
+| Suite | Result |
+|---|---|
+| **E2E** | ✅ **57/57, 0 flaky** — `PLAYWRIGHT_EXIT=0` (1.4 m) |
+| Backend `npm test` | ✅ 78/78 |
+| Backend lint / tsc | ✅ exit 0 |
+
+### ⚠️ Environment finding: a new backend dependency needs a container rebuild
+Adding `@nestjs/serve-static` on the host silently produced a **stale gate**.
+The compose backend bind-mounts only `./pathwise-backend/src`; `node_modules`
+lives in the image. So the watcher tried to recompile, failed to resolve the
+new package, and **kept the last good process running** — the API answered
+`200` throughout, and an E2E run reported 2 unrelated-looking failures while
+in fact never executing the changed code at all.
+
+Symptom to recognise: `docker compose ps` shows a long uptime with no restart
+after a source change, and `docker exec pathwise-backend ls node_modules/@nestjs`
+is missing the package. Fix: `docker compose up -d --build backend`.
+
+> This is the same class of trap as the 2026-07-27 Tailwind config drift: the
+> container silently disagreeing with the repo. **After adding any backend
+> dependency, rebuild before trusting a test run.**
+
 ### Still not covered
 - ~~No spec asserts the "% match" bar or the travel-style picker~~ — **closed
   2026-08-11**, see the Görev 3 section.

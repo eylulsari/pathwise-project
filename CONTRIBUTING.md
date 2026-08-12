@@ -71,6 +71,28 @@ the number is what orders them.
   or why `check_ins.placeId` is not a foreign key (places are an in-memory
   dataset, not a table).
 
+**⚠️ A new table needs a CREATE migration, not just an entity.**
+`DB_SYNCHRONIZE=true` in dev means TypeORM builds any new table from its
+entity, so a missing migration is invisible locally — and stays invisible
+until a deploy runs against an empty database with synchronize off. That is
+exactly how thirteen tables (including `users`) ended up with no migration at
+all: the first production deploy died on `42P01 relation "users" does not
+exist`, because the earliest migration was an `ALTER TABLE "users"` and
+nothing had ever created it. Fixed by `1729999000000-CreateBaselineSchema`.
+
+**Verify against an empty database, never your dev one:**
+
+```bash
+docker exec pathwise-postgres psql -U pathwise -d postgres \
+  -c "CREATE DATABASE pathwise_clean OWNER pathwise;"
+cd pathwise-backend
+POSTGRES_DB=pathwise_clean POSTGRES_HOST=127.0.0.1 npm run migration:run
+```
+
+A dev database that synchronize already populated will pass no matter what is
+missing, because every statement is `IF NOT EXISTS`. Only an empty database
+tells you the truth.
+
 **Running them:**
 
 ```bash
