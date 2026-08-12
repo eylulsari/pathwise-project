@@ -95,6 +95,63 @@ describe('HubBudgetStrategy', () => {
     }
   });
 
+  // ── stop cap ───────────────────────────────────────────────────────
+  // Before the dataset grew to 129 places a hub held 5–6 candidates and the
+  // pace budget alone was enough. It no longer is: 12–15 candidates per hub
+  // means an 8-hour day packs to whatever arithmetic allows.
+
+  it.each([
+    { paceHours: 3, maxStops: 3 },
+    { paceHours: 5, maxStops: 5 },
+    { paceHours: 7, maxStops: 7 },
+    { paceHours: 12, maxStops: 8 },
+  ])(
+    'caps a $paceHours-hour day at $maxStops stops',
+    async ({ paceHours, maxStops }) => {
+      // A wide interest set maximises the number of scoring candidates, so
+      // this is the case most likely to overflow.
+      const result = await strategy.generate(
+        baseInput({
+          hub: 'sultanahmet',
+          paceHours,
+          budgetTry: 50000,
+          interests: ['food', 'history', 'photo', 'market', 'art', 'nature'],
+        }),
+      );
+      const realStops = result.stops.filter((s) => s.place);
+      expect(realStops.length).toBeGreaterThan(0);
+      expect(realStops.length).toBeLessThanOrEqual(maxStops);
+    },
+  );
+
+  it('lets must-visits exceed the cap rather than dropping a booked stop', async () => {
+    // Five forced stops against a "relaxed" 3-hour cap of three. The user asked
+    // for all five explicitly; silently discarding two would be a bug.
+    const mustVisitIds = [
+      'ChIJ-sultanahmet-hagiasophia',
+      'ChIJ-sultanahmet-bluemosque',
+      'ChIJ-sultanahmet-topkapi',
+      'ChIJ-sultanahmet-basilicacistern',
+      'ChIJ-sultanahmet-grandbazaar',
+    ];
+    const result = await strategy.generate(
+      baseInput({ hub: 'sultanahmet', paceHours: 3, mustVisitIds }),
+    );
+    const ids = result.stops.filter((s) => s.place).map((s) => s.place!.placeId);
+    for (const id of mustVisitIds) expect(ids).toContain(id);
+  });
+
+  it('still honours the pace budget when it is tighter than the cap', async () => {
+    // A 1-hour day allows fewer stops than the 3-stop "relaxed" cap; time wins.
+    const result = await strategy.generate(
+      baseInput({ hub: 'sultanahmet', paceHours: 1, budgetTry: 50000 }),
+    );
+    const visitMinutes = result.stops
+      .filter((s) => s.place)
+      .reduce((sum, s) => sum + s.durationMinutes, 0);
+    expect(visitMinutes).toBeLessThanOrEqual(60);
+  });
+
   it('produces valid HH:mm times and a non-negative cost breakdown', async () => {
     const result = await strategy.generate(baseInput());
     for (const stop of result.stops) {

@@ -31,6 +31,37 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
   private static readonly LUNCH_DURATION = 45;
   private static readonly WALK_SPEED_M_PER_MIN = 75; // ~4.5 km/h
 
+  /**
+   * Upper bound on real stops in a day, by pace.
+   *
+   * Until the dataset grew to 129 places this was unnecessary: a hub held five
+   * or six candidates whose visit times summed to less than any sane pace
+   * budget, so "everything that fits" and "everything" were the same set. With
+   * twelve to fifteen candidates per hub the time budget alone will pack a
+   * seven-hour day with ten or more stops — arithmetically valid and a
+   * miserable day to actually walk. The cap is what keeps a plan human;
+   * `paceHours` remains the binding constraint whenever it is the tighter one.
+   *
+   * Must-visits and reservations are exempt — the user asked for those
+   * explicitly, and silently dropping a booked stop would be a bug, not pacing.
+   */
+  private static readonly MAX_STOPS_BY_PACE: ReadonlyArray<{
+    upToHours: number;
+    maxStops: number;
+  }> = [
+    { upToHours: 3, maxStops: 3 }, // "relaxed"
+    { upToHours: 5, maxStops: 5 }, // "moderate"
+    { upToHours: 7, maxStops: 7 }, // "packed"
+    { upToHours: Infinity, maxStops: 8 },
+  ];
+
+  private static maxStopsFor(paceHours: number): number {
+    return (
+      HubBudgetStrategy.MAX_STOPS_BY_PACE.find((b) => paceHours <= b.upToHours)
+        ?.maxStops ?? 8
+    );
+  }
+
   constructor(private readonly places: PlacesService) {}
 
   async generate(input: RouteGenerationInput): Promise<Itinerary> {
@@ -51,11 +82,12 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       .map((p) => ({ place: p, score: this.score(p, input, mustSet) }))
       .sort((a, b) => b.score - a.score);
 
-    // 3 — greedy selection within the time budget.
+    // 3 — greedy selection within the time budget AND the stop cap.
     const timeBudget = input.paceHours * 60;
+    const maxStops = HubBudgetStrategy.maxStopsFor(input.paceHours);
     let usedMinutes = 0;
     const selected: Place[] = [];
-    // Force must-visits in first (never dropped).
+    // Force must-visits in first (never dropped, never counted against the cap).
     for (const { place } of scored) {
       if (mustSet.has(place.placeId)) {
         selected.push(place);
@@ -64,6 +96,9 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     }
     for (const { place } of scored) {
       if (mustSet.has(place.placeId)) continue;
+      if (selected.length >= maxStops) break;
+      // `continue`, not `break`: a long stop that misses the budget must not
+      // stop us considering the shorter, lower-scoring ones behind it.
       if (usedMinutes + place.avgVisitMinutes > timeBudget) continue;
       selected.push(place);
       usedMinutes += place.avgVisitMinutes;
