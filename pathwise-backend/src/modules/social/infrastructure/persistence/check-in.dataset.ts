@@ -39,6 +39,17 @@ const SEED: CheckInSeedEntry[] = [
   { id: 'c12', traveler: { id: 't12', name: 'Camila Rojas', avatarColor: '#B85C7A' }, placeId: 'ChIJ-galata-karakoylokantasi', hub: 'karakoy-galata', message: 'Lunch menu is the cheap way into this place. Gone now, but go.', minutesAgo: 155 },
   { id: 'c7', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A' }, placeId: 'ChIJ-kadikoy-yeldegirmeni', hub: 'kadikoy-moda', message: 'Following the mural trail street by street, it just keeps going 🎨', minutesAgo: 184 },
   { id: 'c13', traveler: { id: 't14', name: 'Kenji Mori', avatarColor: '#8A6B4F' }, placeId: 'ChIJ-sultanahmet-kucukayasofya', hub: 'sultanahmet', message: 'Courtyard was empty at opening. Headed back to the tea garden now.', minutesAgo: 240 },
+
+  // ── Added with the 10-hub expansion ──────────────────────────────
+  // Beyoğlu, Üsküdar and the islands had no check-ins at all, so their map
+  // pins and feed were empty the moment anyone planned a day there. Kept
+  // inside 9–239 minutes on purpose: the specs pin the newest entry (8 min,
+  // live) and the oldest (240 min, stale) as the two ends of the window, and
+  // an entry outside that range would move a boundary the tests rely on.
+  { id: 'c14', traveler: { id: 't17', name: 'Sofia Novak', avatarColor: '#C97B8E' }, placeId: 'ChIJ-beyoglu-cicekpasaji', hub: 'beyoglu-taksim', message: 'Second table from the door is free if anyone wants to join 🍷', minutesAgo: 47 },
+  { id: 'c15', traveler: { id: 't21', name: 'Leyla Demirci', avatarColor: '#A87F28' }, placeId: 'ChIJ-uskudar-camlicatepesi', hub: 'uskudar', message: 'Whole peninsula visible from up here today, no haze at all 📷', minutesAgo: 96 },
+  { id: 'c16', traveler: { id: 't16', name: 'Ravi Menon', avatarColor: '#7A5C9E' }, placeId: 'ChIJ-beyoglu-nevizadesokak', hub: 'beyoglu-taksim', message: 'Went at opening instead of nine — completely different street.', minutesAgo: 168 },
+  { id: 'c17', traveler: { id: 't22', name: 'Grace Mbeki', avatarColor: '#2E8B87' }, placeId: 'ChIJ-adalar-buyukadaiskelesi', hub: 'adalar', message: 'Missed the 14:00 ferry back. No regrets, the pine woods are worth it.', minutesAgo: 205 },
 ];
 
 /** Materialise the seed against a clock. `now` is injected so it is testable. */
