@@ -76,6 +76,35 @@ The E2E suite (`pathwise/e2e/`) drives a real Chromium through onboarding →
 dashboard and asserts the Leaflet map + Today's Path render with live data.
 See [TESTING.md](./TESTING.md) for what has actually been exercised end-to-end.
 
+## Place data
+
+The backend owns the dataset — **124 places across 10 hubs** — in
+`pathwise-backend/src/modules/places/infrastructure/persistence/`. Edit
+`place.dataset.ts` / `hub.dataset.ts` there, then regenerate the frontend copy:
+
+```bash
+node scripts/sync-frontend-places.mjs           # regenerate pathwise/src/hubData.ts
+node scripts/sync-frontend-places.mjs --check   # CI: fail if it is stale
+```
+
+`pathwise/src/hubData.ts` is **generated — never edit it by hand.** CI fails if
+it disagrees with the backend, which is what stops the two halves drifting apart
+(they once differed by 13 places, undetected, for months).
+
+To seed coordinates for new places, add them to
+`scripts/data/pathwise-places.json` and run:
+
+```bash
+node scripts/geocode-places.mjs        # Nominatim, 1 req/s, resumes from cache
+```
+
+It reports every place it could not resolve and every hit that looks wrong —
+a coordinate is rejected if it falls outside Istanbul **or** sits too far from
+its hub centre. That second check is the one that matters: "Moda Sahili" resolves
+to a park in Bethlehem and "Yeni Cami" to a mosque in Beykoz, and only the
+hub-distance test catches the second. Nothing unresolved is ever filled in by
+hand-waving — those places are simply left out.
+
 > Use `npm run typecheck` (`tsc -b`), **not** `tsc --noEmit`, on the frontend.
 > The root `tsconfig.json` is solution-style (`"files": []` + project
 > references), so `tsc --noEmit` silently checks nothing.

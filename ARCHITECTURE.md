@@ -50,9 +50,42 @@ adapter in `infrastructure/` implements it (e.g. `UserRepositoryPort` ←
 - **`QuizVibeStrategy`** — converts a quiz result into a hub + interests, then
   **delegates to `HubBudgetStrategy`** (DRY — no duplicated scoring logic).
 
+`HubBudgetStrategy` bounds a day by **two** limits: the pace budget in minutes,
+and a **stop cap** (3/5/7/8 by pace). The cap exists because the first was not
+enough once the dataset grew — with 5–6 candidates per hub everything fit and
+the cap would have been invisible, but with 12–15 the time budget alone packs a
+seven-hour day with ten or more stops. Must-visits and reservations are exempt:
+the user asked for those explicitly, so dropping one would be a bug, not pacing.
+
 ### Factory Pattern
 `RouteStrategyFactory` returns the correct strategy for a given `mode` string
 (`"hub-budget"` | `"quiz-vibe"`).
+
+### One dataset, one owner — places and hubs
+`PLACE_DATASET` and `HUB_DATASET` in the backend are the **single source of
+truth for both halves of the app**. 124 places across 10 hubs, served by
+`GET /api/places` and `GET /api/places/hubs`.
+
+This used to be two hand-maintained copies, and they drifted: the route engine
+planned over 28 places while the frontend map and bucket list drew from 41, with
+13 that existed on one side only. Nothing noticed, because nothing compared them.
+
+`pathwise/src/hubData.ts` is now a **generated artifact**, produced by
+`node scripts/sync-frontend-places.mjs` and verified in CI with `--check` — a
+stale artifact fails the build. A runtime fetch was the other option and was
+rejected: four components look places up synchronously by id, so switching would
+have meant rewriting component flow and loading states (and the e2e suite along
+with them) purely to move where data comes from. A generated file closes the
+divergence with no behaviour change at all.
+
+The artifact is a **projection** — `placeId`, `name`, `hub`, `lat/lng`,
+`entryFeeTry` — because that is all the synchronous lookups read. Full `Place`
+records, with their tips and transit notes, reach the UI on itinerary stops
+straight from the API, so shipping them twice would only cost bundle weight.
+
+Coordinates are seeded offline by `scripts/geocode-places.mjs` (Nominatim), never
+at runtime: the Overpass enrichment client matches a POI by *proximity* to a
+known lat/lng, so a coordinate is an input to enrichment, not an output of it.
 
 ### Pure domain scoring — buddy matching
 `social/domain/matching.ts` holds the compatibility score as **pure functions**
@@ -149,8 +182,9 @@ badges have clear relational structure and referential integrity needs.
 
 ## 6. Mock data layer (frontend)
 
-`src/mockData.ts` and `src/hubData.ts` shape every record like its real source
-and document the origin in comments:
+`src/mockData.ts` shapes every record like its real source and documents the
+origin in comments. (`src/hubData.ts` is no longer part of this layer — it is
+generated from the backend dataset; see *One dataset, one owner* above.)
 
 | Source                        | Fields it feeds                                   |
 | ----------------------------- | ------------------------------------------------- |
