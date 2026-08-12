@@ -1,5 +1,6 @@
 import { SocialService } from './social.service';
 import { TRAVELER_SEED } from '../infrastructure/persistence/traveler.dataset';
+import { HUB_DATASET } from '../../places/infrastructure/persistence/hub.dataset';
 
 /**
  * Opt-in women-traveler mode.
@@ -103,13 +104,16 @@ describe('SocialService — women-traveler filter', () => {
  * These assert the spread the matching feature depends on.
  */
 describe('traveler seed — coverage the matcher depends on', () => {
-  const HUBS = [
-    'sultanahmet',
-    'karakoy-galata',
-    'kadikoy-moda',
-    'balat-fener',
-    'besiktas-bogaz',
-  ] as const;
+  // Derived from the hub dataset, NOT restated here.
+  //
+  // This list used to be a hand-written copy of the five original hubs, which
+  // meant the coverage assertion below could only ever ask about hubs someone
+  // had remembered to add to it. When the app grew to ten hubs the seed gained
+  // no travelers for the five new ones — the matcher's hub component silently
+  // scored 0 for anyone whose trips were there — and this suite stayed green,
+  // because it never thought to ask. A check that cannot notice the thing it
+  // exists to notice is worse than no check: it reads as reassurance.
+  const HUBS = HUB_DATASET.map((h) => h.id);
   const TAGS = [
     '#SoloVerified',
     '#Foodie',

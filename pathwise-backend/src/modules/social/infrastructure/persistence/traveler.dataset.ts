@@ -13,23 +13,29 @@ import { Traveler } from '../../domain/traveler';
  * opt-in box themselves (see `User.identifiesAsWoman`), and it is never
  * verified. Travelers who have not stated anything simply omit the field.
  *
- * ── Why fourteen, and why this spread ────────────────────────────────
+ * ── Why twenty-four, and why this spread ─────────────────────────────
  * Buddy matching (Görev 2) ranks this list, and a ranking over five people —
  * three of whom are visible by default — cannot show anything. The seed is
  * built to exercise the scorer rather than to look busy:
  *
- *  - all five hubs appear as a preferred hub for at least two travelers, so a
+ *  - all TEN hubs appear as a preferred hub for at least two travelers, so a
  *    user's trip history actually separates the list;
- *  - all three budget levels are represented at every hub, so budget is not
- *    accidentally a proxy for neighbourhood;
+ *  - all three budget levels are represented, so budget is not accidentally a
+ *    proxy for neighbourhood;
  *  - every one of the six tags appears on at least three travelers, so no
  *    style filter lands on an empty (or single-result) list;
  *  - `#SoloVerified` is spread across declarations so it never reads as a
  *    women-only or men-only marker.
  *
- * Seven travelers have made a women-traveler declaration and three of those
+ * The first three are asserted in `social.service.spec.ts`, and the hub one
+ * reads its list from `HUB_DATASET` rather than restating it — when the app
+ * went from five hubs to ten, a hand-copied list in the test meant the gap
+ * went unnoticed while the suite stayed green.
+ *
+ * Thirteen travelers have made a women-traveler declaration and five of those
  * chose women-only visibility, which keeps both sides of the reciprocity rule
- * testable: a browsing account sees eleven, an opted-in one sees fourteen.
+ * testable: a browsing account sees nineteen, an opted-in one sees all
+ * twenty-four. (Verified against the running API, not counted by eye.)
  */
 export const TRAVELER_SEED: Traveler[] = [
   {
@@ -251,5 +257,169 @@ export const TRAVELER_SEED: Traveler[] = [
     preferredHubs: ['sultanahmet', 'karakoy-galata'],
     budgetLevel: 'comfort',
     // No declaration.
+  },
+
+  // ── Added with the 10-hub expansion ──────────────────────────────
+  // The first fourteen only ever named the original five hubs, so once the
+  // app grew to ten the matcher's hub component scored 0 for anyone whose
+  // trips were in Eminönü, Beyoğlu, Ortaköy, Üsküdar or the islands — the
+  // ranking quietly fell back to style and budget alone. These ten give every
+  // new hub at least three travelers. Existing records are untouched: their
+  // profiles are what the current match percentages are built on.
+  {
+    id: 't15',
+    name: 'Zeynep Aydın',
+    age: 29,
+    nationality: 'Türkiye',
+    avatarColor: '#B0603A',
+    tags: ['#CultureSeeker', '#SlowTravel'],
+    bio: 'Grew up two streets from the Spice Bazaar. Will argue about baklava.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Gaziantep', 'Mardin'],
+    badges: ['bazaar-navigator', 'old-city-master'],
+    preferredHubs: ['eminonu-sirkeci', 'sultanahmet'],
+    budgetLevel: 'mid',
+    identifiesAsWoman: true,
+    visibleToWomenOnly: false,
+  },
+  {
+    id: 't16',
+    name: 'Ravi Menon',
+    age: 34,
+    nationality: 'India',
+    avatarColor: '#7A5C9E',
+    tags: ['#Foodie', '#Backpacker'],
+    bio: 'Eating his way up from Eminönü to Taksim, one street cart at a time.',
+    soloVerified: false,
+    visitedProvinces: ['İstanbul', 'İzmir'],
+    badges: ['bazaar-navigator'],
+    preferredHubs: ['eminonu-sirkeci', 'beyoglu-taksim'],
+    budgetLevel: 'budget',
+    // No declaration.
+  },
+  {
+    id: 't17',
+    name: 'Sofia Novak',
+    age: 26,
+    nationality: 'Czechia',
+    avatarColor: '#C97B8E',
+    tags: ['#PhotoNomad', '#SoloVerified'],
+    bio: 'Shoots the arcades off İstiklal before the shutters go up.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Çanakkale'],
+    badges: ['pasaj-explorer'],
+    preferredHubs: ['beyoglu-taksim', 'karakoy-galata'],
+    budgetLevel: 'mid',
+    identifiesAsWoman: true,
+    visibleToWomenOnly: true,
+  },
+  {
+    id: 't18',
+    name: 'Arda Kılıç',
+    age: 24,
+    nationality: 'Türkiye',
+    avatarColor: '#4F7C5E',
+    tags: ['#Backpacker', '#Foodie'],
+    bio: 'Student rate: ferry, çay, meyhane, repeat. Knows every free view.',
+    soloVerified: false,
+    visitedProvinces: ['İstanbul', 'Eskişehir', 'Bursa'],
+    badges: ['pasaj-explorer', 'market-forager'],
+    preferredHubs: ['beyoglu-taksim', 'kadikoy-moda'],
+    budgetLevel: 'budget',
+    // No declaration.
+  },
+  {
+    id: 't19',
+    name: 'Noor Haddad',
+    age: 31,
+    nationality: 'Jordan',
+    avatarColor: '#6B8E5A',
+    tags: ['#CultureSeeker', '#SlowTravel'],
+    bio: 'Mosque architecture, slowly. Üsküdar mornings, Eminönü afternoons.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Konya', 'Şanlıurfa'],
+    badges: ['hill-climber'],
+    preferredHubs: ['uskudar', 'eminonu-sirkeci'],
+    budgetLevel: 'mid',
+    identifiesAsWoman: true,
+    visibleToWomenOnly: false,
+  },
+  {
+    id: 't20',
+    name: 'Erik Bauer',
+    age: 38,
+    nationality: 'Germany',
+    avatarColor: '#3E7BA6',
+    tags: ['#SlowTravel', '#PhotoNomad'],
+    bio: 'Walks the Bosphorus shore end to end and photographs the ferries.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Antalya'],
+    badges: ['bogaz-walker', 'hill-climber'],
+    preferredHubs: ['uskudar', 'ortakoy-bebek'],
+    budgetLevel: 'comfort',
+    // No declaration.
+  },
+  {
+    id: 't21',
+    name: 'Leyla Demirci',
+    age: 27,
+    nationality: 'Türkiye',
+    avatarColor: '#A87F28',
+    tags: ['#PhotoNomad', '#CultureSeeker'],
+    bio: 'Çamlıca at dawn, Büyükada by the afternoon ferry. Film only.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Sinop', 'Trabzon'],
+    badges: ['hill-climber', 'island-hopper'],
+    preferredHubs: ['uskudar', 'adalar'],
+    budgetLevel: 'budget',
+    identifiesAsWoman: true,
+    visibleToWomenOnly: false,
+  },
+  {
+    id: 't22',
+    name: 'Grace Mbeki',
+    age: 33,
+    nationality: 'Kenya',
+    avatarColor: '#2E8B87',
+    tags: ['#SlowTravel', '#SoloVerified'],
+    bio: 'One island per weekend. No cars, no rush, a book and a pine tree.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Muğla'],
+    badges: ['island-hopper', 'bogaz-walker'],
+    preferredHubs: ['adalar', 'ortakoy-bebek'],
+    budgetLevel: 'comfort',
+    identifiesAsWoman: true,
+    visibleToWomenOnly: true,
+  },
+  {
+    id: 't23',
+    name: 'Paolo Ricci',
+    age: 41,
+    nationality: 'Italy',
+    avatarColor: '#C56F52',
+    tags: ['#Foodie', '#SlowTravel'],
+    bio: 'Came for the fish restaurants on the islands, stayed for the ferries.',
+    soloVerified: false,
+    visitedProvinces: ['İstanbul', 'İzmir', 'Çanakkale'],
+    badges: ['island-hopper', 'ferry-hopper'],
+    preferredHubs: ['adalar', 'besiktas-bogaz'],
+    budgetLevel: 'comfort',
+    // No declaration.
+  },
+  {
+    id: 't24',
+    name: 'Mei Chen',
+    age: 28,
+    nationality: 'Taiwan',
+    avatarColor: '#5E8C74',
+    tags: ['#PhotoNomad', '#SoloVerified'],
+    bio: 'Waterside mosques at blue hour. Ortaköy first, then the 20:00 ferry.',
+    soloVerified: true,
+    visitedProvinces: ['İstanbul', 'Nevşehir'],
+    badges: ['bogaz-walker', 'island-hopper'],
+    preferredHubs: ['ortakoy-bebek', 'adalar'],
+    budgetLevel: 'mid',
+    identifiesAsWoman: true,
+    visibleToWomenOnly: false,
   },
 ];
