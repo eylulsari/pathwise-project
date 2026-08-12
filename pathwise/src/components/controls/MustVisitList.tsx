@@ -1,6 +1,6 @@
 import { BUCKET_LIST_IDS } from '../../mockData';
 import { PLACES_BY_ID } from '../../hubData';
-import { HUB_LABEL, formatTry } from '../../utils/format';
+import { HUB_LABEL, formatEntryFee } from '../../utils/format';
 import { useT } from '../../i18n';
 
 /**
@@ -48,7 +48,7 @@ export function MustVisitList({
                 <span>
                   <span className="block font-semibold text-ink">{place.name}</span>
                   <span className="block text-xs text-ink/50">
-                    {HUB_LABEL[place.hub]} · {place.entryFeeTry === 0 ? 'Free' : formatTry(place.entryFeeTry)}
+                    {HUB_LABEL[place.hub]} · {formatEntryFee(place.entryFeeTry, place.entryFeeApprox)}
                   </span>
                 </span>
               </button>

@@ -54,10 +54,15 @@ import { earnBadge } from '../utils/badgeStore';
 // The Passport badge each hub completes.
 const HUB_BADGE: Record<string, string> = {
   sultanahmet: 'old-city-master',
+  'eminonu-sirkeci': 'bazaar-navigator',
+  'beyoglu-taksim': 'pasaj-explorer',
   'karakoy-galata': 'kahve-guru',
-  'kadikoy-moda': 'market-forager',
-  'balat-fener': 'sunset-chaser',
   'besiktas-bogaz': 'ferry-hopper',
+  'ortakoy-bebek': 'bogaz-walker',
+  'balat-fener': 'sunset-chaser',
+  'kadikoy-moda': 'market-forager',
+  uskudar: 'hill-climber',
+  adalar: 'island-hopper',
 };
 
 /**

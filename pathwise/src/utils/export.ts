@@ -1,4 +1,5 @@
 import type { Itinerary } from '../types';
+import { formatEntryFee } from './format';
 
 /** Build a real Google Maps directions URL from the ordered stops (walking). */
 export function googleMapsUrl(itinerary: Itinerary): string {
@@ -27,7 +28,9 @@ export function exportItineraryPdf(itinerary: Itinerary): void {
   const rows = itinerary.stops
     .map((s) => {
       const name = s.isLunchBreak ? '🍽️ Lunch Break' : s.place?.name;
-      return `<tr><td>${s.arrivalTime}–${s.departureTime}</td><td>${name}</td><td>₺${s.entryFeeTry}</td><td>₺${s.foodCostTry}</td></tr>`;
+      // "~" marks an unverified ticket price — the printout must not read as a quote.
+      const fee = formatEntryFee(s.entryFeeTry, s.place?.entryFeeApprox, '₺0');
+      return `<tr><td>${s.arrivalTime}–${s.departureTime}</td><td>${name}</td><td>${fee}</td><td>₺${s.foodCostTry}</td></tr>`;
     })
     .join('');
 

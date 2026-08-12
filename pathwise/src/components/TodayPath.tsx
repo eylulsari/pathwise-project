@@ -14,7 +14,7 @@ import type {
 } from '../types';
 import { BudgetBar } from './BudgetBar';
 import { LocalStoryModal } from './LocalStoryModal';
-import { formatTry, formatDuration, formatKm } from '../utils/format';
+import { formatTry, formatDuration, formatKm, formatEntryFee } from '../utils/format';
 import { haversineMeters, walkEstimate } from '../utils/geo';
 import { useT } from '../i18n';
 
@@ -260,7 +260,7 @@ function SortableStopRow({
           </div>
           <div className="text-right text-xs">
             <div className="text-ink/70">
-              🎟️ {stop.entryFeeTry === 0 ? t('today.free') : formatTry(stop.entryFeeTry)}
+              🎟️ {formatEntryFee(stop.entryFeeTry, stop.place?.entryFeeApprox, t('today.free'))}
             </div>
             {stop.foodCostTry > 0 && (
               <div className="text-ink/70">🍽️ {formatTry(stop.foodCostTry)}</div>

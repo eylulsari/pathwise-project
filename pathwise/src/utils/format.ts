@@ -5,6 +5,21 @@ export const formatTry = (n: number): string =>
 
 export const formatKm = (n: number): string => `${n.toFixed(1)} km`;
 
+/**
+ * Ticket price for display. A zero fee is stated plainly as free; anything the
+ * dataset flags as unverified gets a leading "~" so an estimate never reads as
+ * a quoted price. `freeLabel` is a parameter because some call sites are
+ * translated and others (the HTML export) are not.
+ */
+export function formatEntryFee(
+  entryFeeTry: number,
+  approx?: boolean,
+  freeLabel = 'Free',
+): string {
+  if (entryFeeTry === 0) return freeLabel;
+  return `${approx ? '~' : ''}${formatTry(entryFeeTry)}`;
+}
+
 export function formatDuration(totalMinutes: number): string {
   const h = Math.floor(totalMinutes / 60);
   const m = Math.round(totalMinutes % 60);
@@ -31,10 +46,15 @@ export function isOpenNow(openingHours: string, now = new Date()): boolean | nul
 
 export const HUB_LABEL: Record<string, string> = {
   sultanahmet: 'Sultanahmet & Old City',
+  'eminonu-sirkeci': 'Eminönü & Sirkeci',
+  'beyoglu-taksim': 'Beyoğlu & Taksim',
   'karakoy-galata': 'Karaköy & Galata',
-  'kadikoy-moda': 'Kadıköy & Moda',
-  'balat-fener': 'Balat & Fener',
   'besiktas-bogaz': 'Beşiktaş & Bosphorus',
+  'ortakoy-bebek': 'Ortaköy & Bebek',
+  'balat-fener': 'Balat & Fener',
+  'kadikoy-moda': 'Kadıköy & Moda',
+  uskudar: 'Üsküdar',
+  adalar: 'Princes’ Islands (Adalar)',
 };
 
 export const INTEREST_LABEL: Record<string, string> = {

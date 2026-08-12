@@ -10,7 +10,7 @@ import {
 import L from 'leaflet';
 import type { Itinerary, Place } from '../../types';
 import { HUB_BY_ID } from '../../hubData';
-import { isOpenNow } from '../../utils/format';
+import { formatEntryFee, isOpenNow } from '../../utils/format';
 
 /** A numbered, hub-accented pin built as a divIcon (avoids the broken default
  *  Leaflet marker-image paths under bundlers). */
@@ -156,7 +156,7 @@ export function MapView({
                   <p className="font-display text-sm font-bold text-ink">{p.name}</p>
                   <p className="mt-0.5 text-xs text-ink/60">🕒 {p.openingHours}</p>
                   <p className="mt-1 text-xs text-ink/80">
-                    🎟️ {p.entryFeeTry === 0 ? 'Free entry' : `₺${p.entryFeeTry}`}
+                    🎟️ {formatEntryFee(p.entryFeeTry, p.entryFeeApprox, 'Free entry')}
                     {open === true && <span className="ml-2 font-semibold text-sage">● Open now</span>}
                     {open === false && <span className="ml-2 font-semibold text-terracotta">● Closed</span>}
                   </p>

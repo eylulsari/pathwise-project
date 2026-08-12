@@ -163,10 +163,15 @@ function buildStory(place: Place): {
 function labelHub(hub: string): string {
   const map: Record<string, string> = {
     sultanahmet: 'the Old City',
+    'eminonu-sirkeci': 'Eminönü and the bazaar quarter',
+    'beyoglu-taksim': 'Beyoğlu and İstiklal',
     'karakoy-galata': 'Karaköy and Galata',
-    'kadikoy-moda': 'Kadıköy and Moda',
+    'besiktas-bogaz': 'Beşiktaş',
+    'ortakoy-bebek': 'the Bosphorus shore',
     'balat-fener': 'Balat and Fener',
-    'besiktas-bogaz': 'the Bosphorus shore',
+    'kadikoy-moda': 'Kadıköy and Moda',
+    uskudar: 'Üsküdar',
+    adalar: 'the Princes’ Islands',
   };
   return map[hub] ?? hub;
 }

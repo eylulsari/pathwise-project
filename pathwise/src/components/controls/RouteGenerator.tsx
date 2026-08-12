@@ -14,7 +14,10 @@ export interface RouteConfig {
   startHour: number;
 }
 
-const INTERESTS: Interest[] = ['food', 'history', 'photo', 'market', 'art', 'nature'];
+const INTERESTS: Interest[] = [
+  'food', 'history', 'photo', 'market', 'art', 'nature',
+  'view', 'hiddengem', 'relax', 'local', 'culture', 'nightlife', 'experience', 'religion',
+];
 const GROUPS: { id: GroupType; icon: string }[] = [
   { id: 'solo', icon: '🧍' },
   { id: 'couple', icon: '👫' },

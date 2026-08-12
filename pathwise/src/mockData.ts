@@ -255,6 +255,14 @@ export const BADGES: Badge[] = [
   { id: 'kahve-guru', emoji: '☕', name: 'Kahve Guru', description: 'Try Turkish coffee at 4 different spots.', earned: false, progress: 75 },
   { id: 'market-forager', emoji: '🧺', name: 'Market Forager', description: 'Explore 3 neighborhood markets.', earned: false, progress: 66 },
   { id: 'sunset-chaser', emoji: '🌅', name: 'Sunset Chaser', description: 'Catch golden hour at 5 viewpoints.', earned: false, progress: 40 },
+  // One badge per hub — added with the five new hubs so the Passport stays
+  // complete. `unlockBadgeForHub` silently no-ops on an unmapped hub, so a
+  // missing entry here would be an invisible dead end rather than an error.
+  { id: 'bazaar-navigator', emoji: '🧭', name: 'Bazaar Navigator', description: 'Find your way through 3 covered markets.', earned: false, progress: 0 },
+  { id: 'pasaj-explorer', emoji: '🎭', name: 'Pasaj Explorer', description: 'Duck into 4 İstiklal arcades and side streets.', earned: false, progress: 0 },
+  { id: 'bogaz-walker', emoji: '🌊', name: 'Boğaz Walker', description: 'Walk 3 stretches of the Bosphorus shoreline.', earned: false, progress: 0 },
+  { id: 'hill-climber', emoji: '⛰️', name: 'Hill Climber', description: 'Reach 3 hilltop views on the Asian side.', earned: false, progress: 0 },
+  { id: 'island-hopper', emoji: '🏝️', name: 'Island Hopper', description: 'Set foot on 2 of the Princes’ Islands.', earned: false, progress: 0 },
 ];
 
 export const PAST_TRIPS: PastTrip[] = [
