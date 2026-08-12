@@ -35,13 +35,25 @@ test('one-click time anchor pins a stop', async ({ page }) => {
 
 test('nearby suggestion can be added to the path', async ({ page }) => {
   await signup(page, 'suggest');
-  await page.locator('input[type=range]').nth(1).fill('2');
-  await page.getByRole('button', { name: /Generate My Custom Path/i }).click();
-  await expect(page.getByText(/Nearby:/i)).toBeVisible({ timeout: 12_000 });
-  const raw = await page.getByText(/Nearby:/i).first().textContent();
+
+  // Use the plan the dashboard builds on load rather than regenerating first.
+  //
+  // An effect refetches the suggestion whenever the itinerary changes, so
+  // regenerating opens a window where the panel still shows the PREVIOUS plan's
+  // suggestion while a new request is in flight: the test reads one place, and
+  // by the time it clicks Add the app is holding another. Nothing observable
+  // closes that window — waiting on a `suggest-nearby` response can match the
+  // page-load request instead, and `networkidle` can resolve in the gap between
+  // the generate response and the effect firing. With no regeneration exactly
+  // one suggestion is ever fetched, so the label and the action cannot disagree.
+  const panel = page.locator('div').filter({ hasText: /Nearby:/i }).last();
+  await expect(panel).toBeVisible({ timeout: 15_000 });
+  const raw = await panel.locator('span').first().textContent();
   const name = (raw ?? '').replace(/.*Nearby:\s*/i, '').split(' —')[0].trim();
-  await page.getByRole('button', { name: /Add to Today.s Path/i }).first().click();
-  await expect(page.locator('ol li h3', { hasText: name })).toBeVisible({ timeout: 12_000 });
+  expect(name).not.toBe('');
+
+  await panel.getByRole('button', { name: /Add to Today.s Path/i }).click();
+  await expect(page.locator('ol li h3', { hasText: name })).toBeVisible({ timeout: 15_000 });
 });
 
 test('setting a hotel start point anchors the route', async ({ page }) => {

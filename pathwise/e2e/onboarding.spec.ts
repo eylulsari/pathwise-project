@@ -309,7 +309,9 @@ test('search bar finds a place and adds it to Today’s Path', async ({ page }) 
 
   // Real query → result appears; add it to the path.
   await search.fill('Hagia');
-  const result = page.getByRole('button', { name: /Hagia Sophia/i });
+  // Anchored: the dataset also holds "Little Hagia Sophia (Küçük Ayasofya)",
+  // so an unanchored match hits two results and trips strict mode.
+  const result = page.getByRole('button', { name: /^Hagia Sophia\b/ });
   await expect(result).toBeVisible({ timeout: 5_000 });
   await page.getByRole('button', { name: '➕ Add' }).first().click();
 
@@ -382,7 +384,8 @@ test('story modal shows live Wikipedia + OSM enrichment for a landmark', async (
   // Force a known enriched landmark (Hagia Sophia) into the day via search.
   const search = page.getByPlaceholder(/Search a place/i);
   await search.fill('Hagia');
-  await expect(page.getByRole('button', { name: /Hagia Sophia/i })).toBeVisible({ timeout: 5_000 });
+  // Anchored — see the note in the search test above.
+  await expect(page.getByRole('button', { name: /^Hagia Sophia\b/ })).toBeVisible({ timeout: 5_000 });
   await page.getByRole('button', { name: '➕ Add' }).first().click();
   const stop = page.locator('ol li', { hasText: 'Hagia Sophia' });
   await expect(stop.locator('h3')).toBeVisible({ timeout: 10_000 });
