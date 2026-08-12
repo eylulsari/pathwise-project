@@ -35,7 +35,7 @@ import type {
   TravelTag,
   UsageInfo,
 } from '../types';
-import { PLACES, PLACES_BY_ID } from '../hubData';
+import { PLACES_BY_ID } from '../hubData';
 import { withEarnedBadges } from '../utils/badgeStore';
 import {
   BADGES,
@@ -378,18 +378,14 @@ export const api = {
   },
 
   // ═════════════════════════════════════════════════════════════════
-  // PLACES — Google Places shaped. Served locally so the map works
-  // offline; production would call the backend which proxies Google.
-  //   return http<Place[]>(`/places${hub ? `?hub=${hub}` : ''}`);
+  // PLACES
+  //
+  // `getPlaces` / `getPlaceById` used to live here, serving the frontend's own
+  // hand-maintained copy of the dataset. They had no callers, and the copy they
+  // served had quietly drifted 13 places away from the backend's. Both are gone:
+  // the backend owns the dataset, `hubData.ts` is generated from it, and the
+  // full place records the UI renders arrive on itinerary stops.
   // ═════════════════════════════════════════════════════════════════
-  async getPlaces(hub?: string): Promise<Place[]> {
-    const data = hub ? PLACES.filter((p) => p.hub === hub) : PLACES;
-    return delay(data, 200);
-  },
-
-  getPlaceById(id: string): Place | undefined {
-    return PLACES_BY_ID[id];
-  },
 
   /** Free-text place search (backend substring search). */
   async searchPlaces(q: string): Promise<Place[]> {

@@ -9,6 +9,22 @@ on:
   pull_request:
 
 jobs:
+  # The backend place/hub datasets are the single source of truth, and
+  # pathwise/src/hubData.ts is generated from them. Without this job the two
+  # can drift apart again the moment someone edits the backend and forgets to
+  # regenerate — which is exactly how they diverged by 13 places the first
+  # time, undetected, for months. Runs on its own so a stale artifact is
+  # reported as a stale artifact, not as a confusing test failure downstream.
+  generated:
+    name: Generated files are up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/sync-frontend-places.mjs --check
+
   backend:
     name: Backend (build + test)
     runs-on: ubuntu-latest
