@@ -5,23 +5,77 @@
  */
 
 // ── Geography ──────────────────────────────────────────────────────
+/** Mirrors the backend `Hub` union — see place.ts for why the slugs differ in shape. */
 export type Hub =
   | 'sultanahmet'
+  | 'eminonu-sirkeci'
+  | 'beyoglu-taksim'
   | 'karakoy-galata'
-  | 'kadikoy-moda'
+  | 'besiktas-bogaz'
+  | 'ortakoy-bebek'
   | 'balat-fener'
-  | 'besiktas-bogaz';
+  | 'kadikoy-moda'
+  | 'uskudar'
+  | 'adalar';
 
 export interface HubMeta {
   id: Hub;
   name: string;
-  side: 'European' | 'Asian';
+  /** `Islands` is the Adalar ferry group — neither shore. */
+  side: 'European' | 'Asian' | 'Islands';
   blurb: string;
   center: [number, number]; // [lat, lng]
   accent: string; // hex used for the hub's map/pin accent
 }
 
-export type Interest = 'food' | 'history' | 'photo' | 'market' | 'art' | 'nature';
+/** Mirrors the backend `Interest` union. */
+export type Interest =
+  | 'food'
+  | 'history'
+  | 'photo'
+  | 'market'
+  | 'art'
+  | 'nature'
+  | 'view'
+  | 'hiddengem'
+  | 'relax'
+  | 'local'
+  | 'culture'
+  | 'nightlife'
+  | 'experience'
+  | 'religion';
+
+/**
+ * The slice of a `Place` that the generated `hubData.ts` carries.
+ *
+ * The synchronous `PLACES_BY_ID` lookups only ever read these fields, so the
+ * artifact ships a projection instead of the whole record — keeping the tips,
+ * transit notes and photo prose out of the JS bundle. Anything that needs a
+ * full `Place` gets one from the API on an itinerary stop.
+ */
+export interface PlaceSummary {
+  placeId: string;
+  name: string;
+  hub: Hub;
+  lat: number;
+  lng: number;
+  entryFeeTry: number;
+  entryFeeApprox?: boolean;
+}
+
+/** What a place physically is — orthogonal to `category`/`Interest`. */
+export type PlaceType =
+  | 'landmark'
+  | 'museum'
+  | 'mosque'
+  | 'church'
+  | 'market'
+  | 'food'
+  | 'park'
+  | 'viewpoint'
+  | 'street'
+  | 'beach'
+  | 'experience';
 export type GroupType = 'solo' | 'couple' | 'friends';
 export type Weather = 'sunny' | 'rainy';
 export type RouteMode = 'hub-budget' | 'quiz-vibe';
@@ -39,6 +93,8 @@ export interface Place {
   category: Interest;
   interests: Interest[];
   entryFeeTry: number;
+  /** Ticket price is an unverified estimate — render it as "~₺600". Free (0) is never flagged. */
+  entryFeeApprox?: boolean;
   avgFoodCostTry: number;
   avgVisitMinutes: number;
   openingHours: string;
@@ -51,6 +107,8 @@ export interface Place {
   // Additive metadata layered on top of the Google/IBB-shaped core above.
   // All optional so the original 30 curated places and every existing
   // consumer keep compiling unchanged; newer hubs populate them in full.
+  /** What the place physically is — drives map pin icons and type filters. */
+  placeType?: PlaceType;
   /** Fine-grained district within the hub (e.g. 'Nişantaşı', 'Büyükada'). */
   neighborhood?: string;
   /** Typical crowd density — drives pacing/queue hints in the UI. */
