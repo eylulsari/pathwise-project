@@ -246,21 +246,37 @@ function placeLine(p: Place): string {
 
 // ── Server-side place selection (keyword / hub / interest match) ───────
 
+// 'beyoglu' and 'ortakoy' moved out of karakoy-galata / besiktas-bogaz when
+// those neighborhoods got hubs of their own — a keyword must point at the hub
+// that actually holds the places, or the grounding filter returns the wrong set.
 const HUB_KEYWORDS: Record<string, string[]> = {
   sultanahmet: ['sultanahmet', 'old city', 'hagia', 'blue mosque', 'topkapi'],
-  'karakoy-galata': ['karakoy', 'karaköy', 'galata', 'beyoglu', 'beyoğlu'],
-  'kadikoy-moda': ['kadikoy', 'kadıköy', 'moda', 'asian side'],
+  'eminonu-sirkeci': ['eminonu', 'eminönü', 'sirkeci', 'spice bazaar', 'grand bazaar', 'kapalıçarşı', 'süleymaniye'],
+  'beyoglu-taksim': ['beyoglu', 'beyoğlu', 'taksim', 'istiklal', 'istiklâl', 'pera', 'nevizade'],
+  'karakoy-galata': ['karakoy', 'karaköy', 'galata'],
+  'besiktas-bogaz': ['besiktas', 'beşiktaş', 'dolmabahce', 'dolmabahçe', 'yıldız'],
+  'ortakoy-bebek': ['ortakoy', 'ortaköy', 'bebek', 'bosphorus', 'boğaz', 'rumeli', 'arnavutköy', 'emirgan'],
   'balat-fener': ['balat', 'fener', 'golden horn'],
-  'besiktas-bogaz': ['besiktas', 'beşiktaş', 'bosphorus', 'boğaz', 'ortakoy', 'ortaköy'],
+  'kadikoy-moda': ['kadikoy', 'kadıköy', 'moda', 'asian side'],
+  uskudar: ['uskudar', 'üsküdar', 'kuzguncuk', 'çamlıca', 'camlica', 'maiden', 'kız kulesi'],
+  adalar: ['adalar', 'island', 'islands', 'büyükada', 'buyukada', 'heybeliada', 'prince'],
 };
 
 const INTEREST_KEYWORDS: Record<string, string[]> = {
   food: ['eat', 'food', 'cheap', 'breakfast', 'lunch', 'dinner', 'restaurant', 'cafe', 'kahvaltı', 'street food', 'budget'],
-  history: ['history', 'historic', 'mosque', 'palace', 'museum', 'ancient', 'ottoman', 'byzantine'],
-  photo: ['photo', 'view', 'sunset', 'golden hour', 'instagram', 'scenic', 'panorama'],
+  history: ['history', 'historic', 'palace', 'ancient', 'ottoman', 'byzantine'],
+  photo: ['photo', 'golden hour', 'instagram', 'scenic', 'panorama'],
   market: ['market', 'bazaar', 'shopping', 'shop', 'çarşı', 'souvenir'],
   art: ['art', 'gallery', 'design', 'mural', 'street art'],
-  nature: ['park', 'nature', 'garden', 'walk', 'green', 'sea', 'waterfront'],
+  nature: ['park', 'nature', 'garden', 'green', 'forest', 'grove'],
+  view: ['view', 'sunset', 'viewpoint', 'skyline', 'overlook', 'manzara'],
+  hiddengem: ['hidden', 'secret', 'off the beaten', 'quiet', 'lesser known', 'underrated'],
+  relax: ['relax', 'calm', 'chill', 'slow', 'rest', 'peaceful', 'tea garden'],
+  local: ['local', 'authentic', 'like a local', 'neighborhood', 'esnaf'],
+  culture: ['culture', 'cultural', 'heritage', 'literary', 'music', 'opera'],
+  nightlife: ['nightlife', 'bar', 'bars', 'drink', 'meyhane', 'rakı', 'night out'],
+  experience: ['experience', 'tour', 'cruise', 'hamam', 'bike', 'boat', 'activity'],
+  religion: ['mosque', 'church', 'religious', 'worship', 'cami', 'kilise', 'synagogue'],
 };
 
 /**

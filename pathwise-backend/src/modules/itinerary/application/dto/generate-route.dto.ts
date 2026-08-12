@@ -47,15 +47,39 @@ export class ReservationDto {
   note?: string;
 }
 
+// Runtime mirror of the `Hub` union in places/domain/place.ts. TypeScript types
+// vanish at runtime, so this array is what actually rejects an unknown hub with
+// a 400 — forgetting to extend it here makes a new hub silently unroutable.
 const HUBS = [
   'sultanahmet',
+  'eminonu-sirkeci',
+  'beyoglu-taksim',
   'karakoy-galata',
-  'kadikoy-moda',
-  'balat-fener',
   'besiktas-bogaz',
+  'ortakoy-bebek',
+  'balat-fener',
+  'kadikoy-moda',
+  'uskudar',
+  'adalar',
 ] as const;
 
-const INTERESTS = ['food', 'history', 'photo', 'market', 'art', 'nature'] as const;
+// Runtime mirror of the `Interest` union. Same reasoning as HUBS above.
+const INTERESTS = [
+  'food',
+  'history',
+  'photo',
+  'market',
+  'art',
+  'nature',
+  'view',
+  'hiddengem',
+  'relax',
+  'local',
+  'culture',
+  'nightlife',
+  'experience',
+  'religion',
+] as const;
 
 export class QuizDto {
   @IsIn(['history', 'foodie', 'art', 'photo'])

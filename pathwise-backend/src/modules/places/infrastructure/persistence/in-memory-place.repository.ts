@@ -28,10 +28,15 @@ export class InMemoryPlaceRepository implements PlaceRepositoryPort {
   /** Human-readable neighbourhood labels so a search for "Kadıköy" matches. */
   private static readonly HUB_LABEL: Record<string, string> = {
     sultanahmet: 'Sultanahmet & Old City',
+    'eminonu-sirkeci': 'Eminönü & Sirkeci',
+    'beyoglu-taksim': 'Beyoğlu & Taksim',
     'karakoy-galata': 'Karaköy & Galata',
-    'kadikoy-moda': 'Kadıköy & Moda',
-    'balat-fener': 'Balat & Fener',
     'besiktas-bogaz': 'Beşiktaş & Bosphorus',
+    'ortakoy-bebek': 'Ortaköy & Bebek',
+    'balat-fener': 'Balat & Fener',
+    'kadikoy-moda': 'Kadıköy & Moda',
+    uskudar: 'Üsküdar',
+    adalar: 'Princes’ Islands (Adalar)',
   };
 
   // Simple in-memory substring search. A production build would use Postgres
