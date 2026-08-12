@@ -1125,6 +1125,97 @@ faithfully rendering whatever it asked for.
 
 ---
 
+## Social layer catches up to 10 hubs (2026-08-13)
+
+The place expansion left a hole one day old: the social seeds still only named
+the original five hubs, so `matching.ts`'s HUB component (weight 30) scored
+**0 for anyone whose trips were in the five new ones** — the ranking silently
+fell back to style and budget alone. Nothing looked broken; the percentages
+just meant less than they claimed.
+
+### The test that should have caught it was blind
+[`social.service.spec.ts`](pathwise-backend/src/modules/social/application/social.service.spec.ts)
+already asserted *"covers every hub at least twice, so trip history separates
+the list"* — against a **hand-copied list of the five original hubs**. A fourth
+copy of the hub identifiers. It stayed green through the expansion because it
+never thought to ask about the new hubs.
+
+Now derived from `HUB_DATASET`. Verified the derivation actually bites, before
+fixing the seed:
+
+| State | `covers every hub at least twice` |
+|---|---|
+| HUBS derived, seed untouched | ❌ `Expected: >= 2, Received: 0` |
+| after adding 10 travelers | ✅ |
+
+Same lesson as `tsc --noEmit` and the CI branch filter: **a check restating
+what it should be reading cannot notice the thing it exists to notice.**
+
+### What changed
+| Seed | Before | After |
+|---|---|---|
+| Travelers | 14, over 5 hubs | **24, all 10 hubs ≥2** |
+| Community routes | 10, over 5 hubs | **21, all 10 hubs ≥2** |
+| Check-ins | 13, over 6 hubs | **17, over 9 hubs** |
+
+Existing records are untouched — the current match percentages are built on
+those profiles, and the e2e specs name individual travelers (`Yuki Tanaka`,
+`Diego Fernández`, `Liam O'Connor`). New travelers were appended instead.
+
+`r10 "Ortaköy to Bebek waterfront"` was still filed under `besiktas-bogaz`, so
+Clone handed the dashboard the wrong hub. Same stale-classification bug as the
+check-in seeds fixed the day before. Beşiktaş gained a replacement route so no
+hub is thinner than the rest.
+
+New check-ins are pinned inside 9–239 minutes on purpose: the presence specs
+assert the newest entry (8 min) is live and the oldest (240 min) is stale, so
+an entry outside that range would move a boundary the tests depend on.
+
+### The offline traveler copy is now generated too
+`mockData.TRAVELERS` was a second hand-maintained copy, used only as the
+offline fallback for `api.getTravelers` — the same divergence as places, just
+somewhere nobody looks. It now lives in generated `pathwise/src/travelerData.ts`
+and is covered by the same `--check`.
+
+`visibleToWomenOnly` is deliberately **not** carried into the artifact: it is a
+server-side reciprocal visibility rule the offline path cannot enforce, and a
+client filtering on it would be guessing at a privacy decision.
+
+### ⚠️ The freshness check crashed instead of checking — caught by the drift test
+The first version of the extended `--check` referenced `existsSync` without
+importing it. It exited 1, which *looks* like a working check. Both the clean
+state and the drifted state failed, for the same wrong reason:
+
+```
+ReferenceError: existsSync is not defined
+```
+
+Only running the deliberate-drift procedure (clean → expect 0, drift → expect
+1, restore → expect 0) surfaced it; a single run in either state would have
+been read as success. **Exit 1 is not evidence a check works — the clean case
+has to be observed passing too.**
+
+### Regression
+| Suite | Result |
+|---|---|
+| **E2E** | ✅ **56 passed, 1 flaky, `PLAYWRIGHT_EXIT=0`** (1.5 m) |
+| Backend `npm test` | ✅ 84/84 |
+| Backend lint / build | ✅ exit 0 |
+| Frontend lint / typecheck / i18n / build | ✅ exit 0 |
+| `sync-frontend-places --check` | ✅ exit 0 (124 places, 10 hubs, 24 travelers) |
+
+Live API verified against the running stack rather than counted by eye:
+19 travelers visible to a browsing account (24 minus 5 women-only), all 10
+hubs represented, 21 community routes with no hub below 2.
+
+### Still not covered
+- `marking a review helpful` is still flaky (1 retry). Pre-dates this round.
+- The 9 places without coordinates.
+- Nothing asserts community-route or check-in hub coverage the way the
+  traveler seed now does — those two seeds can still go thin unnoticed.
+
+---
+
 ## Information architecture — current flows (2026-07-27)
 - **Sign-up → first route:** Landing CTA → auth form → `Create account` lands
   **directly on `/dashboard`** (no `/success` interstitial), where Day 1's route
