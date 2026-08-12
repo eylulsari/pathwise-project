@@ -25,14 +25,16 @@
  *   node scripts/sync-frontend-places.mjs           # write the artifact
  *   node scripts/sync-frontend-places.mjs --check   # fail if it is stale (CI)
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 const BACKEND = resolve(root, 'pathwise-backend/src/modules/places/infrastructure/persistence');
+const SOCIAL = resolve(root, 'pathwise-backend/src/modules/social/infrastructure/persistence');
 const TARGET = resolve(root, 'pathwise/src/hubData.ts');
+const TRAVELER_TARGET = resolve(root, 'pathwise/src/travelerData.ts');
 
 /**
  * Loads a TypeScript data module as plain data by stripping the type-only
@@ -40,16 +42,17 @@ const TARGET = resolve(root, 'pathwise/src/hubData.ts');
  * build step — the same technique `pathwise/scripts/check-i18n.mjs` already
  * uses for the translation dictionaries.
  */
-async function loadDataModule(file, exportNames) {
+async function loadDataModule(file) {
   const source = readFileSync(file, 'utf8')
     .replace(/^import[^\n]*\n/gm, '')
-    .replace(/:\s*(Place|HubMeta)\[\]/g, '')
+    .replace(/:\s*(Place|HubMeta|Traveler)\[\]/g, '')
     .replace(/:\s*\{[^}]*\}\[\]/g, '');
   return import('data:text/javascript,' + encodeURIComponent(source));
 }
 
 const { PLACE_DATASET } = await loadDataModule(resolve(BACKEND, 'place.dataset.ts'));
 const { HUB_DATASET, TRANSIT_HUBS } = await loadDataModule(resolve(BACKEND, 'hub.dataset.ts'));
+const { TRAVELER_SEED } = await loadDataModule(resolve(SOCIAL, 'traveler.dataset.ts'));
 
 // ── Emit ────────────────────────────────────────────────────────────────
 const q = (s) => `'${String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
@@ -126,23 +129,98 @@ export const PLACES_BY_ID: Record<string, PlaceSummary> = Object.fromEntries(
 );
 `;
 
+// ── Travelers ───────────────────────────────────────────────────────────
+// The frontend keeps a copy purely as an offline fallback: when the backend is
+// unreachable, `api.getTravelers` renders this list so the Social page is not
+// blank. It was hand-maintained and had already fallen behind — the same drift
+// that left places 13 apart, just somewhere nobody looks.
+const travelerLines = TRAVELER_SEED.map((t) => {
+  const field = (key, value) =>
+    value === undefined ? null : `${key}: ${typeof value === 'string' ? q(value) : Array.isArray(value) ? `[${value.map(q).join(', ')}]` : value}`;
+  return (
+    '  { ' +
+    [
+      field('id', t.id),
+      field('name', t.name),
+      field('age', t.age),
+      field('nationality', t.nationality),
+      field('avatarColor', t.avatarColor),
+      field('tags', t.tags),
+      field('bio', t.bio),
+      field('soloVerified', t.soloVerified),
+      field('visitedProvinces', t.visitedProvinces),
+      field('badges', t.badges),
+      field('preferredHubs', t.preferredHubs),
+      field('budgetLevel', t.budgetLevel),
+      field('identifiesAsWoman', t.identifiesAsWoman),
+    ]
+      .filter(Boolean)
+      .join(', ') +
+    ' },'
+  );
+}).join('\n');
+
+const travelerOutput = `// ─────────────────────────────────────────────────────────────────────────
+// GENERATED FILE — DO NOT EDIT BY HAND.
+//
+// Produced from the backend traveler seed by
+// \`node scripts/sync-frontend-places.mjs\`:
+//   pathwise-backend/src/modules/social/infrastructure/persistence/traveler.dataset.ts
+//
+// This list is ONLY the offline fallback for \`api.getTravelers\` — the Social
+// page normally renders whatever GET /api/social/travelers returns. It exists
+// so that a backend outage shows a populated page instead of a blank one, and
+// it is generated so that fallback cannot quietly describe a different world
+// from the live one.
+//
+// \`visibleToWomenOnly\` is deliberately NOT carried over: it is a server-side
+// visibility rule the offline path has no way to enforce reciprocally, and a
+// client that filtered on it would be guessing at a privacy decision.
+//
+// ⚠️ \`identifiesAsWoman\` is DEMO SEED DATA, hand-assigned in the backend seed.
+// It is NOT inferred from names, avatars or any other attribute — this product
+// never guesses gender. In production the value only ever comes from the
+// account holder ticking the opt-in box themselves, and it is never verified.
+// ─────────────────────────────────────────────────────────────────────────
+import type { Traveler } from './types';
+
+export const TRAVELERS: Traveler[] = [
+${travelerLines}
+];
+`;
+
+// ── Write / check ───────────────────────────────────────────────────────
+const artifacts = [
+  { path: TARGET, label: 'pathwise/src/hubData.ts', content: output },
+  { path: TRAVELER_TARGET, label: 'pathwise/src/travelerData.ts', content: travelerOutput },
+];
+
 const check = process.argv.includes('--check');
-const current = readFileSync(TARGET, 'utf8');
 
 if (check) {
-  if (current === output) {
-    console.log(`✓ ${TARGET} is up to date (${PLACE_DATASET.length} places, ${HUB_DATASET.length} hubs)`);
+  const stale = artifacts.filter(
+    (a) => !existsSync(a.path) || readFileSync(a.path, 'utf8') !== a.content,
+  );
+  if (stale.length === 0) {
+    console.log(
+      `✓ generated files are up to date ` +
+        `(${PLACE_DATASET.length} places, ${HUB_DATASET.length} hubs, ${TRAVELER_SEED.length} travelers)`,
+    );
     process.exit(0);
   }
   console.error(
-    `✗ pathwise/src/hubData.ts is STALE.\n\n` +
-      `  The backend place/hub datasets changed but the generated frontend copy\n` +
-      `  was not regenerated. Run:\n\n` +
+    `✗ ${stale.length === 1 ? 'A generated file is' : 'Generated files are'} STALE:\n` +
+      stale.map((a) => `      ${a.label}`).join('\n') +
+      `\n\n  The backend datasets changed but the generated frontend copies were\n` +
+      `  not regenerated. Run:\n\n` +
       `      node scripts/sync-frontend-places.mjs\n\n` +
       `  and commit the result.\n`,
   );
   process.exit(1);
 }
 
-writeFileSync(TARGET, output);
-console.log(`wrote ${TARGET} — ${PLACE_DATASET.length} places, ${HUB_DATASET.length} hubs`);
+for (const a of artifacts) writeFileSync(a.path, a.content);
+console.log(
+  `wrote ${artifacts.length} files — ${PLACE_DATASET.length} places, ` +
+    `${HUB_DATASET.length} hubs, ${TRAVELER_SEED.length} travelers`,
+);
