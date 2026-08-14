@@ -106,8 +106,20 @@ const tokens = (s) =>
   new Set(normalise(s).split(' ').filter((w) => w.length > 2 && !STOPWORDS.has(w)));
 
 function namesMatch(ours, theirs) {
-  // Whole-string containment runs first and independently of the token check.
-  // Some names are built entirely from stopwords once the district and the
+  const a = tokens(ours);
+  const b = tokens(theirs);
+
+  // An article title that is nothing BUT stopwords is a district or an island
+  // — "Eminönü", "Büyükada". Those words are contained in the name of every
+  // single thing standing in them, so containment is no evidence at all: it
+  // handed the fish-sandwich stall the article about Eminönü the district, and
+  // a shopping street the article about the island it is on. Only an exact
+  // name will do, which is what lets "Moda, Kadıköy" still match the record
+  // that is genuinely about Moda.
+  if (b.size === 0 && normalise(ours) !== normalise(theirs)) return false;
+
+  // Whole-string containment runs before the token check and independently of
+  // it. Some names are built entirely from stopwords once the district and the
   // generic noun are removed — "Sultanahmet Camii" reduces to nothing — and a
   // token comparison has no evidence left to work with even when the two
   // strings are literally identical.
@@ -115,8 +127,6 @@ function namesMatch(ours, theirs) {
   const nb = normalise(theirs).replace(/\s/g, '');
   if (na.length > 5 && nb.length > 5 && (na.includes(nb) || nb.includes(na))) return true;
 
-  const a = tokens(ours);
-  const b = tokens(theirs);
   if (a.size === 0 || b.size === 0) return false;
   for (const w of a) if (b.has(w)) return true;
   return false;
@@ -162,6 +172,16 @@ const cache = existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, 'utf8')) : {};
 
 let found = 0;
 let none = 0;
+/**
+ * Places the network never gave an answer for.
+ *
+ * Tracked separately because they are NOT the same as "no article exists", and
+ * conflating them cost a real regression: a transient error on the very first
+ * request dropped Hagia Sophia, and the run still finished with a confident
+ * "64 matched" that no one had reason to question. An error leaves no cache
+ * entry, so a re-run retries exactly these — but only if you know they exist.
+ */
+const errored = [];
 for (const [i, place] of places.entries()) {
   const label = `[${String(i + 1).padStart(3)}/${places.length}] ${place.name}`;
   if (cache[place.placeId] !== undefined) {
@@ -175,6 +195,7 @@ for (const [i, place] of places.entries()) {
     results = await geosearch(place.lat, place.lng);
   } catch (err) {
     console.log(`${label} — ERROR ${String(err)}`);
+    errored.push(place.name);
     await sleep(REQUEST_INTERVAL_MS);
     continue;
   }
@@ -210,6 +231,11 @@ for (const [i, place] of places.entries()) {
 console.log('\n─────────────────────────────────────────');
 console.log(`articles matched : ${found} / ${places.length}`);
 console.log(`no match         : ${none}`);
+if (errored.length > 0) {
+  console.log(`\n⚠  NO ANSWER (network) : ${errored.length} — these are unresolved,`);
+  console.log('   not "no article". Re-run to retry exactly these:');
+  for (const name of errored) console.log(`     - ${name}`);
+}
 
 if (dryRun) {
   console.log('\n--dry-run: nothing written.');

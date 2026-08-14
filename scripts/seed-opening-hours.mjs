@@ -30,11 +30,24 @@ const DATASET = resolve(
 );
 const CACHE = resolve(here, 'data/osm-hours.json');
 
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+/**
+ * Overpass mirrors, tried in turn.
+ *
+ * The first full run lost 42 of 83 places to HTTP 504 — not a rejection, just
+ * the main instance being busy, and three linear retries against the *same*
+ * host all landed inside the same busy window. Rotating hosts is what actually
+ * breaks out of that: the mirrors are independent deployments of the same
+ * database, so a timeout on one says nothing about the next.
+ */
+const OVERPASS_URLS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+];
 const USER_AGENT = 'Pathwise/1.0 (Istanbul travel planner; one-off hours seeding)';
 // Overpass asks for well under 1 req/s sustained; this is a one-off batch job.
 const REQUEST_INTERVAL_MS = 3000;
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 6;
 /**
  * Radius around the curated coordinate, in metres. Tight on purpose — see the
  * name guard below for why proximity alone is not nearly enough.
@@ -160,34 +173,55 @@ function humanise(raw) {
   return v;
 }
 
+/** Exponential backoff with jitter: ~6s, 12s, 24s, 48s, 96s, capped at 2 min. */
+function backoffMs(attempt) {
+  const base = Math.min(REQUEST_INTERVAL_MS * 2 ** attempt, 120000);
+  return base + Math.random() * 2000;
+}
+
 async function fetchHours(place) {
   const query =
     `[out:json][timeout:25];` +
     `nwr(around:${SEARCH_RADIUS_M},${place.lat},${place.lng})["opening_hours"]["name"];` +
     `out tags 20;`;
 
-  // The public Overpass instance rate-limits (429) and times out (504) under
-  // load. Both are transient, so back off and retry rather than losing a place.
+  // Overpass rate-limits (429) and times out (504) under load. Both are
+  // transient, so retry — but move to a different mirror each time and back off
+  // exponentially with jitter, rather than knocking on the same busy door at a
+  // fixed interval. A whole batch of clients retrying in lockstep is how the
+  // busy window gets extended instead of ridden out.
   let body;
+  let lastStatus = 0;
   for (let attempt = 1; ; attempt++) {
-    const res = await fetch(OVERPASS_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': USER_AGENT,
-      },
-      body: `data=${encodeURIComponent(query)}`,
-      signal: AbortSignal.timeout(40000),
-    });
+    const url = OVERPASS_URLS[(attempt - 1) % OVERPASS_URLS.length];
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': USER_AGENT,
+        },
+        body: `data=${encodeURIComponent(query)}`,
+        signal: AbortSignal.timeout(60000),
+      });
+    } catch (err) {
+      // A mirror that is down or hangs past the timeout is the same situation
+      // as a 504 — try the next one rather than losing the place.
+      if (attempt > MAX_RETRIES) throw err;
+      await sleep(backoffMs(attempt));
+      continue;
+    }
     if (res.ok) {
       body = await res.json();
       break;
     }
+    lastStatus = res.status;
     if ((res.status === 429 || res.status === 504) && attempt <= MAX_RETRIES) {
-      await sleep(REQUEST_INTERVAL_MS * 2 * attempt);
+      await sleep(backoffMs(attempt));
       continue;
     }
-    throw new Error(`Overpass responded ${res.status}`);
+    throw new Error(`Overpass responded ${lastStatus}`);
   }
 
   const tagged = (body.elements ?? [])

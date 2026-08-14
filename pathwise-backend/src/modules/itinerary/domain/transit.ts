@@ -48,6 +48,9 @@ export interface TransitPoint {
 // defend out loud. They round generously: a plan that leaves slack is
 // recoverable, a plan that runs late strands someone.
 
+/** Close enough that "getting there" is not a step in the day. */
+const SAME_SPOT_M = 50;
+
 /** Beyond this, people stop walking and take something. ~16 min on foot. */
 const WALK_LIMIT_M = 1200;
 const WALK_SPEED_M_PER_MIN = 75; // ~4.5 km/h
@@ -101,6 +104,20 @@ function crossesWater(a: TransitPoint, b: TransitPoint): boolean {
  */
 export function planLeg(from: TransitPoint, to: TransitPoint): TransportLeg {
   const distanceMeters = Math.round(haversineMeters(from, to));
+
+  // Two stops at the same spot. This is not a data error to be corrected away:
+  // the Büyükada ferry ride, the electric-carriage tour and the bike hire all
+  // genuinely begin at the pier, so they share its coordinate honestly. What
+  // was wrong was the output — a "🚶 2 min walk (0m)" leg between them, which
+  // reads as a bug because it is one.
+  if (distanceMeters < SAME_SPOT_M) {
+    return {
+      mode: 'walk',
+      label: `📍 Right here — no travel to ${to.name}`,
+      distanceMeters,
+      durationMinutes: 0,
+    };
+  }
 
   if (crossesWater(from, to)) {
     const island =

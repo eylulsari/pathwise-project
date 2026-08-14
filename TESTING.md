@@ -189,11 +189,30 @@ to anyone.
 (plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
 `cd pathwise && npm run e2e`.
 
-**Last full run — 2026-08-14, after the transit model:** 57 tests, **56 passed,
-1 flaky, exit 0**. Backend `npm test`: **99/99**, 9 suites. Frontend
-`npm run lint`: 0 errors (2 pre-existing warnings). `tsc --noEmit`: clean both
-sides. `npm run i18n:check`: 374 keys in both languages.
+**Last full run — 2026-08-14, after the enrichment wiring:** **57/57 passed,
+exit 0** (2.1 min). Backend `npm test`: **109/109**, 10 suites.
+Frontend `npm run lint`: 0 errors
+(2 pre-existing warnings). `tsc --noEmit`: clean both sides.
+`npm run i18n:check`: 374 keys in both languages.
 `node scripts/sync-frontend-places.mjs --check`: up to date.
+
+### The e2e suite caught a real regression this round
+`onboarding.spec.ts:374` (story modal → live enrichment) failed, twice, and it
+was right to. Swapping the hand-written six-landmark Wikipedia allowlist for
+the generated dataset **removed enrichment from Hagia Sophia**: the seeder's
+first request had failed hours earlier, leaving no cache entry and no error in
+the summary, so the generated file was quietly missing it — along with eleven
+others including Dolmabahçe Palace and Kariye Camii.
+
+Worth noting how it was found. The failure looked like flakiness (an external
+API in a browser test), and the tempting move was a longer timeout. The API
+itself disproved that in one call: `/enrichment` returned `wikipedia: null`
+while `tr.wikipedia.org` returned 200 for the same article. After re-seeding,
+the spec passes in 6.7 s.
+
+`wiki-titles.dataset.spec.ts` now guards the invariant directly, and it was
+watched failing on the broken dataset before the fix — a green guard that has
+never been seen red proves nothing.
 
 One e2e assertion was updated in this round and it is worth naming: the tours
 spec still clicked **"Set as Today's Itinerary"**, a button renamed to "Plan
@@ -201,12 +220,43 @@ this into my day" when the panel dropped its dead affiliate link. The label
 moved, the assertion did not — the spec still proves the tour reaches the day
 and produces stops.
 
-> **Still flaky:** `social-features.spec.ts:70` (poll winner → Today's Path).
-> Already recorded as flaky on 2026-08-02, so it predates the transit work, and
-> the run below rules the engine out as the cause: the same request returns
-> Galata Tower in the plan in **7 ms**, and the spec passes **5/5 in
-> isolation**. It only misses on the first attempt under three parallel
-> workers. Left alone rather than papered over with a longer timeout.
+## Known debt: one flaky spec
+
+`social-features.spec.ts:70` — *closing a poll and adding the winner injects it
+into Today's Path*.
+
+| | |
+|---|---|
+| **First seen** | 2026-08-02, in the women-traveler run — it predates both the content expansion and the transit model |
+| **Symptom** | `ol li h3` filtered to "Galata Tower" not found within 15 s, on the **first attempt only**; passes on retry, so the suite exits 0 |
+| **Isolated** | `--repeat-each=5 --retries=0` → **5/5 pass**, 3–5 s each |
+| **Under load** | misses on attempt 1 with 3 parallel workers |
+
+**The route engine is ruled out.** The same request — `kadikoy-moda` with
+Galata Tower as a must-visit — returns a plan **containing Galata Tower** in
+**7 ms** measured over ten calls. The stop is there, the API is fast, and the
+must-visit path is covered by backend unit tests. Whatever is slow is between
+`/social` and the re-rendered dashboard, not in generation.
+
+**Deliberately not fixed.** The obvious move is a longer timeout, which would
+hide the symptom without learning anything; the real fix needs a trace of the
+navigation and the regenerate that follows it. Recording it as debt is
+honest — silently raising the timeout would not be.
+
+> It passed on the 2026-08-14 run. That is not a fix, and the entry stays: an
+> intermittent failure that happens not to fire is still there.
+
+### Machine load can fail the suite wholesale
+On the same day, a run came back **17 failed in 16.9 minutes** — against a
+normal 2 minutes — with every failure a `fill()` timing out on an input the
+locator had already resolved. Nothing was wrong with the app: an Overpass
+seeding job, a Wikipedia sweep, a container restart and a frontend build were
+all running against it. The same specs passed 11/11 in 23 s once the machine
+was quiet, and the full suite then went 57/57.
+
+**Read the wall-clock time before reading the failures.** A suite that takes 8×
+longer than usual is describing the machine, not the code — and the failure
+list will look alarming and mean nothing.
 
 ## Transit realism (route engine)
 `itinerary/domain/transit.spec.ts` (8 tests) pins the model itself; the

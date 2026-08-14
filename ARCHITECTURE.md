@@ -125,6 +125,38 @@ Coordinates are seeded offline by `scripts/geocode-places.mjs` (Nominatim), neve
 at runtime: the Overpass enrichment client matches a POI by *proximity* to a
 known lat/lng, so a coordinate is an input to enrichment, not an output of it.
 
+### Seeded data, and why it is guarded
+Three datasets are produced by scripts under `scripts/` rather than written by
+hand: coordinates, opening hours (Overpass) and Wikipedia article titles.
+
+`wiki-titles.dataset.ts` replaced a hand-written allowlist of six landmarks — a
+number chosen when the catalogue held 28 places and never revisited as it grew
+to 124. Coverage went from **6 places to 65**, every one of which returns a real
+Turkish summary and all but one a photo.
+
+Generated data fails differently from hand-written data, and this is the
+cautionary tale: a transient network error during seeding leaves **no entry and
+no trace**, and the run still finishes with a confident total. Wiring the
+dataset in therefore *removed* enrichment from Hagia Sophia, which the old
+six-landmark list had covered — the seeder's very first request had failed
+hours earlier. Nothing caught it until an e2e spec opened the story modal.
+
+Two things now stand between that and a repeat:
+
+- the seeders count network failures **separately from "no match"** and list
+  them at the end, because "we never asked" is not "there is nothing there";
+- `wiki-titles.dataset.spec.ts` asserts that the six previously curated
+  landmarks still have titles, that every key points at a real place, and that
+  coverage has not collapsed.
+
+The matchers refuse far more than they accept, and refusing well is most of the
+work. The persistent failure is a place inheriting its **neighbourhood's**
+identity: the fish-sandwich stall at Eminönü matched the article about Eminönü
+the district; a shopping street matched the article about the island it sits
+on; SALT Beyoğlu and SALT Galata both matched their districts. All four looked
+entirely plausible on screen. A title made only of stopwords is now rejected
+unless the names match exactly.
+
 ### Pure domain scoring — buddy matching
 `social/domain/matching.ts` holds the compatibility score as **pure functions**
 with no framework imports, so the whole economy is testable without a DB, a

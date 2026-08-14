@@ -21,10 +21,12 @@ export const WIKI_TITLES: Record<string, string> = {
   'ChIJ-balat-cibalikapisi': 'Cibali (İstanbul Tramvayı)', // Cibali Kapısı
   'ChIJ-balat-fenerpatriarchate': 'Maraşlı Rum İlkokulu', // Ecumenical Patriarchate (Fener)
   'ChIJ-balat-fenerrumlisesi': 'Fener Rum Erkek Lisesi', // Fener Rum Lisesi (Kırmızı Mektep)
+  'ChIJ-balat-kariyecamii': 'Kariye Camii', // Kariye Camii (Chora)
   'ChIJ-balat-svetistefanbulgarkilises': 'Sveti Stefan Kilisesi', // Sveti Stefan Bulgar Kilisesi
   'ChIJ-besiktas-besiktascarsisi': 'Büyük Beşiktaş Çarşısı', // Beşiktaş Çarşısı
   'ChIJ-besiktas-ciragansarayidiscephesi': 'Çırağan Sarayı', // Çırağan Sarayı Dış Cephesi
   'ChIJ-besiktas-denizmuzesi': 'İstanbul Deniz Müzesi', // Deniz Müzesi
+  'ChIJ-besiktas-dolmabahce': 'Dolmabahçe Sarayı', // Dolmabahçe Palace
   'ChIJ-besiktas-ihlamurkasri': 'Ihlamur Kasrı',
   'ChIJ-besiktas-yildiz-park': 'Yıldız Sarayı', // Yıldız Park
   'ChIJ-beyoglu-atlaspasaji': 'Atlas Pasajı',
@@ -32,7 +34,6 @@ export const WIKI_TITLES: Record<string, string> = {
   'ChIJ-beyoglu-geziparki': 'Taksim Gezi Parkı', // Gezi Parkı
   'ChIJ-beyoglu-istiklalcaddesi': 'İstiklal Caddesi',
   'ChIJ-beyoglu-peramuzesi': 'Pera Müzesi',
-  'ChIJ-beyoglu-saltbeyoglu': 'Beyoğlu', // SALT Beyoğlu
   'ChIJ-beyoglu-sentantuankilisesi': 'St. Antuan Katolik Kilisesi', // Sent Antuan Kilisesi
   'ChIJ-beyoglu-taksimcamii': 'Taksim Camii',
   'ChIJ-beyoglu-taksimmeydani': 'Taksim Meydanı',
@@ -48,9 +49,7 @@ export const WIKI_TITLES: Record<string, string> = {
   'ChIJ-eminonu-yenicami': 'Yeni Cami',
   'ChIJ-galata-arapcamii': 'Arap Camii',
   'ChIJ-galata-camondo': 'Kamondo Merdivenleri', // Camondo Steps
-  'ChIJ-galata-karakoyrihtimi': 'Karaköy', // Karaköy Rıhtımı
-  'ChIJ-galata-namli': 'Karaköy', // Namlı Gurme (Karaköy)
-  'ChIJ-galata-saltgalata': 'Galata', // SALT Galata
+  'ChIJ-galata-saltgalata': 'SALT', // SALT Galata
   'ChIJ-galata-tower': 'Galata Kulesi', // Galata Tower
   'ChIJ-galata-yeralticamii': 'Yeraltı Camii',
   'ChIJ-kadikoy-alimuhiddinhacibekir': 'Ali Paşa Çeşmesi (Kadıköy)', // Ali Muhiddin Hacı Bekir (Kadıköy)
@@ -60,10 +59,12 @@ export const WIKI_TITLES: Record<string, string> = {
   'ChIJ-ortakoy-asiyanmuzesi': 'Aşiyan Müzesi',
   'ChIJ-ortakoy-rumelihisari': 'Rumeli Hisarı',
   'ChIJ-sultanahmet-basilicacistern': 'Yerebatan Sarnıcı', // Basilica Cistern (Yerebatan Sarnıcı)
+  'ChIJ-sultanahmet-binbirdireksarnici': 'Binbirdirek Sarnıcı',
   'ChIJ-sultanahmet-bluemosque': 'Sultanahmet Camii', // Blue Mosque (Sultanahmet Camii)
   'ChIJ-sultanahmet-cagalogluhamami': 'Cağaloğlu Hamamı',
   'ChIJ-sultanahmet-grandbazaar': 'Kapalıçarşı', // Grand Bazaar (Kapalıçarşı)
   'ChIJ-sultanahmet-gulhane': 'Gülhane Parkı', // Gülhane Park
+  'ChIJ-sultanahmet-hagiasophia': 'Ayasofya', // Hagia Sophia
   'ChIJ-sultanahmet-istanbularkeolojimuzeler': 'İstanbul Arkeoloji Müzeleri',
   'ChIJ-sultanahmet-kucukayasofya': 'Küçük Ayasofya Camii', // Little Hagia Sophia (Küçük Ayasofya)
   'ChIJ-sultanahmet-sogukcesmesokagi': 'Soğukçeşme Sokağı',

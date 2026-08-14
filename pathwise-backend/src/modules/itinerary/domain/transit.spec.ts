@@ -56,6 +56,16 @@ describe('planLeg', () => {
     expect(leg.durationMinutes).toBeGreaterThanOrEqual(45);
   });
 
+  it('does not invent a walk between two stops at the same spot', () => {
+    // The ferry ride, the carriage tour and the bike hire all start at the
+    // Büyükada pier and share its coordinate. The engine used to bill that as
+    // "🚶 2 min walk (0m)".
+    const ferryRide = at('Adalar Vapur Yolculuğu', 40.8749412, 29.1283038, 'Islands', 'Büyükada');
+    const leg = planLeg(buyukadaIskele, ferryRide);
+    expect(leg.durationMinutes).toBe(0);
+    expect(leg.label).not.toMatch(/walk/i);
+  });
+
   it('does not offer a tram on an island that bans cars', () => {
     const prinkipo = at('Prinkipo', 40.8657, 29.1215, 'Islands', 'Büyükada');
     const leg = planLeg(ayaYorgi, prinkipo);

@@ -170,7 +170,7 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-uskudar-kuzguncukbostani', name: 'Kuzguncuk Bostanı', hub: 'uskudar', lat: 41.0347737, lng: 29.0318137, entryFeeTry: 0 },
   // ── Princes’ Islands (Adalar) (10) ──
   { placeId: 'ChIJ-adalar-buyukadaiskelesi', name: 'Büyükada İskelesi', hub: 'adalar', lat: 40.8749412, lng: 29.1283038, entryFeeTry: 0 },
-  { placeId: 'ChIJ-adalar-ayayorgikilisesi', name: 'Aya Yorgi Kilisesi', hub: 'adalar', lat: 40.8503479, lng: 29.1195647, entryFeeTry: 0 },
+  { placeId: 'ChIJ-adalar-ayayorgikilisesi', name: 'Aya Yorgi Kilisesi', hub: 'adalar', lat: 40.8488447, lng: 29.1188324, entryFeeTry: 0 },
   { placeId: 'ChIJ-adalar-buyukadaelektriklifayton', name: 'Büyükada Elektrikli Fayton Turu', hub: 'adalar', lat: 40.8749412, lng: 29.1283038, entryFeeTry: 400, entryFeeApprox: true },
   { placeId: 'ChIJ-adalar-buyukadabisikletturu', name: 'Büyükada Bisiklet Turu', hub: 'adalar', lat: 40.8749412, lng: 29.1283038, entryFeeTry: 300, entryFeeApprox: true },
   { placeId: 'ChIJ-adalar-splendidpalasoteli', name: 'Splendid Palas Oteli', hub: 'adalar', lat: 40.8727296, lng: 29.1264372, entryFeeTry: 0 },
