@@ -74,6 +74,28 @@ export interface ItineraryStop {
   reservation?: { time: string; confirmationCode?: string; note?: string };
 }
 
+/**
+ * Something the traveller needs to know about the shape of this day, as a code
+ * rather than a sentence: the backend does not know which language the reader
+ * chose, and a warning shipped in the wrong one is a warning nobody reads.
+ */
+export type ItineraryNoticeCode =
+  /** Stops from another hub were dropped because Adalar is a day of its own. */
+  | 'adalar-separate-day'
+  /** The plan runs late enough to risk the last ferry back from the islands. */
+  | 'adalar-last-ferry'
+  /** Routine reminder that an island day has to catch a boat home. */
+  | 'adalar-return-ferry'
+  /** The day crosses the Bosphorus — real, doable, and worth an hour of it. */
+  | 'cross-side-day';
+
+export interface ItineraryNotice {
+  code: ItineraryNoticeCode;
+  severity: 'info' | 'warning';
+  /** Place names the notice is about, for interpolation into the message. */
+  places?: string[];
+}
+
 export interface Itinerary {
   hub: Hub;
   mode: RouteMode;
@@ -90,5 +112,7 @@ export interface Itinerary {
   overBudget: boolean;
   totalDistanceKm: number;
   totalDurationMinutes: number;
+  /** Empty on an ordinary day; never null, so the UI can map it unguarded. */
+  notices: ItineraryNotice[];
   generatedAt: string;
 }

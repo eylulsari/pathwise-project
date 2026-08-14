@@ -57,6 +57,44 @@ the cap would have been invisible, but with 12–15 the time budget alone packs 
 seven-hour day with ten or more stops. Must-visits and reservations are exempt:
 the user asked for those explicitly, so dropping one would be a bug, not pacing.
 
+### The transit model — why a day is possible, not just arithmetically valid
+`itinerary/domain/transit.ts` decides how you get from one stop to the next.
+It asks **which shore each stop is on**, not just how far apart they are.
+
+Straight-line distance used to decide it: over 3 km was a "ferry", over 1.5 km a
+"tram". Going from 5 hubs to 10 put open water inside the planning space, and
+the audit found the rule wrong in both directions on the **default path**, with
+no unusual input needed:
+
+| What the engine said | What it was |
+|---|---|
+| Heybeliada → Büyükada, "🚋 tram, 10 min" | a crossing between two islands |
+| Çamlıca → Fethi Paşa Korusu, "🚢 ferry, 20 min" | 4 km of road on one shore, charged a boat fare |
+| Kadıköy → Büyükada, "20 min" | an hour-plus sailing, then a long uphill walk |
+
+The model now returns door-to-door times — walking to the pier, the modelled
+wait, the crossing — so a Bosphorus hop costs the day the hour it really costs.
+Two rules sit on top:
+
+- **Adalar is a day of its own.** An island stop and a mainland stop cannot
+  share a day at any pace, so a must-visit that would mix them is dropped and
+  the traveller is told which one and why. This is the only place the engine
+  overrides an explicit must-visit.
+- **The last ferry is a deadline.** An island day is trimmed to leave time to
+  reach the pier by ~20:00; when only untrimmable must-visits remain, it warns
+  instead of pretending.
+
+**There is no timetable here, deliberately.** Every wait is a modelled average
+and the labels say so. Live ferry schedules were considered and rejected as
+disproportionate — an external dependency with a freshness obligation and a
+fare, for something a transit app does better. Pathwise plans a day; it does not
+navigate one. What it owes the user is a plan that is *possible*.
+
+Assembly and trimming are a **loop, not a sequence**: travel time is not known
+until the stops are ordered, so the day is built, measured against the real
+clock, and shortened if it overran. Before this, an eight-hour request came back
+as a nine-hour day in every hub tested.
+
 ### Factory Pattern
 `RouteStrategyFactory` returns the correct strategy for a given `mode` string
 (`"hub-budget"` | `"quiz-vibe"`).

@@ -7,6 +7,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import type {
   Itinerary,
+  ItineraryNotice,
   ItineraryStop,
   NearbySuggestion,
   Place,
@@ -75,6 +76,8 @@ export function TodayPath({
 
       <BudgetBar itinerary={itinerary} />
 
+      <RouteNotices notices={itinerary.notices} />
+
       {startLeg && (
         <div className="rounded-xl border border-sage/30 bg-sage/10 px-3 py-2 text-xs text-sage">
           <span className="font-semibold">{startPoint!.label}</span> · {startLeg}
@@ -107,7 +110,10 @@ export function TodayPath({
         <div className="rounded-2xl border border-iznik/40 bg-iznik/10 p-3">
           <p className="text-sm">
             <span className="font-semibold text-iznik">{t('suggest.title')}: {suggestion.place.name}</span>
-            <span className="text-ink/60"> — {suggestion.walkMinutes} min {t('suggest.away')} ({suggestion.place.rating}★)</span>
+            <span className="text-ink/60">
+              {' '}— {suggestion.walkMinutes} min {t('suggest.away')}
+              {suggestion.place.rating !== null && ` (${suggestion.place.rating}★)`}
+            </span>
           </p>
           <p className="mt-0.5 text-xs italic text-ink/50">💡 {suggestion.place.localTip}</p>
           <div className="mt-2 flex gap-2">
@@ -124,6 +130,49 @@ export function TodayPath({
       {storyPlace && (
         <LocalStoryModal place={storyPlace} onClose={() => setStoryPlace(null)} />
       )}
+    </div>
+  );
+}
+
+/**
+ * Notices about the day as a whole — a stop the engine could not honour, or a
+ * ferry the plan depends on.
+ *
+ * These are placed above the stop list rather than beside a single stop
+ * because they describe the shape of the whole day. A dropped must-visit in
+ * particular has no row to attach to: the whole point is that it is not there,
+ * and a stop that vanishes with no explanation reads as a bug.
+ */
+const NOTICE_KEY: Record<ItineraryNotice['code'], string> = {
+  'adalar-separate-day': 'today.noticeAdalarSeparateDay',
+  'adalar-return-ferry': 'today.noticeAdalarReturnFerry',
+  'adalar-last-ferry': 'today.noticeAdalarLastFerry',
+  'cross-side-day': 'today.noticeCrossSideDay',
+};
+
+function RouteNotices({ notices }: { notices?: ItineraryNotice[] }) {
+  const { t } = useT();
+  if (!notices || notices.length === 0) return null;
+
+  return (
+    <div className="space-y-1.5">
+      {notices.map((notice) => (
+        <div
+          key={notice.code}
+          role={notice.severity === 'warning' ? 'alert' : undefined}
+          className={`rounded-xl border px-3 py-2 text-xs ${
+            notice.severity === 'warning'
+              ? 'border-terracotta/40 bg-terracotta/10 text-terracotta'
+              : 'border-ink/10 bg-ink/5 text-ink/60'
+          }`}
+        >
+          {notice.severity === 'warning' ? '⚠️ ' : '🚢 '}
+          {t(NOTICE_KEY[notice.code]).replace(
+            '{places}',
+            (notice.places ?? []).join(', '),
+          )}
+        </div>
+      ))}
     </div>
   );
 }

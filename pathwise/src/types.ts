@@ -87,7 +87,13 @@ export interface Place {
   hub: Hub;
   lat: number;
   lng: number;
-  rating: number;
+  /**
+   * Curated editorial score. `null` means **not yet rated** — never render a
+   * star for it. Two thirds of the catalogue is unrated, and showing them all
+   * the same placeholder number would put a judgement nobody made in front of
+   * a traveller.
+   */
+  rating: number | null;
   reviewCount: number;
   photoUrl: string;
   category: Interest;
@@ -222,6 +228,23 @@ export interface JournalSummary {
   categoryRatings: Partial<Record<Interest, number>>;
 }
 
+/**
+ * A warning or note about the shape of the day, sent as a code because the
+ * backend does not know which language the reader picked. `t()` turns it into
+ * a sentence; `places` fills the blank in it.
+ */
+export type ItineraryNoticeCode =
+  | 'adalar-separate-day'
+  | 'adalar-last-ferry'
+  | 'adalar-return-ferry'
+  | 'cross-side-day';
+
+export interface ItineraryNotice {
+  code: ItineraryNoticeCode;
+  severity: 'info' | 'warning';
+  places?: string[];
+}
+
 export interface Itinerary {
   hub: Hub;
   mode: RouteMode;
@@ -238,6 +261,8 @@ export interface Itinerary {
   overBudget: boolean;
   totalDistanceKm: number;
   totalDurationMinutes: number;
+  /** Optional so an itinerary cached before this field existed still renders. */
+  notices?: ItineraryNotice[];
   generatedAt: string;
 }
 

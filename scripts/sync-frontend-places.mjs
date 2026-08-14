@@ -41,12 +41,19 @@ const TRAVELER_TARGET = resolve(root, 'pathwise/src/travelerData.ts');
  * syntax. The datasets are object literals with no logic, so this needs no
  * build step — the same technique `pathwise/scripts/check-i18n.mjs` already
  * uses for the translation dictionaries.
+ *
+ * The strip list grows with the datasets. `Record<…>` annotations and casts
+ * arrived with `HUB_SIDE`, and until they were handled this loader failed with
+ * a bare `SyntaxError` naming a line rather than the missing rule — worth
+ * remembering before adding a type shape it has never seen.
  */
 async function loadDataModule(file) {
   const source = readFileSync(file, 'utf8')
     .replace(/^import[^\n]*\n/gm, '')
     .replace(/:\s*(Place|HubMeta|Traveler)\[\]/g, '')
-    .replace(/:\s*\{[^}]*\}\[\]/g, '');
+    .replace(/:\s*\{[^}]*\}\[\]/g, '')
+    .replace(/:\s*Record<[^>]*>/g, '')
+    .replace(/\bas\s+Record<[^>]*>/g, '');
   return import('data:text/javascript,' + encodeURIComponent(source));
 }
 

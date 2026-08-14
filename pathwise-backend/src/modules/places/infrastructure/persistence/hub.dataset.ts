@@ -1,4 +1,5 @@
-import { HubMeta } from '../../domain/hub';
+import { Hub } from '../../domain/place';
+import { HubMeta, HubSide } from '../../domain/hub';
 
 /**
  * The ten neighborhood hubs, in the order the selector shows them: European
@@ -91,6 +92,18 @@ export const HUB_DATASET: HubMeta[] = [
     accent: '#2E8B87',
   },
 ];
+
+/**
+ * Which shore each hub is on, derived from `HUB_DATASET` rather than restated.
+ *
+ * The route engine needs this per place (a place's side is its hub's side) and
+ * a second hand-written copy is exactly the divergence we removed elsewhere:
+ * adding a hub here and forgetting it there would silently let the engine plan
+ * a walk across the Bosphorus.
+ */
+export const HUB_SIDE: Record<Hub, HubSide> = Object.fromEntries(
+  HUB_DATASET.map((h) => [h.id, h.side]),
+) as Record<Hub, HubSide>;
 
 /**
  * Transit hubs / ferry piers offered as route start points (IBB Open Data).

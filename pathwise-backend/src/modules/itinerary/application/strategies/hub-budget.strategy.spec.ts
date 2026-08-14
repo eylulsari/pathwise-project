@@ -152,6 +152,122 @@ describe('HubBudgetStrategy', () => {
     expect(visitMinutes).toBeLessThanOrEqual(60);
   });
 
+  // ── transit realism ────────────────────────────────────────────────
+  // Growing from five hubs to ten put open water inside the planning space:
+  // Adalar is a scheduled ferry away and Üsküdar/Kadıköy are the far shore.
+  // The engine costed every hop by straight-line distance, so it happily
+  // produced days nobody could physically walk.
+
+  describe('the day it produces can actually be walked', () => {
+    // The exact request from the audit. It returned a nine-stop day ending at
+    // 18:05 on top of a hill on Büyükada, having crossed from Sultanahmet to
+    // Kadıköy to the islands in "20 minutes" a leg, with no way home.
+    const auditCase = () =>
+      strategy.generate(
+        baseInput({
+          hub: 'sultanahmet',
+          budgetTry: 3000,
+          paceHours: 8,
+          startHour: 9,
+          interests: ['history', 'view'],
+          mustVisitIds: [
+            'ChIJ-sultanahmet-hagiasophia',
+            'ChIJ-adalar-ayayorgikilisesi',
+            'ChIJ-kadikoy-carsi',
+          ],
+        }),
+      );
+
+    it('refuses to put the islands and the mainland in the same day', async () => {
+      const result = await auditCase();
+      const hubs = result.stops.filter((s) => s.place).map((s) => s.place!.hub);
+      expect(hubs).not.toContain('adalar');
+      // …and the stop that could not be honoured is named, not silently gone.
+      const notice = result.notices.find((n) => n.code === 'adalar-separate-day');
+      expect(notice).toBeDefined();
+      expect(notice!.severity).toBe('warning');
+      expect(notice!.places).toContain('Aya Yorgi Kilisesi');
+    });
+
+    it('still honours the must-visits that CAN share a day', async () => {
+      const result = await auditCase();
+      const ids = result.stops.filter((s) => s.place).map((s) => s.place!.placeId);
+      expect(ids).toContain('ChIJ-sultanahmet-hagiasophia');
+      expect(ids).toContain('ChIJ-kadikoy-carsi');
+    });
+
+    it('charges the Bosphorus crossing what it really costs', async () => {
+      const result = await auditCase();
+      const ferries = result.stops
+        .map((s) => s.transportToNext)
+        .filter((l): l is NonNullable<typeof l> => l?.mode === 'ferry');
+      expect(ferries.length).toBeGreaterThan(0);
+      // Twenty minutes was the crossing with the walk to the pier and the wait
+      // for the boat both free. Nothing that involves a boat is that cheap.
+      for (const leg of ferries) expect(leg.durationMinutes).toBeGreaterThanOrEqual(45);
+    });
+
+    it('never puts a ferry between two stops on the same shore', async () => {
+      // Inside a single mainland hub there is no water to cross, so a ferry leg
+      // is proof the model fell back to guessing from distance.
+      for (const hub of ['uskudar', 'sultanahmet', 'besiktas-bogaz'] as const) {
+        const result = await strategy.generate(
+          baseInput({ hub, paceHours: 8, startHour: 9, budgetTry: 50000 }),
+        );
+        const modes = result.stops.map((s) => s.transportToNext?.mode);
+        expect(modes).not.toContain('ferry');
+      }
+    });
+  });
+
+  it('keeps the whole day — travel included — inside the requested pace', async () => {
+    // Selection can only budget visit minutes; travel time is not known until
+    // the stops are ordered. Every hub is checked because the overrun showed up
+    // wherever the hops were long, not in one unlucky neighbourhood.
+    for (const hub of ['sultanahmet', 'uskudar', 'kadikoy-moda', 'adalar'] as const) {
+      const paceHours = 6;
+      const result = await strategy.generate(
+        baseInput({ hub, paceHours, startHour: 9, budgetTry: 50000 }),
+      );
+      expect(result.totalDurationMinutes).toBeLessThanOrEqual(paceHours * 60);
+    }
+  });
+
+  describe('an island day', () => {
+    it('leaves enough evening to catch the last ferry back', async () => {
+      const startHour = 10;
+      const result = await strategy.generate(
+        baseInput({ hub: 'adalar', startHour, paceHours: 12, budgetTry: 50000 }),
+      );
+      const endMinutes = startHour * 60 + result.totalDurationMinutes;
+      // 20:00 last boat, minus getting down to the pier and boarding.
+      expect(endMinutes).toBeLessThanOrEqual(20 * 60 - 45);
+      expect(result.notices.map((n) => n.code)).toContain('adalar-return-ferry');
+    });
+
+    it('warns instead of pretending when forced stops run past the last ferry', async () => {
+      // Four long must-visits starting late: the engine cannot trim them away,
+      // so the only honest move left is to say the boat may be gone.
+      const result = await strategy.generate(
+        baseInput({
+          hub: 'adalar',
+          startHour: 16,
+          paceHours: 12,
+          budgetTry: 50000,
+          mustVisitIds: [
+            'ChIJ-adalar-ayayorgikilisesi',
+            'ChIJ-adalar-heybeliadaruhbanokulu',
+            'ChIJ-adalar-prinkiporumyetimhanesi',
+            'ChIJ-adalar-splendidpalasoteli',
+          ],
+        }),
+      );
+      const notice = result.notices.find((n) => n.code === 'adalar-last-ferry');
+      expect(notice).toBeDefined();
+      expect(notice!.severity).toBe('warning');
+    });
+  });
+
   it('produces valid HH:mm times and a non-negative cost breakdown', async () => {
     const result = await strategy.generate(baseInput());
     for (const stop of result.stops) {

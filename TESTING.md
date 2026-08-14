@@ -189,15 +189,41 @@ to anyone.
 (plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
 `cd pathwise && npm run e2e`.
 
-**Last full run — 2026-08-02, after the women-traveler mode:** 42 passed, 1
-flaky (`social-features.spec.ts:70` poll-winner → Today's Path timed out once,
-passed on retry — the same drag/timing sensitivity already noted for #5, not
-related to this feature). Backend `npm test`: 39/39. Frontend `npm run lint`:
-0 errors (2 pre-existing warnings). `tsc --noEmit`: clean both sides.
+**Last full run — 2026-08-14, after the transit model:** 57 tests, **56 passed,
+1 flaky, exit 0**. Backend `npm test`: **99/99**, 9 suites. Frontend
+`npm run lint`: 0 errors (2 pre-existing warnings). `tsc --noEmit`: clean both
+sides. `npm run i18n:check`: 374 keys in both languages.
+`node scripts/sync-frontend-places.mjs --check`: up to date.
 
-> Known pre-existing lint error, unrelated and untouched:
-> `hub-budget.strategy.ts:3` imports `Interest` without using it, so
-> `pathwise-backend`'s `npm run lint` exits non-zero.
+One e2e assertion was updated in this round and it is worth naming: the tours
+spec still clicked **"Set as Today's Itinerary"**, a button renamed to "Plan
+this into my day" when the panel dropped its dead affiliate link. The label
+moved, the assertion did not — the spec still proves the tour reaches the day
+and produces stops.
+
+> **Still flaky:** `social-features.spec.ts:70` (poll winner → Today's Path).
+> Already recorded as flaky on 2026-08-02, so it predates the transit work, and
+> the run below rules the engine out as the cause: the same request returns
+> Galata Tower in the plan in **7 ms**, and the spec passes **5/5 in
+> isolation**. It only misses on the first attempt under three parallel
+> workers. Left alone rather than papered over with a longer timeout.
+
+## Transit realism (route engine)
+`itinerary/domain/transit.spec.ts` (8 tests) pins the model itself; the
+`HubBudgetStrategy` suite carries the engine-level regressions.
+
+Each case is something the old distance-threshold model actually produced, not
+a hypothetical. The headline one is the audit request itself — Sultanahmet +
+Adalar + Kadıköy in one day — which returned a nine-stop, 545-minute day
+against an eight-hour (480-minute) request, ending at 18:05 on a hill on
+Büyükada with no way home. It now returns six stops, 428 minutes, the island
+must-visit dropped **by name** in a notice, and the Bosphorus crossing costed at
+60 minutes instead of 20.
+
+The suite also holds the general fix — *no hub's day may exceed its pace* —
+because the overrun was never about one unlucky neighbourhood: it appeared
+wherever the hops were long (8h→545min, 7h→509min, 6h→451min before; within
+budget in all four hubs after).
 
 ### Not yet covered
 - No e2e spec drives the women-traveler UI (profile panel → 🚺 chip → SOS

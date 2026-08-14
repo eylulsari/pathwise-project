@@ -1,6 +1,15 @@
 import { Hub } from './place';
 
 /**
+ * Which body of land a hub sits on.
+ *
+ * Not decoration: the route engine reads this to decide whether moving between
+ * two stops means a walk or a boat. `Islands` is the Adalar group, reachable
+ * only by a scheduled ferry and therefore neither shore.
+ */
+export type HubSide = 'European' | 'Asian' | 'Islands';
+
+/**
  * Presentation metadata for a hub.
  *
  * Hubs used to exist only as a string union on the backend and a hand-written
@@ -12,8 +21,7 @@ import { Hub } from './place';
 export interface HubMeta {
   id: Hub;
   name: string;
-  /** `Islands` is the Adalar ferry group — neither shore. */
-  side: 'European' | 'Asian' | 'Islands';
+  side: HubSide;
   blurb: string;
   /** Map centre, [lat, lng] — where the map opens when this hub is selected. */
   center: [number, number];

@@ -1,14 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { PlacesService } from '../../../places/application/places.service';
 import { Hub, Place } from '../../../places/domain/place';
+// Reaching into the places dataset for HUB_SIDE is deliberate. The alternative
+// is a second copy of "which shore is this hub on" living in the itinerary
+// module, and a hub added to one list but not the other is precisely how the
+// engine ends up planning a walk across the Bosphorus.
+import { HUB_SIDE } from '../../../places/infrastructure/persistence/hub.dataset';
 import { haversineMeters, LatLng } from '../../domain/geo';
 import {
   GroupType,
   Itinerary,
+  ItineraryNotice,
   ItineraryStop,
   RouteGenerationInput,
   TransportLeg,
 } from '../../domain/itinerary';
+import {
+  ISLAND_LAST_FERRY_MIN,
+  ISLAND_RETURN_BUFFER_MIN,
+  planLeg,
+  TransitPoint,
+} from '../../domain/transit';
 import { RouteGenerationStrategy } from '../../domain/route-generation-strategy.port';
 
 /**
@@ -23,13 +35,26 @@ import { RouteGenerationStrategy } from '../../domain/route-generation-strategy.
  *   5. order by nearest-neighbour; push sunset spots to the end in the evening
  *   6. insert an automatic Lunch Break if the day spans midday
  *   7. compute transport legs, arrival/departure times and the cost breakdown
+ *   8. trim the tail until the day actually fits the clock it was given
+ *
+ * Steps 7 and 8 are a loop, not a sequence. Travel time cannot be known before
+ * the stops are ordered, so the day is assembled, measured, and shortened if it
+ * overran — which is also how an island day is kept on the right side of the
+ * last ferry home.
  */
 @Injectable()
 export class HubBudgetStrategy implements RouteGenerationStrategy {
   private static readonly LUNCH_START = 12 * 60; // minutes since midnight
   private static readonly LUNCH_END = 14 * 60;
   private static readonly LUNCH_DURATION = 45;
-  private static readonly WALK_SPEED_M_PER_MIN = 75; // ~4.5 km/h
+
+  /**
+   * Stand-in score for a place nobody has rated. Deliberately mid-range: the
+   * curated ratings run 4.3–4.8, so this neither promotes nor buries an
+   * unrated place relative to them. It exists only inside scoring — no unrated
+   * place ever shows a star in the UI.
+   */
+  private static readonly UNRATED_BASELINE = 4.5;
 
   /**
    * Upper bound on real stops in a day, by pace.
@@ -73,9 +98,27 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     const reservedIds = (input.reservations ?? []).map((r) => r.placeId);
     const forcedIds = [...input.mustVisitIds, ...reservedIds];
     const hubPlaces = await this.places.findByHub(hub);
-    const forced = forcedIds.length ? await this.places.findByIds(forcedIds) : [];
+    const requested = forcedIds.length
+      ? await this.places.findByIds(forcedIds)
+      : [];
+
+    // The islands rule, applied before anything is scored. A must-visit is
+    // normally sacred, but "Aya Yorgi and then Kadıköy" is not a day that can
+    // be walked at any pace, and honouring it would produce a plan that only
+    // looks valid. Dropping the stop and saying so is the honest failure.
+    const notices: ItineraryNotice[] = [];
+    const forced = requested.filter((p) => this.canShareDay(p.hub, hub));
+    const excluded = requested.filter((p) => !this.canShareDay(p.hub, hub));
+    if (excluded.length > 0) {
+      notices.push({
+        code: 'adalar-separate-day',
+        severity: 'warning',
+        places: excluded.map((p) => p.name),
+      });
+    }
+
     const pool = this.dedupe([...forced, ...hubPlaces]);
-    const mustSet = new Set(forcedIds);
+    const mustSet = new Set(forced.map((p) => p.placeId));
 
     // 2 — score and sort (must-visits always float to the top).
     const scored = pool
@@ -114,8 +157,87 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     // 5 — order geographically; sunset spots pushed to the end in the evening.
     const ordered = this.orderStops(weatherAdjusted, input);
 
-    // 6 & 7 — build timed stops, lunch break, transport legs and costs.
-    return this.assemble(ordered, input, hub);
+    // 6–8 — assemble, measure against the real clock, trim until it fits.
+    return this.assembleWithinDay(ordered, input, hub, mustSet, notices);
+  }
+
+  /**
+   * Can a place from `placeHub` appear on a day built around `dayHub`?
+   *
+   * Only one rule, and only because the islands earn it: Adalar is a scheduled
+   * ferry away from everything else, roughly ninety minutes each way, so an
+   * island stop and a mainland stop cannot both fit a single day no matter how
+   * the arithmetic is arranged. Every other pairing is a boat ride or a bus
+   * ride the model can now cost honestly, so the engine lets the user have it.
+   */
+  private canShareDay(placeHub: Hub, dayHub: Hub): boolean {
+    return (HUB_SIDE[placeHub] === 'Islands') === (HUB_SIDE[dayHub] === 'Islands');
+  }
+
+  /**
+   * Assemble the day, then shorten it until it fits the time it was given.
+   *
+   * Selection (step 3) can only budget visit minutes: travel time depends on
+   * the order, and the order is not known yet. Left there, an eight-hour
+   * request came back as a nine-hour day. Rather than guess an overhead per
+   * stop, the day is measured once it is real and the tail is trimmed — the
+   * tail being where the nearest-neighbour tour puts the longest hops.
+   *
+   * Must-visits and reservations are never trimmed. On an island day the
+   * deadline is whichever comes first: the pace the user asked for, or leaving
+   * enough of the evening to catch the last boat back.
+   */
+  private assembleWithinDay(
+    ordered: Place[],
+    input: RouteGenerationInput,
+    hub: Hub,
+    mustSet: Set<string>,
+    notices: ItineraryNotice[],
+  ): Itinerary {
+    const dayStart = input.startHour * 60;
+    const deadline = Math.min(
+      dayStart + input.paceHours * 60,
+      HUB_SIDE[hub] === 'Islands'
+        ? ISLAND_LAST_FERRY_MIN - ISLAND_RETURN_BUFFER_MIN
+        : Infinity,
+    );
+
+    const stops = [...ordered];
+    let itinerary = this.assemble(stops, input, hub);
+    while (dayStart + itinerary.totalDurationMinutes > deadline) {
+      const idx = stops.map((p) => mustSet.has(p.placeId)).lastIndexOf(false);
+      if (idx === -1) break; // only forced stops left — say so instead
+      stops.splice(idx, 1);
+      itinerary = this.assemble(stops, input, hub);
+    }
+
+    return {
+      ...itinerary,
+      notices: [
+        ...notices,
+        ...this.dayNotices(stops, hub, dayStart + itinerary.totalDurationMinutes),
+      ],
+    };
+  }
+
+  /** What the traveller should be told about the shape of the finished day. */
+  private dayNotices(stops: Place[], hub: Hub, endMinutes: number): ItineraryNotice[] {
+    if (HUB_SIDE[hub] === 'Islands') {
+      // Trimming keeps ordinary days clear of this, but a day made entirely of
+      // must-visits can still run long — and then the warning is the whole
+      // point, because nothing else is going to tell them.
+      const late = endMinutes > ISLAND_LAST_FERRY_MIN - ISLAND_RETURN_BUFFER_MIN;
+      return [
+        {
+          code: late ? 'adalar-last-ferry' : 'adalar-return-ferry',
+          severity: late ? 'warning' : 'info',
+        },
+      ];
+    }
+    const sides = new Set(stops.map((p) => HUB_SIDE[p.hub]));
+    return sides.size > 1
+      ? [{ code: 'cross-side-day', severity: 'info' }]
+      : [];
   }
 
   // ── scoring ──────────────────────────────────────────────────────
@@ -127,7 +249,12 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
   ): number {
     if (mustSet.has(place.placeId)) return Number.MAX_SAFE_INTEGER;
 
-    let score = place.rating * 10; // base quality signal (Google rating)
+    // Base quality signal. An unrated place scores as if it were average rather
+    // than as if it were bad: `null` means nobody has judged it, and treating
+    // that as 0 would bury two thirds of the catalogue behind the handful of
+    // places that happen to carry a curated score. Interest overlap (+25 each)
+    // is a far stronger lever anyway, so this only breaks near-ties.
+    let score = (place.rating ?? HubBudgetStrategy.UNRATED_BASELINE) * 10;
 
     // Interest overlap is the strongest lever.
     const overlap = place.interests.filter((i) =>
@@ -172,7 +299,12 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     const chosenIds = new Set(selected.map((p) => p.placeId));
     const indoorAlternatives = hubPlaces
       .filter((p) => p.isIndoor && !chosenIds.has(p.placeId))
-      .sort((a, b) => b.rating - a.rating);
+      // Unrated places sort as mid-range, not as zero — see UNRATED_BASELINE.
+      .sort(
+        (a, b) =>
+          (b.rating ?? HubBudgetStrategy.UNRATED_BASELINE) -
+          (a.rating ?? HubBudgetStrategy.UNRATED_BASELINE),
+      );
 
     return selected.map((p) => {
       if (p.isIndoor || mustSet.has(p.placeId)) return p;
@@ -275,7 +407,18 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       .map((id) => byId.get(id))
       .filter((p): p is Place => p !== undefined);
     const hub = input.hub ?? ordered[0]?.hub ?? 'kadikoy-moda';
-    return this.assemble(ordered, input, hub);
+    // No trimming here. The order came from the user dragging stops around;
+    // silently deleting one would undo the edit they just made. They still get
+    // the notices, so a day that has grown unrealistic says so.
+    const itinerary = this.assemble(ordered, input, hub);
+    return {
+      ...itinerary,
+      notices: this.dayNotices(
+        ordered,
+        hub,
+        input.startHour * 60 + itinerary.totalDurationMinutes,
+      ),
+    };
   }
 
   // ── assembly (times, lunch, transport, costs) ────────────────────
@@ -382,48 +525,39 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       overBudget: total > input.budgetTry,
       totalDistanceKm: Math.round((distanceMeters / 1000) * 10) / 10,
       totalDurationMinutes: clock - input.startHour * 60,
+      // Filled in by the caller: assembly runs repeatedly while the day is
+      // being trimmed, and only the surviving stop list can be described.
+      notices: [],
       generatedAt: new Date().toISOString(),
     };
   }
 
   // ── transport model ──────────────────────────────────────────────
 
-  private transportLeg(from: LatLng, to: Place): TransportLeg {
-    const meters = Math.round(haversineMeters(from, to));
+  private transportLeg(from: Place, to: Place): TransportLeg {
+    return planLeg(this.transitPoint(from), this.transitPoint(to));
+  }
 
-    // Cross-Bosphorus / long hops become a ferry or Marmaray, otherwise walk.
-    if (meters > 3000) {
-      return {
-        mode: 'ferry',
-        label: `🚢 Ferry to ${to.name} (~20 min)`,
-        distanceMeters: meters,
-        durationMinutes: 20,
-      };
-    }
-    if (meters > 1500) {
-      return {
-        mode: 'tram',
-        label: `🚋 Tram / short ride to ${to.name} (~10 min)`,
-        distanceMeters: meters,
-        durationMinutes: 10,
-      };
-    }
-    const walkMin = Math.max(
-      2,
-      Math.round(meters / HubBudgetStrategy.WALK_SPEED_M_PER_MIN),
-    );
+  /**
+   * A place as the transit model needs it. `neighborhood` doubles as the island
+   * name for Adalar records — Büyükada and Heybeliada are a sailing apart, and
+   * nothing else in the model can tell them apart. Elsewhere the field is
+   * carried but ignored, since the sides already differ.
+   */
+  private transitPoint(p: Place): TransitPoint {
     return {
-      mode: 'walk',
-      label: `🚶 ${walkMin} min walk (${meters}m)`,
-      distanceMeters: meters,
-      durationMinutes: walkMin,
+      name: p.name,
+      lat: p.lat,
+      lng: p.lng,
+      side: HUB_SIDE[p.hub],
+      island: p.neighborhood,
     };
   }
 
   private transportCost(leg: TransportLeg, group: GroupType): number {
     const heads = group === 'solo' ? 1 : group === 'couple' ? 2 : 4;
-    const perHead =
-      leg.mode === 'ferry' ? 27 : leg.mode === 'tram' ? 27 : 0; // Istanbulkart fare
+    // Istanbulkart fare — one fare for anything that is not walking.
+    const perHead = leg.mode === 'walk' ? 0 : 27;
     return perHead * heads;
   }
 
