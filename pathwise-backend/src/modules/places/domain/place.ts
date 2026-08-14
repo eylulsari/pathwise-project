@@ -74,7 +74,17 @@ export interface Place {
   hub: Hub;
   lat: number;
   lng: number;
-  rating: number; // Google 0–5
+  /**
+   * Curated editorial score, 0–5. **`null` means nobody has rated this place**
+   * — it is not a low score, and the UI must not render a star for it.
+   *
+   * This is nullable because the alternative was worse: the expansion pass had
+   * no rating for 83 places, and giving them all the same placeholder number
+   * put an identical "Pathwise editorial: 4.5★" on two thirds of the catalogue.
+   * A traveller reading that is being shown a judgement nobody made.
+   */
+  rating: number | null;
+  /** Reviews behind `rating`. 0 alongside a null rating means "not yet rated". */
   reviewCount: number;
   photoUrl: string;
   category: Interest;
@@ -93,6 +103,12 @@ export interface Place {
   entryFeeApprox?: boolean;
   avgVisitMinutes: number;
   openingHours: string; // human-readable, from Google opening_hours
+  /**
+   * Where `openingHours` came from, when it was not hand-curated.
+   * `'OpenStreetMap'` carries an ODbL attribution obligation, so any surface
+   * that shows these hours has to credit OSM. Absent = curated by hand.
+   */
+  openingHoursSource?: 'OpenStreetMap';
   isIndoor: boolean; // used when it rains
   isSunsetSpot: boolean; // pushed toward end of day
   museumPass: boolean; // covered by the Istanbul Museum Pass (IBB)
@@ -104,7 +120,15 @@ export interface Place {
   // engine, tests) keep compiling unchanged; newer hubs populate them fully.
   // Mirrors the frontend `Place` shape so itinerary responses round-trip.
   placeType?: PlaceType; // what it is, orthogonal to `category`
-  neighborhood?: string; // fine-grained district within the hub
+  /**
+   * Fine-grained district within the hub.
+   *
+   * Load-bearing for the `adalar` hub, where it names the island. Büyükada and
+   * Heybeliada are a scheduled ferry apart but overlap in straight-line
+   * distance with a walk across either one, so this is the only thing that
+   * tells the route engine which of the two a hop is.
+   */
+  neighborhood?: string;
   crowdLevel?: 'low' | 'medium' | 'high';
   safetyScore?: number; // solo-traveler safety score, 0–100
   isSoloVerified?: boolean;

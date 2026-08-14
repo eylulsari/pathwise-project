@@ -86,7 +86,10 @@ export function SearchBar({
                   className="flex-1 text-left"
                 >
                   <span className="block text-sm font-semibold text-ink">{p.name}</span>
-                  <span className="block text-xs text-ink/50">{HUB_LABEL[p.hub]} · ⭐ {p.rating}</span>
+                  <span className="block text-xs text-ink/50">
+                    {HUB_LABEL[p.hub]}
+                    {p.rating !== null && ` · ⭐ ${p.rating}`}
+                  </span>
                 </button>
                 <button
                   onClick={() => {

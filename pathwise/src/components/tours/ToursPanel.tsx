@@ -136,28 +136,26 @@ export function ToursPanel({
               ))}
             </ol>
 
+            {/* Planning the tour into the day is the action that earns points.
+                It used to be an affiliate "Reserve Spot" link, but that pointed
+                at a placeholder partner URL — a dead link, and paying points for
+                clicking one is worse than not offering it. This button does
+                something the user can actually complete. */}
             <button
               onClick={() => {
                 onUseTourHub(detail.hub);
+                void claimReservationPoints(detail);
                 setDetail(null);
               }}
               className="btn-accent mt-6 w-full"
             >
-              Set as Today’s Itinerary
+              {t('tours.planIntoDay')}
             </button>
-            {/* Affiliate booking link (mock ?ref=pathwise → revenue share).
-                Also the action that earns reward points. */}
-            <a
-              href={detail.affiliateUrl}
-              target="_blank"
-              rel="noopener noreferrer sponsored"
-              onClick={() => void claimReservationPoints(detail)}
-              className="mt-2 block w-full rounded-xl border border-sage/40 py-3 text-center text-sm font-semibold text-sage hover:bg-sage/10"
-            >
-              {t('tours.reserve')}
-            </a>
             <p className="mt-1.5 text-center text-[11px] text-ink/40">
-              {t('points.reserveHint')}
+              {t('points.planHint')}
+            </p>
+            <p className="mt-3 text-center text-[11px] text-ink/40">
+              {t('tours.bookingClosed')}
             </p>
           </div>
         </div>

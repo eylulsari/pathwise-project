@@ -54,9 +54,16 @@ export function ReviewsSection({ place }: { place: Place }) {
         )}
       </div>
 
-      {/* Ratings: curated Pathwise editorial score vs live community average */}
+      {/* Ratings: curated Pathwise editorial score vs live community average.
+          A null rating means nobody has scored this place — say so rather than
+          printing a star, which would claim an editorial judgement we never made. */}
       <p className="mt-1 text-xs text-ink/70">
-        <span className="font-semibold">{t('reviews.editorial')}:</span> {place.rating}★
+        <span className="font-semibold">{t('reviews.editorial')}:</span>{' '}
+        {place.rating === null ? (
+          <span className="text-ink/45">{t('reviews.notRated')}</span>
+        ) : (
+          `${place.rating}★`
+        )}
         {data && data.count > 0 && (
           <>
             {' · '}

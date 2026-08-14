@@ -324,7 +324,7 @@ function selectRelevantPlaces(message: string, all: Place[]): Place[] {
     spread.push(p);
     seenHubs.add(p.hub);
   }
-  for (const p of [...all].sort((a, b) => b.rating - a.rating)) {
+  for (const p of [...all].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))) {
     if (spread.length >= MAX_INJECTED_PLACES) break;
     if (spread.includes(p)) continue;
     if (!seenHubs.has(p.hub)) {
@@ -332,7 +332,7 @@ function selectRelevantPlaces(message: string, all: Place[]): Place[] {
       seenHubs.add(p.hub);
     }
   }
-  for (const p of [...all].sort((a, b) => b.rating - a.rating)) {
+  for (const p of [...all].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))) {
     if (spread.length >= MAX_INJECTED_PLACES) break;
     if (!spread.includes(p)) spread.push(p);
   }

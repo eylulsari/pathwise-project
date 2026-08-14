@@ -129,6 +129,15 @@ export const translations = {
       overBudget: 'Over budget by',
       overBudgetTail: '— trim a paid stop or a meal.',
       lunch: 'Lunch Break',
+      // Route notices. {places} is filled in by the component.
+      noticeAdalarSeparateDay:
+        'The Princes’ Islands are a ferry day of their own — about 90 minutes each way — so {places} could not be added to this day. Give the islands their own day.',
+      noticeAdalarReturnFerry:
+        'Last ferry back from the islands is around 20:00 — this plan leaves time to reach the pier.',
+      noticeAdalarLastFerry:
+        'This plan runs late for the last ferry back (around 20:00). Drop a stop or start earlier.',
+      noticeCrossSideDay:
+        'This day crosses the Bosphorus. The ferry is included in the times below — it costs about an hour door to door.',
       readStory: '📖 Read Local Story & Tips',
       free: 'Free',
       museumPass: 'Museum Pass',
@@ -155,6 +164,7 @@ export const translations = {
     reviews: {
       title: 'Reviews',
       editorial: 'Pathwise editorial',
+      notRated: 'not rated yet',
       community: 'Pathwise community',
       placeholder: 'Share your experience…',
       submit: 'Post review',
@@ -210,7 +220,8 @@ export const translations = {
     },
     tours: {
       sponsored: 'Sponsored',
-      reserve: '🎟️ Reserve Spot',
+      planIntoDay: '🗓️ Plan this into my day',
+      bookingClosed: 'Booking is not open yet — tours are listed for inspiration.',
     },
     // Reward points — accrual only, no catalogue yet. The copy must not
     // promise a specific discount; see the note on PointsCard.
@@ -238,14 +249,14 @@ export const translations = {
       balanceLabel: 'Earned across the app',
       unit: 'points',
       earnedSuffix: 'points earned',
-      reserveHint: 'Reserving earns you reward points',
+      planHint: 'Planning a tour into your day earns reward points',
       whatFor: 'What are points for?',
       whatForBody:
         'Nothing to spend them on just yet — you are building up a balance. Points are meant to become discounts and partner perks later, and everything you earn now is kept, so nothing is lost in the meantime.',
       howToEarn: 'How you earn them',
       recent: 'Recent activity',
       action: {
-        tourReserved: 'Reserve a tour or activity',
+        tourReserved: 'Plan a tour into your day',
         referral: 'Invite a friend who joins',
         routeCompleted: 'Finish a day’s route',
         review: 'Review a place you visited',
@@ -583,6 +594,14 @@ export const translations = {
       overBudget: 'Bütçe aşımı:',
       overBudgetTail: '— ücretli bir durağı ya da öğünü kıs.',
       lunch: 'Öğle Molası',
+      noticeAdalarSeparateDay:
+        'Adalar tek başına bir vapur günü — tek yön yaklaşık 90 dakika — bu yüzden {places} bu güne eklenemedi. Adalar’a ayrı bir gün ayır.',
+      noticeAdalarReturnFerry:
+        'Adalar’dan son vapur 20:00 civarı — bu plan iskeleye yetişecek şekilde bitiyor.',
+      noticeAdalarLastFerry:
+        'Bu plan son vapura (20:00 civarı) geç kalıyor. Bir durak çıkar ya da güne daha erken başla.',
+      noticeCrossSideDay:
+        'Bu gün Boğaz’ı geçiyor. Vapur aşağıdaki saatlere dahil — kapıdan kapıya yaklaşık bir saat.',
       readStory: '📖 Yerel Hikaye & İpuçları',
       free: 'Ücretsiz',
       museumPass: 'Müze Kart',
@@ -609,6 +628,7 @@ export const translations = {
     reviews: {
       title: 'Yorumlar',
       editorial: 'Pathwise editoryal',
+      notRated: 'henüz puanlanmadı',
       community: 'Pathwise topluluğu',
       placeholder: 'Deneyimini paylaş…',
       submit: 'Yorum gönder',
@@ -664,7 +684,8 @@ export const translations = {
     },
     tours: {
       sponsored: 'Sponsorlu',
-      reserve: '🎟️ Yer Ayırt',
+      planIntoDay: '🗓️ Günüme ekle',
+      bookingClosed: 'Rezervasyon henüz açık değil — turlar ilham için listeleniyor.',
     },
     presence: {
       available: 'Şu an müsait',
@@ -688,14 +709,14 @@ export const translations = {
       balanceLabel: 'Uygulama genelinde kazandıkların',
       unit: 'puan',
       earnedSuffix: 'puan kazandın',
-      reserveHint: 'Yer ayırtmak ödül puanı kazandırır',
+      planHint: 'Turu gününe eklemek ödül puanı kazandırır',
       whatFor: 'Puanların ne işe yarıyor?',
       whatForBody:
         'Şimdilik harcayabileceğin bir yer yok — bakiye biriktiriyorsun. Puanlar ileride indirimlere ve partner ayrıcalıklarına dönüşecek; şimdi kazandığın her puan saklanıyor, bu sürede hiçbir şey kaybolmuyor.',
       howToEarn: 'Nasıl kazanırsın',
       recent: 'Son hareketler',
       action: {
-        tourReserved: 'Bir tur veya aktiviteye yer ayırt',
+        tourReserved: 'Bir turu gününe ekle',
         referral: 'Katılan bir arkadaş davet et',
         routeCompleted: 'Bir günün rotasını tamamla',
         review: 'Gittiğin bir mekana yorum yaz',

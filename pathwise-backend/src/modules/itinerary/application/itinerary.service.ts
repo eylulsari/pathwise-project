@@ -16,6 +16,13 @@ export interface NearbySuggestion {
 }
 
 /**
+ * Stand-in score for a place with `rating: null` (nobody has rated it yet).
+ * Mid-range on purpose — the curated ratings run 4.3–4.8, so an unrated place
+ * is neither promoted nor buried. Mirrors the constant in HubBudgetStrategy.
+ */
+const UNRATED_BASELINE = 4.5;
+
+/**
  * Application service for itinerary generation. Normalizes the request DTO into
  * the domain input, asks the factory for the right strategy, and runs it.
  */
@@ -107,7 +114,10 @@ export class ItineraryService {
       // Prefer close + highly rated; a high journal rating for this category
       // pulls the score down (better) so favorite categories surface first.
       const journalBoost = (categoryRatings[c.category] ?? 0) * 120;
-      const score = dist - c.rating * 60 - journalBoost;
+      // An unrated place is treated as mid-range, not as zero: `null` means
+      // nobody has scored it, and scoring that as 0 would push two thirds of
+      // the catalogue to the bottom of every suggestion.
+      const score = dist - (c.rating ?? UNRATED_BASELINE) * 60 - journalBoost;
       return { c, nearest, dist, score };
     });
 

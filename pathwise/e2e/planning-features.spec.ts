@@ -82,8 +82,11 @@ test('tours panel lists, syncs live tours, and sets one as the itinerary', async
   await page.getByRole('button', { name: /Sync Live Tours/i }).click();
   await expect(page.getByRole('button', { name: /✓ Synced/i })).toBeVisible({ timeout: 10_000 });
   await page.locator('.bg-surface-2 button', { hasText: /·.*h.*⭐/ }).first().click();
-  await expect(page.getByRole('button', { name: /Set as Today.s Itinerary/i })).toBeVisible();
-  await page.getByRole('button', { name: /Set as Today.s Itinerary/i }).click();
+  // "Plan this into my day" was "Set as Today's Itinerary" until the tour panel
+  // dropped its dead affiliate link and moved the points award onto this
+  // button. Same action, same assertion — only the wording moved.
+  await expect(page.getByRole('button', { name: /Plan this into my day/i })).toBeVisible();
+  await page.getByRole('button', { name: /Plan this into my day/i }).click();
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
   await expect(page.locator('ol li h3').first()).toBeVisible({ timeout: 15_000 });
 });
