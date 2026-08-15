@@ -42,6 +42,54 @@ async function likeCount(page: Page): Promise<number> {
   return Number((text ?? '').replace(/\D/g, ''));
 }
 
+test('a buddy connection survives a reload, and is nobody else’s', async ({ page, browser }) => {
+  await signUp(page, 'buddy');
+  await page.goto('/social');
+
+  // Connect to whoever is first. Which traveler that is does not matter —
+  // the list is ranked per account, and what is being proved is that the
+  // connection outlives the tab, not who it was with.
+  const connectButton = page.getByRole('button', { name: /👋 Connect/ }).first();
+  await expect(connectButton).toBeVisible({ timeout: 15_000 });
+  await connectButton.click();
+  await expect(page.getByRole('button', { name: /✓ Connected/ }).first()).toBeVisible();
+
+  // The whole point: a reload re-reads the list from the server. A connection
+  // still showing here came out of the database, not out of this tab.
+  await page.reload();
+  await expect(page.getByRole('button', { name: /✓ Connected/ }).first()).toBeVisible({
+    timeout: 15_000,
+  });
+
+  // …and it belongs to this account alone. A second, fresh account must see
+  // the same people with nobody connected.
+  const otherContext = await browser.newContext();
+  const other = await otherContext.newPage();
+  await signUp(other, 'buddy_other');
+  await other.goto('/social');
+  await expect(other.getByRole('button', { name: /👋 Connect/ }).first()).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(other.getByRole('button', { name: /✓ Connected/ })).toHaveCount(0);
+  await otherContext.close();
+});
+
+test('disconnecting survives a reload too', async ({ page }) => {
+  await signUp(page, 'unbuddy');
+  await page.goto('/social');
+
+  await page.getByRole('button', { name: /👋 Connect/ }).first().click();
+  const connected = page.getByRole('button', { name: /✓ Connected/ }).first();
+  await expect(connected).toBeVisible({ timeout: 15_000 });
+
+  await connected.click();
+  await page.reload();
+  // Nothing connected after the round trip — the delete reached the database.
+  await expect(page.getByRole('button', { name: /✓ Connected/ })).toHaveCount(0, {
+    timeout: 15_000,
+  });
+});
+
 test('a forum answer survives a reload, in its own thread', async ({ page }) => {
   await signUp(page, 'forum');
   await page.goto('/social');

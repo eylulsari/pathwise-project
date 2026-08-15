@@ -15,6 +15,7 @@ import type {
 } from '../types';
 import { BudgetBar } from './BudgetBar';
 import { LocalStoryModal } from './LocalStoryModal';
+import { OpenNowBadge } from './OpeningHours';
 import { formatTry, formatDuration, formatKm, formatEntryFee } from '../utils/format';
 import { haversineMeters, walkEstimate } from '../utils/geo';
 import { useT } from '../i18n';
@@ -301,6 +302,9 @@ function SortableStopRow({
                 🕒 {stop.arrivalTime}–{stop.departureTime} · {formatDuration(stop.durationMinutes)}
                 {place.museumPass && <span className="ml-2 text-sage">🎫 {t('today.museumPass')}</span>}
               </p>
+              {/* Whether the door is actually open right now, in Istanbul time.
+                  Renders nothing at all when the hours are unknown. */}
+              <OpenNowBadge place={place} className="mt-0.5 block text-[11px]" />
               {stop.reservation && (
                 <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-terracotta/20 px-2 py-0.5 text-[10px] font-semibold text-terracotta">
                   📎 {stop.reservation.time}

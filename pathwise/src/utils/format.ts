@@ -31,30 +31,18 @@ export function formatDuration(totalMinutes: number): string {
 /**
  * The dataset says "Hours not verified" where nobody has confirmed a schedule —
  * most of the catalogue, since OSM simply has no `opening_hours` for a street
- * or a small café. Callers check this before printing hours or asking
- * `isOpenNow`, which would otherwise parse the sentinel to nothing and leave
- * the open/closed badge guessing.
+ * or a small café. Callers check this before printing hours at all.
+ *
+ * The open/closed question lives in `utils/openingHours.ts`. It used to be a
+ * one-line heuristic here that took the FIRST time range in the string and
+ * compared it to the browser's clock — which called every Monday-closed museum
+ * "open" on a Monday, and answered in the reader's timezone rather than
+ * Istanbul's.
  */
 const UNVERIFIED_HOURS = /^hours not verified$/i;
 
 export function hasVerifiedHours(openingHours: string | undefined): boolean {
   return Boolean(openingHours) && !UNVERIFIED_HOURS.test(openingHours!.trim());
-}
-
-/**
- * Rough open/closed estimate from a Google-style opening_hours string.
- * Parses the first "HH:MM–HH:MM" range it finds; treats "Always open" as open.
- * This is a display heuristic, not an authoritative schedule.
- */
-export function isOpenNow(openingHours: string, now = new Date()): boolean | null {
-  if (/always open/i.test(openingHours)) return true;
-  const match = openingHours.match(/(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})/);
-  if (!match) return null; // unknown / prayer-time dependent
-  const [, sh, sm, eh, em] = match.map(Number) as unknown as number[];
-  const cur = now.getHours() * 60 + now.getMinutes();
-  const start = sh * 60 + sm;
-  const end = eh * 60 + em;
-  return cur >= start && cur <= end;
 }
 
 export const HUB_LABEL: Record<string, string> = {

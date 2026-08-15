@@ -478,6 +478,12 @@ export interface TravelerListResult {
   /** False when the backend refused the filter (viewer has not opted in). */
   womenOnlyApplied: boolean;
   /**
+   * Traveler ids this account has connected with, straight from the server.
+   * Optional so an offline response without it still renders — the fallback
+   * simply shows nobody connected rather than guessing from stale storage.
+   */
+  connectedTravelerIds?: string[];
+  /**
    * What the server knows about the caller. Lets the UI explain a thin
    * ranking instead of silently showing weak percentages.
    */

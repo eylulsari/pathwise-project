@@ -161,9 +161,11 @@ export const translations = {
       tours: 'Tours & activities',
     },
     hours: {
-      unverified: '🕒 Opening hours not verified',
       // ODbL requires credit wherever OSM-sourced hours are shown.
       osmSource: 'hours via OpenStreetMap',
+      openNow: 'Open now',
+      closed: 'Closed',
+      closesAt: 'Closes at',
     },
     story: {
       noneYet: 'No local story for this place yet — anything we know about it is below.',
@@ -651,8 +653,10 @@ export const translations = {
       tours: 'Turlar & aktiviteler',
     },
     hours: {
-      unverified: '🕒 Açılış saati doğrulanmadı',
       osmSource: 'saatler OpenStreetMap’ten',
+      openNow: 'Şu an açık',
+      closed: 'Kapalı',
+      closesAt: 'Kapanış:',
     },
     story: {
       noneYet: 'Bu mekan için henüz yerel bir hikaye yok — bildiklerimiz aşağıda.',

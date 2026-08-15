@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { EMERGENCY_NUMBER, POLICE_STATIONS } from '../mockData';
 import { haversineMeters } from '../utils/geo';
@@ -13,25 +13,45 @@ interface ConnectedBuddy {
 }
 
 /**
- * Connected buddies persisted by the Social page (demo — no backend table).
- * Accepts both the current object format and the original plain-string one so
- * a user who connected buddies before this change keeps their list.
+ * Connected buddies, read from the server.
+ *
+ * This used to come out of `localStorage`, written by the Social page. In an
+ * emergency feature that was the wrong place for it: the list existed in one
+ * browser, so signing in on a phone — the device you would actually be holding
+ * — offered an empty "share my location". It is now the same list the server
+ * returns to the Social page, so both agree by construction.
+ *
+ * Failure is silent and empty on purpose. The emergency number and the nearest
+ * police station do not depend on it, and they are the part that matters.
  */
-function connectedBuddies(): ConnectedBuddy[] {
-  try {
-    const raw: unknown = JSON.parse(localStorage.getItem('pathwise.buddies') ?? '[]');
-    if (!Array.isArray(raw)) return [];
-    return raw.map((entry) =>
-      typeof entry === 'string'
-        ? { name: entry, identifiesAsWoman: false }
-        : {
-            name: String((entry as ConnectedBuddy)?.name ?? ''),
-            identifiesAsWoman: (entry as ConnectedBuddy)?.identifiesAsWoman === true,
-          },
-    );
-  } catch {
-    return [];
-  }
+function useConnectedBuddies(): ConnectedBuddy[] {
+  const [buddies, setBuddies] = useState<ConnectedBuddy[]>([]);
+
+  useEffect(() => {
+    let live = true;
+    api
+      .getTravelers()
+      .then((res) => {
+        if (!live) return;
+        const ids = new Set(res.connectedTravelerIds ?? []);
+        setBuddies(
+          res.travelers
+            .filter((t) => ids.has(t.id))
+            .map((t) => ({
+              name: t.name,
+              identifiesAsWoman: t.identifiesAsWoman === true,
+            })),
+        );
+      })
+      .catch(() => {
+        if (live) setBuddies([]);
+      });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  return buddies;
 }
 
 /**
@@ -51,7 +71,7 @@ export function SosButton() {
   // ⚠️ Filters on a SELF-DECLARED flag — no identity verification backs it.
   const [womenBuddiesOnly, setWomenBuddiesOnly] = useState(false);
 
-  const allBuddies = connectedBuddies();
+  const allBuddies = useConnectedBuddies();
   const womenBuddies = allBuddies.filter((b) => b.identifiesAsWoman);
   const buddies = womenBuddiesOnly ? womenBuddies : allBuddies;
   const nearest = pos

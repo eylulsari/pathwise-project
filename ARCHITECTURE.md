@@ -149,6 +149,28 @@ Two things now stand between that and a repeat:
   landmarks still have titles, that every key points at a real place, and that
   coverage has not collapsed.
 
+### Buddy connections — the last of the client-only state
+Connecting to a traveller wrote to `localStorage`. That made a connection a
+fact about one browser: it did not survive a different device, and the SOS
+"share my location" alert — which targets connected buddies — was reading a
+list the server had never seen. On a phone, the device you would actually be
+holding in an emergency, that list was empty.
+
+It now follows the same shape as route likes: `buddy_connections` with a
+`UNIQUE(userId, travelerId)`, so connect and disconnect are idempotent without
+a read-modify-write race, and `userId` comes from the auth context rather than
+the request body.
+
+The reciprocity rule extends to writes, which is the part worth stating.
+Connecting to a traveller the viewer cannot see returns **404 — the same
+response an unknown id gets**, because a distinguishable error would confirm
+that a hidden traveller exists, which is precisely the declaration the rule
+protects. `connectedTravelerIds` is also filtered against the *visible* list on
+every read, so a connection made while opted in cannot surface as a name after
+the viewer's own women-mode is switched off. Disconnect is deliberately **not**
+visibility-checked: someone who becomes hidden after you connected must still
+be removable, or the connection would be impossible to undo.
+
 ### Attribution and absence in the UI
 Seeded data brings two obligations to every surface that shows it.
 

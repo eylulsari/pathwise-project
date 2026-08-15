@@ -86,6 +86,9 @@ export default function Social() {
         // below only narrows it and preserves that order.
         setTravelers(res.travelers);
         setWomenOnlyApplied(res.womenOnlyApplied);
+        // The server owns this now — it is re-read on every load, so a
+        // connection made on a phone shows up on a laptop.
+        setConnected(new Set(res.connectedTravelerIds ?? []));
         const profile = res.viewerProfile;
         setCanMatch(
           !profile ||
@@ -105,20 +108,31 @@ export default function Social() {
     [travelers, filter],
   );
 
-  function toggleConnect(id: string) {
+  /**
+   * Connect / disconnect, persisted server-side.
+   *
+   * Optimistic: the button flips immediately and rolls back if the request
+   * fails, because a connect is a small, reversible action and waiting a round
+   * trip to acknowledge a tap feels broken. Both endpoints are idempotent, so
+   * a rapid double tap cannot leave the server and the button disagreeing.
+   */
+  async function toggleConnect(id: string) {
+    const wasConnected = connected.has(id);
     setConnected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      // Persist connected buddies so other features (e.g. the SOS "share my
-      // location" alert) can target them without a global store. Stored as
-      // objects since SOS can narrow the share to women travelers; readers
-      // still accept the old plain-string format (see SosButton).
-      const buddies = travelers
-        .filter((t) => next.has(t.id))
-        .map((t) => ({ name: t.name, identifiesAsWoman: t.identifiesAsWoman === true }));
-      localStorage.setItem('pathwise.buddies', JSON.stringify(buddies));
+      wasConnected ? next.delete(id) : next.add(id);
       return next;
     });
+    try {
+      if (wasConnected) await api.disconnectTraveler(id);
+      else await api.connectTraveler(id);
+    } catch {
+      setConnected((prev) => {
+        const next = new Set(prev);
+        wasConnected ? next.add(id) : next.delete(id);
+        return next;
+      });
+    }
   }
 
   /**

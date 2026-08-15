@@ -162,6 +162,35 @@ export class SocialController {
   }
 
   /**
+   * PUT /api/social/travelers/:id/connect — connect to a traveler.
+   *
+   * `userId` comes from the auth context, never the body: a client that could
+   * name the connecting user could connect other people to strangers.
+   * Idempotent, so a double tap cannot produce two connections or undo one.
+   */
+  @Put('travelers/:id/connect')
+  async connectTraveler(
+    @CurrentUser() authUser: AuthUser,
+    @Param('id') id: string,
+  ) {
+    const me = await this.users.findById(authUser.id);
+    await this.social.connect(authUser.id, id, {
+      womenModeActive: me.womenModeActive,
+    });
+    return { connected: true };
+  }
+
+  /** DELETE /api/social/travelers/:id/connect — take the connection back. */
+  @Delete('travelers/:id/connect')
+  async disconnectTraveler(
+    @CurrentUser() authUser: AuthUser,
+    @Param('id') id: string,
+  ) {
+    await this.social.disconnect(authUser.id, id);
+    return { connected: false };
+  }
+
+  /**
    * GET /api/social/travelers?womenOnly=true&tag=%23Foodie
    *
    * Authenticated because the response depends on the caller's own opt-in
@@ -181,9 +210,10 @@ export class SocialController {
     @Query('tag') tag?: TravelTag,
   ) {
     const me = await this.users.findById(authUser.id);
-    const filtered = this.social.listTravelers(
+    const filtered = await this.social.listTravelers(
       { womenOnly: womenOnly === 'true', tag },
       { womenModeActive: me.womenModeActive },
+      authUser.id,
     );
     const viewer = await this.matching.buildViewerProfile(authUser.id);
     return {

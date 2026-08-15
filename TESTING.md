@@ -189,9 +189,9 @@ to anyone.
 (plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
 `cd pathwise && npm run e2e`.
 
-**Last full run — 2026-08-15, after the place-facts panel:** **57/57
-passed, exit 0** (2.9 min, `--workers=1` — see the machine-load note below).
-Backend `npm test`: **109/109**, 10 suites.
+**Last full run — 2026-08-15, after buddy persistence + opening hours:**
+**80/80 passed, exit 0** (3.4 min, `--workers=1` — see the machine-load note
+below). Backend `npm test`: **118/118**, 11 suites.
 Frontend `npm run lint`: 0 errors
 (2 pre-existing warnings). `tsc --noEmit`: clean both sides.
 `npm run i18n:check`: 374 keys in both languages.
@@ -220,6 +220,22 @@ spec still clicked **"Set as Today's Itinerary"**, a button renamed to "Plan
 this into my day" when the panel dropped its dead affiliate link. The label
 moved, the assertion did not — the spec still proves the tour reaches the day
 and produces stops.
+
+## Unit tests without a second framework
+`e2e/opening-hours.spec.ts` (21 tests) covers the open/closed parser with no
+browser involved. Playwright is already the project's test runner, so a pure
+unit file rides in the existing suite rather than bringing Vitest in for one
+module — no new dependency, no new CI job.
+
+The cases are the real strings from the dataset, including every shape the
+parser must **refuse**. That is the half worth having: a wrong "Open now" sends
+someone across Istanbul to a locked door, so `Daily, outside prayer times` and
+`Lobby daily; performances evenings` have to come back `null`.
+
+The regression it locks down: the old one-line heuristic took the *first* time
+range in the string and compared it to the browser's clock. That called every
+`Tu-Su` museum "open" on a Monday, and answered in the reader's timezone rather
+than Istanbul's.
 
 ## Known debt: one flaky spec
 
