@@ -16,7 +16,12 @@ export type Hub =
   | 'balat-fener'
   | 'kadikoy-moda'
   | 'uskudar'
-  | 'adalar';
+  | 'adalar'
+  | 'eyupsultan'
+  | 'sariyer'
+  | 'nisantasi-sisli'
+  | 'beykoz-anadolu-kavagi'
+  | 'zeytinburnu-bakirkoy';
 
 export interface HubMeta {
   id: Hub;
@@ -43,7 +48,10 @@ export type Interest =
   | 'culture'
   | 'nightlife'
   | 'experience'
-  | 'religion';
+  | 'religion'
+  | 'walk'
+  | 'architecture'
+  | 'family';
 
 /**
  * The slice of a `Place` that the generated `hubData.ts` carries.

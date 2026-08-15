@@ -91,6 +91,46 @@ export const HUB_DATASET: HubMeta[] = [
     center: [40.8608, 29.1236],
     accent: '#2E8B87',
   },
+  {
+    id: 'eyupsultan',
+    name: 'Eyüpsultan & Pierre Loti',
+    side: 'European',
+    blurb: 'Pilgrim quarter, a cable car and the Golden Horn below it.',
+    center: [41.0478, 28.9327],
+    accent: '#8A6D3B',
+  },
+  {
+    id: 'sariyer',
+    name: 'Sarıyer & the Northern Bosphorus',
+    side: 'European',
+    blurb: 'Fish restaurants, forest and the Black Sea beaches.',
+    center: [41.1686, 29.0573],
+    accent: '#3F7D5B',
+  },
+  {
+    id: 'nisantasi-sisli',
+    name: 'Nişantaşı & Şişli',
+    side: 'European',
+    blurb: 'Shopping streets, café culture and modern Istanbul.',
+    center: [41.0638, 28.9832],
+    accent: '#9B5F7E',
+  },
+  {
+    id: 'beykoz-anadolu-kavagi',
+    name: 'Beykoz & Anadolu Kavağı',
+    side: 'Asian',
+    blurb: 'The far north of the strait — a castle, coves and fish.',
+    center: [41.1343, 29.092],
+    accent: '#4A6E8C',
+  },
+  {
+    id: 'zeytinburnu-bakirkoy',
+    name: 'Zeytinburnu & Bakırköy',
+    side: 'European',
+    blurb: 'Panorama museum, shoreline parks and the Marmara coast.',
+    center: [40.9783, 28.8744],
+    accent: '#B07A4E',
+  },
 ];
 
 /**

@@ -12,8 +12,9 @@ import { HubMeta, HubSide } from '../../places/domain/hub';
  *
  * Three rules, in priority order:
  *
- * 1. **Never the same hub twice.** With ten hubs and a seven-day maximum this
- *    always holds, so no traveller ever sees a day they have already walked.
+ * 1. **Never the same hub twice.** With fifteen hubs and a seven-day maximum
+ *    this always holds, so no traveller ever sees a day they have already
+ *    walked.
  * 2. **Alternate shores.** Two Bosphorus crossings back to back is a lot of
  *    ferry for one trip; spreading them means the transit model's honest hour
  *    lands where it is worth paying.
@@ -27,7 +28,7 @@ import { HubMeta, HubSide } from '../../places/domain/hub';
 const ISLANDS_MIN_TRIP_DAYS = 3;
 
 export const MIN_TRIP_DAYS = 1;
-/** A week is the practical ceiling for one city, and ten hubs cover it. */
+/** A week is the practical ceiling for one city, and fifteen hubs cover it. */
 export const MAX_TRIP_DAYS = 7;
 
 export function planHubSequence(days: number, hubs: HubMeta[]): Hub[] {
@@ -48,13 +49,14 @@ export function planHubSequence(days: number, hubs: HubMeta[]): Hub[] {
   }
 
   const sequence: Hub[] = [];
+  const usedSides = new Set<HubSide>();
   let previousSide: HubSide | null = null;
 
   for (let day = 0; day < wanted; day++) {
-    const side = pickSide(pools, previousSide);
+    const side = pickSide(pools, previousSide, usedSides);
     if (side === null) {
-      // Fewer hubs than days. Unreachable through the UI — ten hubs against a
-      // seven-day cap — but a total function beats a crash if the dataset ever
+      // Fewer hubs than days. Unreachable through the UI — fifteen hubs
+      // against a seven-day cap — but a total function beats a crash if it ever
       // shrinks. Restart the rotation rather than stall, and never immediately
       // after the same hub.
       const restart = eligible.filter((h) => h.id !== sequence[sequence.length - 1]);
@@ -66,6 +68,7 @@ export function planHubSequence(days: number, hubs: HubMeta[]): Hub[] {
     const hub = pool.shift()!;
     if (pool.length === 0) pools.delete(side);
     sequence.push(hub.id);
+    usedSides.add(side);
     previousSide = side;
   }
 
@@ -73,22 +76,32 @@ export function planHubSequence(days: number, hubs: HubMeta[]): Hub[] {
 }
 
 /**
- * The side with the most hubs left, skipping the one used yesterday.
+ * Which shore tomorrow belongs to.
  *
- * Taking from the largest pool is what keeps the alternation going: draining
- * the small side first would strand a run of same-side days at the end, which
- * is exactly the shape the rule exists to avoid.
+ * Order of preference: a side that has not appeared yet, then the side with
+ * the most hubs left — and never the side used today while any other has
+ * something in it.
+ *
+ * The unused-first rule is not a nicety. With ten hubs, largest-pool-first
+ * reached the islands by day six on its own. At fifteen it never did: the two
+ * mainland shores had enough hubs between them to fill a week, so Adalar — the
+ * one hub most people would actually plan a week around — dropped out of every
+ * trip. Variety has to be asked for explicitly, or the biggest group wins by
+ * default.
  */
 function pickSide(
   pools: Map<HubSide, HubMeta[]>,
   previousSide: HubSide | null,
+  usedSides: Set<HubSide>,
 ): HubSide | null {
   const candidates = [...pools.entries()]
     .filter(([, pool]) => pool.length > 0)
     .sort((a, b) => b[1].length - a[1].length);
   if (candidates.length === 0) return null;
 
-  const different = candidates.find(([side]) => side !== previousSide);
+  const eligible = candidates.filter(([side]) => side !== previousSide);
+  const pool = eligible.length > 0 ? eligible : candidates;
+  const fresh = pool.find(([side]) => !usedSides.has(side));
   // Only one side left with anything in it — a same-side day beats no day.
-  return (different ?? candidates[0])[0];
+  return (fresh ?? pool[0])[0];
 }

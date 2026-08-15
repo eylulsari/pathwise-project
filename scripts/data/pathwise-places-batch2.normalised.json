@@ -1,0 +1,1356 @@
+{
+  "newHubs": [
+    {
+      "slug": "eyupsultan",
+      "name": "Eyüpsultan & Pierre Loti",
+      "side": "European",
+      "blurb": "Manevi merkez, teleferik ve Haliç manzarası."
+    },
+    {
+      "slug": "sariyer",
+      "name": "Sarıyer & Kuzey Boğaz",
+      "side": "European",
+      "blurb": "Balık, orman, Karadeniz sahilleri."
+    },
+    {
+      "slug": "nisantasi-sisli",
+      "name": "Nişantaşı & Şişli",
+      "side": "European",
+      "blurb": "Alışveriş, kafe kültürü, modern İstanbul."
+    },
+    {
+      "slug": "beykoz-anadolu-kavagi",
+      "name": "Beykoz & Anadolu Kavağı",
+      "side": "Asian",
+      "blurb": "Boğaz'ın kuzey ucu — kale, koy, balık."
+    },
+    {
+      "slug": "zeytinburnu-bakirkoy",
+      "name": "Zeytinburnu & Bakırköy",
+      "side": "European",
+      "blurb": "Panorama müzesi, sahil parkları, Miniatürk hattı."
+    }
+  ],
+  "places": [
+    {
+      "name": "Eyüp Sultan Camii",
+      "hub": "eyupsultan",
+      "interests": [
+        "religion",
+        "history",
+        "culture"
+      ],
+      "avgVisitMinutes": 45,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "mosque"
+    },
+    {
+      "name": "Pierre Loti Tepesi",
+      "hub": "eyupsultan",
+      "interests": [
+        "view",
+        "relax",
+        "photo"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 150,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Piyer Loti Tepesi, Eyüpsultan"
+    },
+    {
+      "name": "Eyüp Teleferiği",
+      "hub": "eyupsultan",
+      "interests": [
+        "experience",
+        "view",
+        "photo"
+      ],
+      "avgVisitMinutes": 20,
+      "entryFeeTry": 60,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "experience",
+      "nameQuery": "Eyüp Teleferik, Eyüpsultan"
+    },
+    {
+      "name": "Eyüp Sultan Mezarlığı",
+      "hub": "eyupsultan",
+      "interests": [
+        "history",
+        "culture",
+        "photo"
+      ],
+      "avgVisitMinutes": 40,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "landmark"
+    },
+    {
+      "name": "Feshane",
+      "hub": "eyupsultan",
+      "interests": [
+        "art",
+        "culture",
+        "history"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Eyüp Sultan Meydanı",
+      "hub": "eyupsultan",
+      "interests": [
+        "culture",
+        "local",
+        "photo"
+      ],
+      "avgVisitMinutes": 30,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "landmark",
+      "nameQuery": "Eyüp Sultan Camii, Eyüpsultan"
+    },
+    {
+      "name": "Haliç Sahil Yürüyüş Yolu (Eyüp)",
+      "hub": "eyupsultan",
+      "interests": [
+        "walk",
+        "view",
+        "relax"
+      ],
+      "avgVisitMinutes": 50,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Eyüpsultan Sahili, Eyüpsultan"
+    },
+    {
+      "name": "Zal Mahmut Paşa Camii",
+      "hub": "eyupsultan",
+      "interests": [
+        "architecture",
+        "hiddengem",
+        "history"
+      ],
+      "avgVisitMinutes": 25,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "mosque",
+      "nameQuery": "Zal Mahmud Paşa Camii, Eyüpsultan"
+    },
+    {
+      "name": "Eyüp Sultan Pilavcısı",
+      "hub": "eyupsultan",
+      "interests": [
+        "food",
+        "local"
+      ],
+      "avgVisitMinutes": 35,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 200,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "food",
+      "nameQuery": "Eyüpsultan, İstanbul"
+    },
+    {
+      "name": "Miniatürk",
+      "hub": "eyupsultan",
+      "interests": [
+        "family",
+        "culture",
+        "photo"
+      ],
+      "avgVisitMinutes": 90,
+      "entryFeeTry": 250,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Rahmi M. Koç Müzesi",
+      "hub": "eyupsultan",
+      "interests": [
+        "family",
+        "history",
+        "culture"
+      ],
+      "avgVisitMinutes": 120,
+      "entryFeeTry": 400,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Balat Vapur İskelesi Manzarası (Haliç)",
+      "hub": "balat-fener",
+      "interests": [
+        "view",
+        "photo",
+        "relax"
+      ],
+      "avgVisitMinutes": 25,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Balat İskelesi, Fatih"
+    },
+    {
+      "name": "Sarıyer Balıkçıları",
+      "hub": "sariyer",
+      "interests": [
+        "food",
+        "local",
+        "view"
+      ],
+      "avgVisitMinutes": 75,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 700,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "food"
+    },
+    {
+      "name": "Belgrad Ormanı",
+      "hub": "sariyer",
+      "interests": [
+        "nature",
+        "relax"
+      ],
+      "avgVisitMinutes": 150,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "park"
+    },
+    {
+      "name": "Kilyos Plajı",
+      "hub": "sariyer",
+      "interests": [
+        "nature",
+        "relax"
+      ],
+      "avgVisitMinutes": 180,
+      "entryFeeTry": 400,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "beach"
+    },
+    {
+      "name": "Rumeli Feneri",
+      "hub": "sariyer",
+      "interests": [
+        "view",
+        "photo",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint"
+    },
+    {
+      "name": "Sarıyer Börekçisi",
+      "hub": "sariyer",
+      "interests": [
+        "food",
+        "local"
+      ],
+      "avgVisitMinutes": 25,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 150,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "food",
+      "nameQuery": "Sarıyer Merkez, Sarıyer"
+    },
+    {
+      "name": "Atatürk Arboretumu",
+      "hub": "sariyer",
+      "interests": [
+        "nature",
+        "photo",
+        "relax"
+      ],
+      "avgVisitMinutes": 90,
+      "entryFeeTry": 100,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "park"
+    },
+    {
+      "name": "Sadberk Hanım Müzesi",
+      "hub": "sariyer",
+      "interests": [
+        "art",
+        "culture",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 70,
+      "entryFeeTry": 250,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Büyükdere Sahili",
+      "hub": "sariyer",
+      "interests": [
+        "walk",
+        "view",
+        "relax"
+      ],
+      "avgVisitMinutes": 50,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Büyükdere, Sarıyer"
+    },
+    {
+      "name": "Yeniköy Sahil",
+      "hub": "sariyer",
+      "interests": [
+        "walk",
+        "photo",
+        "relax"
+      ],
+      "avgVisitMinutes": 45,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Yeniköy, Sarıyer"
+    },
+    {
+      "name": "Tarabya Koyu",
+      "hub": "sariyer",
+      "interests": [
+        "view",
+        "food",
+        "relax"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 600,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Tarabya, Sarıyer"
+    },
+    {
+      "name": "İstinye Sahili",
+      "hub": "sariyer",
+      "interests": [
+        "walk",
+        "relax",
+        "view"
+      ],
+      "avgVisitMinutes": 40,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "İstinye, Sarıyer"
+    },
+    {
+      "name": "Garipçe Köyü",
+      "hub": "sariyer",
+      "interests": [
+        "hiddengem",
+        "food",
+        "photo"
+      ],
+      "avgVisitMinutes": 70,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 500,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "landmark"
+    },
+    {
+      "name": "Nişantaşı Abdi İpekçi Caddesi",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "market",
+        "walk"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "street"
+    },
+    {
+      "name": "Maçka Demokrasi Parkı",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "nature",
+        "relax",
+        "view"
+      ],
+      "avgVisitMinutes": 50,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "park"
+    },
+    {
+      "name": "Maçka Teleferiği",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "experience",
+        "view",
+        "photo"
+      ],
+      "avgVisitMinutes": 20,
+      "entryFeeTry": 40,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "experience"
+    },
+    {
+      "name": "Atatürk Müzesi (Şişli)",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "history",
+        "culture",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 45,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "İstanbul Kongre Merkezi Çevresi",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "architecture",
+        "walk"
+      ],
+      "avgVisitMinutes": 30,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "landmark",
+      "nameQuery": "İstanbul Kongre Merkezi, Şişli"
+    },
+    {
+      "name": "Teşvikiye Camii",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "architecture",
+        "history"
+      ],
+      "avgVisitMinutes": 20,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "mosque"
+    },
+    {
+      "name": "Nişantaşı Kahve Sokakları",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "food",
+        "relax",
+        "local"
+      ],
+      "avgVisitMinutes": 50,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 350,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "food",
+      "nameQuery": "Nişantaşı, Şişli"
+    },
+    {
+      "name": "Cevahir AVM",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "market",
+        "family"
+      ],
+      "avgVisitMinutes": 90,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 300,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "market"
+    },
+    {
+      "name": "Bomontiada",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "nightlife",
+        "art",
+        "food"
+      ],
+      "avgVisitMinutes": 75,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 500,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "experience"
+    },
+    {
+      "name": "Harbiye Askeri Müzesi",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "history",
+        "culture",
+        "family"
+      ],
+      "avgVisitMinutes": 80,
+      "entryFeeTry": 200,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum",
+      "nameQuery": "Askerî Müze, Harbiye"
+    },
+    {
+      "name": "Şişli Etfal Sokakları (Kurtuluş)",
+      "hub": "nisantasi-sisli",
+      "interests": [
+        "food",
+        "hiddengem",
+        "local"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 450,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "street",
+      "nameQuery": "Kurtuluş, Şişli"
+    },
+    {
+      "name": "Anadolu Kavağı Yoros Kalesi",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "history",
+        "view",
+        "nature"
+      ],
+      "avgVisitMinutes": 90,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "landmark"
+    },
+    {
+      "name": "Anadolu Kavağı Balıkçıları",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "food",
+        "local",
+        "view"
+      ],
+      "avgVisitMinutes": 75,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 600,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "food",
+      "nameQuery": "Anadolu Kavağı, Beykoz"
+    },
+    {
+      "name": "Anadolu Feneri",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "view",
+        "hiddengem",
+        "photo"
+      ],
+      "avgVisitMinutes": 50,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint"
+    },
+    {
+      "name": "Beykoz Korusu",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "nature",
+        "relax",
+        "family"
+      ],
+      "avgVisitMinutes": 80,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "park"
+    },
+    {
+      "name": "Küçüksu Kasrı",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "history",
+        "architecture",
+        "view"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 300,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Anadolu Hisarı",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "history",
+        "photo",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 40,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "landmark"
+    },
+    {
+      "name": "Poyrazköy Koyu",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "nature",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 120,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "beach"
+    },
+    {
+      "name": "Beykoz Çeşmesi ve Çarşı",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "local",
+        "history",
+        "food"
+      ],
+      "avgVisitMinutes": 40,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 250,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "market",
+      "nameQuery": "Beykoz Çarşı, Beykoz"
+    },
+    {
+      "name": "Hıdiv Kasrı",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "history",
+        "view",
+        "architecture"
+      ],
+      "avgVisitMinutes": 70,
+      "entryFeeTry": 200,
+      "avgFoodCostTry": 300,
+      "isIndoor": true,
+      "isSunsetSpot": true,
+      "category": "museum"
+    },
+    {
+      "name": "Boğaz Vapuru (Uzun Tur)",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "experience",
+        "view",
+        "photo"
+      ],
+      "avgVisitMinutes": 180,
+      "entryFeeTry": 200,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "experience"
+    },
+    {
+      "name": "Panorama 1453 Tarih Müzesi",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "history",
+        "family",
+        "culture"
+      ],
+      "avgVisitMinutes": 70,
+      "entryFeeTry": 150,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Zeytinburnu Tıbbi Bitkiler Bahçesi",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "nature",
+        "hiddengem",
+        "relax"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "park"
+    },
+    {
+      "name": "Bakırköy Sahil Parkı",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "walk",
+        "relax",
+        "view"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "park"
+    },
+    {
+      "name": "Ataköy Marina",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "view",
+        "food",
+        "relax"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 500,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint"
+    },
+    {
+      "name": "Yedikule Hisarı",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "history",
+        "photo",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 200,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "landmark"
+    },
+    {
+      "name": "Kazlıçeşme Sahil",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "walk",
+        "view",
+        "relax"
+      ],
+      "avgVisitMinutes": 45,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint"
+    },
+    {
+      "name": "Bakırköy Özgürlük Meydanı",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "local",
+        "market",
+        "walk"
+      ],
+      "avgVisitMinutes": 40,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 250,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "landmark"
+    },
+    {
+      "name": "Florya Atatürk Deniz Köşkü",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "history",
+        "view",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 50,
+      "entryFeeTry": 150,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": true,
+      "category": "museum"
+    },
+    {
+      "name": "İstanbul Akvaryum Florya",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "family",
+        "experience"
+      ],
+      "avgVisitMinutes": 120,
+      "entryFeeTry": 900,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "experience"
+    },
+    {
+      "name": "Merter Tekstil Çarşısı",
+      "hub": "zeytinburnu-bakirkoy",
+      "interests": [
+        "market",
+        "local"
+      ],
+      "avgVisitMinutes": 70,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "market"
+    },
+    {
+      "name": "Sokullu Mehmet Paşa Camii",
+      "hub": "sultanahmet",
+      "interests": [
+        "architecture",
+        "hiddengem",
+        "history"
+      ],
+      "avgVisitMinutes": 25,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "mosque"
+    },
+    {
+      "name": "Mozaik Müzesi",
+      "hub": "sultanahmet",
+      "interests": [
+        "history",
+        "art",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 40,
+      "entryFeeTry": 300,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Çemberlitaş Hamamı",
+      "hub": "sultanahmet",
+      "interests": [
+        "experience",
+        "relax",
+        "history"
+      ],
+      "avgVisitMinutes": 90,
+      "entryFeeTry": 2500,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "experience"
+    },
+    {
+      "name": "Matbah Restaurant",
+      "hub": "sultanahmet",
+      "interests": [
+        "food",
+        "culture"
+      ],
+      "avgVisitMinutes": 80,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 900,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "food"
+    },
+    {
+      "name": "Şehzadebaşı Camii",
+      "hub": "eminonu-sirkeci",
+      "interests": [
+        "architecture",
+        "history",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 30,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "mosque"
+    },
+    {
+      "name": "Bozdoğan Kemeri (Valens)",
+      "hub": "eminonu-sirkeci",
+      "interests": [
+        "history",
+        "photo"
+      ],
+      "avgVisitMinutes": 25,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "landmark"
+    },
+    {
+      "name": "Kuru Kahveci Mehmet Efendi",
+      "hub": "eminonu-sirkeci",
+      "interests": [
+        "food",
+        "local",
+        "market"
+      ],
+      "avgVisitMinutes": 20,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 150,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "food",
+      "nameQuery": "Kurukahveci Mehmet Efendi, Eminönü"
+    },
+    {
+      "name": "Galata Köprüsü",
+      "hub": "eminonu-sirkeci",
+      "interests": [
+        "photo",
+        "walk",
+        "local"
+      ],
+      "avgVisitMinutes": 35,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "landmark"
+    },
+    {
+      "name": "Mısır Apartmanı",
+      "hub": "beyoglu-taksim",
+      "interests": [
+        "architecture",
+        "art",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 30,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "landmark"
+    },
+    {
+      "name": "Asmalımescit",
+      "hub": "beyoglu-taksim",
+      "interests": [
+        "nightlife",
+        "food",
+        "local"
+      ],
+      "avgVisitMinutes": 75,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 650,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "street",
+      "nameQuery": "Asmalımescit, Beyoğlu"
+    },
+    {
+      "name": "Hüseyin Avni Paşa Konağı Sokakları (Çukurcuma)",
+      "hub": "beyoglu-taksim",
+      "interests": [
+        "market",
+        "hiddengem",
+        "art"
+      ],
+      "avgVisitMinutes": 50,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "street",
+      "nameQuery": "Çukurcuma, Beyoğlu"
+    },
+    {
+      "name": "Masumiyet Müzesi",
+      "hub": "beyoglu-taksim",
+      "interests": [
+        "art",
+        "culture",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 350,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Galataport",
+      "hub": "karakoy-galata",
+      "interests": [
+        "market",
+        "walk",
+        "view"
+      ],
+      "avgVisitMinutes": 70,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 400,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "street"
+    },
+    {
+      "name": "Kurşunlu Han",
+      "hub": "karakoy-galata",
+      "interests": [
+        "hiddengem",
+        "history",
+        "architecture"
+      ],
+      "avgVisitMinutes": 25,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "landmark",
+      "nameQuery": "Kurşunlu Mahzen Camii, Karaköy"
+    },
+    {
+      "name": "Vodafone Park Çevresi",
+      "hub": "besiktas-bogaz",
+      "interests": [
+        "nature",
+        "local",
+        "photo"
+      ],
+      "avgVisitMinutes": 30,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "landmark",
+      "nameQuery": "Beşiktaş Stadyumu, Beşiktaş"
+    },
+    {
+      "name": "Sinanpaşa Camii",
+      "hub": "besiktas-bogaz",
+      "interests": [
+        "architecture",
+        "history",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 20,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "mosque"
+    },
+    {
+      "name": "Ortaköy'e Sahil Yürüyüşü (Beşiktaş)",
+      "hub": "besiktas-bogaz",
+      "interests": [
+        "walk",
+        "view",
+        "relax"
+      ],
+      "avgVisitMinutes": 45,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Ortaköy, Beşiktaş"
+    },
+    {
+      "name": "Kanlıca Yoğurdu",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "food",
+        "local"
+      ],
+      "avgVisitMinutes": 30,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 200,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "food",
+      "nameQuery": "Kanlıca, Beykoz"
+    },
+    {
+      "name": "Mihrabat Korusu",
+      "hub": "beykoz-anadolu-kavagi",
+      "interests": [
+        "view",
+        "nature",
+        "relax"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "park"
+    },
+    {
+      "name": "Baltalimanı Sahili",
+      "hub": "ortakoy-bebek",
+      "interests": [
+        "walk",
+        "relax",
+        "view"
+      ],
+      "avgVisitMinutes": 40,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Baltalimanı, Sarıyer"
+    },
+    {
+      "name": "Ahrida Sinagogu",
+      "hub": "balat-fener",
+      "interests": [
+        "history",
+        "culture",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 35,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "landmark"
+    },
+    {
+      "name": "Tekfur Sarayı Müzesi",
+      "hub": "balat-fener",
+      "interests": [
+        "history",
+        "architecture",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 50,
+      "entryFeeTry": 250,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Balat Sahili",
+      "hub": "balat-fener",
+      "interests": [
+        "walk",
+        "view",
+        "relax"
+      ],
+      "avgVisitMinutes": 40,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Balat, Fatih"
+    },
+    {
+      "name": "Kadıköy Salı Pazarı",
+      "hub": "kadikoy-moda",
+      "interests": [
+        "market",
+        "local",
+        "photo"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "market"
+    },
+    {
+      "name": "Fenerbahçe Parkı",
+      "hub": "kadikoy-moda",
+      "interests": [
+        "nature",
+        "walk",
+        "view"
+      ],
+      "avgVisitMinutes": 70,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "park"
+    },
+    {
+      "name": "Kadıköy Karikatür Evi",
+      "hub": "kadikoy-moda",
+      "interests": [
+        "art",
+        "hiddengem",
+        "culture"
+      ],
+      "avgVisitMinutes": 35,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    },
+    {
+      "name": "Çinili Camii",
+      "hub": "uskudar",
+      "interests": [
+        "architecture",
+        "hiddengem",
+        "art"
+      ],
+      "avgVisitMinutes": 25,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "mosque",
+      "nameQuery": "Çinili Camii, Üsküdar"
+    },
+    {
+      "name": "Validebağ Korusu",
+      "hub": "uskudar",
+      "interests": [
+        "nature",
+        "relax",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 60,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": false,
+      "category": "park"
+    },
+    {
+      "name": "Salacak Sahili",
+      "hub": "uskudar",
+      "interests": [
+        "view",
+        "photo",
+        "relax"
+      ],
+      "avgVisitMinutes": 45,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "viewpoint",
+      "nameQuery": "Salacak, Üsküdar"
+    },
+    {
+      "name": "Kınalıada",
+      "hub": "adalar",
+      "interests": [
+        "nature",
+        "relax",
+        "hiddengem"
+      ],
+      "avgVisitMinutes": 120,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 350,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "beach"
+    },
+    {
+      "name": "Burgazada",
+      "hub": "adalar",
+      "interests": [
+        "hiddengem",
+        "walk",
+        "nature"
+      ],
+      "avgVisitMinutes": 120,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 350,
+      "isIndoor": false,
+      "isSunsetSpot": true,
+      "category": "landmark"
+    },
+    {
+      "name": "Sait Faik Abasıyanık Müzesi",
+      "hub": "adalar",
+      "interests": [
+        "culture",
+        "hiddengem",
+        "history"
+      ],
+      "avgVisitMinutes": 40,
+      "entryFeeTry": 0,
+      "avgFoodCostTry": 0,
+      "isIndoor": true,
+      "isSunsetSpot": false,
+      "category": "museum"
+    }
+  ]
+}

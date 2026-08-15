@@ -16,7 +16,14 @@ export type Hub =
   | 'balat-fener'
   | 'kadikoy-moda'
   | 'uskudar'
-  | 'adalar';
+  | 'adalar'
+  // Batch 2. Four European, one Asian — `beykoz-anadolu-kavagi` sits on the
+  // far shore, which the transit model reads to decide walk versus ferry.
+  | 'eyupsultan'
+  | 'sariyer'
+  | 'nisantasi-sisli'
+  | 'beykoz-anadolu-kavagi'
+  | 'zeytinburnu-bakirkoy';
 
 /**
  * Interest categories used for scoring/filtering.
@@ -41,7 +48,15 @@ export type Interest =
   | 'culture'
   | 'nightlife'
   | 'experience'
-  | 'religion';
+  | 'religion'
+  // Batch 2 added three more, for the same reason as the eight before them:
+  // the curated data carried tags nothing here could absorb without changing
+  // what they mean. `walk` is a route worth walking for its own sake, not
+  // `relax`; `architecture` is the building rather than its `history`; and
+  // `family` is who a place suits, which no other value expresses.
+  | 'walk'
+  | 'architecture'
+  | 'family';
 
 /**
  * What a place physically *is*, as opposed to what it appeals to (`Interest`).

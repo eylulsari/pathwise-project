@@ -61,6 +61,11 @@ const HUBS = [
   'kadikoy-moda',
   'uskudar',
   'adalar',
+  'eyupsultan',
+  'sariyer',
+  'nisantasi-sisli',
+  'beykoz-anadolu-kavagi',
+  'zeytinburnu-bakirkoy',
 ] as const;
 
 // Runtime mirror of the `Interest` union. Same reasoning as HUBS above.
@@ -79,6 +84,9 @@ const INTERESTS = [
   'nightlife',
   'experience',
   'religion',
+  'walk',
+  'architecture',
+  'family',
 ] as const;
 
 export class QuizDto {

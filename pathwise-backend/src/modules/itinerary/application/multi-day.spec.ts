@@ -14,9 +14,11 @@ import { HubBudgetStrategy } from './strategies/hub-budget.strategy';
  *
  * The dashboard shipped three hardcoded days for its whole life, so nothing had
  * ever asked what happens at seven. The question that mattered was whether the
- * catalogue runs out — 124 places across 10 hubs, a day taking at most 8 stops.
+ * catalogue runs out — 202 places across 15 hubs, a day taking at most 8 stops.
  * It does not, but that is only worth believing if something checks, because
- * the failure mode is silent repetition rather than a crash.
+ * the failure mode is silent repetition rather than a crash. Two hubs hold
+ * fewer places than the stop cap, so a short day is expected; an *empty* one is
+ * not, which is why that is asserted separately.
  *
  * Failures are collected into arrays and asserted empty rather than checked one
  * at a time: a bare `expect(...).toBe(true)` on day five tells you a week is

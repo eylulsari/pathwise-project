@@ -820,85 +820,669 @@
     "osmId": 462637269,
     "query": "Splendid Palace, Istanbul"
   },
+  "Eyüp Sultan Camii": {
+    "lat": 41.0480113,
+    "lng": 28.9337456,
+    "displayName": "Eyüp Sultan Camii, Bahariye Yolu, Merkez Mahallesi, Eyüpsultan, İstanbul, Marmara Bölgesi, 34050, Türkiye",
+    "osmType": "way",
+    "osmId": 261821356,
+    "query": "Eyüp Sultan Camii, Istanbul"
+  },
+  "Eyüp Sultan Mezarlığı": {
+    "lat": 41.0523632,
+    "lng": 28.9330264,
+    "displayName": "Eyüp Sultan Mezarlığı, Merkez Mahallesi, Eyüpsultan, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 35391586,
+    "query": "Eyüp Sultan Mezarlığı, Istanbul"
+  },
+  "Feshane": {
+    "lat": 41.0455255,
+    "lng": 28.9377817,
+    "displayName": "Feshane, Yavedut Caddesi, Nişancı Mahallesi, Eyüpsultan, İstanbul, Marmara Bölgesi, 34050, Türkiye",
+    "osmType": "node",
+    "osmId": 12196745511,
+    "query": "Feshane, Istanbul"
+  },
+  "Miniatürk": {
+    "lat": 41.0599661,
+    "lng": 28.9487697,
+    "displayName": "Miniatürk, İmrahor Caddesi, Örnektepe, Örnektepe Mahallesi, Beyoğlu, İstanbul, Marmara Bölgesi, 34445, Türkiye",
+    "osmType": "way",
+    "osmId": 1041976901,
+    "query": "Miniatürk, Istanbul"
+  },
+  "Rahmi M. Koç Müzesi": {
+    "lat": 41.0419735,
+    "lng": 28.9485686,
+    "displayName": "Rahmi M. Koç Müzesi, Hasköy Caddesi, Çıksalın, Piri Paşa, Piri Paşa Mahallesi, Beyoğlu, İstanbul, Marmara Bölgesi, 34445, Türkiye",
+    "osmType": "relation",
+    "osmId": 4297527,
+    "query": "Rahmi M. Koç Müzesi, Istanbul"
+  },
+  "Belgrad Ormanı": {
+    "lat": 41.1866198,
+    "lng": 28.9493426,
+    "displayName": "Belgrad Ormanı, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 8845862,
+    "query": "Belgrad Ormanı, Istanbul"
+  },
+  "Kilyos Plajı": {
+    "lat": 41.2468102,
+    "lng": 29.0341657,
+    "displayName": "Kilyos Plajı, Kumköy (Kilyos) Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 20388983,
+    "query": "Kilyos Plajı, Istanbul"
+  },
+  "Rumeli Feneri": {
+    "lat": 41.2342217,
+    "lng": 29.1121447,
+    "displayName": "Rumeli Feneri, Büyük Atatürk Caddesi, Rumelifeneri Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, 34450, Türkiye",
+    "osmType": "node",
+    "osmId": 4472474312,
+    "query": "Rumeli Feneri, Istanbul"
+  },
+  "Atatürk Arboretumu": {
+    "lat": 41.1771254,
+    "lng": 28.9810387,
+    "displayName": "Atatürk Arboretumu, Bahçeköy Kemer Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 516901046,
+    "query": "Atatürk Arboretumu, Istanbul"
+  },
+  "Sadberk Hanım Müzesi": {
+    "lat": 41.1630048,
+    "lng": 29.0481637,
+    "displayName": "Sadberk Hanım Müzesi, 25, Piyasa Caddesi, Büyükdere Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, 34453, Türkiye",
+    "osmType": "way",
+    "osmId": 1112132469,
+    "query": "Sadberk Hanım Müzesi, Istanbul"
+  },
+  "Garipçe Köyü": {
+    "lat": 41.219266,
+    "lng": 29.1047654,
+    "displayName": "Garıpçe Köyü Mezarlığı, Garipçe Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 256713767,
+    "query": "Garipçe Köyü, Istanbul"
+  },
+  "Nişantaşı Abdi İpekçi Caddesi": {
+    "lat": 41.0480782,
+    "lng": 28.992915,
+    "displayName": "Midpoint nişantaşı, Abdi İpekçi Caddesi, Taşkışla, Harbiye Mahallesi, Şişli, İstanbul, Marmara Bölgesi, 34367, Türkiye",
+    "osmType": "node",
+    "osmId": 4773921721,
+    "query": "Nişantaşı Abdi İpekçi Caddesi, Istanbul"
+  },
+  "Maçka Demokrasi Parkı": {
+    "lat": 41.0443082,
+    "lng": 28.9932816,
+    "displayName": "Maçka Demokrasi Parkı, Harbiye Mahallesi, Şişli, İstanbul, Marmara Bölgesi, 34367, Türkiye",
+    "osmType": "way",
+    "osmId": 26970150,
+    "query": "Maçka Demokrasi Parkı, Istanbul"
+  },
+  "Maçka Teleferiği": {
+    "lat": 41.0441282,
+    "lng": 28.9921574,
+    "displayName": "Maçka-Taşkışla Teleferiği, Kadırgalar Caddesi, Taşkışla, Harbiye Mahallesi, Şişli, İstanbul, Marmara Bölgesi, 34367, Türkiye",
+    "osmType": "way",
+    "osmId": 280627255,
+    "query": "Maçka Teleferiği, Istanbul"
+  },
+  "Atatürk Müzesi (Şişli)": {
+    "lat": 41.0564045,
+    "lng": 28.9872128,
+    "displayName": "Atatürk Museum, Şişli, 250, Halaskargazi Caddesi, Meşrutiyet Mahallesi, Osmanbey, Şişli, İstanbul, Marmara Bölgesi, 34363, Türkiye",
+    "osmType": "way",
+    "osmId": 698165879,
+    "query": "Atatürk Müzesi (Şişli), Istanbul"
+  },
+  "Teşvikiye Camii": {
+    "lat": 41.0493802,
+    "lng": 28.9942805,
+    "displayName": "Teşvikiye Camii, Ahmet Fetgeri Sokağı, Teşvikiye Mahallesi, Nişantaşı, Şişli, İstanbul, Marmara Bölgesi, 34365, Türkiye",
+    "osmType": "way",
+    "osmId": 697224044,
+    "query": "Teşvikiye Camii, Istanbul"
+  },
+  "Cevahir AVM": {
+    "lat": 41.0626036,
+    "lng": 28.9929943,
+    "displayName": "İstanbul Cevahir Alışveriş ve Eğlence Merkezi, 22, Büyükdere Caddesi, 19 Mayıs Mahallesi, Osmanbey, Şişli, İstanbul, Marmara Bölgesi, 34363, Türkiye",
+    "osmType": "way",
+    "osmId": 46962419,
+    "query": "Cevahir AVM, Istanbul"
+  },
+  "Bomontiada": {
+    "lat": 41.0583185,
+    "lng": 28.9808053,
+    "displayName": "Bomontiada, Birahane Sokağı, Merkez Mahallesi, Bomonti, Şişli, İstanbul, Marmara Bölgesi, 34384, Türkiye",
+    "osmType": "node",
+    "osmId": 4889959130,
+    "query": "Bomontiada, Istanbul"
+  },
+  "Anadolu Kavağı Yoros Kalesi": {
+    "lat": 41.178574,
+    "lng": 29.094919,
+    "displayName": "Yoros Kalesi, Feneryolu Caddesi, Anadolu Kavağı Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, 34825, Türkiye",
+    "osmType": "way",
+    "osmId": 403116670,
+    "query": "Anadolu Kavağı Yoros Kalesi"
+  },
+  "Anadolu Feneri": {
+    "lat": 41.2173967,
+    "lng": 29.1520592,
+    "displayName": "Anadolu Feneri, Kabakoz Yolu Sokağı, Anadolufeneri Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, 34829, Türkiye",
+    "osmType": "node",
+    "osmId": 10047022223,
+    "query": "Anadolu Feneri, Istanbul"
+  },
+  "Beykoz Korusu": {
+    "lat": 41.1332962,
+    "lng": 29.1002207,
+    "displayName": "Beykoz Korusu, Merkez Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 989152604,
+    "query": "Beykoz Korusu, Istanbul"
+  },
+  "Küçüksu Kasrı": {
+    "lat": 41.0784102,
+    "lng": 29.0648834,
+    "displayName": "Küçüksu Kasrı, Küçüksu Caddesi, Göksu Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, 34810, Türkiye",
+    "osmType": "way",
+    "osmId": 230687140,
+    "query": "Küçüksu Kasrı, Istanbul"
+  },
+  "Anadolu Hisarı": {
+    "lat": 41.0840924,
+    "lng": 29.0683684,
+    "displayName": "Anadolu Hisarı Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 9578449,
+    "query": "Anadolu Hisarı, Istanbul"
+  },
+  "Poyrazköy Koyu": {
+    "lat": 41.2062818,
+    "lng": 29.1367205,
+    "displayName": "Poyraz Köyü Parkı, Poyrazköy Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 894874007,
+    "query": "Poyrazköy Koyu"
+  },
+  "Hıdiv Kasrı": {
+    "lat": 41.105043,
+    "lng": 29.0738706,
+    "displayName": "Hidiv Kasrı, Piri Reis Caddesi, Çubuklu Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, 34805, Türkiye",
+    "osmType": "way",
+    "osmId": 312153675,
+    "query": "Hıdiv Kasrı, Istanbul"
+  },
+  "Panorama 1453 Tarih Müzesi": {
+    "lat": 41.0181266,
+    "lng": 28.9203842,
+    "displayName": "Panorama 1453 Tarih Müzesi, Topkapı Kavşağı, Merkezefendi Mahallesi, Zeytinburnu, İstanbul, Marmara Bölgesi, 34015, Türkiye",
+    "osmType": "way",
+    "osmId": 1153649968,
+    "query": "Panorama 1453 Tarih Müzesi, Istanbul"
+  },
+  "Zeytinburnu Tıbbi Bitkiler Bahçesi": {
+    "lat": 41.0087844,
+    "lng": 28.9164616,
+    "displayName": "Zeytinburnu Tıbbı Bitkiler Bahçesi, Seyitnizam Mahallesi, Zeytinburnu, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 534550377,
+    "query": "Zeytinburnu Tıbbi Bitkiler Bahçesi, Istanbul"
+  },
+  "Bakırköy Sahil Parkı": {
+    "lat": 40.9686067,
+    "lng": 28.7943184,
+    "displayName": "Florya Sahil Parkı, Şenlikköy Mahallesi, Bakırköy, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 315607042,
+    "query": "Bakırköy Sahil Parkı"
+  },
+  "Ataköy Marina": {
+    "lat": 40.9711276,
+    "lng": 28.8761294,
+    "displayName": "Ataköy Marina, Kennedy Caddesi, Sakızağacı Mahallesi, Bakırköy, İstanbul, Marmara Bölgesi, 34142, Türkiye",
+    "osmType": "way",
+    "osmId": 242413873,
+    "query": "Ataköy Marina, Istanbul"
+  },
+  "Yedikule Hisarı": {
+    "lat": 40.9930789,
+    "lng": 28.9226227,
+    "displayName": "Yedikule Zindanları, Yedikule Bucakbaşı Sokağı, Yedikule Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34107, Türkiye",
+    "osmType": "relation",
+    "osmId": 20318937,
+    "query": "Yedikule Hisarı, Istanbul"
+  },
+  "Kazlıçeşme Sahil": {
+    "lat": 40.9851293,
+    "lng": 28.9104561,
+    "displayName": "Kazlıçeşme Sahil Parkı, Kazlıçeşme Mahallesi, Zeytinburnu, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 465151276,
+    "query": "Kazlıçeşme Sahil, Istanbul"
+  },
+  "Bakırköy Özgürlük Meydanı": {
+    "lat": 40.981628,
+    "lng": 28.8740542,
+    "displayName": "Özgürlük Meydanı, General Şükrü Kanatlı Caddesi, Kartaltepe Mahallesi, Bakırköy, İstanbul, Marmara Bölgesi, 34145, Türkiye",
+    "osmType": "node",
+    "osmId": 7974014824,
+    "query": "Bakırköy Özgürlük Meydanı"
+  },
+  "Florya Atatürk Deniz Köşkü": {
+    "lat": 40.9726626,
+    "lng": 28.7823745,
+    "displayName": "Florya Atatürk Deniz Köşkü, Basınköy İstanbul Caddesi, Basınköy Mahallesi, Bakırköy, İstanbul, Marmara Bölgesi, 34153, Türkiye",
+    "osmType": "way",
+    "osmId": 1115171156,
+    "query": "Florya Atatürk Deniz Köşkü, Istanbul"
+  },
+  "İstanbul Akvaryum Florya": {
+    "lat": 40.9641851,
+    "lng": 28.8000315,
+    "displayName": "İstanbul Akvaryum, Yeşilköy Halkalı Caddesi, Florya, Şenlikköy Mahallesi, Bakırköy, İstanbul, Marmara Bölgesi, 34153, Türkiye",
+    "osmType": "way",
+    "osmId": 315607041,
+    "query": "İstanbul Akvaryum Florya, Istanbul"
+  },
+  "Merter Tekstil Çarşısı": {
+    "lat": 41.0116424,
+    "lng": 28.887893,
+    "displayName": "İstanbul Çarşısı, Gülsever Sokağı, Merter Tekstil Merkezi, Merter, Mehmet Nesih Özmen Mahallesi, Güngören, İstanbul, Marmara Bölgesi, 34173, Türkiye",
+    "osmType": "way",
+    "osmId": 1052810074,
+    "query": "Merter Tekstil Çarşısı"
+  },
+  "Sokullu Mehmet Paşa Camii": {
+    "lat": 41.0255986,
+    "lng": 28.9394142,
+    "displayName": "Mesih Mehmet Paşa Camii, Sütçü Murat Sokağı, Karagümrük Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34091, Türkiye",
+    "osmType": "way",
+    "osmId": 330787764,
+    "query": "Mehmet Paşa Camii"
+  },
+  "Mozaik Müzesi": {
+    "lat": 41.0042947,
+    "lng": 28.977433,
+    "displayName": "Büyük Saray Mozaikleri Müzesi, Torun Sokağı, Sultan Ahmet Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34122, Türkiye",
+    "osmType": "way",
+    "osmId": 1153966162,
+    "query": "Mozaik Müzesi, Istanbul"
+  },
+  "Çemberlitaş Hamamı": {
+    "lat": 41.0085416,
+    "lng": 28.9716244,
+    "displayName": "Çemberlitaş Hamamı, 8, Vezirhanı Caddesi, Mahmutpaşa, Molla Fenari Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34440, Türkiye",
+    "osmType": "node",
+    "osmId": 663391267,
+    "query": "Çemberlitaş Hamamı, Istanbul"
+  },
+  "Matbah Restaurant": {
+    "lat": 41.0093013,
+    "lng": 28.9792031,
+    "displayName": "Matbah, Caferiye Sokağı, Cankurtaran Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34122, Türkiye",
+    "osmType": "node",
+    "osmId": 5113620603,
+    "query": "Matbah Restaurant, Istanbul"
+  },
+  "Şehzadebaşı Camii": {
+    "lat": 41.0138337,
+    "lng": 28.95716,
+    "displayName": "Şehzadebaşı Camii, 15 Temmuz Şehitleri Caddesi, Kalenderhane Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34134, Türkiye",
+    "osmType": "relation",
+    "osmId": 7656706,
+    "query": "Şehzadebaşı Camii, Istanbul"
+  },
+  "Bozdoğan Kemeri (Valens)": {
+    "lat": 41.0161645,
+    "lng": 28.9552071,
+    "displayName": "Bozdoğan Su Kemeri, Macar Kardeşler Caddesi, İskenderpaşa Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34080, Türkiye",
+    "osmType": "way",
+    "osmId": 23276526,
+    "query": "Bozdoğan Kemeri (Valens), Istanbul"
+  },
+  "Galata Köprüsü": {
+    "lat": 41.0200769,
+    "lng": 28.9730878,
+    "displayName": "Galata Köprüsü, Azapkapı, Arap Cami, Arap Cami Mahallesi, Beyoğlu, İstanbul, Marmara Bölgesi, 34421, Türkiye",
+    "osmType": "way",
+    "osmId": 5169873,
+    "query": "Galata Köprüsü, Istanbul"
+  },
+  "Mısır Apartmanı": {
+    "lat": 41.0326881,
+    "lng": 28.9768529,
+    "displayName": "Mısır Apartmanı, 303-305, Acara Sokağı, Tomtom, Tomtom Mahallesi, Beyoğlu, İstanbul, Marmara Bölgesi, 34421, Türkiye",
+    "osmType": "way",
+    "osmId": 224685401,
+    "query": "Mısır Apartmanı, Istanbul"
+  },
+  "Masumiyet Müzesi": {
+    "lat": 41.0308531,
+    "lng": 28.9798332,
+    "displayName": "Masumiyet Müzesi, Dalgıç Çıkmazı Sokak, Firuzağa, Firuzağa Mahallesi, Beyoğlu, İstanbul, Marmara Bölgesi, 34425, Türkiye",
+    "osmType": "way",
+    "osmId": 247442912,
+    "query": "Masumiyet Müzesi, Istanbul"
+  },
+  "Galataport": {
+    "lat": 41.0257757,
+    "lng": 28.9828657,
+    "displayName": "Galataport, Kılıçali Paşa, Kılıçali Paşa Mahallesi, Beyoğlu, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 343046405,
+    "query": "Galataport, Istanbul"
+  },
+  "Sinanpaşa Camii": {
+    "lat": 41.0428914,
+    "lng": 29.0028633,
+    "displayName": "Kaptan İbrahim Ağa Camii, Sinanpaşa Köprüsü Sokağı, Sinanpaşa Mahallesi, Akaretler, Beşiktaş, İstanbul, Marmara Bölgesi, 34022, Türkiye",
+    "osmType": "way",
+    "osmId": 699951399,
+    "query": "Sinanpaşa Camii"
+  },
+  "Mihrabat Korusu": {
+    "lat": 41.0950493,
+    "lng": 29.0733467,
+    "displayName": "Mihrabat Korusu, Kanlıca Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 883967369,
+    "query": "Mihrabat Korusu, Istanbul"
+  },
+  "Ahrida Sinagogu": {
+    "lat": 41.0329117,
+    "lng": 28.9455186,
+    "displayName": "Ahrida Sinagogu, Gevgili Sokağı, Ayvansaray Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34087, Türkiye",
+    "osmType": "way",
+    "osmId": 175520628,
+    "query": "Ahrida Sinagogu, Istanbul"
+  },
+  "Tekfur Sarayı Müzesi": {
+    "lat": 41.0339422,
+    "lng": 28.9406756,
+    "displayName": "Tekfur Sarayı Müzesi, Şişhane Caddesi, Ayvansaray Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34087, Türkiye",
+    "osmType": "way",
+    "osmId": 1335767641,
+    "query": "Tekfur Sarayı Müzesi, Istanbul"
+  },
+  "Kadıköy Salı Pazarı": {
+    "lat": 40.9976006,
+    "lng": 29.0502847,
+    "displayName": "Salı Pazarı, Bıldırcın Sokağı, Fikirtepe Mahallesi, Kadıköy, İstanbul, Marmara Bölgesi, 34720, Türkiye",
+    "osmType": "way",
+    "osmId": 286318732,
+    "query": "Kadıköy Salı Pazarı, Istanbul"
+  },
+  "Fenerbahçe Parkı": {
+    "lat": 40.9678182,
+    "lng": 29.0344899,
+    "displayName": "Fenerbahçe Parkı, Fenerbahçe Mahallesi, Kadıköy, İstanbul, Marmara Bölgesi, 34726, Türkiye",
+    "osmType": "way",
+    "osmId": 235392135,
+    "query": "Fenerbahçe Parkı, Istanbul"
+  },
+  "Kadıköy Karikatür Evi": {
+    "lat": 40.9945584,
+    "lng": 29.0378426,
+    "displayName": "Karikatür Evi, 69, Kurbağalıdere Caddesi, Hasanpaşa Mahallesi, Kadıköy, İstanbul, Marmara Bölgesi, 34722, Türkiye",
+    "osmType": "way",
+    "osmId": 686814918,
+    "query": "Kadıköy Karikatür Evi"
+  },
+  "Validebağ Korusu": {
+    "lat": 41.0150315,
+    "lng": 29.0457709,
+    "displayName": "Validebağ Korusu, Altunizade Mahallesi, Üsküdar, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "way",
+    "osmId": 153690111,
+    "query": "Validebağ Korusu, Istanbul"
+  },
+  "Kınalıada": {
+    "lat": 40.9088914,
+    "lng": 29.0547984,
+    "displayName": "Kınalıada Mahallesi, Adalar, İstanbul, Marmara Bölgesi, 34977, Türkiye",
+    "osmType": "relation",
+    "osmId": 9460393,
+    "query": "Kınalıada, Istanbul"
+  },
+  "Burgazada": {
+    "lat": 40.8802771,
+    "lng": 29.0694845,
+    "displayName": "Burgazada Mahallesi, Adalar, İstanbul, Marmara Bölgesi, 34975, Türkiye",
+    "osmType": "relation",
+    "osmId": 9460394,
+    "query": "Burgazada, Istanbul"
+  },
+  "Sait Faik Abasıyanık Müzesi": {
+    "lat": 40.8810298,
+    "lng": 29.0674547,
+    "displayName": "Sait Faik Abasıyanık Museum, Mezarlık Sokağı, Burgazada Mahallesi, Adalar, İstanbul, Marmara Bölgesi, 34975, Türkiye",
+    "osmType": "node",
+    "osmId": 9967219116,
+    "query": "Sait Faik Abasıyanık Müzesi, Istanbul"
+  },
+  "Eyüp Teleferiği": {
+    "lat": 41.049759,
+    "lng": 28.9344105,
+    "displayName": "Eyüp Teleferik İstasyonu, Silahtarağa Caddesi, Merkez Mahallesi, Eyüpsultan, İstanbul, Marmara Bölgesi, 34050, Türkiye",
+    "osmType": "node",
+    "osmId": 414979669,
+    "query": "Eyüp Teleferik, Eyüpsultan"
+  },
+  "Eyüp Sultan Pilavcısı": {
+    "lat": 41.0478358,
+    "lng": 28.9327383,
+    "displayName": "Eyüpsultan, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 1766103,
+    "query": "Eyüpsultan, İstanbul"
+  },
+  "Balat Vapur İskelesi Manzarası (Haliç)": {
+    "lat": 41.034849,
+    "lng": 28.9492202,
+    "displayName": "Balat İskelesi, Mürselpaşa Caddesi, Fener, Ayvansaray Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34087, Türkiye",
+    "osmType": "way",
+    "osmId": 1305509987,
+    "query": "Balat İskelesi, Fatih"
+  },
+  "Sarıyer Börekçisi": {
+    "lat": 41.1695338,
+    "lng": 29.0555158,
+    "displayName": "Merkez Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 9644954,
+    "query": "Sarıyer Merkez, Sarıyer"
+  },
+  "Büyükdere Sahili": {
+    "lat": 41.1602485,
+    "lng": 29.0421459,
+    "displayName": "Büyükdere Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 9644824,
+    "query": "Büyükdere, Sarıyer"
+  },
+  "Yeniköy Sahil": {
+    "lat": 41.1231548,
+    "lng": 29.070613,
+    "displayName": "Yeniköy Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, 34464, Türkiye",
+    "osmType": "relation",
+    "osmId": 9644764,
+    "query": "Yeniköy, Sarıyer"
+  },
+  "Tarabya Koyu": {
+    "lat": 41.1385739,
+    "lng": 29.0530421,
+    "displayName": "Tarabya Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 9644762,
+    "query": "Tarabya, Sarıyer"
+  },
+  "İstinye Sahili": {
+    "lat": 41.1150511,
+    "lng": 29.055486,
+    "displayName": "İstinye Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 9644648,
+    "query": "İstinye, Sarıyer"
+  },
+  "İstanbul Kongre Merkezi Çevresi": {
+    "lat": 41.0462704,
+    "lng": 28.9889649,
+    "displayName": "Istanbul Kongre Merkezi, Darülbedai Caddesi, Taşkışla, Harbiye Mahallesi, Şişli, İstanbul, Marmara Bölgesi, 34367, Türkiye",
+    "osmType": "way",
+    "osmId": 267046312,
+    "query": "İstanbul Kongre Merkezi, Şişli"
+  },
+  "Nişantaşı Kahve Sokakları": {
+    "lat": 41.0516865,
+    "lng": 28.9916962,
+    "displayName": "Nişantaşı, Şişli, İstanbul, Marmara Bölgesi, 34365, Türkiye",
+    "osmType": "node",
+    "osmId": 269491733,
+    "query": "Nişantaşı, Şişli"
+  },
+  "Harbiye Askeri Müzesi": {
+    "lat": 41.0488755,
+    "lng": 28.9882427,
+    "displayName": "Askerî Müze, Valikonağı Caddesi, Taşkışla, Harbiye Mahallesi, Şişli, İstanbul, Marmara Bölgesi, 34367, Türkiye",
+    "osmType": "node",
+    "osmId": 1346157990,
+    "query": "Askerî Müze, Harbiye"
+  },
+  "Şişli Etfal Sokakları (Kurtuluş)": {
+    "lat": 41.0476081,
+    "lng": 28.9807415,
+    "displayName": "Kurtuluş, Eskişehir Mahallesi, Şişli, İstanbul, Marmara Bölgesi, 34375, Türkiye",
+    "osmType": "node",
+    "osmId": 6274733537,
+    "query": "Kurtuluş, Şişli"
+  },
+  "Anadolu Kavağı Balıkçıları": {
+    "lat": 41.17391,
+    "lng": 29.0886888,
+    "displayName": "Anadolu Kavağı Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 9488998,
+    "query": "Anadolu Kavağı, Beykoz"
+  },
+  "Kuru Kahveci Mehmet Efendi": {
+    "lat": 41.0165533,
+    "lng": 28.9702736,
+    "displayName": "Kurukahveci Mehmet Efendi, Tahmis Sokağı, Eminönü, Tahtakale Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, 34116, Türkiye",
+    "osmType": "node",
+    "osmId": 5244796179,
+    "query": "Kurukahveci Mehmet Efendi, Eminönü"
+  },
+  "Hüseyin Avni Paşa Konağı Sokakları (Çukurcuma)": {
+    "lat": 41.0312475,
+    "lng": 28.9800959,
+    "displayName": "Çukurcuma Caddesi, Firuzağa, Firuzağa Mahallesi, Beyoğlu, İstanbul, Marmara Bölgesi, 34425, Türkiye",
+    "osmType": "way",
+    "osmId": 183820454,
+    "query": "Çukurcuma, Beyoğlu"
+  },
+  "Vodafone Park Çevresi": {
+    "lat": 41.0411989,
+    "lng": 28.9943606,
+    "displayName": "Beşiktaş Stadyumu, Kadırgalar Caddesi, Maçka, Vişnezade Mahallesi, Beşiktaş, İstanbul, Marmara Bölgesi, 34357, Türkiye",
+    "osmType": "node",
+    "osmId": 13461435985,
+    "query": "Beşiktaş Stadyumu, Beşiktaş"
+  },
+  "Ortaköy'e Sahil Yürüyüşü (Beşiktaş)": {
+    "lat": 41.0546272,
+    "lng": 29.0281901,
+    "displayName": "Ortaköy Mahallesi, Beşiktaş, İstanbul, Marmara Bölgesi, 34347, Türkiye",
+    "osmType": "relation",
+    "osmId": 9335689,
+    "query": "Ortaköy, Beşiktaş"
+  },
+  "Kanlıca Yoğurdu": {
+    "lat": 41.0997201,
+    "lng": 29.0660785,
+    "displayName": "Kanlıca Mahallesi, Beykoz, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 9578450,
+    "query": "Kanlıca, Beykoz"
+  },
+  "Baltalimanı Sahili": {
+    "lat": 41.0955584,
+    "lng": 29.0525824,
+    "displayName": "Baltalimanı Mahallesi, Sarıyer, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 9343795,
+    "query": "Baltalimanı, Sarıyer"
+  },
+  "Balat Sahili": {
+    "lat": 41.0320032,
+    "lng": 28.9482931,
+    "displayName": "Balat Mahallesi, İstanbul, Fatih, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 2463371,
+    "query": "Balat, Fatih"
+  },
+  "Çinili Camii": {
+    "lat": 41.0198989,
+    "lng": 29.0291857,
+    "displayName": "Çinili Camii, Çinili Mescit Sokağı, Bağlarbaşı, Valide-i Atik Mahallesi, Üsküdar, İstanbul, Marmara Bölgesi, 34664, Türkiye",
+    "osmType": "way",
+    "osmId": 1499904203,
+    "query": "Çinili Camii, Üsküdar"
+  },
+  "Salacak Sahili": {
+    "lat": 41.01663,
+    "lng": 29.011821,
+    "displayName": "Salacak Mahallesi, Üsküdar, İstanbul, Marmara Bölgesi, Türkiye",
+    "osmType": "relation",
+    "osmId": 9463224,
+    "query": "Salacak, Üsküdar"
+  },
   "_failures": [
     {
-      "name": "Seven Hills Restaurant Terası",
-      "hub": "sultanahmet",
+      "name": "Pierre Loti Tepesi",
+      "hub": "eyupsultan",
       "reason": "no result"
     },
     {
-      "name": "Balık Pazarı (Beyoğlu)",
+      "name": "Haliç Sahil Yürüyüş Yolu (Eyüp)",
+      "hub": "eyupsultan",
+      "reason": "no result"
+    },
+    {
+      "name": "Zal Mahmut Paşa Camii",
+      "hub": "eyupsultan",
+      "reason": "no result"
+    },
+    {
+      "name": "Sarıyer Balıkçıları",
+      "hub": "sariyer",
+      "reason": "no result"
+    },
+    {
+      "name": "Beykoz Çeşmesi ve Çarşı",
+      "hub": "beykoz-anadolu-kavagi",
+      "reason": "no result"
+    },
+    {
+      "name": "Boğaz Vapuru (Uzun Tur)",
+      "hub": "beykoz-anadolu-kavagi",
+      "reason": "no result"
+    },
+    {
+      "name": "Asmalımescit",
       "hub": "beyoglu-taksim",
       "reason": "no result"
     },
     {
-      "name": "Galata Şarap Evi",
+      "name": "Kurşunlu Han",
       "hub": "karakoy-galata",
-      "reason": "only implausible hits (5.9 km from the karakoy-galata centre (limit 4 km))"
-    },
-    {
-      "name": "Karaköy Balıkçılar Çarşısı",
-      "hub": "karakoy-galata",
-      "reason": "no result"
-    },
-    {
-      "name": "Beşiktaş Balık Pazarı",
-      "hub": "besiktas",
-      "reason": "only implausible hits (outside the Istanbul bounding box)"
-    },
-    {
-      "name": "Barbaros Hayreddin Paşa Anıtı",
-      "hub": "besiktas",
-      "reason": "no result"
-    },
-    {
-      "name": "Tarihi Beşiktaş Kumpircisi",
-      "hub": "besiktas",
-      "reason": "no result"
-    },
-    {
-      "name": "Ortaköy Kumpir ve Waffle Sokağı",
-      "hub": "ortakoy-bebek",
-      "reason": "no result"
-    },
-    {
-      "name": "Bebek Sahili",
-      "hub": "ortakoy-bebek",
-      "reason": "no result"
-    },
-    {
-      "name": "Balat Renkli Evleri",
-      "hub": "balat",
-      "reason": "no result"
-    },
-    {
-      "name": "Merdivenli Yokuş Sokak",
-      "hub": "balat",
-      "reason": "no result"
-    },
-    {
-      "name": "Balat Antikacılar Sokağı",
-      "hub": "balat",
-      "reason": "no result"
-    },
-    {
-      "name": "Moda Sahili",
-      "hub": "kadikoy-moda",
-      "reason": "only implausible hits (outside the Istanbul bounding box)"
-    },
-    {
-      "name": "Bahariye Caddesi",
-      "hub": "kadikoy-moda",
-      "reason": "only implausible hits (6.7 km from the kadikoy-moda centre (limit 4 km))"
-    },
-    {
-      "name": "Değirmen Tepesi (Büyükada)",
-      "hub": "adalar",
-      "reason": "no result"
-    },
-    {
-      "name": "Aya Nikola Koyu",
-      "hub": "adalar",
       "reason": "no result"
     }
   ]

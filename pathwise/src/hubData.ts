@@ -26,6 +26,11 @@ export const HUBS: HubMeta[] = [
   { id: 'kadikoy-moda', name: 'Kadıköy & Moda', side: 'Asian', blurb: 'The Asian side: markets, meyhanes and a seaside sunset.', center: [40.9887, 29.027], accent: '#C97B8E' },
   { id: 'uskudar', name: 'Üsküdar', side: 'Asian', blurb: 'Sinan mosques, the Maiden’s Tower view and Kuzguncuk’s lanes.', center: [41.0255, 29.0152], accent: '#6B8E5A' },
   { id: 'adalar', name: 'Princes’ Islands (Adalar)', side: 'Islands', blurb: 'A ferry day out — no cars, pine woods and wooden mansions.', center: [40.8608, 29.1236], accent: '#2E8B87' },
+  { id: 'eyupsultan', name: 'Eyüpsultan & Pierre Loti', side: 'European', blurb: 'Pilgrim quarter, a cable car and the Golden Horn below it.', center: [41.0478, 28.9327], accent: '#8A6D3B' },
+  { id: 'sariyer', name: 'Sarıyer & the Northern Bosphorus', side: 'European', blurb: 'Fish restaurants, forest and the Black Sea beaches.', center: [41.1686, 29.0573], accent: '#3F7D5B' },
+  { id: 'nisantasi-sisli', name: 'Nişantaşı & Şişli', side: 'European', blurb: 'Shopping streets, café culture and modern Istanbul.', center: [41.0638, 28.9832], accent: '#9B5F7E' },
+  { id: 'beykoz-anadolu-kavagi', name: 'Beykoz & Anadolu Kavağı', side: 'Asian', blurb: 'The far north of the strait — a castle, coves and fish.', center: [41.1343, 29.092], accent: '#4A6E8C' },
+  { id: 'zeytinburnu-bakirkoy', name: 'Zeytinburnu & Bakırköy', side: 'European', blurb: 'Panorama museum, shoreline parks and the Marmara coast.', center: [40.9783, 28.8744], accent: '#B07A4E' },
 ];
 
 export const HUB_BY_ID: Record<string, HubMeta> = Object.fromEntries(
@@ -45,7 +50,7 @@ export const TRANSIT_HUBS: { label: string; lat: number; lng: number }[] = [
 ];
 
 export const PLACES: PlaceSummary[] = [
-  // ── Sultanahmet & Old City (14) ──
+  // ── Sultanahmet & Old City (18) ──
   { placeId: 'ChIJ-sultanahmet-hagiasophia', name: 'Hagia Sophia', hub: 'sultanahmet', lat: 41.0086, lng: 28.9802, entryFeeTry: 1500, entryFeeApprox: true },
   { placeId: 'ChIJ-sultanahmet-bluemosque', name: 'Blue Mosque (Sultanahmet Camii)', hub: 'sultanahmet', lat: 41.0054, lng: 28.9768, entryFeeTry: 0 },
   { placeId: 'ChIJ-sultanahmet-topkapi', name: 'Topkapı Palace', hub: 'sultanahmet', lat: 41.0115, lng: 28.9834, entryFeeTry: 1700, entryFeeApprox: true },
@@ -60,7 +65,11 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-sultanahmet-binbirdireksarnici', name: 'Binbirdirek Sarnıcı', hub: 'sultanahmet', lat: 41.007606, lng: 28.9744173, entryFeeTry: 400, entryFeeApprox: true },
   { placeId: 'ChIJ-sultanahmet-sogukcesmesokagi', name: 'Soğukçeşme Sokağı', hub: 'sultanahmet', lat: 41.0091697, lng: 28.9805148, entryFeeTry: 0 },
   { placeId: 'ChIJ-sultanahmet-cagalogluhamami', name: 'Cağaloğlu Hamamı', hub: 'sultanahmet', lat: 41.0106906, lng: 28.9756423, entryFeeTry: 3000, entryFeeApprox: true },
-  // ── Eminönü & Sirkeci (15) ──
+  { placeId: 'ChIJ-sultanahmet-sokullumehmetpasacamii', name: 'Sokullu Mehmet Paşa Camii', hub: 'sultanahmet', lat: 41.0255986, lng: 28.9394142, entryFeeTry: 0 },
+  { placeId: 'ChIJ-sultanahmet-mozaikmuzesi', name: 'Mozaik Müzesi', hub: 'sultanahmet', lat: 41.0042947, lng: 28.977433, entryFeeTry: 300, entryFeeApprox: true },
+  { placeId: 'ChIJ-sultanahmet-cemberlitashamami', name: 'Çemberlitaş Hamamı', hub: 'sultanahmet', lat: 41.0085416, lng: 28.9716244, entryFeeTry: 2500, entryFeeApprox: true },
+  { placeId: 'ChIJ-sultanahmet-matbahrestaurant', name: 'Matbah Restaurant', hub: 'sultanahmet', lat: 41.0093013, lng: 28.9792031, entryFeeTry: 0 },
+  // ── Eminönü & Sirkeci (19) ──
   { placeId: 'ChIJ-sultanahmet-grandbazaar', name: 'Grand Bazaar (Kapalıçarşı)', hub: 'eminonu-sirkeci', lat: 41.0106, lng: 28.968, entryFeeTry: 0 },
   { placeId: 'ChIJ-sultanahmet-spicebazaar', name: 'Spice Bazaar (Mısır Çarşısı)', hub: 'eminonu-sirkeci', lat: 41.0165, lng: 28.9707, entryFeeTry: 0 },
   { placeId: 'ChIJ-eminonu-suleymaniyecamii', name: 'Süleymaniye Camii', hub: 'eminonu-sirkeci', lat: 41.0162287, lng: 28.9639548, entryFeeTry: 0 },
@@ -76,7 +85,11 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-eminonu-tahtakalecarsisi', name: 'Tahtakale Çarşısı', hub: 'eminonu-sirkeci', lat: 41.0162853, lng: 28.9689108, entryFeeTry: 0 },
   { placeId: 'ChIJ-eminonu-eminonuvapuriskelesi', name: 'Eminönü Vapur İskelesi', hub: 'eminonu-sirkeci', lat: 41.0171316, lng: 28.976271, entryFeeTry: 0 },
   { placeId: 'ChIJ-eminonu-hafizmustafa1864', name: 'Hafız Mustafa 1864', hub: 'eminonu-sirkeci', lat: 41.0271958, lng: 28.9849177, entryFeeTry: 0 },
-  // ── Beyoğlu & Taksim (14) ──
+  { placeId: 'ChIJ-eminonu-sehzadebasicamii', name: 'Şehzadebaşı Camii', hub: 'eminonu-sirkeci', lat: 41.0138337, lng: 28.95716, entryFeeTry: 0 },
+  { placeId: 'ChIJ-eminonu-bozdogankemerivalens', name: 'Bozdoğan Kemeri (Valens)', hub: 'eminonu-sirkeci', lat: 41.0161645, lng: 28.9552071, entryFeeTry: 0 },
+  { placeId: 'ChIJ-eminonu-kurukahvecimehmetefendi', name: 'Kuru Kahveci Mehmet Efendi', hub: 'eminonu-sirkeci', lat: 41.0165533, lng: 28.9702736, entryFeeTry: 0 },
+  { placeId: 'ChIJ-eminonu-galatakoprusu', name: 'Galata Köprüsü', hub: 'eminonu-sirkeci', lat: 41.0200769, lng: 28.9730878, entryFeeTry: 0 },
+  // ── Beyoğlu & Taksim (17) ──
   { placeId: 'ChIJ-beyoglu-istiklalcaddesi', name: 'İstiklal Caddesi', hub: 'beyoglu-taksim', lat: 41.033865, lng: 28.9781765, entryFeeTry: 0 },
   { placeId: 'ChIJ-beyoglu-taksimmeydani', name: 'Taksim Meydanı', hub: 'beyoglu-taksim', lat: 41.0379547, lng: 28.9852034, entryFeeTry: 0 },
   { placeId: 'ChIJ-galata-mevlevihane', name: 'Galata Mevlevi Lodge Museum', hub: 'beyoglu-taksim', lat: 41.0295, lng: 28.9748, entryFeeTry: 300, entryFeeApprox: true },
@@ -91,7 +104,10 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-beyoglu-atlaspasaji', name: 'Atlas Pasajı', hub: 'beyoglu-taksim', lat: 41.0341134, lng: 28.9792135, entryFeeTry: 0 },
   { placeId: 'ChIJ-beyoglu-taksimcamii', name: 'Taksim Camii', hub: 'beyoglu-taksim', lat: 41.0369981, lng: 28.9840246, entryFeeTry: 0 },
   { placeId: 'ChIJ-beyoglu-nostaljiktramvay', name: 'Nostaljik Tramvay (İstiklal)', hub: 'beyoglu-taksim', lat: 41.0369981, lng: 28.9837401, entryFeeTry: 30, entryFeeApprox: true },
-  // ── Karaköy & Galata (12) ──
+  { placeId: 'ChIJ-beyoglu-misirapartmani', name: 'Mısır Apartmanı', hub: 'beyoglu-taksim', lat: 41.0326881, lng: 28.9768529, entryFeeTry: 0 },
+  { placeId: 'ChIJ-beyoglu-huseyinavnipasakonagisokaklaricukurcuma', name: 'Hüseyin Avni Paşa Konağı Sokakları (Çukurcuma)', hub: 'beyoglu-taksim', lat: 41.0312475, lng: 28.9800959, entryFeeTry: 0 },
+  { placeId: 'ChIJ-beyoglu-masumiyetmuzesi', name: 'Masumiyet Müzesi', hub: 'beyoglu-taksim', lat: 41.0308531, lng: 28.9798332, entryFeeTry: 350, entryFeeApprox: true },
+  // ── Karaköy & Galata (13) ──
   { placeId: 'ChIJ-galata-tower', name: 'Galata Tower', hub: 'karakoy-galata', lat: 41.0256, lng: 28.9744, entryFeeTry: 1000, entryFeeApprox: true },
   { placeId: 'ChIJ-galata-gulluoglu', name: 'Karaköy Güllüoğlu', hub: 'karakoy-galata', lat: 41.0231, lng: 28.9781, entryFeeTry: 0 },
   { placeId: 'ChIJ-galata-camondo', name: 'Camondo Steps', hub: 'karakoy-galata', lat: 41.0243, lng: 28.9737, entryFeeTry: 0 },
@@ -104,7 +120,8 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-galata-serdariekremcaddesi', name: 'Serdar-ı Ekrem Caddesi', hub: 'karakoy-galata', lat: 41.0279561, lng: 28.9770558, entryFeeTry: 0 },
   { placeId: 'ChIJ-galata-kilicalipasa', name: 'Kılıç Ali Paşa Mosque & Hamam', hub: 'karakoy-galata', lat: 41.0238, lng: 28.9805, entryFeeTry: 0 },
   { placeId: 'ChIJ-galata-namli', name: 'Namlı Gurme (Karaköy)', hub: 'karakoy-galata', lat: 41.0227, lng: 28.9772, entryFeeTry: 0 },
-  // ── Beşiktaş & Bosphorus (8) ──
+  { placeId: 'ChIJ-galata-galataport', name: 'Galataport', hub: 'karakoy-galata', lat: 41.0257757, lng: 28.9828657, entryFeeTry: 0 },
+  // ── Beşiktaş & Bosphorus (11) ──
   { placeId: 'ChIJ-besiktas-dolmabahce', name: 'Dolmabahçe Palace', hub: 'besiktas-bogaz', lat: 41.0392, lng: 29.0001, entryFeeTry: 1450, entryFeeApprox: true },
   { placeId: 'ChIJ-besiktas-yildiz-park', name: 'Yıldız Park', hub: 'besiktas-bogaz', lat: 41.0501, lng: 29.0125, entryFeeTry: 0 },
   { placeId: 'ChIJ-besiktas-besiktascarsisi', name: 'Beşiktaş Çarşısı', hub: 'besiktas-bogaz', lat: 41.0427392, lng: 29.0052546, entryFeeTry: 0 },
@@ -113,7 +130,10 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-besiktas-denizmuzesi', name: 'Deniz Müzesi', hub: 'besiktas-bogaz', lat: 41.0410591, lng: 29.0056913, entryFeeTry: 250, entryFeeApprox: true },
   { placeId: 'ChIJ-besiktas-ciragansarayidiscephesi', name: 'Çırağan Sarayı Dış Cephesi', hub: 'besiktas-bogaz', lat: 41.0434671, lng: 29.0153145, entryFeeTry: 0 },
   { placeId: 'ChIJ-besiktas-besiktassahili', name: 'Beşiktaş Sahili', hub: 'besiktas-bogaz', lat: 41.041076, lng: 29.0073612, entryFeeTry: 0 },
-  // ── Ortaköy & Bebek (12) ──
+  { placeId: 'ChIJ-besiktas-vodafoneparkcevresi', name: 'Vodafone Park Çevresi', hub: 'besiktas-bogaz', lat: 41.0411989, lng: 28.9943606, entryFeeTry: 0 },
+  { placeId: 'ChIJ-besiktas-sinanpasacamii', name: 'Sinanpaşa Camii', hub: 'besiktas-bogaz', lat: 41.0428914, lng: 29.0028633, entryFeeTry: 0 },
+  { placeId: 'ChIJ-besiktas-ortakoyesahilyuruyusubesiktas', name: 'Ortaköy\'e Sahil Yürüyüşü (Beşiktaş)', hub: 'besiktas-bogaz', lat: 41.0546272, lng: 29.0281901, entryFeeTry: 0 },
+  // ── Ortaköy & Bebek (13) ──
   { placeId: 'ChIJ-besiktas-ortakoy-mosque', name: 'Ortaköy Mosque', hub: 'ortakoy-bebek', lat: 41.0473, lng: 29.0272, entryFeeTry: 0 },
   { placeId: 'ChIJ-besiktas-ortakoy-kumpir', name: 'Ortaköy Kumpir & Waffle Row', hub: 'ortakoy-bebek', lat: 41.0476, lng: 29.0266, entryFeeTry: 0 },
   { placeId: 'ChIJ-ortakoy-ortakoymeydani', name: 'Ortaköy Meydanı', hub: 'ortakoy-bebek', lat: 41.0472754, lng: 29.0256249, entryFeeTry: 0 },
@@ -126,7 +146,8 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-ortakoy-bebekbademezmesi', name: 'Bebek Badem Ezmesi', hub: 'ortakoy-bebek', lat: 41.0777546, lng: 29.0438253, entryFeeTry: 0 },
   { placeId: 'ChIJ-ortakoy-bebekparki', name: 'Bebek Parkı', hub: 'ortakoy-bebek', lat: 41.0758381, lng: 29.04379, entryFeeTry: 0 },
   { placeId: 'ChIJ-ortakoy-bogazturu', name: 'Boğaz Turu (Ortaköy kalkışlı)', hub: 'ortakoy-bebek', lat: 41.0179386, lng: 28.9739295, entryFeeTry: 500, entryFeeApprox: true },
-  // ── Balat & Fener (11) ──
+  { placeId: 'ChIJ-ortakoy-baltalimanisahili', name: 'Baltalimanı Sahili', hub: 'ortakoy-bebek', lat: 41.0955584, lng: 29.0525824, entryFeeTry: 0 },
+  // ── Balat & Fener (15) ──
   { placeId: 'ChIJ-balat-colorfulhouses', name: 'Balat Colorful Houses (Kiremit Cd.)', hub: 'balat-fener', lat: 41.0294, lng: 28.9487, entryFeeTry: 0 },
   { placeId: 'ChIJ-balat-fenerpatriarchate', name: 'Ecumenical Patriarchate (Fener)', hub: 'balat-fener', lat: 41.0293, lng: 28.9513, entryFeeTry: 0 },
   { placeId: 'ChIJ-balat-kariyecamii', name: 'Kariye Camii (Chora)', hub: 'balat-fener', lat: 41.0312136, lng: 28.9389547, entryFeeTry: 800, entryFeeApprox: true },
@@ -138,7 +159,11 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-balat-ayvansaraysurlari', name: 'Ayvansaray Surları', hub: 'balat-fener', lat: 41.0322193, lng: 28.9378722, entryFeeTry: 0 },
   { placeId: 'ChIJ-balat-antiqueshops', name: 'Balat Antique & Vintage Shops', hub: 'balat-fener', lat: 41.0301, lng: 28.9479, entryFeeTry: 0 },
   { placeId: 'ChIJ-balat-cibalikapisi', name: 'Cibali Kapısı', hub: 'balat-fener', lat: 41.0235835, lng: 28.9593551, entryFeeTry: 0 },
-  // ── Kadıköy & Moda (15) ──
+  { placeId: 'ChIJ-balat-balatvapuriskelesimanzarasihalic', name: 'Balat Vapur İskelesi Manzarası (Haliç)', hub: 'balat-fener', lat: 41.034849, lng: 28.9492202, entryFeeTry: 0 },
+  { placeId: 'ChIJ-balat-ahridasinagogu', name: 'Ahrida Sinagogu', hub: 'balat-fener', lat: 41.0329117, lng: 28.9455186, entryFeeTry: 0 },
+  { placeId: 'ChIJ-balat-tekfursarayimuzesi', name: 'Tekfur Sarayı Müzesi', hub: 'balat-fener', lat: 41.0339422, lng: 28.9406756, entryFeeTry: 250, entryFeeApprox: true },
+  { placeId: 'ChIJ-balat-balatsahili', name: 'Balat Sahili', hub: 'balat-fener', lat: 41.0320032, lng: 28.9482931, entryFeeTry: 0 },
+  // ── Kadıköy & Moda (18) ──
   { placeId: 'ChIJ-kadikoy-moda-sahil', name: 'Moda Seaside (Sahil)', hub: 'kadikoy-moda', lat: 40.9812, lng: 29.024, entryFeeTry: 0 },
   { placeId: 'ChIJ-kadikoy-carsi', name: 'Kadıköy Market (Çarşı)', hub: 'kadikoy-moda', lat: 40.9903, lng: 29.0277, entryFeeTry: 0 },
   { placeId: 'ChIJ-kadikoy-modacaybahcesi', name: 'Moda Çay Bahçesi', hub: 'kadikoy-moda', lat: 40.9807672, lng: 29.0207963, entryFeeTry: 0 },
@@ -154,7 +179,10 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-kadikoy-baylan', name: 'Baylan Pastanesi', hub: 'kadikoy-moda', lat: 40.9905, lng: 29.0282, entryFeeTry: 0 },
   { placeId: 'ChIJ-kadikoy-moda-icecream', name: 'Moda Dondurma (Ali Usta)', hub: 'kadikoy-moda', lat: 40.9836, lng: 29.0263, entryFeeTry: 0 },
   { placeId: 'ChIJ-kadikoy-modapier', name: 'Moda Pier (Moda İskelesi)', hub: 'kadikoy-moda', lat: 40.9789, lng: 29.0268, entryFeeTry: 0 },
-  // ── Üsküdar (13) ──
+  { placeId: 'ChIJ-kadikoy-kadikoysalipazari', name: 'Kadıköy Salı Pazarı', hub: 'kadikoy-moda', lat: 40.9976006, lng: 29.0502847, entryFeeTry: 0 },
+  { placeId: 'ChIJ-kadikoy-fenerbahceparki', name: 'Fenerbahçe Parkı', hub: 'kadikoy-moda', lat: 40.9678182, lng: 29.0344899, entryFeeTry: 0 },
+  { placeId: 'ChIJ-kadikoy-kadikoykarikaturevi', name: 'Kadıköy Karikatür Evi', hub: 'kadikoy-moda', lat: 40.9945584, lng: 29.0378426, entryFeeTry: 0 },
+  // ── Üsküdar (16) ──
   { placeId: 'ChIJ-uskudar-kizkulesi', name: 'Kız Kulesi', hub: 'uskudar', lat: 41.0210488, lng: 29.0041322, entryFeeTry: 800, entryFeeApprox: true },
   { placeId: 'ChIJ-uskudar-mihrimahsultancamii', name: 'Mihrimah Sultan Camii (Üsküdar)', hub: 'uskudar', lat: 41.0268224, lng: 29.015967, entryFeeTry: 0 },
   { placeId: 'ChIJ-uskudar-semsipasacamii', name: 'Şemsi Paşa Camii', hub: 'uskudar', lat: 41.0259442, lng: 29.0113524, entryFeeTry: 0 },
@@ -168,7 +196,10 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-uskudar-nakkastepemilletbahcesi', name: 'Nakkaştepe Millet Bahçesi', hub: 'uskudar', lat: 41.0362262, lng: 29.0379719, entryFeeTry: 0 },
   { placeId: 'ChIJ-uskudar-atikvalidecamii', name: 'Atik Valide Camii', hub: 'uskudar', lat: 41.0188911, lng: 29.0238857, entryFeeTry: 0 },
   { placeId: 'ChIJ-uskudar-kuzguncukbostani', name: 'Kuzguncuk Bostanı', hub: 'uskudar', lat: 41.0347737, lng: 29.0318137, entryFeeTry: 0 },
-  // ── Princes’ Islands (Adalar) (10) ──
+  { placeId: 'ChIJ-uskudar-cinilicamii', name: 'Çinili Camii', hub: 'uskudar', lat: 41.0198989, lng: 29.0291857, entryFeeTry: 0 },
+  { placeId: 'ChIJ-uskudar-validebagkorusu', name: 'Validebağ Korusu', hub: 'uskudar', lat: 41.0150315, lng: 29.0457709, entryFeeTry: 0 },
+  { placeId: 'ChIJ-uskudar-salacaksahili', name: 'Salacak Sahili', hub: 'uskudar', lat: 41.01663, lng: 29.011821, entryFeeTry: 0 },
+  // ── Princes’ Islands (Adalar) (13) ──
   { placeId: 'ChIJ-adalar-buyukadaiskelesi', name: 'Büyükada İskelesi', hub: 'adalar', lat: 40.8749412, lng: 29.1283038, entryFeeTry: 0 },
   { placeId: 'ChIJ-adalar-ayayorgikilisesi', name: 'Aya Yorgi Kilisesi', hub: 'adalar', lat: 40.8488447, lng: 29.1188324, entryFeeTry: 0 },
   { placeId: 'ChIJ-adalar-buyukadaelektriklifayton', name: 'Büyükada Elektrikli Fayton Turu', hub: 'adalar', lat: 40.8749412, lng: 29.1283038, entryFeeTry: 400, entryFeeApprox: true },
@@ -179,6 +210,63 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-adalar-buyukadacarsicaddesi', name: 'Büyükada Çarşı (Şehit Recep Koç Cd.)', hub: 'adalar', lat: 40.8743554, lng: 29.1307589, entryFeeTry: 0 },
   { placeId: 'ChIJ-adalar-heybeliadasahili', name: 'Heybeliada Sahili', hub: 'adalar', lat: 40.8778466, lng: 29.1008681, entryFeeTry: 0 },
   { placeId: 'ChIJ-adalar-adalarvapuryolculugu', name: 'Adalar Vapur Yolculuğu', hub: 'adalar', lat: 40.8749412, lng: 29.1283038, entryFeeTry: 60, entryFeeApprox: true },
+  { placeId: 'ChIJ-adalar-kinaliada', name: 'Kınalıada', hub: 'adalar', lat: 40.9088914, lng: 29.0547984, entryFeeTry: 0 },
+  { placeId: 'ChIJ-adalar-burgazada', name: 'Burgazada', hub: 'adalar', lat: 40.8802771, lng: 29.0694845, entryFeeTry: 0 },
+  { placeId: 'ChIJ-adalar-saitfaikabasiyanikmuzesi', name: 'Sait Faik Abasıyanık Müzesi', hub: 'adalar', lat: 40.8810298, lng: 29.0674547, entryFeeTry: 0 },
+  // ── Eyüpsultan & Pierre Loti (7) ──
+  { placeId: 'ChIJ-eyup-eyupsultancamii', name: 'Eyüp Sultan Camii', hub: 'eyupsultan', lat: 41.0480113, lng: 28.9337456, entryFeeTry: 0 },
+  { placeId: 'ChIJ-eyup-eyupteleferigi', name: 'Eyüp Teleferiği', hub: 'eyupsultan', lat: 41.049759, lng: 28.9344105, entryFeeTry: 60, entryFeeApprox: true },
+  { placeId: 'ChIJ-eyup-eyupsultanmezarligi', name: 'Eyüp Sultan Mezarlığı', hub: 'eyupsultan', lat: 41.0523632, lng: 28.9330264, entryFeeTry: 0 },
+  { placeId: 'ChIJ-eyup-feshane', name: 'Feshane', hub: 'eyupsultan', lat: 41.0455255, lng: 28.9377817, entryFeeTry: 0 },
+  { placeId: 'ChIJ-eyup-eyupsultanpilavcisi', name: 'Eyüp Sultan Pilavcısı', hub: 'eyupsultan', lat: 41.0478358, lng: 28.9327383, entryFeeTry: 0 },
+  { placeId: 'ChIJ-eyup-miniaturk', name: 'Miniatürk', hub: 'eyupsultan', lat: 41.0599661, lng: 28.9487697, entryFeeTry: 250, entryFeeApprox: true },
+  { placeId: 'ChIJ-eyup-rahmimkocmuzesi', name: 'Rahmi M. Koç Müzesi', hub: 'eyupsultan', lat: 41.0419735, lng: 28.9485686, entryFeeTry: 400, entryFeeApprox: true },
+  // ── Sarıyer & the Northern Bosphorus (11) ──
+  { placeId: 'ChIJ-sariyer-belgradormani', name: 'Belgrad Ormanı', hub: 'sariyer', lat: 41.1866198, lng: 28.9493426, entryFeeTry: 0 },
+  { placeId: 'ChIJ-sariyer-kilyosplaji', name: 'Kilyos Plajı', hub: 'sariyer', lat: 41.2468102, lng: 29.0341657, entryFeeTry: 400, entryFeeApprox: true },
+  { placeId: 'ChIJ-sariyer-rumelifeneri', name: 'Rumeli Feneri', hub: 'sariyer', lat: 41.2342217, lng: 29.1121447, entryFeeTry: 0 },
+  { placeId: 'ChIJ-sariyer-sariyerborekcisi', name: 'Sarıyer Börekçisi', hub: 'sariyer', lat: 41.1695338, lng: 29.0555158, entryFeeTry: 0 },
+  { placeId: 'ChIJ-sariyer-ataturkarboretumu', name: 'Atatürk Arboretumu', hub: 'sariyer', lat: 41.1771254, lng: 28.9810387, entryFeeTry: 100, entryFeeApprox: true },
+  { placeId: 'ChIJ-sariyer-sadberkhanimmuzesi', name: 'Sadberk Hanım Müzesi', hub: 'sariyer', lat: 41.1630048, lng: 29.0481637, entryFeeTry: 250, entryFeeApprox: true },
+  { placeId: 'ChIJ-sariyer-buyukderesahili', name: 'Büyükdere Sahili', hub: 'sariyer', lat: 41.1602485, lng: 29.0421459, entryFeeTry: 0 },
+  { placeId: 'ChIJ-sariyer-yenikoysahil', name: 'Yeniköy Sahil', hub: 'sariyer', lat: 41.1231548, lng: 29.070613, entryFeeTry: 0 },
+  { placeId: 'ChIJ-sariyer-tarabyakoyu', name: 'Tarabya Koyu', hub: 'sariyer', lat: 41.1385739, lng: 29.0530421, entryFeeTry: 0 },
+  { placeId: 'ChIJ-sariyer-istinyesahili', name: 'İstinye Sahili', hub: 'sariyer', lat: 41.1150511, lng: 29.055486, entryFeeTry: 0 },
+  { placeId: 'ChIJ-sariyer-garipcekoyu', name: 'Garipçe Köyü', hub: 'sariyer', lat: 41.219266, lng: 29.1047654, entryFeeTry: 0 },
+  // ── Nişantaşı & Şişli (11) ──
+  { placeId: 'ChIJ-nisantasi-nisantasiabdiipekcicaddesi', name: 'Nişantaşı Abdi İpekçi Caddesi', hub: 'nisantasi-sisli', lat: 41.0480782, lng: 28.992915, entryFeeTry: 0 },
+  { placeId: 'ChIJ-nisantasi-mackademokrasiparki', name: 'Maçka Demokrasi Parkı', hub: 'nisantasi-sisli', lat: 41.0443082, lng: 28.9932816, entryFeeTry: 0 },
+  { placeId: 'ChIJ-nisantasi-mackateleferigi', name: 'Maçka Teleferiği', hub: 'nisantasi-sisli', lat: 41.0441282, lng: 28.9921574, entryFeeTry: 40, entryFeeApprox: true },
+  { placeId: 'ChIJ-nisantasi-ataturkmuzesisisli', name: 'Atatürk Müzesi (Şişli)', hub: 'nisantasi-sisli', lat: 41.0564045, lng: 28.9872128, entryFeeTry: 0 },
+  { placeId: 'ChIJ-nisantasi-istanbulkongremerkezicevresi', name: 'İstanbul Kongre Merkezi Çevresi', hub: 'nisantasi-sisli', lat: 41.0462704, lng: 28.9889649, entryFeeTry: 0 },
+  { placeId: 'ChIJ-nisantasi-tesvikiyecamii', name: 'Teşvikiye Camii', hub: 'nisantasi-sisli', lat: 41.0493802, lng: 28.9942805, entryFeeTry: 0 },
+  { placeId: 'ChIJ-nisantasi-nisantasikahvesokaklari', name: 'Nişantaşı Kahve Sokakları', hub: 'nisantasi-sisli', lat: 41.0516865, lng: 28.9916962, entryFeeTry: 0 },
+  { placeId: 'ChIJ-nisantasi-cevahiravm', name: 'Cevahir AVM', hub: 'nisantasi-sisli', lat: 41.0626036, lng: 28.9929943, entryFeeTry: 0 },
+  { placeId: 'ChIJ-nisantasi-bomontiada', name: 'Bomontiada', hub: 'nisantasi-sisli', lat: 41.0583185, lng: 28.9808053, entryFeeTry: 0 },
+  { placeId: 'ChIJ-nisantasi-harbiyeaskerimuzesi', name: 'Harbiye Askeri Müzesi', hub: 'nisantasi-sisli', lat: 41.0488755, lng: 28.9882427, entryFeeTry: 200, entryFeeApprox: true },
+  { placeId: 'ChIJ-nisantasi-sislietfalsokaklarikurtulus', name: 'Şişli Etfal Sokakları (Kurtuluş)', hub: 'nisantasi-sisli', lat: 41.0476081, lng: 28.9807415, entryFeeTry: 0 },
+  // ── Beykoz & Anadolu Kavağı (10) ──
+  { placeId: 'ChIJ-beykoz-anadolukavagiyoroskalesi', name: 'Anadolu Kavağı Yoros Kalesi', hub: 'beykoz-anadolu-kavagi', lat: 41.178574, lng: 29.094919, entryFeeTry: 0 },
+  { placeId: 'ChIJ-beykoz-anadolukavagibalikcilari', name: 'Anadolu Kavağı Balıkçıları', hub: 'beykoz-anadolu-kavagi', lat: 41.17391, lng: 29.0886888, entryFeeTry: 0 },
+  { placeId: 'ChIJ-beykoz-anadolufeneri', name: 'Anadolu Feneri', hub: 'beykoz-anadolu-kavagi', lat: 41.2173967, lng: 29.1520592, entryFeeTry: 0 },
+  { placeId: 'ChIJ-beykoz-beykozkorusu', name: 'Beykoz Korusu', hub: 'beykoz-anadolu-kavagi', lat: 41.1332962, lng: 29.1002207, entryFeeTry: 0 },
+  { placeId: 'ChIJ-beykoz-kucuksukasri', name: 'Küçüksu Kasrı', hub: 'beykoz-anadolu-kavagi', lat: 41.0784102, lng: 29.0648834, entryFeeTry: 300, entryFeeApprox: true },
+  { placeId: 'ChIJ-beykoz-anadoluhisari', name: 'Anadolu Hisarı', hub: 'beykoz-anadolu-kavagi', lat: 41.0840924, lng: 29.0683684, entryFeeTry: 0 },
+  { placeId: 'ChIJ-beykoz-poyrazkoykoyu', name: 'Poyrazköy Koyu', hub: 'beykoz-anadolu-kavagi', lat: 41.2062818, lng: 29.1367205, entryFeeTry: 0 },
+  { placeId: 'ChIJ-beykoz-hidivkasri', name: 'Hıdiv Kasrı', hub: 'beykoz-anadolu-kavagi', lat: 41.105043, lng: 29.0738706, entryFeeTry: 200, entryFeeApprox: true },
+  { placeId: 'ChIJ-beykoz-kanlicayogurdu', name: 'Kanlıca Yoğurdu', hub: 'beykoz-anadolu-kavagi', lat: 41.0997201, lng: 29.0660785, entryFeeTry: 0 },
+  { placeId: 'ChIJ-beykoz-mihrabatkorusu', name: 'Mihrabat Korusu', hub: 'beykoz-anadolu-kavagi', lat: 41.0950493, lng: 29.0733467, entryFeeTry: 0 },
+  // ── Zeytinburnu & Bakırköy (10) ──
+  { placeId: 'ChIJ-zeytinburnu-panorama1453tarihmuzesi', name: 'Panorama 1453 Tarih Müzesi', hub: 'zeytinburnu-bakirkoy', lat: 41.0181266, lng: 28.9203842, entryFeeTry: 150, entryFeeApprox: true },
+  { placeId: 'ChIJ-zeytinburnu-zeytinburnutibbibitkilerbahcesi', name: 'Zeytinburnu Tıbbi Bitkiler Bahçesi', hub: 'zeytinburnu-bakirkoy', lat: 41.0087844, lng: 28.9164616, entryFeeTry: 0 },
+  { placeId: 'ChIJ-zeytinburnu-bakirkoysahilparki', name: 'Bakırköy Sahil Parkı', hub: 'zeytinburnu-bakirkoy', lat: 40.9686067, lng: 28.7943184, entryFeeTry: 0 },
+  { placeId: 'ChIJ-zeytinburnu-atakoymarina', name: 'Ataköy Marina', hub: 'zeytinburnu-bakirkoy', lat: 40.9711276, lng: 28.8761294, entryFeeTry: 0 },
+  { placeId: 'ChIJ-zeytinburnu-yedikulehisari', name: 'Yedikule Hisarı', hub: 'zeytinburnu-bakirkoy', lat: 40.9930789, lng: 28.9226227, entryFeeTry: 200, entryFeeApprox: true },
+  { placeId: 'ChIJ-zeytinburnu-kazlicesmesahil', name: 'Kazlıçeşme Sahil', hub: 'zeytinburnu-bakirkoy', lat: 40.9851293, lng: 28.9104561, entryFeeTry: 0 },
+  { placeId: 'ChIJ-zeytinburnu-bakirkoyozgurlukmeydani', name: 'Bakırköy Özgürlük Meydanı', hub: 'zeytinburnu-bakirkoy', lat: 40.981628, lng: 28.8740542, entryFeeTry: 0 },
+  { placeId: 'ChIJ-zeytinburnu-floryaataturkdenizkosku', name: 'Florya Atatürk Deniz Köşkü', hub: 'zeytinburnu-bakirkoy', lat: 40.9726626, lng: 28.7823745, entryFeeTry: 150, entryFeeApprox: true },
+  { placeId: 'ChIJ-zeytinburnu-istanbulakvaryumflorya', name: 'İstanbul Akvaryum Florya', hub: 'zeytinburnu-bakirkoy', lat: 40.9641851, lng: 28.8000315, entryFeeTry: 900, entryFeeApprox: true },
+  { placeId: 'ChIJ-zeytinburnu-mertertekstilcarsisi', name: 'Merter Tekstil Çarşısı', hub: 'zeytinburnu-bakirkoy', lat: 41.0116424, lng: 28.887893, entryFeeTry: 0 },
 ];
 
 export const PLACES_BY_ID: Record<string, PlaceSummary> = Object.fromEntries(

@@ -382,6 +382,9 @@ export const translations = {
       nightlife: 'Nightlife',
       experience: 'Experiences',
       religion: 'Sacred Places',
+      walk: 'Walking Routes',
+      architecture: 'Architecture',
+      family: 'Family Friendly',
     },
     social: {
       title: 'Social & Travel Buddies',
@@ -872,6 +875,9 @@ export const translations = {
       nightlife: 'Gece Hayatı',
       experience: 'Deneyimler',
       religion: 'İbadet Mekânları',
+      walk: 'Yürüyüş Rotaları',
+      architecture: 'Mimari',
+      family: 'Aile Dostu',
     },
     social: {
       title: 'Sosyal & Gezgin Arkadaşlar',

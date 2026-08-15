@@ -14,8 +14,9 @@ describe('planHubSequence', () => {
   });
 
   it('never puts the same shore on two days in a row', () => {
-    // Ten hubs across three sides is enough to alternate every day up to the
-    // maximum; if it ever is not, this fails rather than quietly clustering.
+    // Fifteen hubs across three sides is enough to alternate every day up to
+    // the maximum; if it ever is not, this fails rather than quietly
+    // clustering.
     const sequence = planHubSequence(MAX_TRIP_DAYS, HUB_DATASET);
     for (let i = 1; i < sequence.length; i++) {
       expect(HUB_SIDE[sequence[i]]).not.toBe(HUB_SIDE[sequence[i - 1]]);
@@ -60,7 +61,7 @@ describe('planHubSequence', () => {
   });
 
   it('survives a dataset smaller than the trip, without consecutive repeats', () => {
-    // Unreachable through the UI (ten hubs, seven-day cap) but the function has
+    // Unreachable through the UI (15 hubs, seven-day cap) but the function has
     // to be total — a crash here would take the whole dashboard down.
     const twoHubs = HUB_DATASET.filter((h) =>
       ['sultanahmet', 'kadikoy-moda'].includes(h.id),

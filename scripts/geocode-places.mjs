@@ -22,7 +22,14 @@ import { fileURLToPath } from 'node:url';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const INPUT = resolve(here, 'data/pathwise-places.json');
+// Which dataset to geocode. Batch 2 arrived as a second file rather than an
+// edit to the first, so the input is an argument with the original as default:
+//   node scripts/geocode-places.mjs --input data/pathwise-places-batch2.json
+const inputArg = process.argv.indexOf('--input');
+const INPUT = resolve(
+  here,
+  inputArg === -1 ? 'data/pathwise-places.json' : process.argv[inputArg + 1],
+);
 const OUTPUT = resolve(here, 'data/geocoded.json');
 
 // Nominatim's usage policy: absolute maximum of 1 request per second, and a
@@ -63,6 +70,14 @@ const HUB_CENTERS = {
   'kadikoy-moda': [40.9887, 29.027],
   uskudar: [41.0255, 29.0152],
   adalar: [40.8608, 29.1236],
+  // Batch 2. Each centre is the district's own Nominatim result rather than a
+  // number picked by eye — these are the anchors the plausibility check below
+  // measures against, so guessing them would quietly widen the net.
+  eyupsultan: [41.0478, 28.9327],
+  sariyer: [41.1686, 29.0573],
+  'nisantasi-sisli': [41.0638, 28.9832],
+  'beykoz-anadolu-kavagi': [41.1343, 29.092],
+  'zeytinburnu-bakirkoy': [40.9783, 28.8744],
 };
 
 /**
@@ -75,6 +90,15 @@ const HUB_RADIUS_KM = {
   'ortakoy-bebek': 9, // runs up the Bosphorus as far as Emirgan
   adalar: 12, // spans Büyükada, Heybeliada and the ferry route between them
   uskudar: 6, // Çamlıca hill is genuinely ~4.5 km inland from the shore centre
+  // The batch-2 hubs are districts, not neighbourhoods, and three of them are
+  // genuinely enormous. A tight limit here would reject correct coordinates —
+  // which is the expensive kind of wrong, since a rejected place gets no
+  // coordinate at all rather than a bad one.
+  eyupsultan: 8, // Miniatürk and the Koç museum sit down on the Golden Horn
+  sariyer: 18, // Kilyos on the Black Sea and Belgrad Forest are both in it
+  'nisantasi-sisli': 5,
+  'beykoz-anadolu-kavagi': 14, // Anadolu Hisarı in the south to Poyrazköy north
+  'zeytinburnu-bakirkoy': 12, // Yedikule in the east out to Florya in the west
 };
 const DEFAULT_RADIUS_KM = 4;
 

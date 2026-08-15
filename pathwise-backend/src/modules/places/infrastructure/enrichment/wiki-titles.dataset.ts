@@ -15,59 +15,101 @@
  */
 export const WIKI_TITLES: Record<string, string> = {
   'ChIJ-adalar-ayayorgikilisesi': 'Büyükada Aya Yorgi Manastırı', // Aya Yorgi Kilisesi
+  'ChIJ-adalar-burgazada': 'Burgazada İskelesi', // Burgazada
+  'ChIJ-adalar-kinaliada': 'Surp Krikor Lusavoriç Ermeni Kilisesi (Kınalıada)', // Kınalıada
   'ChIJ-adalar-prinkiporumyetimhanesi': 'Büyükada Rum Yetimhanesi', // Prinkipo Rum Yetimhanesi
+  'ChIJ-adalar-saitfaikabasiyanikmuzesi': 'Sait Faik Abasıyanık Müzesi',
   'ChIJ-adalar-splendidpalasoteli': 'Anadolu Kulübü Oteli', // Splendid Palas Oteli
+  'ChIJ-balat-ahridasinagogu': 'Ahrida Sinagogu',
   'ChIJ-balat-ayvansaraysurlari': 'Ali Ağa Çeşmesi (Ayvansaray)', // Ayvansaray Surları
   'ChIJ-balat-cibalikapisi': 'Cibali (İstanbul Tramvayı)', // Cibali Kapısı
   'ChIJ-balat-fenerpatriarchate': 'Maraşlı Rum İlkokulu', // Ecumenical Patriarchate (Fener)
   'ChIJ-balat-fenerrumlisesi': 'Fener Rum Erkek Lisesi', // Fener Rum Lisesi (Kırmızı Mektep)
   'ChIJ-balat-kariyecamii': 'Kariye Camii', // Kariye Camii (Chora)
   'ChIJ-balat-svetistefanbulgarkilises': 'Sveti Stefan Kilisesi', // Sveti Stefan Bulgar Kilisesi
+  'ChIJ-balat-tekfursarayimuzesi': 'Tekfur Sarayı', // Tekfur Sarayı Müzesi
   'ChIJ-besiktas-besiktascarsisi': 'Büyük Beşiktaş Çarşısı', // Beşiktaş Çarşısı
   'ChIJ-besiktas-ciragansarayidiscephesi': 'Çırağan Sarayı', // Çırağan Sarayı Dış Cephesi
   'ChIJ-besiktas-denizmuzesi': 'İstanbul Deniz Müzesi', // Deniz Müzesi
   'ChIJ-besiktas-dolmabahce': 'Dolmabahçe Sarayı', // Dolmabahçe Palace
   'ChIJ-besiktas-ihlamurkasri': 'Ihlamur Kasrı',
   'ChIJ-besiktas-yildiz-park': 'Yıldız Sarayı', // Yıldız Park
+  'ChIJ-beykoz-anadolufeneri': 'Anadolu Feneri',
+  'ChIJ-beykoz-anadolukavagiyoroskalesi': 'Yoros Kalesi', // Anadolu Kavağı Yoros Kalesi
+  'ChIJ-beykoz-hidivkasri': 'Hidiv Kasrı',
+  'ChIJ-beykoz-kucuksukasri': 'Küçüksu Kasrı',
   'ChIJ-beyoglu-atlaspasaji': 'Atlas Pasajı',
   'ChIJ-beyoglu-cicekpasaji': 'Çiçek Pasajı',
   'ChIJ-beyoglu-geziparki': 'Taksim Gezi Parkı', // Gezi Parkı
+  'ChIJ-beyoglu-huseyinavnipasakonagisokaklaricukurcuma': 'Çukurcuma Camii', // Hüseyin Avni Paşa Konağı Sokakları (Çukurcuma)
   'ChIJ-beyoglu-istiklalcaddesi': 'İstiklal Caddesi',
+  'ChIJ-beyoglu-masumiyetmuzesi': 'Masumiyet Müzesi (müze)', // Masumiyet Müzesi
+  'ChIJ-beyoglu-misirapartmani': 'Mısır Apartmanı',
   'ChIJ-beyoglu-peramuzesi': 'Pera Müzesi',
   'ChIJ-beyoglu-sentantuankilisesi': 'St. Antuan Katolik Kilisesi', // Sent Antuan Kilisesi
   'ChIJ-beyoglu-taksimcamii': 'Taksim Camii',
   'ChIJ-beyoglu-taksimmeydani': 'Taksim Meydanı',
   'ChIJ-beyoglu-tunelmeydani': 'Beyoğlu (Tünel)', // Tünel Meydanı
   'ChIJ-eminonu-beyazitmeydani': 'Beyazıt Devlet Kütüphanesi', // Beyazıt Meydanı
+  'ChIJ-eminonu-bozdogankemerivalens': 'Bozdoğan Kemeri', // Bozdoğan Kemeri (Valens)
+  'ChIJ-eminonu-galatakoprusu': 'Galata Köprüsü',
+  'ChIJ-eminonu-kurukahvecimehmetefendi': 'Kuru Kahveci Han', // Kuru Kahveci Mehmet Efendi
   'ChIJ-eminonu-nuruosmaniyecamii': 'Nuruosmaniye Camii',
   'ChIJ-eminonu-rustempasacamii': 'Rüstem Paşa Camii',
   'ChIJ-eminonu-sahaflarcarsisi': 'Sahaflar Çarşısı',
+  'ChIJ-eminonu-sehzadebasicamii': 'İbrahim Paşa Camii (Şehzadebaşı)', // Şehzadebaşı Camii
   'ChIJ-eminonu-sirkecigari': 'Sirkeci Garı',
   'ChIJ-eminonu-suleymaniyecamii': 'Süleymaniye Camii',
   'ChIJ-eminonu-tahtakalecarsisi': 'Tahtakale Hamamı', // Tahtakale Çarşısı
   'ChIJ-eminonu-vefabozacisi': 'Vefa Lisesi', // Vefa Bozacısı
   'ChIJ-eminonu-yenicami': 'Yeni Cami',
+  'ChIJ-eyup-eyupsultancamii': 'Eyüp Sultan Camii',
+  'ChIJ-eyup-eyupsultanmezarligi': 'Eyüpsultan Mezarlığı', // Eyüp Sultan Mezarlığı
+  'ChIJ-eyup-eyupsultanpilavcisi': 'Eyüp Sultan Camii', // Eyüp Sultan Pilavcısı
+  'ChIJ-eyup-eyupteleferigi': 'Eyüp Sultan Camii', // Eyüp Teleferiği
+  'ChIJ-eyup-feshane': 'Feshane',
+  'ChIJ-eyup-miniaturk': 'Miniatürk',
   'ChIJ-galata-arapcamii': 'Arap Camii',
   'ChIJ-galata-camondo': 'Kamondo Merdivenleri', // Camondo Steps
+  'ChIJ-galata-galataport': 'Galataport',
   'ChIJ-galata-saltgalata': 'SALT', // SALT Galata
   'ChIJ-galata-tower': 'Galata Kulesi', // Galata Tower
   'ChIJ-galata-yeralticamii': 'Yeraltı Camii',
   'ChIJ-kadikoy-alimuhiddinhacibekir': 'Ali Paşa Çeşmesi (Kadıköy)', // Ali Muhiddin Hacı Bekir (Kadıköy)
+  'ChIJ-kadikoy-fenerbahceparki': 'Fenerbahçe Adası', // Fenerbahçe Parkı
   'ChIJ-kadikoy-kadikoybogaheykeli': 'Kadıköy Boğa Heykeli',
   'ChIJ-kadikoy-moda-sahil': 'Moda, Kadıköy', // Moda Seaside (Sahil)
+  'ChIJ-nisantasi-ataturkmuzesisisli': 'Atatürk Müzesi (İstanbul)', // Atatürk Müzesi (Şişli)
+  'ChIJ-nisantasi-bomontiada': 'Bomonti', // Bomontiada
+  'ChIJ-nisantasi-cevahiravm': 'Cevahir Alışveriş Merkezi', // Cevahir AVM
+  'ChIJ-nisantasi-harbiyeaskerimuzesi': 'Askerî Müze (İstanbul)', // Harbiye Askeri Müzesi
+  'ChIJ-nisantasi-istanbulkongremerkezicevresi': 'İstanbul Kongre Merkezi', // İstanbul Kongre Merkezi Çevresi
+  'ChIJ-nisantasi-mackademokrasiparki': 'Maçka Demokrasi Parkı',
+  'ChIJ-nisantasi-mackateleferigi': 'Maçka Demokrasi Parkı', // Maçka Teleferiği
+  'ChIJ-nisantasi-nisantasiabdiipekcicaddesi': 'Abdi İpekçi Caddesi', // Nişantaşı Abdi İpekçi Caddesi
+  'ChIJ-nisantasi-sislietfalsokaklarikurtulus': 'Kurtuluş, Şişli', // Şişli Etfal Sokakları (Kurtuluş)
+  'ChIJ-nisantasi-tesvikiyecamii': 'Teşvikiye Camii',
   'ChIJ-ortakoy-arnavutkoysahilyolu': 'Arnavutköy Karakolu', // Arnavutköy Sahil Yolu
   'ChIJ-ortakoy-asiyanmuzesi': 'Aşiyan Müzesi',
+  'ChIJ-ortakoy-baltalimanisahili': 'Baltalimanı Japon Bahçesi', // Baltalimanı Sahili
   'ChIJ-ortakoy-rumelihisari': 'Rumeli Hisarı',
+  'ChIJ-sariyer-istinyesahili': 'İstinye Devlet Hastanesi', // İstinye Sahili
+  'ChIJ-sariyer-sadberkhanimmuzesi': 'Sadberk Hanım Müzesi',
+  'ChIJ-sariyer-sariyerborekcisi': 'Ali Kethüda Camii (Sarıyer)', // Sarıyer Börekçisi
+  'ChIJ-sariyer-tarabyakoyu': 'Tarabya İngiliz Okulları', // Tarabya Koyu
+  'ChIJ-sariyer-yenikoysahil': 'Panayia Kilisesi (Yeniköy)', // Yeniköy Sahil
   'ChIJ-sultanahmet-basilicacistern': 'Yerebatan Sarnıcı', // Basilica Cistern (Yerebatan Sarnıcı)
   'ChIJ-sultanahmet-binbirdireksarnici': 'Binbirdirek Sarnıcı',
   'ChIJ-sultanahmet-bluemosque': 'Sultanahmet Camii', // Blue Mosque (Sultanahmet Camii)
   'ChIJ-sultanahmet-cagalogluhamami': 'Cağaloğlu Hamamı',
+  'ChIJ-sultanahmet-cemberlitashamami': 'Çemberlitaş Hamamı',
   'ChIJ-sultanahmet-grandbazaar': 'Kapalıçarşı', // Grand Bazaar (Kapalıçarşı)
   'ChIJ-sultanahmet-gulhane': 'Gülhane Parkı', // Gülhane Park
   'ChIJ-sultanahmet-hagiasophia': 'Ayasofya', // Hagia Sophia
   'ChIJ-sultanahmet-istanbularkeolojimuzeler': 'İstanbul Arkeoloji Müzeleri',
   'ChIJ-sultanahmet-kucukayasofya': 'Küçük Ayasofya Camii', // Little Hagia Sophia (Küçük Ayasofya)
   'ChIJ-sultanahmet-sogukcesmesokagi': 'Soğukçeşme Sokağı',
+  'ChIJ-sultanahmet-sokullumehmetpasacamii': 'Öküz Mehmed Paşa Camii', // Sokullu Mehmet Paşa Camii
   'ChIJ-sultanahmet-spicebazaar': 'Mısır Çarşısı', // Spice Bazaar (Mısır Çarşısı)
   'ChIJ-sultanahmet-topkapi': 'Topkapı Sarayı', // Topkapı Palace
   'ChIJ-sultanahmet-turkislam': 'Türk ve İslam Eserleri Müzesi', // Museum of Turkish & Islamic Arts
@@ -75,8 +117,13 @@ export const WIKI_TITLES: Record<string, string> = {
   'ChIJ-uskudar-beylerbeyisarayi': 'Beylerbeyi Sarayı',
   'ChIJ-uskudar-buyukcamlicacamii': 'Çamlıca Camii', // Büyük Çamlıca Camii
   'ChIJ-uskudar-camlicatepesi': 'Çamlıca TRT Kulesi', // Çamlıca Tepesi
+  'ChIJ-uskudar-cinilicamii': 'Çinili Cami', // Çinili Camii
   'ChIJ-uskudar-kizkulesi': 'Kız Kulesi',
   'ChIJ-uskudar-kuzguncukbostani': 'Kuzguncuk Bostanı',
   'ChIJ-uskudar-mihrimahsultancamii': 'Mihrimah Sultan Camii (Üsküdar)',
   'ChIJ-uskudar-semsipasacamii': 'Şemsi Paşa Camii',
+  'ChIJ-zeytinburnu-bakirkoyozgurlukmeydani': 'Özgürlük Meydanı (İstanbul Metrosu)', // Bakırköy Özgürlük Meydanı
+  'ChIJ-zeytinburnu-floryaataturkdenizkosku': 'Florya Atatürk Deniz Köşkü',
+  'ChIJ-zeytinburnu-panorama1453tarihmuzesi': 'Panorama 1453 Tarih Müzesi',
+  'ChIJ-zeytinburnu-yedikulehisari': 'Yedikule Zindanları', // Yedikule Hisarı
 };

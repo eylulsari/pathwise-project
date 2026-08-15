@@ -1,3 +1,5 @@
+import { HUBS } from '../hubData';
+
 /** Small formatting/estimation helpers shared across the UI. */
 
 export const formatTry = (n: number): string =>
@@ -45,18 +47,18 @@ export function hasVerifiedHours(openingHours: string | undefined): boolean {
   return Boolean(openingHours) && !UNVERIFIED_HOURS.test(openingHours!.trim());
 }
 
-export const HUB_LABEL: Record<string, string> = {
-  sultanahmet: 'Sultanahmet & Old City',
-  'eminonu-sirkeci': 'Eminönü & Sirkeci',
-  'beyoglu-taksim': 'Beyoğlu & Taksim',
-  'karakoy-galata': 'Karaköy & Galata',
-  'besiktas-bogaz': 'Beşiktaş & Bosphorus',
-  'ortakoy-bebek': 'Ortaköy & Bebek',
-  'balat-fener': 'Balat & Fener',
-  'kadikoy-moda': 'Kadıköy & Moda',
-  uskudar: 'Üsküdar',
-  adalar: 'Princes’ Islands (Adalar)',
-};
+/**
+ * Hub id → display name, derived from the generated hub list rather than
+ * restated.
+ *
+ * This was a hand-written map of ten entries, which meant every new hub needed
+ * remembering in two places — and forgetting the second one renders a raw slug
+ * like `beykoz-anadolu-kavagi` at the user. The backend already owns these
+ * names and `hubData.ts` already carries them.
+ */
+export const HUB_LABEL: Record<string, string> = Object.fromEntries(
+  HUBS.map((h) => [h.id, h.name]),
+);
 
 export const INTEREST_LABEL: Record<string, string> = {
   food: 'Local Food',

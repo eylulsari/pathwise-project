@@ -17,6 +17,7 @@ export interface RouteConfig {
 const INTERESTS: Interest[] = [
   'food', 'history', 'photo', 'market', 'art', 'nature',
   'view', 'hiddengem', 'relax', 'local', 'culture', 'nightlife', 'experience', 'religion',
+  'walk', 'architecture', 'family',
 ];
 const GROUPS: { id: GroupType; icon: string }[] = [
   { id: 'solo', icon: '🧍' },
