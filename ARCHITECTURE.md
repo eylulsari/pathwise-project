@@ -174,6 +174,21 @@ someone to pay for nothing. The open/closed badge is no longer computed from
 unverified hours, because that heuristic parses the sentinel to nothing and
 would be a coin toss wearing a fact's clothes.
 
+**What is left when there is neither.** Thirty-four places have no curated tip
+*and* no Wikipedia article, and their panel was blank. The fix was not to write
+thirty-four descriptions — nobody visited them to write one, and an invented
+sentence is the thing this whole pass has been removing. It was to render facts
+the record already held and never showed: what kind of place it is, which
+neighbourhood, how long people typically spend, whether it has a roof.
+`PlaceFacts` is deliberately incapable of a judgement — it reads only stored
+values, never the fields (`crowdLevel`, `safetyScore`) left empty on purpose.
+
+`Place.neighborhood` and `Place.emoji` were left unfilled for the same reason,
+and this is worth writing down because it looks like an omission: **nothing
+renders them.** Filling eighty-three of each would add noise no traveller can
+see. `neighborhood` is populated only for `adalar`, where the route engine
+reads it as the island name.
+
 The matchers refuse far more than they accept, and refusing well is most of the
 work. The persistent failure is a place inheriting its **neighbourhood's**
 identity: the fish-sandwich stall at Eminönü matched the article about Eminönü

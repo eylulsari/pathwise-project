@@ -168,6 +168,24 @@ export const translations = {
     story: {
       noneYet: 'No local story for this place yet — anything we know about it is below.',
     },
+    facts: {
+      typicalVisit: 'typically',
+      indoor: 'Indoor',
+      museumPass: 'Museum Pass',
+    },
+    placeType: {
+      landmark: 'Landmark',
+      museum: 'Museum',
+      mosque: 'Mosque',
+      church: 'Church',
+      market: 'Market',
+      food: 'Food',
+      park: 'Park',
+      viewpoint: 'Viewpoint',
+      street: 'Street',
+      beach: 'Beach',
+      experience: 'Experience',
+    },
     weather: { crowds: 'Crowds', feelsLike: 'feels' },
     reviews: {
       title: 'Reviews',
@@ -638,6 +656,24 @@ export const translations = {
     },
     story: {
       noneYet: 'Bu mekan için henüz yerel bir hikaye yok — bildiklerimiz aşağıda.',
+    },
+    facts: {
+      typicalVisit: 'genelde',
+      indoor: 'Kapalı alan',
+      museumPass: 'Müze Kart',
+    },
+    placeType: {
+      landmark: 'Simge yapı',
+      museum: 'Müze',
+      mosque: 'Cami',
+      church: 'Kilise',
+      market: 'Çarşı',
+      food: 'Yeme-içme',
+      park: 'Park',
+      viewpoint: 'Manzara noktası',
+      street: 'Sokak',
+      beach: 'Plaj',
+      experience: 'Deneyim',
     },
     weather: { crowds: 'Kalabalık', feelsLike: 'hissedilen' },
     reviews: {

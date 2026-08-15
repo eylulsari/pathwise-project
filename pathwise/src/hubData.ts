@@ -176,7 +176,7 @@ export const PLACES: PlaceSummary[] = [
   { placeId: 'ChIJ-adalar-splendidpalasoteli', name: 'Splendid Palas Oteli', hub: 'adalar', lat: 40.8727296, lng: 29.1264372, entryFeeTry: 0 },
   { placeId: 'ChIJ-adalar-prinkiporumyetimhanesi', name: 'Prinkipo Rum Yetimhanesi', hub: 'adalar', lat: 40.8610115, lng: 29.1230776, entryFeeTry: 0 },
   { placeId: 'ChIJ-adalar-heybeliadaruhbanokulu', name: 'Heybeliada Ruhban Okulu', hub: 'adalar', lat: 40.8821315, lng: 29.094627, entryFeeTry: 0 },
-  { placeId: 'ChIJ-adalar-buyukadacarsicaddesi', name: 'Büyükada Çarşı Caddesi', hub: 'adalar', lat: 40.8563545, lng: 29.1190366, entryFeeTry: 0 },
+  { placeId: 'ChIJ-adalar-buyukadacarsicaddesi', name: 'Büyükada Çarşı (Şehit Recep Koç Cd.)', hub: 'adalar', lat: 40.8743554, lng: 29.1307589, entryFeeTry: 0 },
   { placeId: 'ChIJ-adalar-heybeliadasahili', name: 'Heybeliada Sahili', hub: 'adalar', lat: 40.8778466, lng: 29.1008681, entryFeeTry: 0 },
   { placeId: 'ChIJ-adalar-adalarvapuryolculugu', name: 'Adalar Vapur Yolculuğu', hub: 'adalar', lat: 40.8749412, lng: 29.1283038, entryFeeTry: 60, entryFeeApprox: true },
 ];

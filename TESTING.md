@@ -189,8 +189,8 @@ to anyone.
 (plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
 `cd pathwise && npm run e2e`.
 
-**Last full run — 2026-08-15, after the attribution + absence work:** **57/57
-passed, exit 0** (2.7 min, `--workers=1` — see the machine-load note below).
+**Last full run — 2026-08-15, after the place-facts panel:** **57/57
+passed, exit 0** (2.9 min, `--workers=1` — see the machine-load note below).
 Backend `npm test`: **109/109**, 10 suites.
 Frontend `npm run lint`: 0 errors
 (2 pre-existing warnings). `tsc --noEmit`: clean both sides.

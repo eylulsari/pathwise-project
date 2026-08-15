@@ -6,6 +6,7 @@ import { api } from '../services/api';
 import { ReviewsSection } from './ReviewsSection';
 import { PlaceEnrichmentPanel } from './PlaceEnrichmentPanel';
 import { OpeningHours } from './OpeningHours';
+import { PlaceFacts } from './PlaceFacts';
 import { useT } from '../i18n';
 
 /**
@@ -68,6 +69,10 @@ export function LocalStoryModal({
           </div>
           <button onClick={onClose} className="text-ink/40 hover:text-ink">✕</button>
         </div>
+
+        {/* What this place is, from the record itself. Shown to everyone and
+            never paywalled: these are plain facts, not editorial. */}
+        <PlaceFacts place={place} />
 
         <section className="mt-4">
           <h4 className="text-sm font-bold text-iznik">📖 The story</h4>

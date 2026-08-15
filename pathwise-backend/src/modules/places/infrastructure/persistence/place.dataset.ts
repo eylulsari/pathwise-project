@@ -3229,10 +3229,10 @@ export const PLACE_DATASET: Place[] = [
   },
   {
     placeId: 'ChIJ-adalar-buyukadacarsicaddesi',
-    name: 'Büyükada Çarşı Caddesi',
+    name: 'Büyükada Çarşı (Şehit Recep Koç Cd.)',
     hub: 'adalar',
-    lat: 40.8563545,
-    lng: 29.1190366,
+    lat: 40.8743554,
+    lng: 29.1307589,
     rating: null,
     reviewCount: 0,
     photoUrl: 'https://images.pathwise.mock/buyukadacarsicaddesi.jpg',
