@@ -363,6 +363,42 @@ completion). There is no reward catalogue yet — accrual and visibility only.
 - Global exception filter → consistent error envelope.
 - `JwtAuthGuard` + `@CurrentUser()` decorator.
 
+### The CSP, and the map that vanished in production
+`common/security/content-security-policy.ts` spells out the policy this server
+publishes. It exists because `helmet()` with no arguments does not survive the
+single-origin move.
+
+While the API and the SPA were separate origins, helmet's default CSP rode on
+JSON responses and governed nothing: JSON loads no subresources. Serving the
+built SPA from this same process put that header on the **HTML document**, and
+`img-src 'self' data:` then applied to everything the page fetched. Three things
+died at once, and none of them locally, because Vite serves the document in
+development and sets no CSP at all:
+
+| What broke | How it looked |
+|---|---|
+| Every map tile (`*.basemaps.cartocdn.com`) | the map, gone |
+| Every place photo (`upload.wikimedia.org`), 108 of them | empty story panels |
+| Walking geometry (`router.project-osrm.org`) | **nothing** — it fails soft to a straight line |
+
+The third one is the lesson. A CSP failure is not an exception: nothing throws,
+no request 500s, and the server log is clean. It looks like a feature that was
+never built.
+
+**One host has to appear twice, and that is not a typo.** The service worker
+runtime-caches tiles (`CacheFirst`, `vite.config.ts`), so it intercepts each
+`<img>` request and re-issues it with `fetch()` from inside the worker — and a
+worker's fetch answers to `connect-src`, not `img-src`. With the tile host in
+`img-src` alone, the browser permits the image and then refuses the worker's
+fetch, and the failure arrives as a bare `net::ERR_FAILED` naming neither CSP
+nor the directive it violated. That second failure was only visible because the
+map was checked in a browser under the production build; the header alone
+looked correct.
+
+Hosts are named individually rather than waved through with `https:`. A
+wildcard would also have prevented the outage, and would also have let any
+server on the internet supply an image or receive a fetch.
+
 ## 4. Auth flow
 
 1. `register` / `login` → **access token (~15m)** in the JSON body; **refresh

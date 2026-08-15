@@ -1367,6 +1367,106 @@ hubs represented, 21 community routes with no hub below 2.
 
 ---
 
+## The map vanished in production (2026-08-15)
+
+Reported as "the map does not show up live — it worked locally". Two separate
+causes, one behind the other.
+
+### Cause 1 — helmet's default CSP, exposed by the single-origin move
+`main.ts` called `app.use(helmet())`. Its default policy includes
+`img-src 'self' data:` and `default-src 'self'`, which `connect-src` falls back
+to. That was harmless while the SPA lived on its own origin: the header only
+rode on `/api` JSON responses, and JSON loads nothing. Once this process began
+serving the built SPA, the header landed on the **HTML document**.
+
+Confirmed by reading the header the code actually emits, not by reasoning:
+
+```
+img-src 'self' data:          → https://a.basemaps.cartocdn.com/... blocked
+default-src 'self'            → https://router.project-osrm.org/... blocked
+```
+
+Three things were broken, not one:
+
+| Broken | Visible? |
+|---|---|
+| map tiles (`*.basemaps.cartocdn.com`) | yes — the reported symptom |
+| place photos (`upload.wikimedia.org`), 108 places | yes, once you open a story |
+| walking geometry (`router.project-osrm.org`) | **no** — falls back to a straight line |
+
+### Cause 2 — the service worker re-fetches the tiles
+With `img-src` fixed, the tiles *still* did not paint. Measured in the browser
+against the production build: container 1102×286 (so not a zero-height
+container), 10 tile `<img>` elements with correct URLs, `complete: true` and
+**`naturalWidth: 0`** — loaded and failed. `curl` returned 200 and a real PNG
+for the same URLs, so the CDN was fine and the block was client-side.
+
+The console said only `net::ERR_FAILED`, and the responses were logged with
+`fromServiceWorker=true`. The SW runtime-caches tiles (`CacheFirst`), so it
+intercepts the `<img>` and re-issues it as `fetch()` — **and a worker's fetch is
+governed by `connect-src`, not `img-src`**. The tile host had to be in both.
+
+After adding it: all 22 tiles at `naturalWidth: 256`, zero console errors.
+
+This one is worth remembering because the CSP error message never mentions CSP.
+
+### Why every existing test stayed green
+`onboarding.spec.ts` already asserted `.leaflet-container` was visible and that
+markers rendered. Both are true with every tile blocked — Leaflet mounts its
+container, draws markers and draws the route line regardless. The container is
+not evidence of a map.
+
+### The guard, in two layers
+Neither layer alone is enough, and the reason is the whole problem:
+
+- **`content-security-policy.spec.ts` (9 tests, backend).** Parses the header
+  the real helmet call emits back into directives and matches URLs against the
+  rule that would govern them in a browser — including all four `{s}` tile
+  subdomains, and including the service worker's `connect-src` re-fetch. One
+  test asserts an arbitrary host is *refused*, so widening a directive to
+  `https:` fails here.
+- **`map-renders.spec.ts` (3 tests, e2e).** Asserts tile `<img>` elements reach
+  `naturalWidth > 0` — the only property that distinguishes a painted tile from
+  a blocked one — on both maps, plus a check that the **backend's** CSP names
+  the hosts. That last one matters because the browser tests run against Vite
+  locally, which sends no CSP and therefore cannot see this class of bug at all.
+
+Both were watched failing before the fix. Against the old `helmet()` default the
+backend spec fails on exactly the three broken things:
+
+```
+× lets the map load its tiles
+× lets place photos load from Wikipedia
+× lets the client fetch walking geometry from OSRM
+× names every host the app actually talks to
+√ (4 others pass)
+```
+
+### Verified against a real production build, not just a compile
+The single-origin server was reproduced locally — SPA built with
+`VITE_API_URL=/api`, copied to `pathwise-backend/client`, backend built and run
+with `node dist/main.js` — and the **whole suite ran against it: 88/88**. That
+is what proved the `.ics` download, the PDF print popup and offline mode were
+not also casualties of the new policy.
+
+One trap in reproducing it: running `VITE_API_URL=/api npm run build` from Git
+Bash on Windows silently rewrites the value to `C:/Program Files/Git/api`
+(MSYS path conversion), and every API call in the resulting bundle goes to a
+`file://` URL. Build from PowerShell, or the reproduction is not a reproduction.
+Production is unaffected — the Dockerfile sets it with `ENV`, where no shell is
+involved.
+
+### Gate
+| Check | Result |
+|---|---|
+| Backend `npm run lint` | ✅ clean |
+| Backend `npm test` | ✅ **150/150**, 14 suites (was 141) |
+| Frontend lint / typecheck / i18n / build | ✅ exit 0 (399 i18n keys) |
+| E2E against the dev stack | ✅ **88/88** (5.7 min) |
+| E2E against the production build | ✅ **88/88** (4.4 min) |
+
+---
+
 ## Batch 2: 10 hubs / 124 places → 15 hubs / 202 places (2026-08-15)
 
 Seeded from `scripts/data/pathwise-places-batch2.json` (89 places, 5 hubs).
