@@ -20,9 +20,11 @@ function at(day: string, hhmm: string): Date {
   return base;
 }
 
-// 2026-08-17 is a Monday; 2026-08-18 Tuesday; 2026-08-22 Saturday; 23rd Sunday.
+// 2026-08-17 is a Monday, and the week runs on from there.
 const MON = '2026-08-17';
 const TUE = '2026-08-18';
+const WED = '2026-08-19';
+const THU = '2026-08-20';
 const SAT = '2026-08-22';
 const SUN = '2026-08-23';
 
@@ -131,6 +133,47 @@ test.describe('openStatus — day-restricted hours', () => {
     expect(openStatus(hours, at(MON, '17:00'))).toEqual({ open: false });
     expect(openStatus(hours, at(MON, '20:00'))).toEqual({ open: true, closesAt: '23:00' });
     expect(openStatus(hours, at(SUN, '13:00'))).toEqual({ open: false });
+  });
+});
+
+/**
+ * OSM writes hours in its own syntax, and the seeding pass copies anything it
+ * cannot confidently rewrite through verbatim. These four shapes arrived that
+ * way and are in the dataset now, so they are the parser's problem — a shape it
+ * silently fails on renders as no badge at all, which looks like a place with
+ * no hours rather than like a bug.
+ */
+test.describe('openStatus — the shapes OpenStreetMap actually returned', () => {
+  test('Th-Tu wraps the week and closes on the missing day', () => {
+    // Sadberk Hanım Müzesi: open Thursday through Tuesday, shut Wednesday.
+    const hours = 'Th-Tu 10:00–17:00';
+    expect(openStatus(hours, at(THU, '12:00'))).toEqual({ open: true, closesAt: '17:00' });
+    expect(openStatus(hours, at(MON, '12:00'))).toEqual({ open: true, closesAt: '17:00' });
+    expect(openStatus(hours, at(WED, '12:00'))).toEqual({ open: false });
+  });
+
+  test('two ranges joined by a comma', () => {
+    // Atatürk Müzesi (Şişli): Mon–Wed and Fri–Sat, so Thursday and Sunday are out.
+    const hours = 'Mo-We,Fr-Sa 09:00-16:00';
+    expect(openStatus(hours, at(MON, '10:00'))).toEqual({ open: true, closesAt: '16:00' });
+    expect(openStatus(hours, at(SAT, '10:00'))).toEqual({ open: true, closesAt: '16:00' });
+    expect(openStatus(hours, at(THU, '10:00'))).toEqual({ open: false });
+    expect(openStatus(hours, at(SUN, '10:00'))).toEqual({ open: false });
+  });
+
+  test('an hour written without its leading zero', () => {
+    // Harbiye Askeri Müzesi: "9:00", not "09:00".
+    const hours = 'We-Su 9:00-17:00';
+    expect(openStatus(hours, at(WED, '09:30'))).toEqual({ open: true, closesAt: '17:00' });
+    expect(openStatus(hours, at(TUE, '09:30'))).toEqual({ open: false });
+  });
+
+  test('a bare window with no days means every day', () => {
+    // Panorama 1453: OSM gave times only, with spaces around the dash.
+    const hours = '08:00 - 18:30';
+    expect(openStatus(hours, at(MON, '09:00'))).toEqual({ open: true, closesAt: '18:30' });
+    expect(openStatus(hours, at(SUN, '09:00'))).toEqual({ open: true, closesAt: '18:30' });
+    expect(openStatus(hours, at(SUN, '19:00'))).toEqual({ open: false });
   });
 });
 
