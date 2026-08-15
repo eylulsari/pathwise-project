@@ -189,9 +189,9 @@ to anyone.
 (plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
 `cd pathwise && npm run e2e`.
 
-**Last full run — 2026-08-15, after buddy persistence + opening hours:**
-**80/80 passed, exit 0** (3.4 min, `--workers=1` — see the machine-load note
-below). Backend `npm test`: **118/118**, 11 suites.
+**Last full run — 2026-08-15, after variable trip length:** **81/81 passed,
+exit 0** (2.6 min, `--workers=1` — see the machine-load note below).
+Backend `npm test`: **141/141**, 13 suites.
 Frontend `npm run lint`: 0 errors
 (2 pre-existing warnings). `tsc --noEmit`: clean both sides.
 `npm run i18n:check`: 374 keys in both languages.
@@ -220,6 +220,28 @@ spec still clicked **"Set as Today's Itinerary"**, a button renamed to "Plan
 this into my day" when the panel dropped its dead affiliate link. The label
 moved, the assertion did not — the spec still proves the tour reaches the day
 and produces stops.
+
+## Multi-day trips
+`multi-day.spec.ts` generates a full seven-day trip the way the dashboard does
+— one plan per day, from the hub the day plan assigned — and asserts what a
+week can break that a single day cannot: no place repeated across days, no
+empty day, no pace overrun, no broken transit rule.
+
+The question behind it was whether 124 places can fill seven days. They can,
+and the arithmetic says so before the test runs — a day takes at most 8 stops
+and the smallest hub holds 8 — but the failure mode here is **silent
+repetition**, not a crash, so an assertion is worth more than the arithmetic.
+The generated week comes to 51 stops and 51 distinct places.
+
+Failures are collected into arrays and asserted empty rather than checked one
+at a time: `expect(...).toBe(true)` on day five tells you a week is broken
+without telling you where. (Jest's `expect` takes no message argument — that is
+Vitest, and it type-errors here.)
+
+`day-plan.spec.ts` (15 tests) covers the hub sequence itself, including
+prefix-stability — extending a trip must not reshuffle days already edited —
+and a hub dataset smaller than the trip, which is unreachable through the UI
+but must not throw.
 
 ## Unit tests without a second framework
 `e2e/opening-hours.spec.ts` (21 tests) covers the open/closed parser with no

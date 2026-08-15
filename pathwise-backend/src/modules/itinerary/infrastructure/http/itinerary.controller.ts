@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ItineraryService } from '../../application/itinerary.service';
@@ -20,6 +22,19 @@ import {
 @Controller('itinerary')
 export class ItineraryController {
   constructor(private readonly itinerary: ItineraryService) {}
+
+  /**
+   * GET /api/itinerary/day-plan?days=7 — which hub each day is built around.
+   *
+   * Server-side because it is a planning rule, not a layout choice: it depends
+   * on which shore each hub is on and on the islands needing a whole day, both
+   * of which the backend owns. Deciding it in the client would put a second
+   * copy of that knowledge where it could drift.
+   */
+  @Get('day-plan')
+  dayPlan(@Query('days') days?: string) {
+    return { hubs: this.itinerary.planDays(Number(days)) };
+  }
 
   /**
    * POST /api/itinerary/generate

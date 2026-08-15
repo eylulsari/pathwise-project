@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { Hub, Interest, Place } from '../../places/domain/place';
 import { PlacesService } from '../../places/application/places.service';
 import { JournalService } from '../../journal/application/journal.service';
+import { HUB_DATASET } from '../../places/infrastructure/persistence/hub.dataset';
 import { Itinerary, RouteGenerationInput } from '../domain/itinerary';
+import {
+  MAX_TRIP_DAYS,
+  MIN_TRIP_DAYS,
+  planHubSequence,
+} from '../domain/day-plan';
 import { haversineMeters } from '../domain/geo';
 import { RouteStrategyFactory } from './route-strategy.factory';
 import { HubBudgetStrategy } from './strategies/hub-budget.strategy';
@@ -36,6 +42,19 @@ export class ItineraryService {
     private readonly places: PlacesService,
     private readonly journal: JournalService,
   ) {}
+
+  /**
+   * Which hub each day of a trip is built around, for a trip of `days` days.
+   *
+   * Clamped rather than rejected: this only shapes a suggestion the traveller
+   * can then change per day, so a nonsense query string should give them a
+   * sensible week, not a 400 and an empty dashboard.
+   */
+  planDays(days: number): Hub[] {
+    const wanted = Number.isFinite(days) ? Math.round(days) : MAX_TRIP_DAYS;
+    const clamped = Math.min(MAX_TRIP_DAYS, Math.max(MIN_TRIP_DAYS, wanted));
+    return planHubSequence(clamped, HUB_DATASET);
+  }
 
   async generate(dto: GenerateRouteDto): Promise<Itinerary> {
     const input: RouteGenerationInput = {

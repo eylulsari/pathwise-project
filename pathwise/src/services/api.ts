@@ -199,6 +199,17 @@ export const api = {
   async getUsage(): Promise<UsageInfo> {
     return http<UsageInfo>('/premium/usage');
   },
+  /**
+   * Which hub each day of a trip should cover.
+   *
+   * Server-side because it depends on which shore a hub is on and on the
+   * islands needing a whole day — planning rules the backend owns. Returns an
+   * empty array if it cannot be reached, and the caller keeps its own order.
+   */
+  async getDayPlan(days: number): Promise<Hub[]> {
+    const r = await http<{ hubs: Hub[] }>(`/itinerary/day-plan?days=${days}`);
+    return r.hubs;
+  },
   /** A6 — record a client-side paywall hit (day/story/pdf). */
   async recordPaywall(feature: 'day' | 'story' | 'pdf'): Promise<void> {
     await http('/analytics/paywall', { method: 'POST', body: JSON.stringify({ feature }) }).catch(() => {});

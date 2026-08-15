@@ -57,6 +57,41 @@ the cap would have been invisible, but with 12–15 the time budget alone packs 
 seven-hour day with ten or more stops. Must-visits and reservations are exempt:
 the user asked for those explicitly, so dropping one would be a bug, not pacing.
 
+### Trip length, and why the hub sequence is a server rule
+The dashboard shipped **three hardcoded days** — Kadıköy, Karaköy, Balat — for
+its whole life. Not a constant named `MAX_DAYS`, not a quiz option, not a limit
+in the engine: a three-element array literal in `Dashboard.tsx`. The engine had
+never had an opinion about how many days a trip has.
+
+Trips are now 1–7 days. Seven is the practical ceiling for one city, and the
+ten hubs cover it without repeating a neighbourhood — which is the constraint
+that actually matters, because **every day is generated from one hub's pool**,
+so a repeated hub means a repeated day.
+
+`itinerary/domain/day-plan.ts` assigns the hubs, on the server, under three
+rules in priority order:
+
+1. **Never the same hub twice.** Ten hubs against a seven-day maximum makes
+   this always achievable.
+2. **Alternate shores.** Two Bosphorus crossings back to back is a lot of ferry
+   for one trip.
+3. **The islands need room.** Adalar is a scheduled 90-minute sailing each way,
+   so it is held back until a trip is at least three days — spending half a
+   two-day holiday on a boat is a poor trade.
+
+It lives on the server because it depends on which shore each hub is on and on
+the islands needing a whole day, both of which the backend owns; a copy in the
+client would be free to drift. It is also **prefix-stable** — extending a trip
+never reshuffles the days already planned — and days the traveller has edited
+are never re-hubbed.
+
+**Does the catalogue run out?** No, and it was worth checking rather than
+assuming, because the failure mode is silent repetition rather than a crash.
+124 places across 10 hubs; a day takes at most 8 stops; the *smallest* hub
+holds 8. A generated week comes to 51 stops and **51 distinct places**. A
+regression spec asserts no repeat, no empty day, no pace overrun and no broken
+transit rule across all seven days, and the whole week generates in ~5 ms.
+
 ### The transit model — why a day is possible, not just arithmetically valid
 `itinerary/domain/transit.ts` decides how you get from one stop to the next.
 It asks **which shore each stop is on**, not just how far apart they are.

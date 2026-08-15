@@ -96,12 +96,43 @@ const baseConfig = (hub: Hub): RouteConfig => ({
   startHour: 10,
 });
 
-// Three days, three different neighborhoods — deliberately not Sultanahmet-first.
-const INITIAL_DAYS: DayState[] = [
-  { config: baseConfig('kadikoy-moda'), mustVisitIds: [], reservations: [], itinerary: null, undoStack: [], loading: true, error: null },
-  { config: baseConfig('karakoy-galata'), mustVisitIds: [], reservations: [], itinerary: null, undoStack: [], loading: false, error: null },
-  { config: baseConfig('balat-fener'), mustVisitIds: [], reservations: [], itinerary: null, undoStack: [], loading: false, error: null },
+/**
+ * Trip length. Seven is the practical ceiling for one city and the ten hubs
+ * cover it without repeating a neighbourhood — which matters, because each day
+ * is generated from one hub's pool, so a repeated hub means repeated places.
+ */
+export const MIN_TRIP_DAYS = 1;
+export const MAX_TRIP_DAYS = 7;
+const DEFAULT_TRIP_DAYS = 3;
+
+const emptyDay = (hub: Hub, loading: boolean): DayState => ({
+  config: baseConfig(hub),
+  mustVisitIds: [],
+  reservations: [],
+  itinerary: null,
+  undoStack: [],
+  loading,
+  error: null,
+});
+
+/**
+ * Fallback hub order for the days, used only until the server's day plan
+ * arrives (and if it never does, offline). Deliberately not Sultanahmet-first,
+ * and alternating shores the same way the server's rule does.
+ */
+const FALLBACK_HUBS: Hub[] = [
+  'kadikoy-moda',
+  'karakoy-galata',
+  'uskudar',
+  'balat-fener',
+  'adalar',
+  'beyoglu-taksim',
+  'ortakoy-bebek',
 ];
+
+const INITIAL_DAYS: DayState[] = FALLBACK_HUBS.slice(0, DEFAULT_TRIP_DAYS).map(
+  (hub, i) => emptyDay(hub, i === 0),
+);
 
 export default function Dashboard() {
   const { t } = useT();
@@ -275,8 +306,59 @@ export default function Dashboard() {
     }
     generateFor(0, buildRequest(INITIAL_DAYS[0]));
     api.getUsage().then(setUsage).catch(() => {});
+    // Ask the server which hubs these days should cover. Only day 1 has been
+    // generated at this point, so re-hubbing the untouched later days costs
+    // nothing — and day 1 keeps whatever it already started on.
+    api
+      .getDayPlan(INITIAL_DAYS.length)
+      .then((hubs) => {
+        if (hubs.length === 0) return;
+        setDays((prev) =>
+          prev.map((d, i) =>
+            i === 0 || !hubs[i] || d.itinerary
+              ? d
+              : { ...d, config: { ...d.config, hub: hubs[i] } },
+          ),
+        );
+      })
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Change the length of the trip.
+   *
+   * Growing asks the server which hubs the new days should cover, so the week
+   * keeps alternating shores instead of repeating a neighbourhood — and a
+   * repeated neighbourhood would mean repeated places, since every day is
+   * generated from one hub's pool.
+   *
+   * Shrinking drops days off the end. Days the traveller has already edited are
+   * never re-hubbed: `d.itinerary` is the marker that a day is theirs now.
+   */
+  async function setTripLength(next: number) {
+    const target = Math.min(MAX_TRIP_DAYS, Math.max(MIN_TRIP_DAYS, next));
+    if (target === days.length) return;
+
+    if (target < days.length) {
+      setDays((prev) => prev.slice(0, target));
+      setActiveDay((cur) => Math.min(cur, target - 1));
+      return;
+    }
+
+    const hubs = await api.getDayPlan(target).catch(() => FALLBACK_HUBS);
+    setDays((prev) => {
+      const grown = [...prev];
+      for (let i = prev.length; i < target; i++) {
+        grown.push(emptyDay(hubs[i] ?? FALLBACK_HUBS[i % FALLBACK_HUBS.length], false));
+      }
+      return grown.map((d, i) =>
+        i < prev.length || d.itinerary
+          ? d
+          : { ...d, config: { ...d.config, hub: hubs[i] ?? d.config.hub } },
+      );
+    });
+  }
 
   // Persist itineraries for offline use whenever any day's plan changes.
   useEffect(() => {
@@ -615,6 +697,28 @@ export default function Dashboard() {
             locked={!isPremium && i > 0}
           />
         ))}
+        {/* Trip length. Free accounts only get Day 1, so offering them more
+            days would be offering a row of padlocks. */}
+        {isPremium && (
+          <label className="flex items-center gap-1.5 text-xs text-ink/60">
+            <span>{t('dash.tripLength')}</span>
+            <select
+              value={days.length}
+              onChange={(e) => void setTripLength(Number(e.target.value))}
+              className="rounded-lg border border-ink/15 bg-surface-2 px-2 py-1 text-xs font-semibold text-ink outline-none focus:border-iznik"
+              aria-label={t('dash.tripLength')}
+            >
+              {Array.from(
+                { length: MAX_TRIP_DAYS - MIN_TRIP_DAYS + 1 },
+                (_, i) => MIN_TRIP_DAYS + i,
+              ).map((n) => (
+                <option key={n} value={n}>
+                  {n} {n === 1 ? t('dash.dayOne') : t('dash.dayMany')}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {usage && (
             <span className="rounded-lg border border-ink/10 px-2.5 py-1 text-xs text-ink/60">

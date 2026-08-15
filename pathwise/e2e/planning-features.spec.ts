@@ -91,6 +91,39 @@ test('tours panel lists, syncs live tours, and sets one as the itinerary', async
   await expect(page.locator('ol li h3').first()).toBeVisible({ timeout: 15_000 });
 });
 
+test('a trip can be stretched to seven days, each on its own neighborhood', async ({
+  page,
+}) => {
+  // New accounts start on a Premium trial, so the trip-length selector is
+  // available immediately. The dashboard shipped three hardcoded days for its
+  // whole life — this is the spec that would have caught that.
+  await signup(page, 'triplen');
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible({
+    timeout: 20_000,
+  });
+  await expect(page.getByRole('button', { name: /^Day 3$/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Day 7$/ })).toHaveCount(0);
+
+  await page.getByLabel(/Trip length/i).selectOption('7');
+
+  // Seven tabs, and every one of them reachable.
+  for (const n of [1, 2, 3, 4, 5, 6, 7]) {
+    await expect(page.getByRole('button', { name: new RegExp(`^Day ${n}$`) })).toBeVisible({
+      timeout: 15_000,
+    });
+  }
+
+  // Day 7 generates a real plan rather than sitting empty — the failure mode
+  // when a hub runs out of places is a blank tab, not an error.
+  await page.getByRole('button', { name: /^Day 7$/ }).click();
+  await expect(page.locator('ol li h3').first()).toBeVisible({ timeout: 20_000 });
+
+  // Shrinking drops the tail back off.
+  await page.getByLabel(/Trip length/i).selectOption('2');
+  await expect(page.getByRole('button', { name: /^Day 3$/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Day 2$/ })).toBeVisible();
+});
+
 test('split bill adds an item and computes the per-person share', async ({ page }) => {
   await signup(page, 'split');
   await page.getByRole('button', { name: /Split Bill/i }).click();

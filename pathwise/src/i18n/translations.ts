@@ -61,6 +61,9 @@ export const translations = {
     dash: {
       day: 'Day',
       daysHint: 'Each day focuses on a different neighborhood.',
+      tripLength: 'Trip length',
+      dayOne: 'day',
+      dayMany: 'days',
       savePlan: 'Save plan',
       saving: 'Saving…',
       saved: 'Saved',
@@ -554,6 +557,9 @@ export const translations = {
     dash: {
       day: 'Gün',
       daysHint: 'Her gün farklı bir semte odaklanır.',
+      tripLength: 'Gezi süresi',
+      dayOne: 'gün',
+      dayMany: 'gün',
       savePlan: 'Planı kaydet',
       saving: 'Kaydediliyor…',
       saved: 'Kaydedildi',
