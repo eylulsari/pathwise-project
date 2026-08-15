@@ -24,10 +24,16 @@ interface ConnectedBuddy {
  * Failure is silent and empty on purpose. The emergency number and the nearest
  * police station do not depend on it, and they are the part that matters.
  */
-function useConnectedBuddies(): ConnectedBuddy[] {
+function useConnectedBuddies(active: boolean): ConnectedBuddy[] {
   const [buddies, setBuddies] = useState<ConnectedBuddy[]>([]);
 
   useEffect(() => {
+    // Only once the panel is actually open. `getTravelers` is the heaviest
+    // endpoint in the app — it loads the user, derives a profile from their
+    // saved trips and ranks every traveler — and SosButton sits on the
+    // dashboard, so fetching on mount put that request on every single page
+    // load for a list nobody had asked to see yet.
+    if (!active) return;
     let live = true;
     api
       .getTravelers()
@@ -49,7 +55,7 @@ function useConnectedBuddies(): ConnectedBuddy[] {
     return () => {
       live = false;
     };
-  }, []);
+  }, [active]);
 
   return buddies;
 }
@@ -71,7 +77,7 @@ export function SosButton() {
   // ⚠️ Filters on a SELF-DECLARED flag — no identity verification backs it.
   const [womenBuddiesOnly, setWomenBuddiesOnly] = useState(false);
 
-  const allBuddies = useConnectedBuddies();
+  const allBuddies = useConnectedBuddies(stage !== 'idle');
   const womenBuddies = allBuddies.filter((b) => b.identifiesAsWoman);
   const buddies = womenBuddiesOnly ? womenBuddies : allBuddies;
   const nearest = pos
