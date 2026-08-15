@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { ReviewsSection } from './ReviewsSection';
 import { PlaceEnrichmentPanel } from './PlaceEnrichmentPanel';
+import { OpeningHours } from './OpeningHours';
 import { useT } from '../i18n';
 
 /**
@@ -23,7 +24,7 @@ export function LocalStoryModal({
   const { t } = useT();
   const navigate = useNavigate();
   const story = buildStory(place);
-  const shortSummary = story.history.split('. ')[0] + '.';
+  const shortSummary = story.history ? story.history.split('. ')[0] + '.' : null;
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0); // 0–100 over 15s
   const timer = useRef<number | null>(null);
@@ -47,8 +48,9 @@ export function LocalStoryModal({
   }, [playing]);
 
   const elapsed = Math.round((progress / 100) * 15);
-  const wordsToShow = Math.ceil((progress / 100) * story.transcript.split(' ').length);
-  const transcript = story.transcript.split(' ').slice(0, wordsToShow).join(' ');
+  const words = story.transcript ? story.transcript.split(' ') : [];
+  const wordsToShow = Math.ceil((progress / 100) * words.length);
+  const transcript = words.slice(0, wordsToShow).join(' ');
 
   return (
     <div
@@ -62,23 +64,31 @@ export function LocalStoryModal({
         <div className="flex items-start justify-between">
           <div>
             <h3 className="font-display text-xl font-bold text-ink">{place.name}</h3>
-            <p className="text-xs text-ink/50">{place.openingHours}</p>
+            <OpeningHours place={place} />
           </div>
           <button onClick={onClose} className="text-ink/40 hover:text-ink">✕</button>
         </div>
 
         <section className="mt-4">
           <h4 className="text-sm font-bold text-iznik">📖 The story</h4>
-          <p className="mt-1 text-sm leading-relaxed text-ink/80">
-            {isPremium ? story.history : shortSummary}
-          </p>
-          {!isPremium && (
-            <button
-              onClick={() => { api.recordPaywall('story'); navigate('/premium'); }}
-              className="mt-1 text-xs font-semibold text-iznik hover:text-terracotta"
-            >
-              {t('premium.unlock')}
-            </button>
+          {story.history ? (
+            <>
+              <p className="mt-1 text-sm leading-relaxed text-ink/80">
+                {isPremium ? story.history : shortSummary}
+              </p>
+              {!isPremium && (
+                <button
+                  onClick={() => { api.recordPaywall('story'); navigate('/premium'); }}
+                  className="mt-1 text-xs font-semibold text-iznik hover:text-terracotta"
+                >
+                  {t('premium.unlock')}
+                </button>
+              )}
+            </>
+          ) : (
+            // No paywall button here on purpose: there is nothing behind it to
+            // unlock, and charging for an empty section would be a lie.
+            <p className="mt-1 text-sm text-ink/50">{t('story.noneYet')}</p>
           )}
         </section>
 
@@ -87,8 +97,10 @@ export function LocalStoryModal({
           <p className="mt-1 text-sm text-ink/80">{story.photoTip}</p>
         </section>
 
-        {/* Audio guide — full for premium, locked preview for free */}
-        {!isPremium ? (
+        {/* Audio guide — full for premium, locked preview for free. Hidden
+            entirely when there is no story to narrate: a padlock over an empty
+            recording asks the user to pay for nothing. */}
+        {story.transcript === null ? null : !isPremium ? (
           <section className="mt-4 rounded-xl border border-ink/10 bg-ink/5 p-4 text-center">
             <p className="text-sm font-semibold text-ink">🔒 {t('premium.fullAudio')}</p>
             <p className="mt-1 text-xs text-ink/60">{t('premium.shortOnly')}</p>
@@ -142,21 +154,38 @@ export function LocalStoryModal({
   );
 }
 
-/** Deterministic story/tip/transcript per place (would come from a CMS/LLM). */
+/**
+ * Story text for a place, or `null` where there is nothing real to say.
+ *
+ * This used to wrap every place in the same sentence — "Locals have gathered
+ * here for generations, and it rewards a slower visit than most guidebooks
+ * suggest" — with the curated tip dropped into the middle. Two thirds of the
+ * catalogue has no curated tip, so most travellers were reading a claim about
+ * a bike-hire stand or a café that nobody had made and nobody could check.
+ *
+ * So the story is now only ever the curated tip. Where there is none, the
+ * modal says so and leans on the panel below it, which carries a real
+ * Wikipedia summary for 65 places and cites where it came from.
+ *
+ * The photo tip stays for everyone: it is generic technique — bracket indoors,
+ * shoot low in the morning — and asserts nothing about the place itself.
+ */
 function buildStory(place: Place): {
-  history: string;
+  history: string | null;
   photoTip: string;
-  transcript: string;
+  transcript: string | null;
 } {
+  const tip = place.localTip?.trim();
   return {
-    history: `${place.name} is one of the anchors of ${labelHub(place.hub)}. ${place.localTip} Locals have gathered here for generations, and it rewards a slower visit than most guidebooks suggest.`,
-    photoTip:
-      place.isSunsetSpot
-        ? 'Arrive ~45 minutes before sunset and shoot toward the water for warm backlight and long shadows.'
-        : place.isIndoor
-          ? 'Bracket your exposure for the interior light and brace against a column — tripods are usually not allowed.'
-          : 'Shoot from a low angle in the morning to catch the texture of the street before the crowds arrive.',
-    transcript: `Welcome to ${place.name}. As you stand here, imagine the layers of history beneath your feet. ${place.localTip} Take a moment, breathe it in, and when you're ready, your next stop is just a short walk away.`,
+    history: tip
+      ? `${place.name} is one of the anchors of ${labelHub(place.hub)}. ${tip}`
+      : null,
+    photoTip: place.isSunsetSpot
+      ? 'Arrive ~45 minutes before sunset and shoot toward the water for warm backlight and long shadows.'
+      : place.isIndoor
+        ? 'Bracket your exposure for the interior light and brace against a column — tripods are usually not allowed.'
+        : 'Shoot from a low angle in the morning to catch the texture of the street before the crowds arrive.',
+    transcript: tip ? `Welcome to ${place.name}. ${tip}` : null,
   };
 }
 

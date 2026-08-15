@@ -189,8 +189,9 @@ to anyone.
 (plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
 `cd pathwise && npm run e2e`.
 
-**Last full run — 2026-08-14, after the enrichment wiring:** **57/57 passed,
-exit 0** (2.1 min). Backend `npm test`: **109/109**, 10 suites.
+**Last full run — 2026-08-15, after the attribution + absence work:** **57/57
+passed, exit 0** (2.7 min, `--workers=1` — see the machine-load note below).
+Backend `npm test`: **109/109**, 10 suites.
 Frontend `npm run lint`: 0 errors
 (2 pre-existing warnings). `tsc --noEmit`: clean both sides.
 `npm run i18n:check`: 374 keys in both languages.
@@ -257,6 +258,24 @@ was quiet, and the full suite then went 57/57.
 **Read the wall-clock time before reading the failures.** A suite that takes 8×
 longer than usual is describing the machine, not the code — and the failure
 list will look alarming and mean nothing.
+
+It recurred the next day in a subtler form: three runs failed **17, then 9,
+then 4** tests, always different ones, always an assertion about dashboard
+chrome (the `Today's Path` heading, the `optimizations left today` badge) that
+has nothing to do with the change under test. Free memory was **2.1 GB of
+15.4 GB**. At `--workers=1` the same suite went **57/57 in 2.7 min**.
+
+Three signals separate contention from a real break, and it is worth checking
+all three before touching any code:
+
+1. **The failure set changes between runs.** A real break fails the same test.
+2. **The failing assertions are unrelated to the change.** Editing an opening-
+   hours label does not stop a page heading from mounting.
+3. **The failures pass in isolation.** One spec, one worker, 3.7 s.
+
+Lower the worker count rather than raising timeouts. It fits the run to the
+machine without changing what is being asserted; a longer timeout changes what
+the test accepts, permanently, to work around something temporary.
 
 ## Transit realism (route engine)
 `itinerary/domain/transit.spec.ts` (8 tests) pins the model itself; the

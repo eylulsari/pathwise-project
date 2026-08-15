@@ -104,6 +104,13 @@ export interface Place {
   avgFoodCostTry: number;
   avgVisitMinutes: number;
   openingHours: string;
+  /**
+   * Where `openingHours` came from, when it was not curated by hand.
+   * `'OpenStreetMap'` carries an ODbL attribution obligation — any surface
+   * that shows these hours has to credit OSM, so this field is load-bearing
+   * rather than informational.
+   */
+  openingHoursSource?: 'OpenStreetMap';
   isIndoor: boolean;
   isSunsetSpot: boolean;
   museumPass: boolean;

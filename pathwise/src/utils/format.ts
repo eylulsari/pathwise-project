@@ -29,6 +29,19 @@ export function formatDuration(totalMinutes: number): string {
 }
 
 /**
+ * The dataset says "Hours not verified" where nobody has confirmed a schedule —
+ * most of the catalogue, since OSM simply has no `opening_hours` for a street
+ * or a small café. Callers check this before printing hours or asking
+ * `isOpenNow`, which would otherwise parse the sentinel to nothing and leave
+ * the open/closed badge guessing.
+ */
+const UNVERIFIED_HOURS = /^hours not verified$/i;
+
+export function hasVerifiedHours(openingHours: string | undefined): boolean {
+  return Boolean(openingHours) && !UNVERIFIED_HOURS.test(openingHours!.trim());
+}
+
+/**
  * Rough open/closed estimate from a Google-style opening_hours string.
  * Parses the first "HH:MM–HH:MM" range it finds; treats "Always open" as open.
  * This is a display heuristic, not an authoritative schedule.

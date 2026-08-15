@@ -115,7 +115,9 @@ export function TodayPath({
               {suggestion.place.rating !== null && ` (${suggestion.place.rating}★)`}
             </span>
           </p>
-          <p className="mt-0.5 text-xs italic text-ink/50">💡 {suggestion.place.localTip}</p>
+          {suggestion.place.localTip?.trim() && (
+            <p className="mt-0.5 text-xs italic text-ink/50">💡 {suggestion.place.localTip}</p>
+          )}
           <div className="mt-2 flex gap-2">
             <button onClick={onAddSuggestion} className="rounded-lg bg-iznik px-3 py-1.5 text-xs font-semibold text-white">
               {t('suggest.add')}

@@ -10,7 +10,8 @@ import {
 import L from 'leaflet';
 import type { Itinerary, Place } from '../../types';
 import { HUB_BY_ID } from '../../hubData';
-import { formatEntryFee, isOpenNow } from '../../utils/format';
+import { formatEntryFee, isOpenNow, hasVerifiedHours } from '../../utils/format';
+import { OpeningHours } from '../OpeningHours';
 
 /** A numbered, hub-accented pin built as a divIcon (avoids the broken default
  *  Leaflet marker-image paths under bundlers). */
@@ -143,7 +144,10 @@ export function MapView({
           )
         )}
         {places.map((p, i) => {
-          const open = isOpenNow(p.openingHours);
+          // Only ask the open/closed heuristic about hours we actually have —
+          // "Hours not verified" parses to nothing and the badge would be a
+          // coin toss dressed up as a fact.
+          const open = hasVerifiedHours(p.openingHours) ? isOpenNow(p.openingHours) : null;
           return (
             <Marker
               key={p.placeId}
@@ -154,13 +158,17 @@ export function MapView({
               <Popup>
                 <div className="min-w-[190px]">
                   <p className="font-display text-sm font-bold text-ink">{p.name}</p>
-                  <p className="mt-0.5 text-xs text-ink/60">🕒 {p.openingHours}</p>
+                  <OpeningHours place={p} className="mt-0.5 text-xs text-ink/60" />
                   <p className="mt-1 text-xs text-ink/80">
                     🎟️ {formatEntryFee(p.entryFeeTry, p.entryFeeApprox, 'Free entry')}
                     {open === true && <span className="ml-2 font-semibold text-sage">● Open now</span>}
                     {open === false && <span className="ml-2 font-semibold text-terracotta">● Closed</span>}
                   </p>
-                  <p className="mt-1 text-xs italic text-ink/70">💡 {p.localTip}</p>
+                  {/* Two thirds of the catalogue has no curated tip. An empty
+                      bulb with nothing after it reads as a broken template. */}
+                  {p.localTip?.trim() && (
+                    <p className="mt-1 text-xs italic text-ink/70">💡 {p.localTip}</p>
+                  )}
                 </div>
               </Popup>
             </Marker>
@@ -176,8 +184,10 @@ export function MapView({
             <Popup>
               <div className="min-w-[190px]">
                 <p className="font-display text-sm font-bold text-ink">{focusPlace.name}</p>
-                <p className="mt-0.5 text-xs text-ink/60">🕒 {focusPlace.openingHours}</p>
-                <p className="mt-1 text-xs italic text-ink/70">💡 {focusPlace.localTip}</p>
+                <OpeningHours place={focusPlace} className="mt-0.5 text-xs text-ink/60" />
+                {focusPlace.localTip?.trim() && (
+                  <p className="mt-1 text-xs italic text-ink/70">💡 {focusPlace.localTip}</p>
+                )}
                 {onAddFocus && (
                   <button
                     onClick={() => onAddFocus(focusPlace.placeId)}

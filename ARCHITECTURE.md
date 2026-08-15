@@ -149,6 +149,31 @@ Two things now stand between that and a repeat:
   landmarks still have titles, that every key points at a real place, and that
   coverage has not collapsed.
 
+### Attribution and absence in the UI
+Seeded data brings two obligations to every surface that shows it.
+
+**Attribution is a licence term, not a courtesy.** Hours from OpenStreetMap
+carry ODbL, so anywhere they appear has to credit OSM. `openingHoursSource`
+sat on the record for a full release with nothing rendering it, which meant ten
+places shipped OSM data uncredited. `components/OpeningHours.tsx` is now the
+only place hours are printed, so the credit cannot be forgotten at a call site.
+
+**Absence has to look like absence.** Most of the catalogue has no verified
+hours and no curated tip, and the UI used to render both regardless: the raw
+sentinel `"Hours not verified"` beside a clock emoji, and a bare `💡` with
+nothing after it. Worse, the story modal wrapped every place in one fixed
+sentence — *"Locals have gathered here for generations, and it rewards a slower
+visit than most guidebooks suggest"* — with the curated tip dropped in the
+middle. Two thirds of the catalogue has no tip, so most travellers were reading
+an invented claim about a bike-hire stand or a café.
+
+The story is now only ever the curated tip; where there is none the modal says
+so and leans on the Wikipedia panel, which is real and cited. The locked audio
+guide hides itself in that case too — a padlock over an empty recording asks
+someone to pay for nothing. The open/closed badge is no longer computed from
+unverified hours, because that heuristic parses the sentinel to nothing and
+would be a coin toss wearing a fact's clothes.
+
 The matchers refuse far more than they accept, and refusing well is most of the
 work. The persistent failure is a place inheriting its **neighbourhood's**
 identity: the fish-sandwich stall at Eminönü matched the article about Eminönü

@@ -160,6 +160,14 @@ export const translations = {
       add: '➕ Add',
       tours: 'Tours & activities',
     },
+    hours: {
+      unverified: '🕒 Opening hours not verified',
+      // ODbL requires credit wherever OSM-sourced hours are shown.
+      osmSource: 'hours via OpenStreetMap',
+    },
+    story: {
+      noneYet: 'No local story for this place yet — anything we know about it is below.',
+    },
     weather: { crowds: 'Crowds', feelsLike: 'feels' },
     reviews: {
       title: 'Reviews',
@@ -623,6 +631,13 @@ export const translations = {
       empty: 'Bu isimde bir yer bulamadık — yakında eklenecek.',
       add: '➕ Ekle',
       tours: 'Turlar & aktiviteler',
+    },
+    hours: {
+      unverified: '🕒 Açılış saati doğrulanmadı',
+      osmSource: 'saatler OpenStreetMap’ten',
+    },
+    story: {
+      noneYet: 'Bu mekan için henüz yerel bir hikaye yok — bildiklerimiz aşağıda.',
     },
     weather: { crowds: 'Kalabalık', feelsLike: 'hissedilen' },
     reviews: {
