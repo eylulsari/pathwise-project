@@ -7,6 +7,10 @@ node_modules/
 dist/
 build/
 *.tsbuildinfo
+# Where the built SPA lands when reproducing the single-origin production
+# server locally (see TESTING.md). The image builds this itself; a copy in the
+# working tree is a local artifact, not source.
+pathwise-backend/client/
 
 # Environment
 .env

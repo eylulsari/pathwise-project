@@ -5,13 +5,22 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { CSP_DIRECTIVES } from './common/security/content-security-policy';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: false });
   const config = app.get(ConfigService);
 
   // Security headers + cookie parsing (refresh token lives in an httpOnly cookie).
-  app.use(helmet());
+  //
+  // The CSP is spelled out rather than left to helmet's default, because this
+  // process serves the SPA as well as the API — see the directive list for what
+  // the default silently broke.
+  app.use(
+    helmet({
+      contentSecurityPolicy: { useDefaults: true, directives: CSP_DIRECTIVES },
+    }),
+  );
   app.use(cookieParser());
 
   // All routes are served under /api
