@@ -189,13 +189,24 @@ to anyone.
 (plus the 15-test baseline `onboarding.spec.ts`). Run all 43 with the stack up:
 `cd pathwise && npm run e2e`.
 
-**Last full run — 2026-08-15, after variable trip length:** **81/81 passed,
-exit 0** (2.6 min, `--workers=1` — see the machine-load note below).
+**Last full run — 2026-08-15, after the batch-2 dataset:** **85/85 passed,
+exit 0** (2.8 min, `--workers=1` — see the machine-load note below).
 Backend `npm test`: **141/141**, 13 suites.
 Frontend `npm run lint`: 0 errors
 (2 pre-existing warnings). `tsc --noEmit`: clean both sides.
-`npm run i18n:check`: 374 keys in both languages.
-`node scripts/sync-frontend-places.mjs --check`: up to date.
+`npm run i18n:check`: 399 keys in both languages.
+`node scripts/sync-frontend-places.mjs --check`: up to date
+(202 places, 15 hubs, 34 travelers).
+
+The four new e2e tests are the OSM opening-hours shapes. The seeder copies
+through any `opening_hours` expression it cannot confidently rewrite, so four
+syntaxes landed in the dataset that the parser had never been asked about:
+`Th-Tu` (a week that wraps and skips Wednesday), `Mo-We,Fr-Sa` (two ranges in
+one spec), `9:00` (no leading zero) and `08:00 - 18:30` (no days, spaces round
+the dash). All four parse — but the reason to pin them is that a shape the
+parser *cannot* read renders no badge at all, which is indistinguishable from a
+place with no hours. That failure is invisible by design, so only a test sees
+it.
 
 ### The e2e suite caught a real regression this round
 `onboarding.spec.ts:374` (story modal → live enrichment) failed, twice, and it
@@ -227,11 +238,18 @@ and produces stops.
 week can break that a single day cannot: no place repeated across days, no
 empty day, no pace overrun, no broken transit rule.
 
-The question behind it was whether 124 places can fill seven days. They can,
-and the arithmetic says so before the test runs — a day takes at most 8 stops
-and the smallest hub holds 8 — but the failure mode here is **silent
-repetition**, not a crash, so an assertion is worth more than the arithmetic.
-The generated week comes to 51 stops and 51 distinct places.
+The question behind it was whether the catalogue can fill seven days. It can —
+202 places across 15 hubs, a day taking at most 8 stops — but the failure mode
+here is **silent repetition**, not a crash, so an assertion is worth more than
+the arithmetic. The generated week comes to **47 stops and 47 distinct places**,
+in 10 ms.
+
+Batch 2 made the week *shorter*, which is the right direction: 51 stops before,
+47 after. The new hubs are further out, and day seven (Beykoz–Anadolu Kavağı)
+fits five stops into 457 minutes because the transit model charges for the
+distance. Two hubs — `eyupsultan` at 7 places — now hold fewer than a day's stop
+cap, so a short day is expected and an empty one is not; those are separate
+assertions for exactly that reason.
 
 Failures are collected into arrays and asserted empty rather than checked one
 at a time: `expect(...).toBe(true)` on day five tells you a week is broken
@@ -1346,6 +1364,121 @@ hubs represented, 21 community routes with no hub below 2.
 - The 9 places without coordinates.
 - Nothing asserts community-route or check-in hub coverage the way the
   traveler seed now does — those two seeds can still go thin unnoticed.
+
+---
+
+## Batch 2: 10 hubs / 124 places → 15 hubs / 202 places (2026-08-15)
+
+Seeded from `scripts/data/pathwise-places-batch2.json` (89 places, 5 hubs).
+Same pipeline as batch 1: normalise → geocode → verify → emit → enrich.
+
+| | before | after |
+|---|---|---|
+| hubs | 10 | **15** |
+| places | 124 | **202** |
+| Wikipedia titles | 65 | **112** (112/112 return a summary, **108 with a photo**) |
+| places with real opening hours | 51 | **57** (16 from OSM) |
+| travelers | 24 | **34** |
+
+`beykoz-anadolu-kavagi` is the only Asian hub of the five; the transit model
+reads `side` to decide walk versus ferry, so getting this wrong would have
+planned a walk across the Bosphorus.
+
+### What the input got wrong, and how each was caught
+Not by reading it — by comparing it against the live dataset:
+
+| Problem | Count | Found by |
+|---|---|---|
+| Hub id does not exist (`besiktas`, `balat`) | 2 | normalise script, exits 1 |
+| Interest outside the enum | 6 values | normalise script, exits 1 |
+| Place already in the catalogue | 2 | name comparison against `PLACE_DATASET` |
+| Place on the wrong shore | 3 | hub/`side` cross-check |
+| Coordinate resolved to a *different* place | 4 | `verify-districts.mjs` |
+| No trustworthy coordinate at all | 8 | geocoder, left out |
+
+**A distance check cannot catch a wrong-but-nearby hit.** `geocode-places.mjs`
+rejects anything outside Istanbul or too far from its hub centre, and it did
+reject Kazakhstan, Palestine and Aydın. But the batch-2 hubs are whole
+districts, so their radius has to be generous — and generous is what these four
+slipped through:
+
+- **Zal Mahmut Paşa Camii** → a different mosque in Fatih
+- **Eyüp Sultan Pilavcısı** → *Aksaray* Pilavcısı
+- **Sarıyer Börekçisi** → that chain's *Üsküdar* branch
+- **Eyüp Sultan Meydanı** → the mosque itself, 0 m from an existing record
+
+`verify-districts.mjs` reverse-geocodes every coordinate and asks a different
+question — not "how far is this?" but "which district is this in?" — and
+flagged 9 of 79, of which those 4 were real errors. It writes nothing.
+
+The fourth is worth naming as **my own error, not the input's**: the search
+query I wrote for "Eyüp Sultan Meydanı" pointed at the mosque, producing exactly
+the Büyükada-style duplicate coordinate this pass existed to prevent. The record
+was dropped rather than patched, which is why the total is 202 and not 203.
+
+**Nothing was invented.** The 8 places without a verified coordinate were left
+out. Three of them — "Sarıyer Balıkçıları", "Boğaz Vapuru (Uzun Tur)", "Beykoz
+Çeşmesi ve Çarşı" — name a category, not a mappable place, so no query string
+would have helped. The rest: Pierre Loti Tepesi, Haliç Sahil Yürüyüş Yolu,
+Zal Mahmut Paşa Camii, Asmalımescit, Kurşunlu Han.
+
+### Two tests went red, and both were right
+- **`multi-day.spec.ts`** — Adalar fell out of the seven-day plan. With 10 hubs,
+  picking the largest remaining pool happened to reach the islands by day six;
+  at 15 it never did, because five fresh pools kept outranking Adalar's. The
+  sequencer now prefers a side it has not used yet. The old behaviour was luck,
+  and the test is what noticed the luck running out.
+- **`social.service.spec.ts`** — the 5 new hubs had no travelers, so the matcher
+  scored 0 on the hub component for anyone planning there. That is not "no
+  strong match", it is the feature quietly not working. 10 travelers added
+  (t25–t34), at least 2 per new hub.
+
+### Overpass: the rejections are the point
+151 places asked, **6 accepted**, 124 with no `opening_hours` tag, **20 rejected
+because the hours nearby belonged to someone else**, 1 timeout (retried: that
+place has no hours either).
+
+Within 40 m of Galata Köprüsü sits a bus timetable; within 40 m of Matbah
+Restaurant, Ayasofya's. Proximity alone would have published both. The name
+guard is what keeps a 96%-rejection rate from being a 96% wrong-data rate.
+
+### Far hubs — measured, not assumed
+Sarıyer and Beykoz sit an hour out of the centre, so the question was whether
+the model charges for that or quietly pretends the city is flat. Generated, not
+reasoned about:
+
+| Request | Result |
+|---|---|
+| Sarıyer, interests `nature`+`relax` | **2 stops / 360 min** — Kilyos Plajı 09:00–12:00 (180 min), 45 min transit, Arboretum 90 min |
+| Sarıyer, general interests | 5 stops / 460 min |
+| Beykoz–Anadolu Kavağı, general | 5 stops / 457 min |
+| Kilyos → Rumeli Feneri | 🚌 35 min, 6.7 km — same shore, correctly **not** a ferry |
+| Rumeli Feneri (Eur) → Yoros Kalesi (Asia) | 🚢 "~60 min incl. pier + ~15 min wait", 6.4 km |
+| A Sarıyer day with Yoros as a must-visit | fires `cross-side-day` (info) and routes Eur → Asia → Eur |
+
+Kilyos and Belgrad Ormanı carry `avgVisitMinutes` of **180 and 150**, so a beach
+day really is two stops. Five stops elsewhere and two here is the model working,
+not the catalogue thinning out.
+
+The two legs above are the pair that matters. They are 6.7 km and 6.4 km apart —
+near-identical straight-line distances — and the old distance-threshold model
+would have given them the same mode. One is a bus ride up the coast; the other
+crosses the Bosphorus.
+
+### Gate
+| Check | Result |
+|---|---|
+| Backend `npm run lint` | ✅ clean |
+| Backend `npm test` | ✅ **141/141**, 13 suites |
+| Frontend lint / typecheck / i18n / build | ✅ exit 0 (399 i18n keys) |
+| `sync-frontend-places --check` | ✅ exit 0 (202 places, 15 hubs, 34 travelers) |
+| E2E | ✅ **85/85**, `--workers=1`, 2.8 min |
+
+### Still not covered
+- The 8 places without coordinates (17 in total now, counting batch 1's 9).
+- `rating` on batch-2 places is the same flat 4.5 placeholder as batch 1.
+- Community-route and check-in seeds still do not reference the 5 new hubs;
+  only the traveler seed was brought up to date.
 
 ---
 

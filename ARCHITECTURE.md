@@ -64,14 +64,14 @@ in the engine: a three-element array literal in `Dashboard.tsx`. The engine had
 never had an opinion about how many days a trip has.
 
 Trips are now 1–7 days. Seven is the practical ceiling for one city, and the
-ten hubs cover it without repeating a neighbourhood — which is the constraint
-that actually matters, because **every day is generated from one hub's pool**,
-so a repeated hub means a repeated day.
+fifteen hubs cover it without repeating a neighbourhood — which is the
+constraint that actually matters, because **every day is generated from one
+hub's pool**, so a repeated hub means a repeated day.
 
 `itinerary/domain/day-plan.ts` assigns the hubs, on the server, under three
 rules in priority order:
 
-1. **Never the same hub twice.** Ten hubs against a seven-day maximum makes
+1. **Never the same hub twice.** Fifteen hubs against a seven-day maximum makes
    this always achievable.
 2. **Alternate shores.** Two Bosphorus crossings back to back is a lot of ferry
    for one trip.
@@ -87,10 +87,17 @@ are never re-hubbed.
 
 **Does the catalogue run out?** No, and it was worth checking rather than
 assuming, because the failure mode is silent repetition rather than a crash.
-124 places across 10 hubs; a day takes at most 8 stops; the *smallest* hub
-holds 8. A generated week comes to 51 stops and **51 distinct places**. A
-regression spec asserts no repeat, no empty day, no pace overrun and no broken
-transit rule across all seven days, and the whole week generates in ~5 ms.
+202 places across 15 hubs; a day takes at most 8 stops. A generated week comes
+to 47 stops and **47 distinct places**, in ~10 ms. A regression spec asserts no
+repeat, no empty day, no pace overrun and no broken transit rule across all
+seven days.
+
+Two hubs now hold fewer places than a day's stop cap — `eyupsultan` has 7 —
+which is a shorter day, not a broken one, and the spec's "no empty day" check is
+what keeps the difference visible. The week also got **shorter as the catalogue
+grew** (51 stops before batch 2, 47 after) because the hubs it now reaches are
+further out: day seven is Beykoz–Anadolu Kavağı, where five stops fill 457
+minutes. That is the transit model charging honestly for distance.
 
 ### The transit model — why a day is possible, not just arithmetically valid
 `itinerary/domain/transit.ts` decides how you get from one stop to the next.
@@ -136,7 +143,7 @@ as a nine-hour day in every hub tested.
 
 ### One dataset, one owner — places and hubs
 `PLACE_DATASET` and `HUB_DATASET` in the backend are the **single source of
-truth for both halves of the app**. 124 places across 10 hubs, served by
+truth for both halves of the app**. 202 places across 15 hubs, served by
 `GET /api/places` and `GET /api/places/hubs`.
 
 This used to be two hand-maintained copies, and they drifted: the route engine
@@ -160,14 +167,68 @@ Coordinates are seeded offline by `scripts/geocode-places.mjs` (Nominatim), neve
 at runtime: the Overpass enrichment client matches a POI by *proximity* to a
 known lat/lng, so a coordinate is an input to enrichment, not an output of it.
 
+### Batch 2 — five more hubs, and the check that a distance cannot make
+The catalogue went from 124 places across 10 hubs to **202 across 15**. Four of
+the new hubs are European; `beykoz-anadolu-kavagi` is Asian, which the transit
+model reads to decide walk versus ferry.
+
+The incoming drop needed three corrections before anything downstream could
+use it, all found by comparing it against the live dataset rather than by
+reading it:
+
+- **Hub ids that do not exist** — `besiktas` and `balat`, where the real ids
+  are `besiktas-bogaz` and `balat-fener`.
+- **Two places already in the catalogue**, one of them filed on the wrong side
+  of the city.
+- **Three places on the wrong shore.** Kanlıca and Mihrabat are Asian; the drop
+  put them in `ortakoy-bebek`, which is European. That is not cosmetic — the
+  engine would have planned a walk across the Bosphorus.
+
+**Distance is not identity.** `geocode-places.mjs` rejects a hit outside
+Istanbul or too far from its hub centre, and that catches Kazakhstan,
+Palestine and Aydın — all of which it did. It cannot catch a same-named feature
+a few kilometres away, and the batch-2 hubs are whole districts, so their radius
+has to be generous. Generous is exactly what a wrong-but-nearby hit slips
+through: **Zal Mahmut Paşa Camii resolved to a different mosque in Fatih**,
+Eyüp Sultan Pilavcısı to *Aksaray Pilavcısı*, and Sarıyer Börekçisi to that
+chain's Üsküdar branch. All three were comfortably inside the limit.
+
+`verify-districts.mjs` reverse-geocodes every coordinate and asks a different
+question — not "how far is this?" but "which district is this in?". The two
+together caught 9 mismatches out of 79, of which 4 were genuinely wrong
+coordinates. Nothing is written by that script; it reports, and a person
+decides.
+
+**Nothing was invented.** Eight places have no verified coordinate and were
+left out of the dataset rather than given a plausible one. Three of them
+("Sarıyer Balıkçıları", "Boğaz Vapuru (Uzun Tur)", "Beykoz Çeşmesi ve Çarşı")
+describe a category rather than a mappable place, and no query string will
+change that.
+
 ### Seeded data, and why it is guarded
 Three datasets are produced by scripts under `scripts/` rather than written by
 hand: coordinates, opening hours (Overpass) and Wikipedia article titles.
 
 `wiki-titles.dataset.ts` replaced a hand-written allowlist of six landmarks — a
 number chosen when the catalogue held 28 places and never revisited as it grew
-to 124. Coverage went from **6 places to 65**, every one of which returns a real
-Turkish summary and all but one a photo.
+to 124. Coverage went from **6 places to 65**, and batch 2 took it to **112 of
+202**: all 112 return a real Turkish summary and **108 carry a photo**.
+
+Coverage is far short of the catalogue on purpose. A neighbourhood shoreline, a
+fish market or a coffee street has no Wikipedia article, and the three guards —
+distance, name, and object type — refuse a near miss rather than attach the
+district's article to a café in it. Four places did exactly that before the
+guards tightened: a title made only of stopwords now demands an exact name
+match.
+
+Opening hours are the thinner harvest: **57 of 202** places have real hours, 16
+of them from OSM. The batch-2 pass asked Overpass about 151 places and accepted
+**6** — 124 had no `opening_hours` tag at all, and **20 were rejected because
+the hours found nearby belonged to someone else**. That last number is the
+useful one. Within 40 m of Galata Köprüsü sits a bus timetable; within 40 m of
+Matbah Restaurant, Ayasofya's. Proximity would have published both, confidently
+and wrongly, so the name guard refuses a hit whose OSM name does not correspond
+to the place asked about.
 
 Generated data fails differently from hand-written data, and this is the
 cautionary tale: a transient network error during seeding leaves **no entry and
