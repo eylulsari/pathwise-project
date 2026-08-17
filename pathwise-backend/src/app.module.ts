@@ -13,6 +13,8 @@ import { UsersModule } from './modules/users/users.module';
 import { PlacesModule } from './modules/places/places.module';
 import { ItineraryModule } from './modules/itinerary/itinerary.module';
 import { TripsModule } from './modules/trips/trips.module';
+import { PlanModule } from './modules/plan/plan.module';
+import { SavedPlacesModule } from './modules/saved-places/saved-places.module';
 import { PremiumModule } from './modules/premium/premium.module';
 import { ModerationModule } from './modules/moderation/moderation.module';
 import { JournalModule } from './modules/journal/journal.module';
@@ -79,6 +81,8 @@ function serveClientIfBuilt(): DynamicModule[] {
     PlacesModule,
     ItineraryModule,
     TripsModule,
+    PlanModule,
+    SavedPlacesModule,
     PremiumModule,
     ModerationModule,
     JournalModule,
