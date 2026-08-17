@@ -59,6 +59,15 @@ services:
       GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-20b}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      # `nest start --watch` watches through tsc, which uses inotify — and
+      # inotify events do not cross a bind mount on Windows or macOS, so the
+      # container kept serving the code it booted with while the editor showed
+      # something else. That is worse than having no hot reload at all: a
+      # backend change appears to be running and is not, so anything measured
+      # against it is measured against the old build. Poll instead, same as
+      # CHOKIDAR_USEPOLLING does for the frontend below.
+      TSC_WATCHFILE: PriorityPollingInterval
+      TSC_WATCHDIRECTORY: DynamicPriorityPolling
     ports:
       - "3000:3000"
     volumes:
