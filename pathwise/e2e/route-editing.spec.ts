@@ -69,6 +69,15 @@ test('a reordered day survives a reload', async ({ page }) => {
 });
 
 test('a saved place survives a reload and can seed the day', async ({ page }) => {
+  // Six round trips in one journey: sign up, save, cross to the profile and
+  // back, remove a stop, then re-seed the day from the saved list. Each step is
+  // waited on properly, but the 30 s default is a budget for the *whole* test
+  // and under a loaded backend this one legitimately outgrows it — it failed on
+  // "Test timeout exceeded" while waiting for a button that does appear, not on
+  // the button's own timeout. Splitting it would break the one thing it exists
+  // to prove: that the place makes the entire trip through the server.
+  test.slow();
+
   await signUp(page, 'saved');
 
   const names = await stopNames(page);

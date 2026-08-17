@@ -80,7 +80,22 @@ test('marking a review helpful increments its count', async ({ page }) => {
   await signup(page, 'helpful');
   await page.getByRole('button', { name: /Read Local Story/i }).first().click();
   await expect(page.getByRole('heading', { name: /Reviews/i })).toBeVisible();
-  const btn = page.getByRole('button', { name: /👍 Helpful/i }).first();
+
+  // Post the review this test then marks helpful.
+  //
+  // It used to reach straight for the first "👍 Helpful" button and depend on
+  // a review left by `onboarding.spec.ts`. That is an ordering dependency
+  // dressed up as flakiness: reviews live in Postgres, CI starts every run on
+  // an empty database, and whether the button exists came down to which spec
+  // happened to run first. On a fresh database with this test running early
+  // there is nothing to mark helpful and it waits out the whole timeout.
+  const text = `Helpful target ${Date.now()}`;
+  await page.getByPlaceholder(/Share your experience/i).fill(text);
+  await page.getByRole('button', { name: /Post review/i }).click();
+  const review = page.locator('li,article,div').filter({ hasText: text }).last();
+  await expect(review).toBeVisible({ timeout: 10_000 });
+
+  const btn = review.getByRole('button', { name: /👍 Helpful/i }).first();
   const before = await btn.textContent();
   await btn.click();
   await expect.poll(async () => btn.textContent(), { timeout: 10_000 }).not.toBe(before);
