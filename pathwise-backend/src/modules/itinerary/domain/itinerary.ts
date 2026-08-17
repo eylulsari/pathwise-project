@@ -1,6 +1,21 @@
 import { Hub, Interest, Place } from '../../places/domain/place';
 
-export type GroupType = 'solo' | 'couple' | 'friends';
+/**
+ * Who is travelling together.
+ *
+ * `family` is the quiz's "who are you coming with?" answer, and it belongs
+ * here rather than in a field of its own: the dashboard has carried a
+ * solo/couple/friends selector since before the quiz existed, and two controls
+ * describing the same thing would disagree the moment a user touched one of
+ * them. The quiz sets this, exactly as it already sets hub and budget.
+ */
+export type GroupType = 'solo' | 'couple' | 'family' | 'friends';
+
+/**
+ * How far the traveller is willing to walk in a day. Absent means unanswered,
+ * which must behave exactly as the engine did before the question existed.
+ */
+export type WalkingTolerance = 'short' | 'moderate' | 'long';
 export type Weather = 'sunny' | 'rainy';
 export type RouteMode = 'hub-budget' | 'quiz-vibe';
 
@@ -20,11 +35,26 @@ export interface Reservation {
   note?: string;
 }
 
-/** Quiz answers (Travel Vibe Quiz) — consumed by QuizVibeStrategy. */
+/**
+ * Quiz answers (Travel Vibe Quiz) — consumed by QuizVibeStrategy.
+ *
+ * Everything after `budgetTry` was added later and is optional, because the
+ * quiz is not the only caller: a route generated from the dashboard controls
+ * sends no quiz at all, and an older client sends only the first three. Each
+ * new answer must therefore be a no-op when absent.
+ *
+ * `dietary` is deliberately NOT in this object. It goes to the assistant and
+ * nowhere near the route engine — see the note on ChatInput.
+ */
 export interface QuizInput {
   mood: 'history' | 'foodie' | 'art' | 'photo';
   pace: 'relaxed' | 'moderate' | 'packed';
   budgetTry: number;
+  /** "Who are you coming with?" — becomes the day's `group`. */
+  party?: GroupType;
+  walkingTolerance?: WalkingTolerance;
+  /** "Is this your first time in Istanbul?" — false means first time. */
+  visitedBefore?: boolean;
 }
 
 /**
@@ -47,6 +77,17 @@ export interface RouteGenerationInput {
   endOrigin?: Origin;
   /** Pinned bookings whose times must not move. */
   reservations?: Reservation[];
+  /**
+   * How much walking the day may ask for. Only `'short'` currently changes
+   * anything — it lowers the stop cap. Absent behaves as it always did.
+   */
+  walkingTolerance?: WalkingTolerance;
+  /**
+   * Whether the traveller has been to Istanbul before. `false` weights the
+   * icons up, `true` weights the quieter places up, and `undefined` — the
+   * question unanswered — weights neither.
+   */
+  visitedBefore?: boolean;
   quiz?: QuizInput;
 }
 

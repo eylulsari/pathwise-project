@@ -37,10 +37,28 @@ export interface AssistantReply {
   source: AssistantSource;
 }
 
+/**
+ * A dietary restriction the traveller told the quiz about.
+ *
+ * This reaches the assistant and stops there. It is deliberately absent from
+ * `RouteGenerationInput`: nothing in the place dataset records whether a
+ * kitchen serves vegetarian or vegan food, so a route engine "filtering" on it
+ * would be sorting by a field that does not exist. The traveller would see
+ * their restriction acknowledged in the UI and a day built as if they had never
+ * mentioned it — worse than not asking, because it would be trusted.
+ *
+ * The assistant is honest ground for it: it answers in prose, it can say "I
+ * don't know whether this place has a vegan option", and it is already the part
+ * of the app that reasons rather than filters.
+ */
+export type DietaryRestriction = 'vegetarian' | 'vegan' | 'no-seafood';
+
 /** Normalised input the service works with (after DTO validation). */
 export interface ChatInput {
   message: string;
   conversationHistory: ChatTurn[];
   /** Place names on the user's active Today's Path, for personalisation. */
   activePlan: string[];
+  /** Absent when the traveller has none, or has not answered the question. */
+  dietary?: DietaryRestriction;
 }

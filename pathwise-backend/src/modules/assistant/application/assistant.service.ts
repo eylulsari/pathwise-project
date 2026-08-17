@@ -8,6 +8,7 @@ import {
   AssistantReply,
   AssistantSource,
   ChatInput,
+  DietaryRestriction,
   PlaceSuggestion,
 } from '../domain/assistant.types';
 
@@ -78,7 +79,11 @@ export class AssistantService {
   ): Promise<AssistantReply> {
     const all = await this.places.findAll();
     const relevant = selectRelevantPlaces(input.message, all);
-    const systemInstruction = buildSystemInstruction(relevant, input.activePlan);
+    const systemInstruction = buildSystemInstruction(
+      relevant,
+      input.activePlan,
+      input.dietary,
+    );
     const contents = [
       ...input.conversationHistory,
       { role: 'user' as const, parts: [{ text: input.message }] },
@@ -201,12 +206,42 @@ export class AssistantService {
 
 // ── Prompt building ───────────────────────────────────────────────────
 
-function buildSystemInstruction(places: Place[], activePlan: string[]): string {
+/** How each restriction is described to the model, in its own words. */
+const DIETARY_BRIEF: Record<DietaryRestriction, string> = {
+  vegetarian: 'The user is VEGETARIAN — they do not eat meat or fish.',
+  vegan: 'The user is VEGAN — no meat, fish, dairy, eggs or honey.',
+  'no-seafood': 'The user has a SEAFOOD ALLERGY — no fish or shellfish, and cross-contamination matters to them.',
+};
+
+function buildSystemInstruction(
+  places: Place[],
+  activePlan: string[],
+  dietary?: DietaryRestriction,
+): string {
   const placeLines = places.map(placeLine).join('\n');
   const planLine =
     activePlan.length > 0
       ? activePlan.join(', ')
       : 'none yet — the user has not built a route for today.';
+
+  /*
+   * The instruction says what the model must NOT claim as loudly as what it
+   * should do. The dataset carries no dietary information whatsoever, so the
+   * one failure mode worth engineering against is a confident "this place has
+   * great vegan options" about a café nobody has checked. Told to reason from
+   * cuisine and to admit the gap, the model gives advice a traveller can act on
+   * — Turkish meze and pide are genuinely vegetarian-friendly — without
+   * inventing a menu.
+   */
+  const dietaryLines = dietary
+    ? [
+        '',
+        'DIETARY:',
+        `- ${DIETARY_BRIEF[dietary]} Keep it in mind for every food suggestion.`,
+        '- The place data below does NOT record dietary options. NEVER state that a specific place has a vegetarian, vegan or seafood-free menu — you do not know that.',
+        '- Instead, reason from what Turkish cuisine reliably offers (meze, pide, lahmacun, börek, çiğ köfte, simit, breakfast spreads) and say plainly when they should ask on arrival.',
+      ]
+    : [];
 
   return [
     "You are the Pathwise Assistant, a warm, practical Istanbul travel companion inside the Pathwise trip-planning app.",
@@ -223,6 +258,7 @@ function buildSystemInstruction(places: Place[], activePlan: string[]): string {
     placeLines || '(no matching places found)',
     '',
     `USER'S CURRENT PLAN TODAY: ${planLine}`,
+    ...dietaryLines,
   ].join('\n');
 }
 

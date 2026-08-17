@@ -16,6 +16,7 @@ const INTERESTS: Interest[] = [
 const GROUPS: { id: GroupType; icon: string }[] = [
   { id: 'solo', icon: '🧍' },
   { id: 'couple', icon: '👫' },
+  { id: 'family', icon: '👨‍👩‍👧' },
   { id: 'friends', icon: '👥' },
 ];
 
@@ -123,7 +124,9 @@ export function RouteGenerator({
       {/* Group type */}
       <div>
         <Label>{t('dash.group')}</Label>
-        <div className="grid grid-cols-3 gap-1.5">
+        {/* Four across, not three: adding `family` to a three-column grid left
+            it alone on a second row looking like an afterthought. */}
+        <div className="grid grid-cols-4 gap-1.5">
           {GROUPS.map((g) => (
             <button
               key={g.id}

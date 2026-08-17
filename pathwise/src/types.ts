@@ -84,7 +84,15 @@ export type PlaceType =
   | 'street'
   | 'beach'
   | 'experience';
-export type GroupType = 'solo' | 'couple' | 'friends';
+/** Mirrors the backend `GroupType` — the quiz's "who with?" sets this. */
+export type GroupType = 'solo' | 'couple' | 'family' | 'friends';
+export type WalkingTolerance = 'short' | 'moderate' | 'long';
+/**
+ * Only ever sent to the assistant. The route engine does not take it, because
+ * no place in the catalogue records whether it can feed someone who is vegan —
+ * see the note on the backend's `DietaryRestriction`.
+ */
+export type DietaryRestriction = 'vegetarian' | 'vegan' | 'no-seafood';
 export type Weather = 'sunny' | 'rainy';
 export type RouteMode = 'hub-budget' | 'quiz-vibe';
 
@@ -329,10 +337,15 @@ export interface GenerateRouteRequest {
   startOrigin?: Origin;
   endOrigin?: Origin;
   reservations?: Reservation[];
+  walkingTolerance?: WalkingTolerance;
+  visitedBefore?: boolean;
   quiz?: {
     mood: 'history' | 'foodie' | 'art' | 'photo';
     pace: 'relaxed' | 'moderate' | 'packed';
     budgetTry: number;
+    party?: GroupType;
+    walkingTolerance?: WalkingTolerance;
+    visitedBefore?: boolean;
   };
 }
 

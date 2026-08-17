@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsNumber,
@@ -89,6 +90,13 @@ const INTERESTS = [
   'family',
 ] as const;
 
+// Runtime mirror of `GroupType`. Used by both route DTOs below: a traveller
+// whose group is accepted by /generate but rejected by /rebuild can build a day
+// and then get a 400 the first time they drag a stop in it.
+const GROUPS = ['solo', 'couple', 'family', 'friends'] as const;
+
+const WALKING_TOLERANCES = ['short', 'moderate', 'long'] as const;
+
 export class QuizDto {
   @IsIn(['history', 'foodie', 'art', 'photo'])
   mood: 'history' | 'foodie' | 'art' | 'photo';
@@ -100,6 +108,21 @@ export class QuizDto {
   @Min(0)
   @Max(50000)
   budgetTry: number;
+
+  // Optional, and not merely for tolerance: an older client — a phone with the
+  // app open across the deploy — sends the first three answers and nothing
+  // else, and must keep getting routes rather than validation errors.
+  @IsOptional()
+  @IsIn(GROUPS as unknown as string[])
+  party?: (typeof GROUPS)[number];
+
+  @IsOptional()
+  @IsIn(WALKING_TOLERANCES as unknown as string[])
+  walkingTolerance?: (typeof WALKING_TOLERANCES)[number];
+
+  @IsOptional()
+  @IsBoolean()
+  visitedBefore?: boolean;
 }
 
 /**
@@ -124,8 +147,8 @@ export class GenerateRouteDto {
   @Max(12)
   paceHours: number;
 
-  @IsIn(['solo', 'couple', 'friends'])
-  group: 'solo' | 'couple' | 'friends';
+  @IsIn(GROUPS as unknown as string[])
+  group: (typeof GROUPS)[number];
 
   @IsOptional()
   @IsArray()
@@ -161,6 +184,19 @@ export class GenerateRouteDto {
   @Type(() => ReservationDto)
   reservations?: ReservationDto[];
 
+  /**
+   * Also accepted outside `quiz`, so a route built from the dashboard controls
+   * can carry the same answers. The quiz value wins when both are present —
+   * see QuizVibeStrategy.
+   */
+  @IsOptional()
+  @IsIn(WALKING_TOLERANCES as unknown as string[])
+  walkingTolerance?: (typeof WALKING_TOLERANCES)[number];
+
+  @IsOptional()
+  @IsBoolean()
+  visitedBefore?: boolean;
+
   @IsOptional()
   @ValidateNested()
   @Type(() => QuizDto)
@@ -190,8 +226,8 @@ export class RebuildRouteDto {
   @Max(12)
   paceHours: number;
 
-  @IsIn(['solo', 'couple', 'friends'])
-  group: 'solo' | 'couple' | 'friends';
+  @IsIn(GROUPS as unknown as string[])
+  group: (typeof GROUPS)[number];
 
   @IsIn(['sunny', 'rainy'])
   weather: 'sunny' | 'rainy';

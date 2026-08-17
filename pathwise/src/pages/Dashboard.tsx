@@ -51,6 +51,7 @@ import { DayCelebration } from '../components/DayCelebration';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { BADGES } from '../mockData';
 import { earnBadge } from '../utils/badgeStore';
+import { setDietary } from '../utils/travelerPreferences';
 import { useSavedPlaces } from '../hooks/useSavedPlaces';
 
 // The Passport badge each hub completes.
@@ -744,19 +745,32 @@ export default function Dashboard() {
 
   async function handleQuiz(result: QuizResult) {
     setShowQuiz(false);
+    // The dietary answer is stored, not sent: it goes to the assistant with
+    // each chat turn, and the route engine never sees it. See
+    // `utils/travelerPreferences.ts` for why.
+    setDietary(result.dietary);
     const req: GenerateRouteRequest = {
       mode: 'quiz-vibe',
       budgetTry: result.budgetTry,
       paceHours: day.config.paceHours,
-      group: day.config.group,
+      group: result.party,
       mustVisitIds: day.mustVisitIds,
       weather: day.config.weather,
       startHour: day.config.startHour,
-      quiz: result,
+      quiz: {
+        mood: result.mood,
+        pace: result.pace,
+        budgetTry: result.budgetTry,
+        party: result.party,
+        walkingTolerance: result.walkingTolerance,
+        visitedBefore: result.visitedBefore,
+      },
     };
     const it = await generateFor(activeDay, req);
-    // Reflect the quiz-derived hub/budget back into the visible controls.
-    if (it) updateConfig({ hub: it.hub, budgetTry: result.budgetTry });
+    // Reflect the quiz-derived hub/budget/group back into the visible controls,
+    // so the form agrees with the day the quiz just built rather than showing
+    // a group the route was not made for.
+    if (it) updateConfig({ hub: it.hub, budgetTry: result.budgetTry, group: result.party });
     // The quiz is also the only place the app learns the user's travel style,
     // so feed it into the profile that drives buddy matching. Fire-and-forget:
     // it must never delay or fail the route the user actually asked for. The

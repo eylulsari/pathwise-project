@@ -44,12 +44,34 @@ export class QuizVibeStrategy implements RouteGenerationStrategy {
 
     const { hub, interests } = QuizVibeStrategy.MOOD_MAP[quiz.mood];
 
+    /*
+     * The three answers added to the quiz are carried through as their own
+     * fields, and none of them is allowed near `hub` or `interests`.
+     *
+     * Those two are decided by the mood answer alone, and they are decided by
+     * replacement — `interests` is overwritten here, not merged. Expressing
+     * "first time in Istanbul" as an interest would therefore either be
+     * discarded by that overwrite or, if appended, silently change which
+     * places match the +25-per-overlap term that the mood answer is supposed
+     * to control. Steering the hub from a walking or first-visit answer would
+     * be worse still: the traveller picked a mood and would get someone
+     * else's neighbourhood.
+     *
+     * So each new answer stays a separate, weaker term in scoring, and a
+     * traveller who answers only the first three questions gets precisely the
+     * route they got before the other four existed.
+     */
     const normalized: RouteGenerationInput = {
       ...input,
       hub,
       interests,
       paceHours: QuizVibeStrategy.PACE_HOURS[quiz.pace],
       budgetTry: quiz.budgetTry,
+      // "Who with?" is the group the rest of the engine already costs and
+      // scores by; the quiz answers the same question the dashboard does.
+      group: quiz.party ?? input.group,
+      walkingTolerance: quiz.walkingTolerance ?? input.walkingTolerance,
+      visitedBefore: quiz.visitedBefore ?? input.visitedBefore,
     };
 
     // Reuse the core engine — this is the whole point of the pattern.

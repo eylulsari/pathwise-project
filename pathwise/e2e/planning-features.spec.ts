@@ -25,18 +25,53 @@ test('AI assistant answers a question (real backend round-trip)', async ({ page 
   await expect(page.getByText(/couldn.t reach the assistant/i)).toHaveCount(0);
 });
 
-test('Vibe Quiz completes all 3 steps and rebuilds the route', async ({ page }) => {
+test('Vibe Quiz walks all seven steps and rebuilds the route', async ({ page }) => {
   await signup(page, 'quiz');
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
   await page.getByRole('button', { name: /Vibe Quiz/i }).click();
   await expect(page.getByText(/What's your mood/i)).toBeVisible();
-  await page.getByRole('button', { name: 'History Buff' }).click();
-  await page.getByRole('button', { name: /Next/i }).click();
-  await page.getByRole('button', { name: 'Relaxed' }).click();
-  await page.getByRole('button', { name: /Next/i }).click();
+
+  // One answer per question, in order. Next stays disabled until each is
+  // answered, so a step that failed to render would stall here rather than
+  // being skipped past.
+  const answer = async (label: string | RegExp) => {
+    await page.getByRole('button', { name: label }).click();
+    await page.getByRole('button', { name: /Next/i }).click();
+  };
+  await answer('History Buff');
+  await answer('Relaxed');
+  await answer('Family with kids');
+  await answer('Short distances');
+  await answer('First time');
+  await answer('Vegetarian');
+
   await page.getByRole('button', { name: /Build my path/i }).click();
   await expect(page.getByText(/What's your mood/i)).toHaveCount(0);
   await expect(page.locator('ol li h3').first()).toBeVisible({ timeout: 15_000 });
+
+  // The party answer is the one that has somewhere visible to land: it becomes
+  // the day's group, so the generator form must now agree with the quiz rather
+  // than still showing whatever it held before.
+  await expect(
+    page.getByRole('button', { name: /Family/ }).first(),
+  ).toHaveClass(/border-iznik/);
+});
+
+test('the dietary question says it does not filter the route', async ({ page }) => {
+  await signup(page, 'diet');
+  await page.getByRole('button', { name: /Vibe Quiz/i }).click();
+  // Scoped to the modal: every choice carries an emoji in its accessible name,
+  // and "Solo" also names a button on the generator form behind the overlay.
+  const quiz = page.locator('.card-cream');
+  for (const label of ['History Buff', 'Relaxed', 'Solo', 'Average', 'First time']) {
+    await quiz.getByRole('button', { name: label }).click();
+    await quiz.getByRole('button', { name: /Next/i }).click();
+  }
+  await expect(page.getByText(/Any dietary restrictions/i)).toBeVisible();
+  // The honesty note is the feature here. Nothing in the catalogue records
+  // whether a kitchen can feed a vegan, so the app says what it does with the
+  // answer instead of implying a filter it cannot perform.
+  await expect(page.getByText(/does not filter your route/i)).toBeVisible();
 });
 
 test('Must-Visit picks auto-apply on close with a toast', async ({ page }) => {

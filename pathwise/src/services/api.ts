@@ -37,6 +37,7 @@ import type {
   UsageInfo,
 } from '../types';
 import { PLACES_BY_ID } from '../hubData';
+import { getDietary } from '../utils/travelerPreferences';
 import { withEarnedBadges } from '../utils/badgeStore';
 import {
   BADGES,
@@ -733,9 +734,19 @@ export const api = {
     suggestion?: AiSuggestion;
     source?: 'groq' | 'gemini' | 'fallback';
   }> {
+    // Read at call time rather than passed in: the answer is a standing fact
+    // about the traveller, and every caller would otherwise have to remember
+    // to forward it. Omitted entirely when there is none — see the note in
+    // the backend DTO on why "no restriction" is silence, not a value.
+    const dietary = getDietary();
     return http('/assistant/chat', {
       method: 'POST',
-      body: JSON.stringify({ message, conversationHistory, activePlan }),
+      body: JSON.stringify({
+        message,
+        conversationHistory,
+        activePlan,
+        ...(dietary ? { dietary } : {}),
+      }),
     });
   },
 };

@@ -14,6 +14,7 @@ import {
   ItineraryStop,
   RouteGenerationInput,
   TransportLeg,
+  WalkingTolerance,
 } from '../../domain/itinerary';
 import {
   ISLAND_LAST_FERRY_MIN,
@@ -57,6 +58,37 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
   private static readonly UNRATED_BASELINE = 4.5;
 
   /**
+   * How hard the quiz answers lean on the shortlist.
+   *
+   * Both are calibrated against the levers already here: one interest match is
+   * +25 and a strained-budget ticket is −15. So a familiarity bonus of +20
+   * reorders places the traveller is equally interested in without ever
+   * outranking an interest they actually named, and a −30 nightlife penalty is
+   * enough to push a bar below a similar non-bar without erasing it.
+   */
+  private static readonly FAMILIARITY_BONUS = 20;
+  private static readonly NIGHTLIFE_PENALTY_FOR_FAMILIES = 30;
+
+  /**
+   * How much walking a day may ask of someone who said they would rather not
+   * walk far, and the floor that protects the day from the rule.
+   *
+   * Measured rather than picked: generated across thirteen hubs at three paces,
+   * a day's walking legs run from 0 m to 2,828 m with the middle around a
+   * kilometre. 1,500 m therefore leaves the ordinary day untouched and trims
+   * the handful that are genuinely long — Eminönü at a packed pace (2,828 m),
+   * Nişantaşı (2,146 m), Kadıköy and Balat (~1,560 m).
+   *
+   * Nişantaşı is also why this exists at all. At seven hours it plans six stops
+   * against a cap of seven, so lowering the cap by one changes nothing there
+   * while the day still asks for over two kilometres on foot. A stop cap alone
+   * would have been a control that answers "how far can you walk?" by doing
+   * nothing at all in about half the cases.
+   */
+  private static readonly SHORT_WALK_CEILING_METERS = 1500;
+  private static readonly MIN_STOPS_AFTER_WALK_TRIM = 3;
+
+  /**
    * Upper bound on real stops in a day, by pace.
    *
    * Until the dataset grew to 129 places this was unnecessary: a hub held five
@@ -80,11 +112,29 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     { upToHours: Infinity, maxStops: 8 },
   ];
 
-  private static maxStopsFor(paceHours: number): number {
-    return (
+  /**
+   * The fewest stops a day is allowed to be cut to by walking tolerance. Below
+   * three there is no day left to plan, only an errand.
+   */
+  private static readonly MIN_STOPS_WHEN_WALKING_IS_HARD = 3;
+
+  private static maxStopsFor(
+    paceHours: number,
+    walkingTolerance?: WalkingTolerance,
+  ): number {
+    const byPace =
       HubBudgetStrategy.MAX_STOPS_BY_PACE.find((b) => paceHours <= b.upToHours)
-        ?.maxStops ?? 8
-    );
+        ?.maxStops ?? 8;
+
+    // Fewer stops is the honest lever for "I would rather not walk far". The
+    // walking in a day is mostly the hops between stops, and the engine has
+    // already committed to a hub by this point, so dropping a stop removes a
+    // hop; nothing else here can shorten one. Only the low answer moves the
+    // cap — 'moderate' and 'long' leave the day exactly as it was, and so does
+    // the question going unanswered.
+    return walkingTolerance === 'short'
+      ? Math.max(HubBudgetStrategy.MIN_STOPS_WHEN_WALKING_IS_HARD, byPace - 1)
+      : byPace;
   }
 
   constructor(private readonly places: PlacesService) {}
@@ -127,7 +177,10 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
 
     // 3 — greedy selection within the time budget AND the stop cap.
     const timeBudget = input.paceHours * 60;
-    const maxStops = HubBudgetStrategy.maxStopsFor(input.paceHours);
+    const maxStops = HubBudgetStrategy.maxStopsFor(
+      input.paceHours,
+      input.walkingTolerance,
+    );
     let usedMinutes = 0;
     const selected: Place[] = [];
     // Force must-visits in first (never dropped, never counted against the cap).
@@ -202,9 +255,26 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
         : Infinity,
     );
 
+    // A day is too long if it runs past the clock, or — for a traveller who
+    // said they would rather not walk far — if it asks for too many metres on
+    // foot. Both are trimmed the same way, from the tail, because the tail is
+    // where the nearest-neighbour tour puts the longest hops.
+    const walkCeiling =
+      input.walkingTolerance === 'short'
+        ? HubBudgetStrategy.SHORT_WALK_CEILING_METERS
+        : Infinity;
+
     const stops = [...ordered];
     let itinerary = this.assemble(stops, input, hub);
-    while (dayStart + itinerary.totalDurationMinutes > deadline) {
+    const tooLong = () => dayStart + itinerary.totalDurationMinutes > deadline;
+    // The walking rule stops at three stops. Below that it is no longer
+    // shortening a day, it is deleting one — and someone who cannot walk far
+    // still came to Istanbul to see something.
+    const tooFar = () =>
+      this.walkingMeters(itinerary) > walkCeiling &&
+      stops.length > HubBudgetStrategy.MIN_STOPS_AFTER_WALK_TRIM;
+
+    while (tooLong() || tooFar()) {
       const idx = stops.map((p) => mustSet.has(p.placeId)).lastIndexOf(false);
       if (idx === -1) break; // only forced stops left — say so instead
       stops.splice(idx, 1);
@@ -218,6 +288,20 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
         ...this.dayNotices(stops, hub, dayStart + itinerary.totalDurationMinutes),
       ],
     };
+  }
+
+  /**
+   * Metres the traveller actually walks. Ferry and metro legs carry distance
+   * too, and counting them would penalise a day for a boat ride the traveller
+   * spends sitting down.
+   */
+  private walkingMeters(itinerary: Itinerary): number {
+    return itinerary.stops.reduce(
+      (sum, s) =>
+        sum +
+        (s.transportToNext?.mode === 'walk' ? s.transportToNext.distanceMeters : 0),
+      0,
+    );
   }
 
   /** What the traveller should be told about the shape of the finished day. */
@@ -266,12 +350,41 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     // solo travelers get a small bump on safe, walkable culture stops.
     score += this.groupBonus(place, input.group);
 
+    // A family day should not be built around the places people go to drink.
+    // Demoted, not excluded: the answer said who is travelling, not that a
+    // rooftop bar must never appear, and the catalogue has exactly seven
+    // nightlife-tagged places — small enough that hiding them outright would
+    // quietly empty part of one or two hubs.
+    if (input.group === 'family' && place.interests.includes('nightlife')) {
+      score -= HubBudgetStrategy.NIGHTLIFE_PENALTY_FOR_FAMILIES;
+    }
+
+    // First visit or not. Both bonuses sit below one interest match (+25), so
+    // this settles ties and orders the shortlist without overruling what the
+    // traveller actually said they were interested in.
+    if (input.visitedBefore === false && place.placeType === 'landmark') {
+      score += HubBudgetStrategy.FAMILIARITY_BONUS;
+    }
+    if (input.visitedBefore === true && place.interests.includes('hiddengem')) {
+      score += HubBudgetStrategy.FAMILIARITY_BONUS;
+    }
+
     // Gently penalize expensive tickets when the budget is tight.
     if (place.entryFeeTry > input.budgetTry * 0.25) score -= 15;
 
     return score;
   }
 
+  /**
+   * Exhaustive on purpose, with no `default`.
+   *
+   * This was three cases and no fallthrough, so adding `family` to `GroupType`
+   * would have returned `undefined` here, made the running score `NaN`, and
+   * handed the sort a comparator that answers `NaN` to every question — which
+   * does not throw, does not warn, and quietly returns the pool in whatever
+   * order it happened to be in. The `never` check turns the next value added
+   * to the union into a compile error instead of a silently scrambled day.
+   */
   private groupBonus(place: Place, group: GroupType): number {
     switch (group) {
       case 'friends':
@@ -286,6 +399,16 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
           place.interests.includes('art')
           ? 8
           : 0;
+      // No positive lever for families yet. Seven places carry the `family`
+      // interest, which is too thin to steer a day with, and inventing a
+      // proxy — "families like parks" — would be a guess wearing the clothes
+      // of data. The nightlife demotion above is what this answer does.
+      case 'family':
+        return 0;
+      default: {
+        const exhaustive: never = group;
+        return exhaustive;
+      }
     }
   }
 
@@ -554,17 +677,31 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     };
   }
 
+  /**
+   * How many people the day is being costed for.
+   *
+   * A lookup rather than the chain of ternaries this was, because that chain
+   * ended in `: 4` — so `family` would have been priced at four heads by
+   * falling off the end of a condition written before families existed. Four
+   * happens to be a fair guess for a family, but a guess that arrives by
+   * accident is indistinguishable from a bug until someone checks the bill.
+   */
+  private static readonly HEADS_BY_GROUP: Record<GroupType, number> = {
+    solo: 1,
+    couple: 2,
+    family: 4,
+    friends: 4,
+  };
+
   private transportCost(leg: TransportLeg, group: GroupType): number {
-    const heads = group === 'solo' ? 1 : group === 'couple' ? 2 : 4;
     // Istanbulkart fare — one fare for anything that is not walking.
     const perHead = leg.mode === 'walk' ? 0 : 27;
-    return perHead * heads;
+    return perHead * HubBudgetStrategy.HEADS_BY_GROUP[group];
   }
 
   private lunchCost(group: GroupType): number {
     const perHead = 250;
-    const heads = group === 'solo' ? 1 : group === 'couple' ? 2 : 4;
-    return perHead * heads;
+    return perHead * HubBudgetStrategy.HEADS_BY_GROUP[group];
   }
 
   // ── helpers ──────────────────────────────────────────────────────

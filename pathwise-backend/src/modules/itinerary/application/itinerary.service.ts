@@ -69,6 +69,8 @@ export class ItineraryService {
       startOrigin: dto.startOrigin,
       endOrigin: dto.endOrigin,
       reservations: dto.reservations,
+      walkingTolerance: dto.walkingTolerance,
+      visitedBefore: dto.visitedBefore,
       quiz: dto.quiz,
     };
 

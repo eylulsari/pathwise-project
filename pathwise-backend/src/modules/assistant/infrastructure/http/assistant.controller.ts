@@ -26,6 +26,7 @@ export class AssistantController {
       message: dto.message,
       conversationHistory: dto.conversationHistory ?? [],
       activePlan: dto.activePlan ?? [],
+      dietary: dto.dietary,
     });
   }
 }

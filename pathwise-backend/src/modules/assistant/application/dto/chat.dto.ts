@@ -54,4 +54,13 @@ export class ChatDto {
   @IsString({ each: true })
   @MaxLength(120, { each: true })
   activePlan?: string[];
+
+  /**
+   * The quiz's dietary answer. "No restriction" is sent as an absent field
+   * rather than a value, so the prompt says nothing at all rather than telling
+   * the model the user eats everything — which it would otherwise assume.
+   */
+  @IsOptional()
+  @IsIn(['vegetarian', 'vegan', 'no-seafood'])
+  dietary?: 'vegetarian' | 'vegan' | 'no-seafood';
 }
