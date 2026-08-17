@@ -249,7 +249,7 @@ function Stat({ label, value }: { label: string; value: string }) {
  */
 function SavedPlacesList() {
   const { t } = useT();
-  const { savedIds, toggle } = useSavedPlaces();
+  const { toggle } = useSavedPlaces();
   const [places, setPlaces] = useState<Place[]>([]);
   /**
    * Three states, not two.
@@ -277,10 +277,24 @@ function SavedPlacesList() {
     };
   }, []);
 
-  // Unsaving from this list should make the row leave, and `savedIds` is what
-  // the toggle updates — so the fetched records are filtered through it rather
-  // than re-fetched on every tap.
-  const visible = places.filter((p) => savedIds.has(p.placeId));
+  /**
+   * Unsaving from this list should make the row leave without a refetch, so
+   * removals are tracked here.
+   *
+   * This used to filter through `savedIds`, which comes from a *second*,
+   * independently fetched endpoint — and that endpoint swallows its own
+   * errors and defaults to an empty set. So whenever `/saved-places/ids`
+   * was slow or failed, this list rendered "nothing saved yet" while holding
+   * the records that prove otherwise, and never corrected itself. Every row
+   * here is saved by definition: it came back from the saved-places endpoint.
+   */
+  const [removed, setRemoved] = useState<Set<string>>(new Set());
+  const visible = places.filter((p) => !removed.has(p.placeId));
+
+  const unsave = async (placeId: string) => {
+    setRemoved((prev) => new Set(prev).add(placeId));
+    await toggle(placeId);
+  };
 
   if (status === 'loading') {
     return (
@@ -327,7 +341,7 @@ function SavedPlacesList() {
             placeId={place.placeId}
             placeName={place.name}
             saved
-            onToggle={toggle}
+            onToggle={unsave}
             className="ml-auto flex-shrink-0"
           />
         </div>

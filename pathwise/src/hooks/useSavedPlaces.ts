@@ -13,19 +13,42 @@ export function useSavedPlaces() {
   const [ids, setIds] = useState<Set<string>>(new Set());
   const [loaded, setLoaded] = useState(false);
 
+  /**
+   * Load the set, retrying a failed request rather than settling on empty.
+   *
+   * This used to swallow the error and leave the set empty, on the reasoning
+   * that "signed out or offline" makes empty the honest default. It is not
+   * honest for a signed-in traveller whose request merely failed: an empty set
+   * means every ☆ reads unsaved, and it means `savedCount` is 0, which removes
+   * the "start from my saved places" button from the page entirely. The
+   * feature does not degrade — it disappears, permanently, because nothing
+   * ever asked again.
+   *
+   * Three attempts with a short backoff, then give up quietly. Being signed
+   * out still ends in an empty set; the difference is that a blip no longer
+   * does.
+   */
   useEffect(() => {
     let cancelled = false;
-    api
-      .getSavedPlaceIds()
-      .then((list) => {
-        if (!cancelled) setIds(new Set(list));
-      })
-      .catch(() => {
-        /* signed out or offline — an empty set is the honest default */
-      })
-      .finally(() => {
-        if (!cancelled) setLoaded(true);
-      });
+
+    const load = async () => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const list = await api.getSavedPlaceIds();
+          if (!cancelled) {
+            setIds(new Set(list));
+            setLoaded(true);
+          }
+          return;
+        } catch {
+          if (cancelled) return;
+          await new Promise((r) => setTimeout(r, 400 * 2 ** attempt));
+        }
+      }
+      if (!cancelled) setLoaded(true);
+    };
+
+    void load();
     return () => {
       cancelled = true;
     };
