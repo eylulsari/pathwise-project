@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { IsString, MaxLength, MinLength } from 'class-validator';
 import { MessagingService } from '../../application/messaging.service';
+import { UsersService } from '../../../users/application/users.service';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../auth/infrastructure/decorators/current-user.decorator';
 import { AuthUser } from '../../../auth/domain/auth-user';
@@ -37,13 +38,22 @@ export class SendMessageDto {
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
 export class MessagingController {
-  constructor(private readonly messaging: MessagingService) {}
+  constructor(
+    private readonly messaging: MessagingService,
+    private readonly users: UsersService,
+  ) {}
 
   // ── connections ──────────────────────────────────────────────────
 
+  /**
+   * Whether the caller may read `identifiesAsWoman` off their connections is
+   * decided from their own stored preferences, not from a query parameter —
+   * the same reason the buddy list derives it server-side.
+   */
   @Get('connections')
-  connections(@CurrentUser() user: AuthUser) {
-    return this.messaging.listConnections(user.id);
+  async connections(@CurrentUser() user: AuthUser) {
+    const me = await this.users.findById(user.id);
+    return this.messaging.listConnections(user.id, me.womenModeActive);
   }
 
   @Post('connections/:userId/request')

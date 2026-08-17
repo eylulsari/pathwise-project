@@ -1,26 +1,54 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { Hub } from '../../places/domain/place';
+import { avatarColorFor } from '../domain/check-in';
+import { BudgetLevel } from '../domain/matching';
 import {
   Traveler,
   TravelTag,
   TravelerViewerContext,
 } from '../domain/traveler';
-import {
-  BUDDY_CONNECTION_REPOSITORY,
-  BuddyConnectionRepositoryPort,
-} from '../domain/buddy-connection.repository.port';
+import { UsersService } from '../../users/application/users.service';
+import { MessagingService } from '../../messaging/application/messaging.service';
 import { TRAVELER_SEED } from '../infrastructure/persistence/traveler.dataset';
 
 /** What a caller may actually see — `visibleToWomenOnly` is never exposed. */
 export type PublicTraveler = Omit<Traveler, 'visibleToWomenOnly'>;
 
+/**
+ * A real account as it appears in the buddy list.
+ *
+ * Deliberately NOT the `Traveler` shape. A seed profile is a hand-written
+ * fixture with an age, a nationality and a bio guaranteed to be there; a real
+ * account has whatever its owner chose to fill in, and most of it is nullable.
+ * Forcing accounts through the seed's type would mean inventing defaults —
+ * an age of 0, an empty-string nationality — that the UI would then render.
+ *
+ * `isSample: false` is stated rather than implied. Both lists carry the flag,
+ * so a client can never tell them apart by which array they arrived in and
+ * then get it wrong the day the two are merged.
+ */
+export interface RealTraveler {
+  id: string;
+  name: string;
+  age: number | null;
+  nationality: string | null;
+  avatarColor: string;
+  tags: TravelTag[];
+  bio: string | null;
+  preferredHubs: Hub[];
+  budgetLevel: BudgetLevel | null;
+  identifiesAsWoman?: boolean;
+  isSample: false;
+}
+
+/** A seed profile. Shown for texture; never an action target. */
+export type SampleTraveler = PublicTraveler & { isSample: true };
+
 export interface TravelerListResult {
-  travelers: PublicTraveler[];
-  /**
-   * Traveler ids this viewer has connected with. Sent alongside the list so
-   * the client renders the correct button state from the server's answer
-   * rather than from whatever the browser happened to remember.
-   */
-  connectedTravelerIds: string[];
+  /** Real accounts. The only ones that can be connected to. */
+  travelers: RealTraveler[];
+  /** The curated demo profiles. Display only. */
+  sampleTravelers: SampleTraveler[];
   /**
    * Whether the `womenOnly` filter was actually applied. It is refused (and
    * reported as `false`) for viewers who have not opted in themselves — see
@@ -35,7 +63,24 @@ export interface ListTravelersOptions {
 }
 
 /**
+ * How many accounts the buddy list will consider. See
+ * `UserRepositoryPort.listDiscoverable` for why raising this is not the fix
+ * when it is ever reached.
+ */
+const DISCOVERABLE_LIMIT = 200;
+
+/**
  * Traveler Buddy Finder.
+ *
+ * ── Two sources, and only one of them is a person ────────────────────
+ * The list used to be the demo seed and nothing else, which meant buddy
+ * matching scored a real user's real trip history against invented people and
+ * offered a "connect" button that wrote a row nobody would ever read. Those
+ * are now separated at the source: `travelers` are accounts, `sampleTravelers`
+ * are fixtures, and every action in the app hangs off the first list.
+ *
+ * The seed stays because a buddy finder with two accounts in it demonstrates
+ * nothing — but it is labelled, unranked and inert.
  *
  * ⚠️ SELF-DECLARATION, NOT VERIFICATION: the women-traveler mode filters on a
  * box the account holder ticked themselves. Pathwise performs no identity
@@ -50,94 +95,113 @@ export interface ListTravelersOptions {
 @Injectable()
 export class SocialService {
   constructor(
-    @Inject(BUDDY_CONNECTION_REPOSITORY)
-    private readonly connections: BuddyConnectionRepositoryPort,
+    private readonly users: UsersService,
+    private readonly messaging: MessagingService,
   ) {}
 
   /**
-   * Reciprocity — the single rule that governs this feature:
+   * Reciprocity — the single rule that governs this feature, applied to both
+   * sources identically:
    *
-   * 1. **Discovery.** A traveler who set `visibleToWomenOnly` is hidden from
-   *    everyone whose own women-mode is not active.
+   * 1. **Discovery.** Anyone who set `visibleToWomenOnly` is hidden from every
+   *    viewer whose own women-mode is not active.
    * 2. **Reading the flag.** `identifiesAsWoman` is stripped from the payload
    *    for those same viewers, so a browsing account can never read anyone's
    *    declaration off the wire.
    * 3. **Filtering.** `womenOnly` is refused for those viewers too — otherwise
    *    list membership would leak exactly the declaration rule 2 hides.
+   *
+   * It is stated once, here, and both lists are built from it. When the rule
+   * lived only over the seed, adding accounts would have been the moment it
+   * quietly stopped covering everyone.
    */
   async listTravelers(
     options: ListTravelersOptions,
     viewer: TravelerViewerContext,
-    userId?: string,
+    userId: string,
   ): Promise<TravelerListResult> {
     const eligible = viewer.womenModeActive;
     const womenOnlyApplied = !!options.womenOnly && eligible;
 
-    const travelers = TRAVELER_SEED.filter((t) => {
-      // (1) honour each traveler's own visibility preference
-      if (t.visibleToWomenOnly && !eligible) return false;
-      // (3) the women-traveler filter, only for eligible viewers
-      if (womenOnlyApplied && t.identifiesAsWoman !== true) return false;
-      if (options.tag && !t.tags.includes(options.tag)) return false;
-      return true;
-    }).map((t) => this.toPublic(t, eligible));
-
-    const connected = userId
-      ? await this.connections.connectedTravelerIds(userId)
-      : new Set<string>();
-
     return {
-      travelers,
+      travelers: await this.listRealTravelers(userId, options, eligible, womenOnlyApplied),
+      sampleTravelers: this.listSampleTravelers(options, eligible, womenOnlyApplied),
       womenOnlyApplied,
-      // Only ids from THIS response. A connection to someone the viewer can no
-      // longer see (they turned on women-only visibility afterwards) must not
-      // leak back as a name in the list — rule (1) would be undone by rule (4).
-      connectedTravelerIds: travelers
-        .map((t) => t.id)
-        .filter((id) => connected.has(id)),
     };
   }
 
   /**
-   * Connect to a traveler. Idempotent, and refuses ids the viewer cannot see.
+   * Real accounts, minus the viewer and minus anyone either of them has
+   * blocked.
    *
-   * The visibility check is not decoration. Without it, POSTing an id straight
-   * at this endpoint would confirm that a hidden traveler exists — which is
-   * exactly the declaration the reciprocity rule keeps from browsing accounts.
-   * An unknown id and a hidden one both come back 404, so the two are
-   * indistinguishable from outside.
+   * The block exclusion is not cosmetic. Messaging already refuses a blocked
+   * pair, so leaving them in the list would only produce a card whose one
+   * button is guaranteed to fail — and would tell the blocker that the person
+   * they blocked is still around, which is the opposite of what blocking is.
    */
-  async connect(
+  private async listRealTravelers(
     userId: string,
-    travelerId: string,
-    viewer: TravelerViewerContext,
-  ): Promise<void> {
-    this.assertVisible(travelerId, viewer);
-    await this.connections.connect(userId, travelerId);
+    options: ListTravelersOptions,
+    eligible: boolean,
+    womenOnlyApplied: boolean,
+  ): Promise<RealTraveler[]> {
+    const [accounts, blocked] = await Promise.all([
+      this.users.listDiscoverable({
+        excludeUserId: userId,
+        includeWomenOnlyVisible: eligible, // rule (1)
+        limit: DISCOVERABLE_LIMIT,
+      }),
+      this.messaging.blockedIds(userId),
+    ]);
+
+    return accounts
+      .filter((u) => !blocked.has(u.id))
+      // rule (3) — only ever reached by a viewer who is eligible
+      .filter((u) => !womenOnlyApplied || u.identifiesAsWoman === true)
+      .filter(
+        (u) => !options.tag || (u.travelStyles as TravelTag[]).includes(options.tag),
+      )
+      .map((u) => ({
+        id: u.id,
+        name: u.name,
+        age: u.age,
+        nationality: u.nationality,
+        avatarColor: avatarColorFor(u.id),
+        tags: u.travelStyles as TravelTag[],
+        bio: u.bio,
+        // Filled in by the controller from saved trips; an account with no
+        // trips keeps the empty values, which the matcher reads as "nothing to
+        // compare on" rather than as a preference.
+        preferredHubs: [],
+        budgetLevel: null,
+        // rule (2)
+        ...(eligible && u.identifiesAsWoman === true
+          ? { identifiesAsWoman: true }
+          : {}),
+        isSample: false as const,
+      }));
   }
 
-  /**
-   * Disconnect. Deliberately NOT visibility-checked: someone who becomes
-   * hidden after you connected must still be removable, or the connection
-   * would be impossible to undo.
-   */
-  async disconnect(userId: string, travelerId: string): Promise<void> {
-    await this.connections.disconnect(userId, travelerId);
-  }
-
-  private assertVisible(travelerId: string, viewer: TravelerViewerContext): void {
-    const traveler = TRAVELER_SEED.find((t) => t.id === travelerId);
-    if (!traveler || (traveler.visibleToWomenOnly && !viewer.womenModeActive)) {
-      throw new NotFoundException('Traveler not found');
-    }
+  /** The demo seed. Same visibility rules, no connection state, no ranking. */
+  private listSampleTravelers(
+    options: ListTravelersOptions,
+    eligible: boolean,
+    womenOnlyApplied: boolean,
+  ): SampleTraveler[] {
+    return TRAVELER_SEED.filter((t) => {
+      if (t.visibleToWomenOnly && !eligible) return false; // (1)
+      if (womenOnlyApplied && t.identifiesAsWoman !== true) return false; // (3)
+      if (options.tag && !t.tags.includes(options.tag)) return false;
+      return true;
+    }).map((t) => this.toPublic(t, eligible));
   }
 
   /** (2) Strip the declaration for viewers who have not made one themselves. */
-  private toPublic(traveler: Traveler, eligible: boolean): PublicTraveler {
+  private toPublic(traveler: Traveler, eligible: boolean): SampleTraveler {
     const view: Traveler = { ...traveler };
     // Never exposed to anyone — it is the traveler's own visibility setting.
     delete view.visibleToWomenOnly;
     if (!eligible) delete view.identifiesAsWoman;
-    return view;
+    return { ...view, isSample: true };
   }
 }

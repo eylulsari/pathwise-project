@@ -40,6 +40,18 @@ const BURST_MESSAGE_LIMIT = 20;
  */
 const HOURLY_CONNECTION_REQUEST_LIMIT = 20;
 
+/** One entry in "who am I connected to", as the API returns it. */
+export interface Connection {
+  userId: string;
+  name: string;
+  status: 'pending-in' | 'pending-out' | 'accepted';
+  /**
+   * Self-declared, and present only for callers in women-traveler mode.
+   * ⚠️ Never verified — see `SocialService` for the full rule.
+   */
+  identifiesAsWoman?: boolean;
+}
+
 /**
  * Direct messaging between connected accounts.
  *
@@ -153,16 +165,26 @@ export class MessagingService {
     return count > 0;
   }
 
-  async listConnections(userId: string): Promise<
-    { userId: string; name: string; status: 'pending-in' | 'pending-out' | 'accepted' }[]
-  > {
+  /**
+   * `identifiesAsWoman` rides along only when the caller has opted into
+   * women-traveler mode themselves — the same reciprocity rule the buddy list
+   * applies, restated here because this is a second way to read the flag.
+   *
+   * The SOS panel is what needs it: "share my location with my connected women
+   * buddies" has to know which connections those are, and these connections
+   * are the only ones with a real person on the other end.
+   */
+  async listConnections(
+    userId: string,
+    viewerWomenModeActive = false,
+  ): Promise<Connection[]> {
     const rows = await this.connections.find({
       where: [{ requesterId: userId }, { addresseeId: userId }],
       order: { createdAt: 'DESC' },
     });
     const blocked = await this.blockedIdsEitherWay(userId);
 
-    const out: { userId: string; name: string; status: 'pending-in' | 'pending-out' | 'accepted' }[] = [];
+    const out: Connection[] = [];
     for (const row of rows) {
       const otherId = row.requesterId === userId ? row.addresseeId : row.requesterId;
       // A blocked pair is not shown at all — neither as a connection nor as a
@@ -182,6 +204,9 @@ export class MessagingService {
             : row.requesterId === userId
               ? 'pending-out'
               : 'pending-in',
+        ...(viewerWomenModeActive && other.identifiesAsWoman === true
+          ? { identifiesAsWoman: true }
+          : {}),
       });
     }
     return out;
@@ -217,7 +242,18 @@ export class MessagingService {
     await this.blocks.delete({ blockerId, blockedId });
   }
 
-  /** Everyone this user has blocked, or who has blocked them. */
+  /**
+   * Everyone this user has blocked, or who has blocked them.
+   *
+   * Public because the buddy list needs it too: a blocked account must not
+   * appear there as a card with a connect button, since the button is already
+   * guaranteed to be refused and its presence would tell the blocker that the
+   * person is still around.
+   */
+  async blockedIds(userId: string): Promise<Set<string>> {
+    return this.blockedIdsEitherWay(userId);
+  }
+
   private async blockedIdsEitherWay(userId: string): Promise<Set<string>> {
     const rows = await this.blocks.find({
       where: [{ blockerId: userId }, { blockedId: userId }],

@@ -42,52 +42,82 @@ async function likeCount(page: Page): Promise<number> {
   return Number((text ?? '').replace(/\D/g, ''));
 }
 
-test('a buddy connection survives a reload, and is nobody else’s', async ({ page, browser }) => {
+/**
+ * Connection persistence, against a real account.
+ *
+ * This replaces two specs that connected to a demo profile and reloaded. The
+ * shape of the assertion is kept — a thing still on screen after a reload came
+ * from the database, not from the tab — but the other side is now a person,
+ * which is what makes the row mean anything.
+ */
+test('a connection request survives a reload, and is nobody else’s', async ({
+  page,
+  browser,
+}) => {
   await signUp(page, 'buddy');
+
+  // The other side has to exist first: a check-in is how one account becomes
+  // findable by another.
+  const theirContext = await browser.newContext();
+  const them = await theirContext.newPage();
+  await signUp(them, 'buddy_target');
+  const marker = `Persist buddy ${Date.now()}`;
+  await them.goto('/social');
+  await them.getByPlaceholder(/say what you.re up to/i).fill(marker);
+  await them.getByRole('button', { name: /I.m Here/i }).click();
+  await expect(them.getByText(marker)).toBeVisible();
+
   await page.goto('/social');
+  const card = page
+    .locator('div')
+    .filter({ hasText: marker })
+    .filter({ has: page.getByRole('button', { name: /Ask to connect/i }) })
+    .last();
+  await expect(card).toBeVisible({ timeout: 20_000 });
+  await card.getByRole('button', { name: /Ask to connect/i }).click();
+  await expect(page.getByText(/Request sent/i).first()).toBeVisible();
 
-  // Connect to whoever is first. Which traveler that is does not matter —
-  // the list is ranked per account, and what is being proved is that the
-  // connection outlives the tab, not who it was with.
-  const connectButton = page.getByRole('button', { name: /👋 Connect/ }).first();
-  await expect(connectButton).toBeVisible({ timeout: 15_000 });
-  await connectButton.click();
-  await expect(page.getByRole('button', { name: /✓ Connected/ }).first()).toBeVisible();
-
-  // The whole point: a reload re-reads the list from the server. A connection
-  // still showing here came out of the database, not out of this tab.
+  // The whole point: a reload re-reads from the server. A request still listed
+  // here came out of the database.
+  await page.goto('/messages');
   await page.reload();
-  await expect(page.getByRole('button', { name: /✓ Connected/ }).first()).toBeVisible({
-    timeout: 15_000,
-  });
+  await expect(page.getByTestId('dm-connections').getByText(/Persistence Tester/).first())
+    .toBeVisible({ timeout: 15_000 });
 
-  // …and it belongs to this account alone. A second, fresh account must see
-  // the same people with nobody connected.
+  // …and it belongs to these two alone. A third, fresh account sees none of it.
   const otherContext = await browser.newContext();
   const other = await otherContext.newPage();
   await signUp(other, 'buddy_other');
-  await other.goto('/social');
-  await expect(other.getByRole('button', { name: /👋 Connect/ }).first()).toBeVisible({
+  await other.goto('/messages');
+  await expect(other.getByTestId('dm-connections').getByRole('button')).toHaveCount(0, {
     timeout: 15_000,
   });
-  await expect(other.getByRole('button', { name: /✓ Connected/ })).toHaveCount(0);
+
   await otherContext.close();
+  await theirContext.close();
 });
 
-test('disconnecting survives a reload too', async ({ page }) => {
-  await signUp(page, 'unbuddy');
-  await page.goto('/social');
+/**
+ * The removed endpoints, asserted at the wire.
+ *
+ * Taking the button out of the UI is not what makes an action impossible —
+ * the request can still be sent by hand. These two used to answer 200 and
+ * persist a row pointing at a fixture.
+ */
+test('the old buddy-connect endpoints are gone, not just hidden', async ({ page, request }) => {
+  await signUp(page, 'gone');
+  const token = await page.evaluate(() => localStorage.getItem('pathwise.access'));
+  expect(token, 'signed-in token').toBeTruthy();
+  const headers = { authorization: `Bearer ${token}` };
+  const API = process.env.E2E_API_URL ?? 'http://127.0.0.1:3000/api';
 
-  await page.getByRole('button', { name: /👋 Connect/ }).first().click();
-  const connected = page.getByRole('button', { name: /✓ Connected/ }).first();
-  await expect(connected).toBeVisible({ timeout: 15_000 });
+  expect((await request.put(`${API}/social/travelers/t1/connect`, { headers })).status()).toBe(404);
+  expect((await request.delete(`${API}/social/travelers/t1/connect`, { headers })).status()).toBe(404);
 
-  await connected.click();
-  await page.reload();
-  // Nothing connected after the round trip — the delete reached the database.
-  await expect(page.getByRole('button', { name: /✓ Connected/ })).toHaveCount(0, {
-    timeout: 15_000,
-  });
+  // And a seed id is still refused by the messaging system it might be aimed
+  // at instead — the point is that no path connects an account to a fixture.
+  const asked = await request.post(`${API}/messages/connections/t1/request`, { headers });
+  expect(asked.ok()).toBeFalsy();
 });
 
 test('a forum answer survives a reload, in its own thread', async ({ page }) => {

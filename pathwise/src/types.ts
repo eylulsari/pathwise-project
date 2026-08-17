@@ -343,6 +343,13 @@ export interface MessagingConnection {
   userId: string;
   name: string;
   status: 'pending-in' | 'pending-out' | 'accepted';
+  /**
+   * Self-declared, and sent only to callers who are in women-traveler mode
+   * themselves — the same reciprocity rule the buddy list applies.
+   *
+   * ⚠️ Never verified. The SOS panel narrows on it and says so.
+   */
+  identifiesAsWoman?: boolean;
 }
 
 export interface DirectMessage {
@@ -518,6 +525,14 @@ export type TravelTag =
   | '#PhotoNomad'
   | '#SlowTravel';
 
+/**
+ * A curated demo profile.
+ *
+ * ⚠️ Nobody is behind these. They are shown for texture and are never an
+ * action target — no connect, no message, no compatibility score. `isSample`
+ * comes from the server rather than being inferred from the id shape; see the
+ * backend's `check-in.ts` for why.
+ */
 export interface Traveler {
   id: string;
   name: string;
@@ -551,6 +566,32 @@ export interface Traveler {
   matchScore?: number | null;
   /** The style tags both sides share — what makes the number explainable. */
   sharedStyles?: TravelTag[];
+  /** Always `true` here. Present so the two lists read the same way. */
+  isSample?: true;
+}
+
+/**
+ * A real account in the buddy list — the only kind that can be connected to.
+ *
+ * Almost everything is nullable, and deliberately so: this is whatever its
+ * owner chose to fill in, not a fixture written to look complete. The UI omits
+ * a line rather than printing a placeholder for it.
+ */
+export interface RealTraveler {
+  id: string;
+  name: string;
+  age: number | null;
+  nationality: string | null;
+  avatarColor: string;
+  tags: TravelTag[];
+  bio: string | null;
+  preferredHubs: Hub[];
+  budgetLevel: BudgetLevel | null;
+  /** ⚠️ Self-declared, NOT verified. Redacted for viewers who have not opted in. */
+  identifiesAsWoman?: boolean;
+  matchScore?: number | null;
+  sharedStyles?: TravelTag[];
+  isSample: false;
 }
 
 /** Coarse spending band used by buddy matching. */
@@ -558,16 +599,15 @@ export type BudgetLevel = 'budget' | 'mid' | 'comfort';
 
 /** Response of `GET /social/travelers`. */
 export interface TravelerListResult {
-  /** Already ranked by `matchScore`, best first. */
-  travelers: Traveler[];
+  /** Real accounts, ranked by `matchScore`, best first. */
+  travelers: RealTraveler[];
+  /**
+   * The demo seed. Unranked and inert — a percentage describing how well you
+   * would get along with a fixture is a number about nothing.
+   */
+  sampleTravelers: Traveler[];
   /** False when the backend refused the filter (viewer has not opted in). */
   womenOnlyApplied: boolean;
-  /**
-   * Traveler ids this account has connected with, straight from the server.
-   * Optional so an offline response without it still renders — the fallback
-   * simply shows nobody connected rather than guessing from stale storage.
-   */
-  connectedTravelerIds?: string[];
   /**
    * What the server knows about the caller. Lets the UI explain a thin
    * ranking instead of silently showing weak percentages.
@@ -589,7 +629,12 @@ export interface TravelerListResult {
  */
 export interface CheckIn {
   id: string;
-  traveler: Pick<Traveler, 'id' | 'name' | 'avatarColor'>;
+  /**
+   * `isSample` is the server's answer to "is there an account behind this
+   * name". Nothing may be offered against a sample author — the connect
+   * request would be refused, and asking anyway shows a dead button.
+   */
+  traveler: Pick<Traveler, 'id' | 'name' | 'avatarColor'> & { isSample: boolean };
   /** `null` when the author did not pick a place ("right here"). */
   placeId: string | null;
   hub: Hub | null;

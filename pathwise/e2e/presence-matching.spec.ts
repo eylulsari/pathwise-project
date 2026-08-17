@@ -121,14 +121,46 @@ test('the check-in map renders pins, and only recent ones pulse', async ({ page 
 
 // ── Buddy matching UI (previously API-verified only) ──────────────────
 
-test('travel styles can be picked in the profile and drive the match score', async ({ page }) => {
+/**
+ * ⚠️ This test now builds its own candidates.
+ *
+ * Ranking used to run over the demo seed, so a lone account could open /social
+ * and see thirty ranked cards. That was the bug, not a convenience: the
+ * percentages described how well a real person would get along with a fixture.
+ * Only real accounts are scored now, which means this spec has to create the
+ * people it ranks — two of them, since "best first" needs something to be
+ * first *of*.
+ */
+test('travel styles can be picked in the profile and drive the match score', async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(120_000);
+
+  // Two other accounts with different styles, so the scores actually differ.
+  const others = [];
+  for (const [tag, style] of [
+    ['match_a', '#Foodie'],
+    ['match_b', '#Backpacker'],
+  ] as const) {
+    const ctx = await browser.newContext();
+    const p = await ctx.newPage();
+    await signUp(p, tag);
+    await p.goto('/profile');
+    const chip = p.getByRole('button', { name: style, exact: true });
+    await expect(chip).toBeVisible({ timeout: 20_000 });
+    await chip.click();
+    await expect(chip).toHaveAttribute('aria-pressed', 'true', { timeout: 15_000 });
+    others.push(ctx);
+  }
+
   await signUp(page, 'match');
 
   // A brand-new account has nothing to match on, so no percentage is shown —
   // the UI must not invent one.
   await page.goto('/social');
-  await expect(page.locator('.card-cream').first()).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText(/% *\d/).first()).toHaveCount(0);
+  await expect(page.getByTestId('traveler-card').first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId('traveler-card').getByText(/% *\d/)).toHaveCount(0);
   await expect(page.getByText(/Add your travel styles/i)).toBeVisible();
 
   // Pick a style in the profile.
@@ -138,17 +170,24 @@ test('travel styles can be picked in the profile and drive the match score', asy
   await foodie.click();
   await expect(foodie).toHaveAttribute('aria-pressed', 'true', { timeout: 15_000 });
 
-  // Now the buddy list is ranked and each card explains itself.
+  // Now the list is ranked and each card explains itself.
   await page.goto('/social');
-  const firstCard = page.locator('.card-cream').first();
-  await expect(firstCard).toBeVisible({ timeout: 20_000 });
-  await expect(firstCard.getByText(/Match/i)).toBeVisible({ timeout: 20_000 });
-  await expect(firstCard.getByText(/%\d+/)).toBeVisible();
+  const cards = page.getByTestId('traveler-card');
+  await expect(cards.first()).toBeVisible({ timeout: 20_000 });
+  await expect(cards.first().getByText(/Match/i)).toBeVisible({ timeout: 20_000 });
+  await expect(cards.first().getByText(/%\d+/)).toBeVisible();
 
   // Best match first: the top card must score at least as high as the next.
   const score = async (index: number) => {
-    const text = await page.locator('.card-cream').nth(index).getByText(/%\d+/).textContent();
+    const text = await cards.nth(index).getByText(/%\d+/).textContent();
     return Number((text ?? '').replace(/\D/g, ''));
   };
   expect(await score(0)).toBeGreaterThanOrEqual(await score(1));
+
+  // The sample profiles are NOT ranked — a percentage there would be a number
+  // about nobody, which is exactly what this list used to be full of.
+  await expect(page.getByTestId('sample-card').first()).toBeVisible();
+  await expect(page.getByTestId('sample-card').getByText(/% *\d/)).toHaveCount(0);
+
+  for (const ctx of others) await ctx.close();
 });

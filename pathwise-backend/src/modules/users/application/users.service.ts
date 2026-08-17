@@ -31,6 +31,15 @@ export class UsersService {
     return user;
   }
 
+  /** Accounts eligible to appear in someone's buddy list. See the port. */
+  listDiscoverable(options: {
+    excludeUserId: string;
+    includeWomenOnlyVisible: boolean;
+    limit: number;
+  }): Promise<User[]> {
+    return this.users.listDiscoverable(options);
+  }
+
   /** Public profile view for `GET /users/me`. */
   async getPublicProfile(id: string) {
     const user = await this.findById(id);

@@ -26,19 +26,19 @@ interface CheckInSeedEntry {
 }
 
 const SEED: CheckInSeedEntry[] = [
-  { id: 'c1', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#4A7C82' }, placeId: 'ChIJ-galata-tower', hub: 'karakoy-galata', message: 'Golden hour is unreal up here 🌇', minutesAgo: 8 },
-  { id: 'c2', traveler: { id: 't2', name: 'Diego Fernández', avatarColor: '#C56F52' }, placeId: 'ChIJ-kadikoy-ciya', hub: 'kadikoy-moda', message: 'Anyone want to split a table? So much food.', minutesAgo: 21 },
-  { id: 'c3', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A' }, placeId: 'ChIJ-kadikoy-carsi', hub: 'kadikoy-moda', message: 'Pickle shop tour starting now 🥒', minutesAgo: 34 },
-  { id: 'c8', traveler: { id: 't10', name: 'Elif Şahin', avatarColor: '#C98A3E' }, placeId: 'ChIJ-kadikoy-moda-sahil', hub: 'kadikoy-moda', message: 'Çay ve simit, sahilde. Yerliyim, soru sorabilirsiniz ☕', minutesAgo: 41 },
-  { id: 'c4', traveler: { id: 't3', name: 'Yuki Tanaka', avatarColor: '#6E8F74' }, placeId: 'ChIJ-balat-colorfulhouses', hub: 'balat-fener', message: 'Sketching the terraces, come say hi.', minutesAgo: 52 },
-  { id: 'c9', traveler: { id: 't9', name: 'Tom Whitaker', avatarColor: '#4F7C5E' }, placeId: 'ChIJ-besiktas-ortakoy-kumpir', hub: 'ortakoy-bebek', message: 'Bridge view table just opened up, two seats free 🌉', minutesAgo: 58 },
-  { id: 'c5', traveler: { id: 't5', name: 'Liam O’Connor', avatarColor: '#3F6E8C' }, placeId: 'ChIJ-kadikoy-modapier', hub: 'kadikoy-moda', message: 'End of the deck, 270° of water. Staying for sunset ⚓', minutesAgo: 66 },
-  { id: 'c10', traveler: { id: 't7', name: 'Noah Weber', avatarColor: '#5B7A99' }, placeId: 'ChIJ-balat-fenerpatriarchate', hub: 'balat-fener', message: 'Last two frames on this roll. Red brick against grey sky, worth the walk up.', minutesAgo: 95 },
-  { id: 'c11', traveler: { id: 't6', name: 'Sofia Marchetti', avatarColor: '#A8574C' }, placeId: 'ChIJ-sultanahmet-hagiasophia', hub: 'sultanahmet', message: 'Queue is twenty minutes at this hour, not the two you read about.', minutesAgo: 112 },
-  { id: 'c6', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#4A7C82' }, placeId: 'ChIJ-sultanahmet-spicebazaar', hub: 'eminonu-sirkeci', message: 'Bought saffron on Hasırcılar instead of inside — half the price 🌶️', minutesAgo: 128 },
-  { id: 'c12', traveler: { id: 't12', name: 'Camila Rojas', avatarColor: '#B85C7A' }, placeId: 'ChIJ-galata-karakoylokantasi', hub: 'karakoy-galata', message: 'Lunch menu is the cheap way into this place. Gone now, but go.', minutesAgo: 155 },
-  { id: 'c7', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A' }, placeId: 'ChIJ-kadikoy-yeldegirmeni', hub: 'kadikoy-moda', message: 'Following the mural trail street by street, it just keeps going 🎨', minutesAgo: 184 },
-  { id: 'c13', traveler: { id: 't14', name: 'Kenji Mori', avatarColor: '#8A6B4F' }, placeId: 'ChIJ-sultanahmet-kucukayasofya', hub: 'sultanahmet', message: 'Courtyard was empty at opening. Headed back to the tea garden now.', minutesAgo: 240 },
+  { id: 'c1', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#4A7C82', isSample: true }, placeId: 'ChIJ-galata-tower', hub: 'karakoy-galata', message: 'Golden hour is unreal up here 🌇', minutesAgo: 8 },
+  { id: 'c2', traveler: { id: 't2', name: 'Diego Fernández', avatarColor: '#C56F52', isSample: true }, placeId: 'ChIJ-kadikoy-ciya', hub: 'kadikoy-moda', message: 'Anyone want to split a table? So much food.', minutesAgo: 21 },
+  { id: 'c3', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A', isSample: true }, placeId: 'ChIJ-kadikoy-carsi', hub: 'kadikoy-moda', message: 'Pickle shop tour starting now 🥒', minutesAgo: 34 },
+  { id: 'c8', traveler: { id: 't10', name: 'Elif Şahin', avatarColor: '#C98A3E', isSample: true }, placeId: 'ChIJ-kadikoy-moda-sahil', hub: 'kadikoy-moda', message: 'Çay ve simit, sahilde. Yerliyim, soru sorabilirsiniz ☕', minutesAgo: 41 },
+  { id: 'c4', traveler: { id: 't3', name: 'Yuki Tanaka', avatarColor: '#6E8F74', isSample: true }, placeId: 'ChIJ-balat-colorfulhouses', hub: 'balat-fener', message: 'Sketching the terraces, come say hi.', minutesAgo: 52 },
+  { id: 'c9', traveler: { id: 't9', name: 'Tom Whitaker', avatarColor: '#4F7C5E', isSample: true }, placeId: 'ChIJ-besiktas-ortakoy-kumpir', hub: 'ortakoy-bebek', message: 'Bridge view table just opened up, two seats free 🌉', minutesAgo: 58 },
+  { id: 'c5', traveler: { id: 't5', name: 'Liam O’Connor', avatarColor: '#3F6E8C', isSample: true }, placeId: 'ChIJ-kadikoy-modapier', hub: 'kadikoy-moda', message: 'End of the deck, 270° of water. Staying for sunset ⚓', minutesAgo: 66 },
+  { id: 'c10', traveler: { id: 't7', name: 'Noah Weber', avatarColor: '#5B7A99', isSample: true }, placeId: 'ChIJ-balat-fenerpatriarchate', hub: 'balat-fener', message: 'Last two frames on this roll. Red brick against grey sky, worth the walk up.', minutesAgo: 95 },
+  { id: 'c11', traveler: { id: 't6', name: 'Sofia Marchetti', avatarColor: '#A8574C', isSample: true }, placeId: 'ChIJ-sultanahmet-hagiasophia', hub: 'sultanahmet', message: 'Queue is twenty minutes at this hour, not the two you read about.', minutesAgo: 112 },
+  { id: 'c6', traveler: { id: 't1', name: 'Mara Lindqvist', avatarColor: '#4A7C82', isSample: true }, placeId: 'ChIJ-sultanahmet-spicebazaar', hub: 'eminonu-sirkeci', message: 'Bought saffron on Hasırcılar instead of inside — half the price 🌶️', minutesAgo: 128 },
+  { id: 'c12', traveler: { id: 't12', name: 'Camila Rojas', avatarColor: '#B85C7A', isSample: true }, placeId: 'ChIJ-galata-karakoylokantasi', hub: 'karakoy-galata', message: 'Lunch menu is the cheap way into this place. Gone now, but go.', minutesAgo: 155 },
+  { id: 'c7', traveler: { id: 't4', name: 'Amara Okafor', avatarColor: '#B5654A', isSample: true }, placeId: 'ChIJ-kadikoy-yeldegirmeni', hub: 'kadikoy-moda', message: 'Following the mural trail street by street, it just keeps going 🎨', minutesAgo: 184 },
+  { id: 'c13', traveler: { id: 't14', name: 'Kenji Mori', avatarColor: '#8A6B4F', isSample: true }, placeId: 'ChIJ-sultanahmet-kucukayasofya', hub: 'sultanahmet', message: 'Courtyard was empty at opening. Headed back to the tea garden now.', minutesAgo: 240 },
 
   // ── Added with the 10-hub expansion ──────────────────────────────
   // Beyoğlu, Üsküdar and the islands had no check-ins at all, so their map
@@ -46,10 +46,10 @@ const SEED: CheckInSeedEntry[] = [
   // inside 9–239 minutes on purpose: the specs pin the newest entry (8 min,
   // live) and the oldest (240 min, stale) as the two ends of the window, and
   // an entry outside that range would move a boundary the tests rely on.
-  { id: 'c14', traveler: { id: 't17', name: 'Sofia Novak', avatarColor: '#C97B8E' }, placeId: 'ChIJ-beyoglu-cicekpasaji', hub: 'beyoglu-taksim', message: 'Second table from the door is free if anyone wants to join 🍷', minutesAgo: 47 },
-  { id: 'c15', traveler: { id: 't21', name: 'Leyla Demirci', avatarColor: '#A87F28' }, placeId: 'ChIJ-uskudar-camlicatepesi', hub: 'uskudar', message: 'Whole peninsula visible from up here today, no haze at all 📷', minutesAgo: 96 },
-  { id: 'c16', traveler: { id: 't16', name: 'Ravi Menon', avatarColor: '#7A5C9E' }, placeId: 'ChIJ-beyoglu-nevizadesokak', hub: 'beyoglu-taksim', message: 'Went at opening instead of nine — completely different street.', minutesAgo: 168 },
-  { id: 'c17', traveler: { id: 't22', name: 'Grace Mbeki', avatarColor: '#2E8B87' }, placeId: 'ChIJ-adalar-buyukadaiskelesi', hub: 'adalar', message: 'Missed the 14:00 ferry back. No regrets, the pine woods are worth it.', minutesAgo: 205 },
+  { id: 'c14', traveler: { id: 't17', name: 'Sofia Novak', avatarColor: '#C97B8E', isSample: true }, placeId: 'ChIJ-beyoglu-cicekpasaji', hub: 'beyoglu-taksim', message: 'Second table from the door is free if anyone wants to join 🍷', minutesAgo: 47 },
+  { id: 'c15', traveler: { id: 't21', name: 'Leyla Demirci', avatarColor: '#A87F28', isSample: true }, placeId: 'ChIJ-uskudar-camlicatepesi', hub: 'uskudar', message: 'Whole peninsula visible from up here today, no haze at all 📷', minutesAgo: 96 },
+  { id: 'c16', traveler: { id: 't16', name: 'Ravi Menon', avatarColor: '#7A5C9E', isSample: true }, placeId: 'ChIJ-beyoglu-nevizadesokak', hub: 'beyoglu-taksim', message: 'Went at opening instead of nine — completely different street.', minutesAgo: 168 },
+  { id: 'c17', traveler: { id: 't22', name: 'Grace Mbeki', avatarColor: '#2E8B87', isSample: true }, placeId: 'ChIJ-adalar-buyukadaiskelesi', hub: 'adalar', message: 'Missed the 14:00 ferry back. No regrets, the pine woods are worth it.', minutesAgo: 205 },
 ];
 
 /** Materialise the seed against a clock. `now` is injected so it is testable. */

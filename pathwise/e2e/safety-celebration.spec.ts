@@ -136,14 +136,52 @@ test('women-traveler mode: the buddy filter only applies once opted in, and filt
 
 test('women-traveler mode: SOS can narrow the alert to connected women buddies', async ({
   page,
+  browser,
 }) => {
+  test.setTimeout(120_000);
   await signUp(page, 'wt_sos');
 
-  // Connect one woman traveler so the SOS sub-option has something to target.
+  /**
+   * ⚠️ The buddy this test needs is now a REAL ACCOUNT, and that is the change
+   * being covered. It used to connect to Mara Lindqvist — a demo profile with
+   * nobody behind her — so the panel counted a fixture as somebody who would
+   * receive an emergency alert. In a safety feature that number has to be real,
+   * so the setup is longer on purpose: a second account, a declaration, and a
+   * connection both sides agreed to.
+   */
+  const theirContext = await browser.newContext();
+  const buddy = await theirContext.newPage();
+  await signUp(buddy, 'wt_sos_buddy');
+  await buddy.goto('/profile');
+  await toggle(box(buddy, /^I identify as a woman/), true);
+
+  const marker = `SOS buddy ${Date.now()}`;
+  await buddy.goto('/social');
+  await buddy.getByPlaceholder(/say what you.re up to/i).fill(marker);
+  await buddy.getByRole('button', { name: /I.m Here/i }).click();
+  await expect(buddy.getByText(marker)).toBeVisible();
+
+  // The alerting account must be in women-mode itself to read anyone's
+  // declaration — the same reciprocity rule the buddy list applies.
+  await page.goto('/profile');
+  await toggle(box(page, /^I identify as a woman/), true);
+  await toggle(box(page, /^Show me only to women travelers/), true);
+
   await page.goto('/social');
-  const mara = travelerCard(page, 'Mara Lindqvist');
-  await expect(mara).toBeVisible({ timeout: 20_000 });
-  await mara.getByRole('button', { name: /Connect/i }).click();
+  const card = page
+    .locator('div')
+    .filter({ hasText: marker })
+    .filter({ has: page.getByRole('button', { name: /Ask to connect/i }) })
+    .last();
+  await expect(card).toBeVisible({ timeout: 20_000 });
+  await card.getByRole('button', { name: /Ask to connect/i }).click();
+  await expect(page.getByText(/Request sent/i).first()).toBeVisible();
+
+  // Consent: until this click there is no connection, and the panel below
+  // would correctly report nobody.
+  await buddy.goto('/messages');
+  await buddy.getByRole('button', { name: 'Accept', exact: true }).first().click();
+  await theirContext.close();
 
   // SOS lives on the dashboard map; it asks to confirm before showing the panel.
   await page.goto('/dashboard');

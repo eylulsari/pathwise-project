@@ -21,6 +21,20 @@ export interface UserRepositoryPort {
   create(data: CreateUserData): Promise<User>;
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
+  /**
+   * Accounts that may appear in someone else's buddy list.
+   *
+   * `includeWomenOnlyVisible` is passed in rather than decided here: the
+   * reciprocity rule that computes it lives in `SocialService`, next to the
+   * identical rule for the demo seed, so there is exactly one statement of who
+   * is eligible to see whom. This method only executes the filter — in SQL, so
+   * the cap applies to the rows that survive it rather than to the rows before.
+   */
+  listDiscoverable(options: {
+    excludeUserId: string;
+    includeWomenOnlyVisible: boolean;
+    limit: number;
+  }): Promise<User[]>;
   save(user: User): Promise<User>;
   setSubscriptionTier(id: string, tier: SubscriptionTier): Promise<User>;
   setTrialEndsAt(id: string, trialEndsAt: Date | null): Promise<User>;

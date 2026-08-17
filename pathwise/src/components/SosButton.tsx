@@ -15,11 +15,15 @@ interface ConnectedBuddy {
 /**
  * Connected buddies, read from the server.
  *
- * This used to come out of `localStorage`, written by the Social page. In an
- * emergency feature that was the wrong place for it: the list existed in one
- * browser, so signing in on a phone — the device you would actually be holding
- * — offered an empty "share my location". It is now the same list the server
- * returns to the Social page, so both agree by construction.
+ * ── Which "connected" ────────────────────────────────────────────────
+ * This used to read the buddy-connection table, whose other side was always a
+ * demo profile. So in an emergency the panel said "shared with 3 travel
+ * buddies" and the three were fixtures — a made-up number in the one feature
+ * where a made-up number is worst.
+ *
+ * It now reads accepted messaging connections: two real accounts that each
+ * agreed. Only `accepted` counts, because a request you sent is not somebody
+ * who will see anything.
  *
  * Failure is silent and empty on purpose. The emergency number and the nearest
  * police station do not depend on it, and they are the part that matters.
@@ -28,24 +32,21 @@ function useConnectedBuddies(active: boolean): ConnectedBuddy[] {
   const [buddies, setBuddies] = useState<ConnectedBuddy[]>([]);
 
   useEffect(() => {
-    // Only once the panel is actually open. `getTravelers` is the heaviest
-    // endpoint in the app — it loads the user, derives a profile from their
-    // saved trips and ranks every traveler — and SosButton sits on the
-    // dashboard, so fetching on mount put that request on every single page
-    // load for a list nobody had asked to see yet.
+    // Only once the panel is actually open — SosButton sits on the dashboard,
+    // so fetching on mount put a request on every page load for a list nobody
+    // had asked to see yet.
     if (!active) return;
     let live = true;
     api
-      .getTravelers()
-      .then((res) => {
+      .listConnections()
+      .then((list) => {
         if (!live) return;
-        const ids = new Set(res.connectedTravelerIds ?? []);
         setBuddies(
-          res.travelers
-            .filter((t) => ids.has(t.id))
-            .map((t) => ({
-              name: t.name,
-              identifiesAsWoman: t.identifiesAsWoman === true,
+          list
+            .filter((c) => c.status === 'accepted')
+            .map((c) => ({
+              name: c.name,
+              identifiesAsWoman: c.identifiesAsWoman === true,
             })),
         );
       })

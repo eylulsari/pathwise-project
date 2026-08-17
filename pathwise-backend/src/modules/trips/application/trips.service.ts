@@ -39,6 +39,11 @@ export class TripsService {
     return this.trips.findByUser(userId);
   }
 
+  /** Trips for several users at once — buddy matching scores a whole list. */
+  async listForUsers(userIds: string[]): Promise<Trip[]> {
+    return this.trips.findByUsers(userIds);
+  }
+
   async remove(userId: string, tripId: string): Promise<void> {
     await this.trips.deleteForUser(userId, tripId);
   }

@@ -63,6 +63,35 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
     return row ? this.toDomain(row) : null;
   }
 
+  /**
+   * Newest accounts first, capped.
+   *
+   * The order is a real limitation and not a preference: compatibility is
+   * computed in the application layer, so a cap here means "rank the newest N",
+   * not "the best N matches". At the size this app runs at the cap is never
+   * reached; the day it is, the score has to move into SQL rather than the cap
+   * being raised.
+   */
+  async listDiscoverable(options: {
+    excludeUserId: string;
+    includeWomenOnlyVisible: boolean;
+    limit: number;
+  }): Promise<User[]> {
+    const q = this.repo
+      .createQueryBuilder('u')
+      .where('u.id != :me', { me: options.excludeUserId });
+    if (!options.includeWomenOnlyVisible) {
+      // `visibleToWomenOnly` is NOT NULL with a false default, so a plain
+      // comparison covers every row.
+      q.andWhere('u."visibleToWomenOnly" = false');
+    }
+    const rows = await q
+      .orderBy('u."createdAt"', 'DESC')
+      .take(options.limit)
+      .getMany();
+    return rows.map((r) => this.toDomain(r));
+  }
+
   async save(user: User): Promise<User> {
     const saved = await this.repo.save({
       id: user.id,

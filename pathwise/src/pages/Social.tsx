@@ -4,6 +4,7 @@ import type {
   CheckIn,
   CommunityRoute,
   ForumQuestion,
+  RealTraveler,
   Traveler,
   TravelTag,
 } from '../types';
@@ -33,7 +34,10 @@ export default function Social() {
   const { t } = useT();
   const navigate = useNavigate();
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
-  const [travelers, setTravelers] = useState<Traveler[]>([]);
+  // Two lists, kept apart all the way to the screen. `travelers` are accounts
+  // and are the only ones anything can be done with; `samples` are fixtures.
+  const [travelers, setTravelers] = useState<RealTraveler[]>([]);
+  const [samples, setSamples] = useState<Traveler[]>([]);
   const [routes, setRoutes] = useState<CommunityRoute[]>([]);
   const [forum, setForum] = useState<ForumQuestion[]>([]);
 
@@ -43,8 +47,7 @@ export default function Social() {
   // nudge — a thin profile should say so rather than show weak percentages
   // with no explanation.
   const [canMatch, setCanMatch] = useState(true);
-  const [connected, setConnected] = useState<Set<string>>(new Set());
-  const [active, setActive] = useState<Traveler | null>(null);
+  const [active, setActive] = useState<Traveler | RealTraveler | null>(null);
   const [checkInText, setCheckInText] = useState('');
   const [posting, setPosting] = useState(false);
   const [postFailed, setPostFailed] = useState(false);
@@ -86,10 +89,8 @@ export default function Social() {
         // Already ranked by the server (best match first) — the tag filter
         // below only narrows it and preserves that order.
         setTravelers(res.travelers);
+        setSamples(res.sampleTravelers ?? []);
         setWomenOnlyApplied(res.womenOnlyApplied);
-        // The server owns this now — it is re-read on every load, so a
-        // connection made on a phone shows up on a laptop.
-        setConnected(new Set(res.connectedTravelerIds ?? []));
         const profile = res.viewerProfile;
         setCanMatch(
           !profile ||
@@ -104,37 +105,15 @@ export default function Social() {
     };
   }, [womenOnly, womenModeEligible]);
 
+  // The tag chips narrow both lists, and preserve the server's order.
   const filtered = useMemo(
     () => (filter ? travelers.filter((t) => t.tags.includes(filter)) : travelers),
     [travelers, filter],
   );
-
-  /**
-   * Connect / disconnect, persisted server-side.
-   *
-   * Optimistic: the button flips immediately and rolls back if the request
-   * fails, because a connect is a small, reversible action and waiting a round
-   * trip to acknowledge a tap feels broken. Both endpoints are idempotent, so
-   * a rapid double tap cannot leave the server and the button disagreeing.
-   */
-  async function toggleConnect(id: string) {
-    const wasConnected = connected.has(id);
-    setConnected((prev) => {
-      const next = new Set(prev);
-      wasConnected ? next.delete(id) : next.add(id);
-      return next;
-    });
-    try {
-      if (wasConnected) await api.disconnectTraveler(id);
-      else await api.connectTraveler(id);
-    } catch {
-      setConnected((prev) => {
-        const next = new Set(prev);
-        wasConnected ? next.add(id) : next.delete(id);
-        return next;
-      });
-    }
-  }
+  const filteredSamples = useMemo(
+    () => (filter ? samples.filter((t) => t.tags.includes(filter)) : samples),
+    [samples, filter],
+  );
 
   /**
    * Post a check-in, then re-read the feed from the server.
@@ -253,12 +232,12 @@ export default function Social() {
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <ReportButton contentType="checkin" contentId={c.id} />
-                    {/* The check-in feed is the only place in the app where
-                        real accounts meet — the buddy list is a curated seed
-                        with nobody behind it. So this is where asking to
-                        connect belongs, and it is a request: the other person
-                        has to accept before either of you can send anything. */}
-                    {c.traveler.id !== user?.id && (
+                    {/* Only against a real account. The feed mixes persisted
+                        check-ins with the demo seed, and the seed authors have
+                        no accounts — asking to connect with one used to render
+                        a button whose request came back 400. `isSample` is the
+                        server's answer, not a guess about the id's shape. */}
+                    {!c.traveler.isSample && c.traveler.id !== user?.id && (
                       <ConnectRequestButton userId={c.traveler.id} />
                     )}
                   </div>
@@ -306,27 +285,11 @@ export default function Social() {
               {t('social.matchEmptyProfile')}
             </p>
           )}
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Real accounts. Everything actionable on this page lives here. */}
+          <div data-testid="real-travelers" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((tr) => (
-              <div key={tr.id} className="card-cream p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: tr.avatarColor }}>
-                    {tr.name.split(' ').map((n) => n[0]).join('')}
-                  </div>
-                  <div>
-                    <p className="font-display font-bold text-ink">{tr.name}</p>
-                    <p className="text-xs text-ink/50">{tr.age} · {tr.nationality}</p>
-                  </div>
-                  <span className="ml-auto flex items-center gap-1">
-                    {/* Reciprocity: the backend only sends `identifiesAsWoman`
-                        to viewers who opted in themselves, so this badge is
-                        invisible to everyone else. */}
-                    {tr.identifiesAsWoman && (
-                      <span title={t('social.womenBadgeTitle')}>🚺</span>
-                    )}
-                    {tr.soloVerified && <span className="text-sage" title="Solo-Verified">✓</span>}
-                  </span>
-                </div>
+              <div key={tr.id} data-testid="traveler-card" className="card-cream p-4">
+                <TravelerHead traveler={tr} />
                 {/* Compatibility. Rendered only when the server could
                     actually compute one — never a made-up number. */}
                 {typeof tr.matchScore === 'number' && (
@@ -347,23 +310,64 @@ export default function Social() {
                     </div>
                   </div>
                 )}
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {tr.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="rounded-full bg-iznik/10 px-2 py-0.5 text-[10px] font-semibold text-iznik">{tag}</span>
-                  ))}
-                </div>
-                <div className="mt-3 flex gap-2">
-                  <button onClick={() => toggleConnect(tr.id)} className={`flex-1 rounded-lg py-2 text-xs font-semibold ${connected.has(tr.id) ? 'bg-sage/20 text-sage' : 'bg-iznik text-white'}`}>
-                    {connected.has(tr.id) ? t('social.connected') : t('social.connect')}
-                  </button>
-                  <button onClick={() => setActive(tr)} className="flex-1 rounded-lg border border-ink/15 py-2 text-xs font-semibold text-ink hover:border-ink/30">
+                <TagRow tags={tr.tags} />
+                <div className="mt-3 flex items-center gap-2">
+                  {/* One button, and it is a request: the other person has to
+                      accept before either of you can send anything. */}
+                  <span className="flex-1">
+                    <ConnectRequestButton userId={tr.id} />
+                  </span>
+                  <button onClick={() => setActive(tr)} className="rounded-lg border border-ink/15 px-3 py-2 text-xs font-semibold text-ink hover:border-ink/30">
                     {t('social.viewProfile')}
                   </button>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Nobody else has signed up yet, or the filters excluded everyone.
+              Saying so is the honest answer — the sample profiles below are
+              deliberately not offered as a substitute. */}
+          {filtered.length === 0 && (
+            <p className="rounded-xl border border-dashed border-ink/15 px-4 py-6 text-center text-sm text-ink/50">
+              {t('social.noRealTravelers')}
+            </p>
+          )}
         </section>
+
+        {/*
+          The demo seed.
+          Its own section, under its own heading, with the reason stated in
+          plain words. These profiles have no accounts behind them, so nothing
+          here is clickable except "view profile" — a connect button would
+          start a request that goes nowhere.
+        */}
+        {filteredSamples.length > 0 && (
+          <section data-testid="sample-travelers">
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              <h2 className="font-display text-lg font-bold">{t('social.sampleTitle')}</h2>
+              <span className="rounded-full bg-mustard/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink/70">
+                {t('social.sampleBadge')}
+              </span>
+            </div>
+            <p className="mb-3 text-xs leading-relaxed text-ink/55">
+              {t('social.sampleNote')}
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredSamples.map((tr) => (
+                <div key={tr.id} data-testid="sample-card" className="card-cream p-4">
+                  <TravelerHead traveler={tr} />
+                  <TagRow tags={tr.tags} />
+                  <div className="mt-3">
+                    <button onClick={() => setActive(tr)} className="w-full rounded-lg border border-ink/15 py-2 text-xs font-semibold text-ink hover:border-ink/30">
+                      {t('social.viewProfile')}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Group polls (B3) */}
         <PollSection />
@@ -404,14 +408,51 @@ export default function Social() {
         </section>
       </main>
 
-      {active && (
-        <TravelerModal
-          traveler={active}
-          connected={connected.has(active.id)}
-          onConnect={() => toggleConnect(active.id)}
-          onClose={() => setActive(null)}
-        />
-      )}
+      {active && <TravelerModal traveler={active} onClose={() => setActive(null)} />}
+    </div>
+  );
+}
+
+/**
+ * The name, age and nationality block, shared by both card kinds.
+ *
+ * A real account's age and nationality are whatever its owner filled in, so
+ * the line is assembled from what is actually there rather than printed with
+ * gaps — "· " with nothing after it reads as a bug, and "0" reads as a lie.
+ */
+function TravelerHead({ traveler }: { traveler: Traveler | RealTraveler }) {
+  const { t } = useT();
+  const details = [traveler.age, traveler.nationality].filter(Boolean).join(' · ');
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: traveler.avatarColor }}>
+        {traveler.name.split(' ').map((n) => n[0]).join('')}
+      </div>
+      <div className="min-w-0">
+        <p className="truncate font-display font-bold text-ink">{traveler.name}</p>
+        {details && <p className="text-xs text-ink/50">{details}</p>}
+      </div>
+      <span className="ml-auto flex items-center gap-1">
+        {/* Reciprocity: the backend only sends `identifiesAsWoman` to viewers
+            who opted in themselves, so this badge is invisible to everyone
+            else. ⚠️ Self-declared, never verified. */}
+        {traveler.identifiesAsWoman && (
+          <span title={t('social.womenBadgeTitle')}>🚺</span>
+        )}
+        {'soloVerified' in traveler && traveler.soloVerified && (
+          <span className="text-sage" title="Solo-Verified">✓</span>
+        )}
+      </span>
+    </div>
+  );
+}
+
+function TagRow({ tags }: { tags: TravelTag[] }) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-1">
+      {tags.slice(0, 3).map((tag) => (
+        <span key={tag} className="rounded-full bg-iznik/10 px-2 py-0.5 text-[10px] font-semibold text-iznik">{tag}</span>
+      ))}
     </div>
   );
 }
@@ -420,7 +461,7 @@ export default function Social() {
  * Hover text explaining a score. The percentage on its own is a black box;
  * naming the shared tags is what makes it trustworthy.
  */
-function matchTitle(tr: Traveler, t: (key: string) => string): string {
+function matchTitle(tr: RealTraveler, t: (key: string) => string): string {
   const shared = tr.sharedStyles ?? [];
   return shared.length > 0
     ? `${t('social.matchShared')}: ${shared.join(', ')}`

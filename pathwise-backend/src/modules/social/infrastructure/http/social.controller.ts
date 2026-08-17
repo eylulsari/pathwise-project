@@ -162,35 +162,6 @@ export class SocialController {
   }
 
   /**
-   * PUT /api/social/travelers/:id/connect — connect to a traveler.
-   *
-   * `userId` comes from the auth context, never the body: a client that could
-   * name the connecting user could connect other people to strangers.
-   * Idempotent, so a double tap cannot produce two connections or undo one.
-   */
-  @Put('travelers/:id/connect')
-  async connectTraveler(
-    @CurrentUser() authUser: AuthUser,
-    @Param('id') id: string,
-  ) {
-    const me = await this.users.findById(authUser.id);
-    await this.social.connect(authUser.id, id, {
-      womenModeActive: me.womenModeActive,
-    });
-    return { connected: true };
-  }
-
-  /** DELETE /api/social/travelers/:id/connect — take the connection back. */
-  @Delete('travelers/:id/connect')
-  async disconnectTraveler(
-    @CurrentUser() authUser: AuthUser,
-    @Param('id') id: string,
-  ) {
-    await this.social.disconnect(authUser.id, id);
-    return { connected: false };
-  }
-
-  /**
    * GET /api/social/travelers?womenOnly=true&tag=%23Foodie
    *
    * Authenticated because the response depends on the caller's own opt-in
@@ -198,10 +169,14 @@ export class SocialController {
    * honoured at all, is decided from their stored profile — not from the query
    * string alone (see the reciprocity rule in SocialService).
    *
-   * The result is then ranked by compatibility (Görev 2). Filtering and
-   * ranking stay separate on purpose: the filters decide *who* is in the list,
-   * matching only decides the order and adds a percentage. Ranking can never
-   * reveal someone a filter excluded.
+   * Two lists come back, and only the first one is people. `travelers` are
+   * real accounts and are ranked by compatibility; `sampleTravelers` are the
+   * demo seed and are returned unranked, because a percentage describing how
+   * well you would get along with a fixture is a number about nothing.
+   *
+   * Filtering and ranking stay separate: the filters decide *who* is in the
+   * list, matching only decides the order. Ranking can never reveal someone a
+   * filter excluded.
    */
   @Get('travelers')
   async travelers(
@@ -215,10 +190,23 @@ export class SocialController {
       { womenModeActive: me.womenModeActive },
       authUser.id,
     );
+
+    // Candidates' hubs and budget bands are derived the same way the viewer's
+    // are — from saved trips — so both sides of every comparison come from
+    // where people actually went rather than from what they said.
+    const profiles = await this.matching.buildProfilesFor(
+      filtered.travelers.map((t) => ({ id: t.id, travelStyles: t.tags })),
+    );
+    const withProfiles = filtered.travelers.map((t) => {
+      const p = profiles.get(t.id);
+      return { ...t, preferredHubs: p?.preferredHubs ?? [], budgetLevel: p?.budgetLevel ?? null };
+    });
+
     const viewer = await this.matching.buildViewerProfile(authUser.id);
     return {
-      ...filtered,
-      travelers: this.matching.rank(filtered.travelers, viewer),
+      travelers: this.matching.rank(withProfiles, viewer),
+      sampleTravelers: filtered.sampleTravelers,
+      womenOnlyApplied: filtered.womenOnlyApplied,
       /**
        * The caller's own profile, so the UI can explain a thin ranking
        * ("add your travel styles to improve these matches") instead of

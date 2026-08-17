@@ -21,6 +21,19 @@ export interface CheckInAuthor {
   id: string;
   name: string;
   avatarColor: string;
+  /**
+   * `true` for the curated demo authors, who have no account behind them.
+   *
+   * Stated by the server rather than inferred by the client. The only other
+   * way to tell the two apart is the shape of the id — seed authors are `t1`,
+   * real ones are UUIDs — and a UUID regex in the UI would be a rule about
+   * primary keys pretending to be a rule about people. It also silently breaks
+   * the day the seed is replaced by real rows.
+   *
+   * What depends on it: nothing may be *offered* against a sample author. They
+   * cannot be connected to or messaged, because there is nobody there.
+   */
+  isSample: boolean;
 }
 
 export interface CheckIn {

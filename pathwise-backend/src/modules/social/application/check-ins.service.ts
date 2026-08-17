@@ -40,6 +40,9 @@ export class CheckInsService {
         id: row.userId,
         name: row.authorName,
         avatarColor: avatarColorFor(row.userId),
+        // A real account: `userId` is a real users-table id, so this author can
+        // be asked to connect.
+        isSample: false,
       },
       placeId: row.placeId,
       hub: row.hub,
@@ -75,6 +78,9 @@ export class CheckInsService {
         id: row.userId,
         name: row.authorName,
         avatarColor: avatarColorFor(row.userId),
+        // A real account: `userId` is a real users-table id, so this author can
+        // be asked to connect.
+        isSample: false,
       },
       placeId: row.placeId,
       hub: row.hub,

@@ -1,10 +1,17 @@
 import { Traveler } from '../../domain/traveler';
 
 /**
- * Curated demo traveler seed — mirrors the frontend `TRAVELERS` mock so the
- * buddy list can be served from the API. A real build would read these from a
- * `travelers`/`users` join; this module keeps the same shape so that swap is
- * local to the repository.
+ * Curated demo traveler seed — mirrors the frontend `TRAVELERS` mock.
+ *
+ * ⚠️ NOBODY HERE HAS AN ACCOUNT. These are fixtures, and the app treats them
+ * as such: they are returned as `sampleTravelers`, labelled in the UI, carry
+ * no compatibility score and are not a connection or message target. That
+ * separation is the whole point — the list was once the *only* source of
+ * buddies, which meant a real user's real trip history was scored against
+ * invented people and offered a "connect" button pointing at nobody. Real
+ * accounts now come from the users table (see `SocialService`).
+ *
+ * Do not wire an action to an id from this file.
  *
  * ⚠️ `identifiesAsWoman` below is DEMO SEED DATA, deliberately hand-assigned.
  * It is NOT inferred from names, avatars, or any other attribute — inferring
@@ -13,10 +20,11 @@ import { Traveler } from '../../domain/traveler';
  * opt-in box themselves (see `User.identifiesAsWoman`), and it is never
  * verified. Travelers who have not stated anything simply omit the field.
  *
- * ── Why twenty-four, and why this spread ─────────────────────────────
- * Buddy matching (Görev 2) ranks this list, and a ranking over five people —
- * three of whom are visible by default — cannot show anything. The seed is
- * built to exercise the scorer rather than to look busy:
+ * ── Why thirty-four, and why this spread ─────────────────────────────
+ * The seed no longer feeds the ranking, but it is still what the *page* is
+ * judged by: a buddy finder showing five faces demonstrates nothing, and the
+ * filters have to land on something. The spread is built to exercise them
+ * rather than to look busy:
  *
  *  - all TEN hubs appear as a preferred hub for at least two travelers, so a
  *    user's trip history actually separates the list;
@@ -32,10 +40,12 @@ import { Traveler } from '../../domain/traveler';
  * went from five hubs to ten, a hand-copied list in the test meant the gap
  * went unnoticed while the suite stayed green.
  *
- * Thirteen travelers have made a women-traveler declaration and five of those
+ * Twenty travelers have made a women-traveler declaration and seven of those
  * chose women-only visibility, which keeps both sides of the reciprocity rule
- * testable: a browsing account sees nineteen, an opted-in one sees all
- * twenty-four. (Verified against the running API, not counted by eye.)
+ * testable: a browsing account sees twenty-seven, an opted-in one sees all
+ * thirty-four. (Counted from the file and checked against the running API —
+ * the previous version of this paragraph still said twenty-four, from back
+ * when it was.)
  */
 export const TRAVELER_SEED: Traveler[] = [
   {

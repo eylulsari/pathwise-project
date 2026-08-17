@@ -597,30 +597,16 @@ export const api = {
             delete copy.identifiesAsWoman;
             return copy;
           });
-      // No connections offline: they live on the server now, and inventing a
-      // list from stale local storage is how the old implementation ended up
-      // showing connections the server had never heard of.
-      return delay({ travelers: visible, womenOnlyApplied, connectedTravelerIds: [] });
+      // The mock is the demo seed, so it can only ever fill the sample list.
+      // Real accounts live in the database and there is no offline stand-in
+      // for them — an empty list is the honest answer, and it is also what
+      // stops the offline path from offering a connect button to a fixture.
+      return delay({
+        travelers: [],
+        sampleTravelers: visible.map((t) => ({ ...t, isSample: true as const })),
+        womenOnlyApplied,
+      });
     }
-  },
-
-  /**
-   * Connect / disconnect a buddy. The connecting user is taken from the auth
-   * token server-side, never sent — a client that could name it could connect
-   * other people to strangers.
-   *
-   * Both are idempotent, so a double tap is harmless and the UI can send the
-   * request without first checking what state it thinks it is in.
-   */
-  async connectTraveler(travelerId: string): Promise<void> {
-    await http(`/social/travelers/${encodeURIComponent(travelerId)}/connect`, {
-      method: 'PUT',
-    });
-  },
-  async disconnectTraveler(travelerId: string): Promise<void> {
-    await http(`/social/travelers/${encodeURIComponent(travelerId)}/connect`, {
-      method: 'DELETE',
-    });
   },
   // ── Travel styles — the vocabulary buddy matching compares on ──
   /** The pickable tags, served so the client can never offer an invalid one. */

@@ -27,14 +27,62 @@ test('check-in composer broadcasts a message to the feed', async ({ page }) => {
   await expect(page.getByText(msg)).toBeVisible();
 });
 
-test('buddy connect toggles, filter works, and profile modal shows the map', async ({ page }) => {
+/**
+ * Sample profiles are shown, and are inert.
+ *
+ * This replaces a test that clicked "👋 Connect" on a demo profile and
+ * asserted it flipped to "✓ Connected". That button is gone: it wrote a row
+ * linking a real account to a fixture, which nothing could read and nobody was
+ * on the other end of. What is worth asserting now is the opposite — that the
+ * seed is still there for texture and offers nothing to act on.
+ */
+test('sample profiles are labelled and offer no connection', async ({ page }) => {
   await signup(page, 'buddy');
   await gotoSocial(page);
-  await page.getByRole('button', { name: /👋 Connect/ }).first().click();
-  await expect(page.getByRole('button', { name: /✓ Connected/ }).first()).toBeVisible();
+
+  const samples = page.getByTestId('sample-travelers');
+  await expect(samples).toBeVisible({ timeout: 20_000 });
+  // Said in words, not just implied by a missing button.
+  await expect(samples.getByText(/Nobody is behind them/i)).toBeVisible();
+
+  // Not one connect or message affordance anywhere in the section — including
+  // inside the profile modal, which used to end with two of them.
+  const card = page.getByTestId('sample-card').first();
+  await expect(card.getByRole('button', { name: /connect|message/i })).toHaveCount(0);
+  await card.getByRole('button', { name: /View profile/i }).click();
+
+  // Scoped to the modal, not the page. The check-in feed behind it carries
+  // real accounts with real connect buttons — a page-wide count would be
+  // asserting something about other people's cards.
+  const modal = page.getByTestId('traveler-modal');
+  await expect(modal.getByText(/Visited provinces/i)).toBeVisible();
+  await expect(modal.getByRole('button', { name: /connect|message/i })).toHaveCount(0);
+  await expect(modal.getByText(/no account behind it/i)).toBeVisible();
+});
+
+test('the tag filter narrows the list, and the profile modal opens', async ({ page }) => {
+  await signup(page, 'filter');
+  await gotoSocial(page);
+
+  const samples = page.getByTestId('sample-travelers');
+  // Two named profiles rather than a count: the list arrives asynchronously,
+  // so "fewer cards than before" can compare a full list against a partly
+  // rendered one and pass or fail on timing. One #Foodie and one not is the
+  // same claim, and it settles.
+  const card = (name: string) => samples.getByTestId('sample-card').filter({ hasText: name });
+  await expect(card('Amara Okafor')).toBeVisible({ timeout: 20_000 }); // #Foodie
+  await expect(card('Mara Lindqvist')).toBeVisible(); // not #Foodie
+
   await page.getByRole('button', { name: '#Foodie', exact: true }).click();
-  await page.getByRole('button', { name: /View profile/i }).first().click();
-  await expect(page.getByText(/Visited provinces/i)).toBeVisible();
+  await expect(card('Amara Okafor')).toBeVisible();
+  await expect(card('Mara Lindqvist')).toHaveCount(0);
+
+  // Scoped to the sample section on purpose: real accounts are listed above
+  // it and also carry a "View profile" button, so `.first()` on the page can
+  // open an account's modal — which has no provinces map, because a real
+  // account has no visited-provinces data.
+  await samples.getByRole('button', { name: /View profile/i }).first().click();
+  await expect(page.getByTestId('traveler-modal').getByText(/Visited provinces/i)).toBeVisible();
 });
 
 test('community route like toggles and clone rebuilds the plan', async ({ page }) => {

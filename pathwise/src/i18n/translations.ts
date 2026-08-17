@@ -495,10 +495,7 @@ export const translations = {
       clone: '📋 Clone This Route',
       localQA: 'Local Q&A',
       quickAnswer: 'Quick answer…',
-      connect: '👋 Connect',
-      connected: '✓ Connected',
       viewProfile: 'View profile',
-      message: '💬 Message',
       badges: 'Badges',
       visitedProvinces: 'Visited provinces',
       noBadges: 'No badges yet — just getting started.',
@@ -520,6 +517,14 @@ export const translations = {
       matchHow: 'Based on your travel styles, neighbourhoods and budget',
       matchEmptyProfile:
         'Add your travel styles in your profile (or take the Vibe Quiz) and these travelers will be ranked by how well they match you.',
+      // ── Demo profiles, kept visibly apart from real accounts ──
+      noRealTravelers:
+        'No other travelers here yet. When someone signs up you can ask to connect — and the sample profiles below are not stand-ins for that.',
+      sampleTitle: 'Sample profiles',
+      sampleBadge: 'Demo data',
+      sampleNote:
+        'These are example profiles that show how the buddy finder works. Nobody is behind them, so you cannot connect or send a message.',
+      sampleNoAction: 'Sample profile — no account behind it',
     },
     premium: {
       nav: '💎 Premium',
@@ -1077,10 +1082,7 @@ export const translations = {
       clone: '📋 Bu Rotayı Klonla',
       localQA: 'Yerel Soru-Cevap',
       quickAnswer: 'Hızlı yanıt…',
-      connect: '👋 Bağlan',
-      connected: '✓ Bağlandı',
       viewProfile: 'Profili gör',
-      message: '💬 Mesaj',
       badges: 'Rozetler',
       visitedProvinces: 'Ziyaret edilen iller',
       noBadges: 'Henüz rozet yok — daha yeni başlıyor.',
@@ -1102,6 +1104,14 @@ export const translations = {
       matchHow: 'Seyahat stillerin, semtlerin ve bütçene göre',
       matchEmptyProfile:
         'Profilinde seyahat stillerini ekle (ya da Vibe Quiz’i çöz) — bu gezginler sana ne kadar uyduklarına göre sıralansın.',
+      // ── Örnek profiller, gerçek hesaplardan görünür biçimde ayrı ──
+      noRealTravelers:
+        'Burada henüz başka gezgin yok. Biri kaydolduğunda bağlantı isteyebilirsin — aşağıdaki örnek profiller bunun yerini tutmuyor.',
+      sampleTitle: 'Örnek profiller',
+      sampleBadge: 'Örnek veri',
+      sampleNote:
+        'Bunlar gezgin bulucunun nasıl çalıştığını gösteren örnek profiller. Arkalarında kimse yok; bağlanamaz ya da mesaj gönderemezsin.',
+      sampleNoAction: 'Örnek profil — arkasında hesap yok',
     },
     premium: {
       nav: '💎 Premium',

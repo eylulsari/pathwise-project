@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Hub } from '../../../places/domain/place';
 import { Trip } from '../../domain/trip';
 import { CreateTripData, TripRepositoryPort } from '../../domain/trip.repository.port';
@@ -35,6 +35,16 @@ export class TypeOrmTripRepository implements TripRepositoryPort {
   async findByUser(userId: string): Promise<Trip[]> {
     const rows = await this.repo.find({
       where: { userId },
+      order: { createdAt: 'DESC' },
+    });
+    return rows.map((r) => this.toDomain(r));
+  }
+
+  /** Empty in, empty out — `IN ()` is a syntax error, not an empty result. */
+  async findByUsers(userIds: string[]): Promise<Trip[]> {
+    if (userIds.length === 0) return [];
+    const rows = await this.repo.find({
+      where: { userId: In(userIds) },
       order: { createdAt: 'DESC' },
     });
     return rows.map((r) => this.toDomain(r));
