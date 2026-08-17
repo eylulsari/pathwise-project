@@ -1,8 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { MemoryStoreService } from '../../../infrastructure/cache/memory-store.service';
 import { PlacesService } from './places.service';
 import { OverpassClient } from '../infrastructure/enrichment/overpass.client';
-import { WikipediaClient } from '../infrastructure/enrichment/wikipedia.client';
+import {
+  WikipediaClient,
+  WIKI_LICENCE,
+  WIKI_LICENCE_URL,
+} from '../infrastructure/enrichment/wikipedia.client';
+import { WikipediaCacheOrmEntity } from '../infrastructure/persistence/wikipedia-cache.orm-entity';
 import { WIKI_TITLES } from '../infrastructure/enrichment/wiki-titles.dataset';
 import {
   OsmEnrichment,
@@ -28,6 +35,8 @@ export class EnrichmentService {
     private readonly overpass: OverpassClient,
     private readonly wikipedia: WikipediaClient,
     private readonly store: MemoryStoreService,
+    @InjectRepository(WikipediaCacheOrmEntity)
+    private readonly wikiCache: Repository<WikipediaCacheOrmEntity>,
   ) {}
 
   async getEnrichment(placeId: string): Promise<PlaceEnrichment> {
@@ -66,11 +75,62 @@ export class EnrichmentService {
   private async wikiFor(placeId: string): Promise<WikipediaEnrichment | null> {
     const title = WIKI_TITLES[placeId];
     if (!title) return null;
-    return this.cached(
-      `enrich:wiki:${placeId}`,
-      WIKI_TTL_SECONDS,
-      () => this.wikipedia.fetchSummary(title),
+    return this.cached(`enrich:wiki:${placeId}`, WIKI_TTL_SECONDS, () =>
+      this.wikiFromDbOrNetwork(placeId, title),
     );
+  }
+
+  /**
+   * The table, then Wikipedia.
+   *
+   * Read order is memory → database → network, each layer cheaper and shorter
+   * lived than the one behind it. The database is what makes a restart free:
+   * without it a cold process refetched all hundred-odd articles, and a burst
+   * that size is answered with 429s rather than articles.
+   *
+   * Every database failure here is logged and swallowed. This is a cache in
+   * front of an optional panel; a broken cache must degrade to a slower panel,
+   * never to a missing one.
+   */
+  private async wikiFromDbOrNetwork(
+    placeId: string,
+    title: string,
+  ): Promise<WikipediaEnrichment | null> {
+    try {
+      const row = await this.wikiCache.findOne({ where: { placeId } });
+      if (row) {
+        return {
+          title: row.title,
+          summary: row.summary,
+          thumbnailUrl: row.thumbnailUrl,
+          pageUrl: row.pageUrl,
+          attribution: 'Wikipedia',
+          licence: WIKI_LICENCE,
+          licenceUrl: WIKI_LICENCE_URL,
+        };
+      }
+    } catch (err) {
+      this.logger.warn(`Wikipedia cache read failed for ${placeId}: ${String(err)}`);
+    }
+
+    const fetched = await this.wikipedia.fetchSummary(title);
+    // A miss is not written to the table. The in-process layer already holds
+    // misses for a day, and a missing article is usually a mapping to fix
+    // rather than a fact to store for a month.
+    if (!fetched) return null;
+
+    try {
+      await this.wikiCache.save({
+        placeId,
+        title: fetched.title,
+        summary: fetched.summary,
+        thumbnailUrl: fetched.thumbnailUrl,
+        pageUrl: fetched.pageUrl,
+      });
+    } catch (err) {
+      this.logger.warn(`Wikipedia cache write failed for ${placeId}: ${String(err)}`);
+    }
+    return fetched;
   }
 
   /**

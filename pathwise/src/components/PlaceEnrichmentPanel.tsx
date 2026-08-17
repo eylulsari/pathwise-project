@@ -54,15 +54,33 @@ export function PlaceEnrichmentPanel({ place }: { place: Place }) {
             />
           )}
           <p className="text-sm leading-relaxed text-ink/80">{wikipedia.summary}</p>
-          <a
-            href={wikipedia.pageUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-1 inline-block text-[11px] font-semibold text-iznik hover:text-terracotta"
-          >
-            {/* Attribution is a licence requirement. */}
-            {t('enrich.source')}: {wikipedia.attribution} ↗
-          </a>
+          {/* Attribution is a licence requirement, and naming the source is
+              only half of it: CC BY-SA asks for the licence to be named and
+              linked too. This used to read "Source: Wikipedia" and stop. */}
+          <p className="mt-1.5 text-[11px] text-ink/45">
+            {t('enrich.source')}:{' '}
+            <a
+              href={wikipedia.pageUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-iznik hover:text-terracotta"
+            >
+              {wikipedia.attribution} ↗
+            </a>
+            {wikipedia.licence && (
+              <>
+                {' · '}
+                <a
+                  href={wikipedia.licenceUrl}
+                  target="_blank"
+                  rel="license noreferrer"
+                  className="hover:text-terracotta"
+                >
+                  {wikipedia.licence}
+                </a>
+              </>
+            )}
+          </p>
         </div>
       )}
 

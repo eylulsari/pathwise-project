@@ -401,8 +401,51 @@ test('story modal shows live Wikipedia + OSM enrichment for a landmark', async (
   await expect(page.getByRole('heading', { name: /Live details/i })).toBeVisible({ timeout: 20_000 });
   // Wikipedia attribution (licence requirement) is shown.
   await expect(page.getByText(/Source: Wikipedia/i)).toBeVisible({ timeout: 20_000 });
+  // CC BY-SA asks for the licence to be named and linked, not just the source.
+  // Asserted as a link with an href, because the obligation is the link — text
+  // reading "CC BY-SA 4.0" that goes nowhere would satisfy a string check and
+  // not the licence.
+  const licence = page.getByRole('link', { name: /CC BY-SA/i });
+  await expect(licence).toBeVisible();
+  await expect(licence).toHaveAttribute('href', /creativecommons\.org\/licenses\/by-sa/);
+
+  // The summary is an excerpt, not the article: short, and ending cleanly
+  // rather than mid-word.
+  const summary = page.locator('section', { hasText: /Source: Wikipedia/ }).locator('p').first();
+  const text = ((await summary.textContent()) ?? '').trim();
+  expect(text.length).toBeGreaterThan(40);
+  expect(text.length).toBeLessThanOrEqual(420);
+  expect(text).toMatch(/[.!?…]$/);
+
   // Rating is relabelled as the curated editorial score.
   await expect(page.getByText(/Pathwise editorial/i)).toBeVisible();
+});
+
+test('a place with no mapped article shows no enrichment panel at all', async ({ page }) => {
+  const email = `e2e_noenrich_${Date.now()}@std.antalya.edu.tr`;
+  await page.goto('/auth');
+  await page.getByPlaceholder('Aylin Demir').fill('No Enrich Tester');
+  await page.getByPlaceholder('you@example.com').fill(email);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+
+  // Kadıköy's day is small cafés and shops rather than monuments, so most of
+  // its stops carry no article. Take one that genuinely has no panel and
+  // assert the silence — the same rule opening hours follow: with nothing to
+  // say, say nothing, rather than filling the space with a guess.
+  const stop = page
+    .locator('ol li')
+    .filter({ has: page.getByRole('button', { name: /Read Local Story/i }) })
+    .filter({ hasNot: page.locator('h3', { hasText: /Camii|Mosque|Kulesi|Sarayı|Müze/ }) })
+    .first();
+  await stop.getByRole('button', { name: /Read Local Story/i }).click();
+
+  // Give the request the time it would need to arrive before concluding it
+  // rendered nothing, or this passes for the wrong reason on a slow call.
+  await expect(page.getByRole('heading', { name: /The story/i })).toBeVisible();
+  await page.waitForTimeout(3_000);
+  await expect(page.getByText(/Source: Wikipedia/i)).toHaveCount(0);
 });
 
 test('language toggle switches the UI between English and Turkish', async ({ page }) => {

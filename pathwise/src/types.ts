@@ -254,6 +254,14 @@ export interface WikipediaEnrichment {
   thumbnailUrl: string | null;
   pageUrl: string;
   attribution: 'Wikipedia';
+  /**
+   * CC BY-SA requires the licence to be named and linked next to the credit,
+   * not just the source. Optional on the type so a response cached by an older
+   * backend still renders — the panel drops the licence line rather than
+   * printing "undefined" beside a credit.
+   */
+  licence?: string;
+  licenceUrl?: string;
 }
 export interface PlaceEnrichment {
   placeId: string;

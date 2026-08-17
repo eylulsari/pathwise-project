@@ -20,8 +20,17 @@ export interface WikipediaEnrichment {
   summary: string;
   thumbnailUrl: string | null;
   pageUrl: string;
-  /** Attribution is a licence requirement — always shown in the UI. */
+  /**
+   * Attribution is a licence requirement — always shown in the UI.
+   *
+   * Naming the source is not sufficient on its own: Wikipedia's text is
+   * CC BY-SA, and that licence asks for the licence to be named and linked
+   * beside the credit. The panel showed "Source: Wikipedia" and stopped there,
+   * which is the half of the obligation that is easy to remember.
+   */
   attribution: 'Wikipedia';
+  licence: string;
+  licenceUrl: string;
 }
 
 export interface PlaceEnrichment {
