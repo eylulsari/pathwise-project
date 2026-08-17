@@ -387,7 +387,13 @@ test('story modal shows live Wikipedia + OSM enrichment for a landmark', async (
   // Anchored — see the note in the search test above.
   await expect(page.getByRole('button', { name: /^Hagia Sophia\b/ })).toBeVisible({ timeout: 5_000 });
   await page.getByRole('button', { name: '➕ Add' }).first().click();
-  const stop = page.locator('ol li', { hasText: 'Hagia Sophia' });
+  // Scoped to the row's heading, not to its text. A stop's transport label
+  // names the stop it leads to ("🚌 … to Hagia Sophia"), so once an added
+  // place lands anywhere but first, a text filter matches two rows: the place
+  // itself and whatever comes before it.
+  const stop = page.locator('ol li').filter({
+    has: page.getByRole('heading', { name: 'Hagia Sophia', exact: true }),
+  });
   await expect(stop.locator('h3')).toBeVisible({ timeout: 10_000 });
 
   // Open its story modal → the live enrichment panel appears (real APIs).

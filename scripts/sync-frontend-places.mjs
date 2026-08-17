@@ -204,9 +204,25 @@ const artifacts = [
 
 const check = process.argv.includes('--check');
 
+/**
+ * Compare content, not bytes.
+ *
+ * Git checks these files out with CRLF on Windows (`core.autocrlf`) while this
+ * script writes LF, so a byte comparison called every artifact STALE on a
+ * Windows machine the moment git re-materialised it — after a `checkout` or a
+ * `merge`, with no dataset change at all. CI never saw it, because CI checks
+ * out on Linux, so the check quietly meant two different things depending on
+ * who ran it.
+ *
+ * A freshness check that cries wolf is worse than none: the instructions it
+ * prints tell you to regenerate and commit, which on Windows means committing
+ * line-ending churn over a file that was already correct.
+ */
+const sameContent = (a, b) => a.replace(/\r\n/g, '\n') === b.replace(/\r\n/g, '\n');
+
 if (check) {
   const stale = artifacts.filter(
-    (a) => !existsSync(a.path) || readFileSync(a.path, 'utf8') !== a.content,
+    (a) => !existsSync(a.path) || !sameContent(readFileSync(a.path, 'utf8'), a.content),
   );
   if (stale.length === 0) {
     console.log(
