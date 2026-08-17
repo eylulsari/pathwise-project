@@ -189,17 +189,37 @@ export default function Dashboard() {
     [],
   );
 
+  /**
+   * Newest request per day wins, and older answers are discarded.
+   *
+   * Two generates for the same day can be in flight at once — the mount's
+   * initial one and, right behind it, a one-shot instruction like "add this
+   * poll winner" or a config change the traveller made while the first was
+   * still running. Without sequencing, whichever the *network* returned last
+   * won, so a slower first response would silently overwrite the day the
+   * second one had built. That is what made the poll test look flaky: the
+   * winner was added and then erased by an answer to a question nobody was
+   * asking any more.
+   */
+  const requestSeq = useRef<Record<number, number>>({});
+
   const generateFor = useCallback(
     async (index: number, req: GenerateRouteRequest): Promise<Itinerary | null> => {
+      const ticket = (requestSeq.current[index] ?? 0) + 1;
+      requestSeq.current[index] = ticket;
+      const stale = () => requestSeq.current[index] !== ticket;
+
       patchDay(index, { loading: true, error: null });
       try {
         const itinerary = await api.generateRoute(req);
+        if (stale()) return itinerary;
         patchDay(index, { itinerary, loading: false });
         setSelectedPlaceId(null);
         setOptimizeBlocked(false);
         api.getUsage().then(setUsage).catch(() => {});
         return itinerary;
       } catch (err) {
+        if (stale()) return null;
         const msg = err instanceof Error ? err.message : 'Failed to generate route';
         // Free daily optimize limit hit → prompt upgrade instead of erroring.
         if (/limited to|Premium/i.test(msg)) {
@@ -308,7 +328,17 @@ export default function Dashboard() {
    * Debounced because edits arrive in bursts: a drag fires a state change, and
    * so does the rebuild that follows it a moment later.
    */
-  const hydrated = useRef(false);
+  /**
+   * State, not a ref, because other effects have to *wait* for it.
+   *
+   * A ref would let the autosave read it, but it cannot wake an effect when it
+   * flips — and the poll-winner and clone-hub handlers below must not run until
+   * the stored plan has landed. They consume a one-shot instruction out of
+   * localStorage; running one before hydration means `setDays(stored)`
+   * overwrites the day it just built, with the instruction already deleted and
+   * no way to retry it.
+   */
+  const [hydrated, setHydrated] = useState(false);
 
   const persistedDays = useCallback(
     (withItinerary: boolean): PersistedDay[] =>
@@ -328,7 +358,7 @@ export default function Dashboard() {
   const unsaved = useRef(false);
 
   useEffect(() => {
-    if (!hydrated.current || isOffline) return;
+    if (!hydrated || isOffline) return;
     unsaved.current = true;
     const handle = window.setTimeout(() => {
       void api
@@ -341,7 +371,7 @@ export default function Dashboard() {
         });
     }, 700);
     return () => window.clearTimeout(handle);
-  }, [days, isOffline, persistedDays]);
+  }, [days, isOffline, persistedDays, hydrated]);
 
   /**
    * Flush the plan when the page is going away.
@@ -364,7 +394,7 @@ export default function Dashboard() {
    */
   useEffect(() => {
     const flush = () => {
-      if (!hydrated.current || isOffline || !unsaved.current) return;
+      if (!hydrated || isOffline || !unsaved.current) return;
       void api.savePlan(persistedDays(false), { keepalive: true }).catch(() => {});
     };
     // `pagehide` fires on reload, close and bfcache navigation; the visibility
@@ -376,7 +406,7 @@ export default function Dashboard() {
       window.removeEventListener('pagehide', flush);
       document.removeEventListener('visibilitychange', onHide);
     };
-  }, [persistedDays, isOffline]);
+  }, [persistedDays, isOffline, hydrated]);
 
   // On mount: if offline, hydrate the last cached plan instead of calling the
   // network; otherwise restore the saved plan, or generate a fresh one.
@@ -437,7 +467,7 @@ export default function Dashboard() {
       })
       .catch(() => false)
       .then((restored) => {
-        hydrated.current = true;
+        setHydrated(true);
         if (restored) return;
         generateFor(0, buildRequest(INITIAL_DAYS[0]));
         planInitialHubs();
@@ -510,25 +540,37 @@ export default function Dashboard() {
     cacheItineraries(days.map((d) => d.itinerary));
   }, [days]);
 
-  // B3: a poll winner selected on the Social page → add it to Today's Path.
+  /**
+   * B3: a poll winner selected on the Social page → add it to Today's Path.
+   *
+   * Gated on `hydrated`, and that gate is load-bearing. The winner is a
+   * one-shot instruction: it is read out of localStorage and deleted in the
+   * same breath. Run before the stored plan lands and `setDays(stored)`
+   * overwrites the day this just built — with the instruction already gone and
+   * nothing left to retry from. It looked like flakiness because it is a race,
+   * and it got worse the slower the machine.
+   */
   useEffect(() => {
+    if (!hydrated) return;
     const winner = localStorage.getItem('pathwise.pollWinner');
     if (winner && !isOffline) {
       localStorage.removeItem('pathwise.pollWinner');
       addToPath(winner);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [day.itinerary]);
+  }, [day.itinerary, hydrated]);
 
   // "Clone This Route" on the Social page → rebuild Today's Path on that hub.
+  // Same one-shot instruction, same race, same gate as the poll winner above.
   useEffect(() => {
+    if (!hydrated) return;
     const hub = localStorage.getItem('pathwise.cloneHub');
     if (hub && !isOffline) {
       localStorage.removeItem('pathwise.cloneHub');
       applyTourHub(hub as Hub);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hydrated]);
 
   // Fetch real OSRM walking geometry whenever the visible itinerary changes.
   useEffect(() => {

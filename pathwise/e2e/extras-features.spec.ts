@@ -92,7 +92,11 @@ test('marking a review helpful increments its count', async ({ page }) => {
   const text = `Helpful target ${Date.now()}`;
   await page.getByPlaceholder(/Share your experience/i).fill(text);
   await page.getByRole('button', { name: /Post review/i }).click();
-  const review = page.locator('li,article,div').filter({ hasText: text }).last();
+  // The row carries a testid rather than being fished out by tag name: a
+  // `filter({ hasText })` over `div` also matches every ancestor that contains
+  // the text, and picking one of those by position is a guess that happens to
+  // work until the markup nests one level deeper.
+  const review = page.getByTestId('review').filter({ hasText: text });
   await expect(review).toBeVisible({ timeout: 10_000 });
 
   const btn = review.getByRole('button', { name: /👍 Helpful/i }).first();

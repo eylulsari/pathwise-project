@@ -104,7 +104,7 @@ export function ReviewsSection({ place }: { place: Place }) {
           <p className="text-xs text-ink/50">{t('reviews.empty')}</p>
         )}
         {data?.reviews.map((r) => (
-          <div key={r.id} className="rounded-lg border border-ink/10 p-2.5">
+          <div key={r.id} data-testid="review" className="rounded-lg border border-ink/10 p-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-ink">{r.authorName}</span>
               <span className="text-xs text-terracotta">{'★'.repeat(r.rating)}</span>
