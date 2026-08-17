@@ -105,9 +105,19 @@ jobs:
         if: always()
         run: docker compose down
 
+      # Both paths, because they answer different questions: the HTML report
+      # says which test failed and why, `test-results/` carries the traces,
+      # screenshots and error context for the ones that did.
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
-          path: pathwise/playwright-report/
+          path: |
+            pathwise/playwright-report/
+            pathwise/test-results/
+          # Without if-no-files-found the step passes quietly when it uploads
+          # nothing, which is how a red E2E job stayed undiagnosable for two
+          # pushes: the artifact was missing and the only sign was a warning
+          # annotation nobody reads.
+          if-no-files-found: error
           retention-days: 7

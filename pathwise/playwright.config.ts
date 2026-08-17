@@ -37,7 +37,19 @@ export default defineConfig({
    */
   workers: 2,
   retries: 1,
-  reporter: [['list']],
+  /**
+   * `list` for the terminal, `html` so a failure leaves something to read.
+   *
+   * CI uploads `pathwise/playwright-report/` when the suite fails, and that
+   * directory is produced by the html reporter — which was not enabled, so
+   * every failed run annotated "No files were found with the provided path"
+   * and uploaded nothing. A red E2E job was therefore undiagnosable from
+   * outside the runner: the job log needs admin rights to download, and the
+   * one artifact that would not have was never written.
+   *
+   * `open: 'never'` keeps it from trying to launch a browser on the runner.
+   */
+  reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:5173',
     trace: 'on-first-retry',
