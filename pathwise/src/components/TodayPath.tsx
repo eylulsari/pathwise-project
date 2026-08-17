@@ -104,11 +104,21 @@ export function TodayPath({
       <p className="text-[11px] text-ink/40">{t('today.dragHint')}</p>
 
       <SortableContext items={realIds} strategy={verticalListSortingStrategy}>
-        <ol className="space-y-1">
+        {/* No `space-y` here on purpose: a gap between list items would cut
+            the timeline into segments. Each row carries its own bottom
+            padding instead, inside the span the spine is drawn across. */}
+        <ol>
           {itinerary.stops.map((stop, i) => (
             <StopRow
               key={stop.place ? stop.place.placeId : `lunch-${i}`}
               stop={stop}
+              /* Counted over real stops only. `stop.order` includes the lunch
+                 break, so once the numbers moved onto the timeline the day
+                 read "2, 3, 🍽️, 5, 6" — a skipped number, which looks like a
+                 stop went missing rather than like lunch. */
+              displayIndex={
+                itinerary.stops.slice(0, i + 1).filter((s) => s.place).length
+              }
               active={stop.place?.placeId === selectedPlaceId}
               onSelect={() => stop.place && onSelectPlace(stop.place.placeId)}
               onStory={() => stop.place && setStoryPlace(stop.place)}
@@ -201,6 +211,7 @@ function RouteNotices({ notices }: { notices?: ItineraryNotice[] }) {
 
 function StopRow({
   stop,
+  displayIndex,
   active,
   onSelect,
   onStory,
@@ -214,6 +225,8 @@ function StopRow({
   onToggleSaved,
 }: {
   stop: ItineraryStop;
+  /** Position among real stops — the lunch break does not take a number. */
+  displayIndex: number;
   active: boolean;
   onSelect: () => void;
   onStory: () => void;
@@ -228,12 +241,18 @@ function StopRow({
 }) {
   const { t } = useT();
 
-  // Lunch break is synthetic → static, not draggable.
+  // Lunch break is synthetic → static, not draggable. It sits on the same
+  // spine as the real stops but with a hollow marker, so the eye reads it as
+  // part of the day without mistaking it for somewhere you have to go.
   if (stop.isLunchBreak) {
     return (
-      <li className="ml-3 border-l-2 border-dashed border-terracotta/50 pl-4">
-        <div className="rounded-xl bg-terracotta/10 px-3 py-2 text-sm">
-          <span className="font-semibold text-terracotta">🍽️ {t('today.lunch')}</span>
+      <li className="relative pb-2 pl-9">
+        <Spine />
+        <span className="absolute left-0 top-2.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-terracotta/60 bg-surface text-[11px]">
+          🍽️
+        </span>
+        <div className="rounded-xl border border-terracotta/25 bg-terracotta/10 px-3 py-2 text-sm">
+          <span className="font-semibold text-terracotta">{t('today.lunch')}</span>
           <span className="ml-2 text-ink/50">
             {stop.arrivalTime}–{stop.departureTime} · {formatTry(stop.foodCostTry)}
           </span>
@@ -243,11 +262,12 @@ function StopRow({
   }
 
   const place = stop.place!;
-  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} onJournal={onJournal} onToggleAnchor={onToggleAnchor} visited={visited} onToggleVisited={onToggleVisited} onRemove={onRemove} isSaved={isSaved} onToggleSaved={onToggleSaved} />;
+  return <SortableStopRow stop={stop} displayIndex={displayIndex} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} onJournal={onJournal} onToggleAnchor={onToggleAnchor} visited={visited} onToggleVisited={onToggleVisited} onRemove={onRemove} isSaved={isSaved} onToggleSaved={onToggleSaved} />;
 }
 
 function SortableStopRow({
   stop,
+  displayIndex,
   place,
   active,
   onSelect,
@@ -262,6 +282,7 @@ function SortableStopRow({
   onToggleSaved,
 }: {
   stop: ItineraryStop;
+  displayIndex: number;
   place: Place;
   active: boolean;
   onSelect: () => void;
@@ -286,11 +307,28 @@ function SortableStopRow({
   };
 
   return (
-    <li ref={setNodeRef} style={style} className="ml-3 border-l-2 border-ink/10 pl-4">
+    <li ref={setNodeRef} style={style} className="relative pb-2 pl-9">
+      <Spine />
+      {/* The stop's place in the day, on the line rather than inside the card.
+          It used to sit next to the title, which made every row start with a
+          number and pushed the name — the thing being looked for — inward. */}
+      <span
+        className={`absolute left-0 top-2.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shadow-soft transition-colors ${
+          visited
+            ? 'bg-sage text-ink'
+            : active
+              ? 'bg-iznik text-white ring-2 ring-iznik/30'
+              : 'bg-iznik text-white'
+        }`}
+      >
+        {visited ? '✓' : displayIndex}
+      </span>
       <div
         onClick={onSelect}
-        className={`rounded-xl border p-3 transition-colors ${
-          active ? 'border-iznik bg-iznik/10' : 'border-ink/10 bg-surface-2 hover:border-ink/20'
+        className={`rounded-xl border p-3 transition-all ${
+          active
+            ? 'border-iznik bg-iznik/10 shadow-soft'
+            : 'border-ink/10 bg-surface-2 hover:border-ink/20 hover:shadow-soft'
         } ${visited ? 'opacity-70' : ''}`}
       >
         <div className="flex items-start justify-between gap-2">
@@ -322,16 +360,23 @@ function SortableStopRow({
             >
               ⠿
             </button>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-iznik text-xs font-bold text-white">
-                  {stop.order}
-                </span>
-                <h3 className={`font-semibold text-ink ${visited ? 'line-through decoration-sage decoration-2' : ''}`}>{place.name}</h3>
-              </div>
-              <p className="mt-1 text-xs text-ink/50">
-                🕒 {stop.arrivalTime}–{stop.departureTime} · {formatDuration(stop.durationMinutes)}
-                {place.museumPass && <span className="ml-2 text-sage">🎫 {t('today.museumPass')}</span>}
+            <div className="min-w-0">
+              <h3 className={`font-semibold leading-snug text-ink ${visited ? 'line-through decoration-sage decoration-2' : ''}`}>
+                {place.name}
+              </h3>
+              <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-ink/50">
+                {/* Arrival is what a traveller scans for, so it is the one
+                    number here set in a face that keeps its columns. */}
+                <span className="font-semibold tabular-nums text-ink/70">{stop.arrivalTime}</span>
+                <span className="text-ink/30">→</span>
+                <span className="tabular-nums">{stop.departureTime}</span>
+                <span className="text-ink/30">·</span>
+                <span>{formatDuration(stop.durationMinutes)}</span>
+                {place.museumPass && (
+                  <span className="rounded-full bg-sage/20 px-1.5 py-px text-[10px] font-semibold text-sage">
+                    🎫 {t('today.museumPass')}
+                  </span>
+                )}
               </p>
               {/* Whether the door is actually open right now, in Istanbul time.
                   Renders nothing at all when the hours are unknown. */}
@@ -353,7 +398,12 @@ function SortableStopRow({
             )}
           </div>
         </div>
-        <div className="mt-2 flex items-center gap-3">
+        {/* `flex-wrap`, and every label kept on one line.
+            Without it the row could not wrap, so the buttons shrank instead
+            and each label broke inside itself — "Read Local / Story & Tips",
+            "Lock / time" — which at the real column width made a tidy row of
+            six actions look like a rendering fault. */}
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-ink/5 pt-2 [&>button]:whitespace-nowrap">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -424,8 +474,35 @@ function SortableStopRow({
       </div>
 
       {stop.transportToNext && (
-        <div className="py-1.5 pl-1 text-xs text-ink/40">{stop.transportToNext.label}</div>
+        // The hop to the next stop is part of the day, not a caption under the
+        // card: at 40% opacity in the old layout it read as disabled text, and
+        // the ferry legs that cost an hour were the easiest thing to miss.
+        <div className="relative py-2">
+          <span
+            aria-hidden="true"
+            className="absolute left-[11px] top-0 flex h-full w-0.5 items-center justify-center bg-transparent"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-ink/20" />
+          </span>
+          <p className="text-xs font-medium text-ink/45">{stop.transportToNext.label}</p>
+        </div>
       )}
     </li>
+  );
+}
+
+/**
+ * The vertical line the day hangs from.
+ *
+ * One element, absolutely placed, drawn behind each row's marker — so the
+ * timeline is continuous down the list instead of being a left border that
+ * restarts and leaves a gap at every card.
+ */
+function Spine() {
+  return (
+    <span
+      aria-hidden="true"
+      className="absolute left-[11px] top-0 h-full w-0.5 bg-ink/10"
+    />
   );
 }
