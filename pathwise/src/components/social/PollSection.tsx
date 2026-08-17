@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Poll } from '../../types';
 import { api } from '../../services/api';
@@ -16,7 +16,35 @@ export function PollSection() {
   const [picked, setPicked] = useState<string[]>([]);
   const [voted, setVoted] = useState<Set<string>>(new Set());
 
-  const load = () => api.getPolls().then(setPolls).catch(() => {});
+  /**
+   * Whether the last load failed — not the same thing as having no polls.
+   *
+   * The failure used to be swallowed, and an empty list renders as "No polls
+   * yet — start one and let friends vote." So a request that never arrived was
+   * reported to the user as a fact about their group. "We don't know" and
+   * "there is nothing" are different answers, and only one of them was true.
+   */
+  const [failed, setFailed] = useState(false);
+
+  const loadSeq = useRef(0);
+  const load = () => {
+    // The load on mount and the load after creating a poll are both in flight
+    // at once, and if the older one answers last it puts back a list from
+    // before the new poll existed — which reads as the poll never having been
+    // created at all.
+    const ticket = ++loadSeq.current;
+    return api
+      .getPolls()
+      .then((list) => {
+        if (loadSeq.current !== ticket) return;
+        setPolls(list);
+        setFailed(false);
+      })
+      .catch(() => {
+        if (loadSeq.current !== ticket) return;
+        setFailed(true);
+      });
+  };
   useEffect(() => { load(); }, []);
 
   async function create() {
@@ -29,16 +57,42 @@ export function PollSection() {
     load();
   }
 
+  /**
+   * Newest write wins, per poll.
+   *
+   * Voting and closing are two writes to the same poll and a user can fire
+   * them a moment apart. Whichever response arrives last used to be the one
+   * that stuck, so a vote that came back slowly would overwrite the close that
+   * had already been applied — the poll re-opened on screen, the winner and
+   * the button to use it disappeared, and the server meanwhile held it closed.
+   *
+   * Each call takes a ticket before it starts; a response whose ticket is no
+   * longer the current one describes a state that has since been superseded,
+   * so it is read and dropped.
+   */
+  const seq = useRef<Record<string, number>>({});
+  const claim = (pollId: string) => {
+    const ticket = (seq.current[pollId] ?? 0) + 1;
+    seq.current[pollId] = ticket;
+    return () => seq.current[pollId] === ticket;
+  };
+
   async function vote(poll: Poll, optionId: string) {
+    const current = claim(poll.id);
     try {
       const updated = await api.votePoll(poll.id, optionId);
+      // The vote itself happened regardless of what has landed since, and this
+      // flag is what stops the user voting twice — so it is not conditional.
       setVoted((s) => new Set(s).add(poll.id));
+      if (!current()) return;
       setPolls((prev) => prev.map((p) => (p.id === poll.id ? updated : p)));
     } catch { /* already voted / closed */ }
   }
 
   async function close(poll: Poll) {
+    const current = claim(poll.id);
     const updated = await api.closePoll(poll.id);
+    if (!current()) return;
     setPolls((prev) => prev.map((p) => (p.id === poll.id ? updated : p)));
   }
 
@@ -57,7 +111,9 @@ export function PollSection() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {polls.length === 0 && <p className="text-sm text-ink/40">{t('poll.empty')}</p>}
+        {polls.length === 0 && (
+          <p className="text-sm text-ink/40">{failed ? t('poll.error') : t('poll.empty')}</p>
+        )}
         {polls.map((poll) => {
           const total = poll.options.reduce((s, o) => s + o.votes, 0);
           const winner = poll.winnerPlaceId ? PLACES_BY_ID[poll.winnerPlaceId] : null;

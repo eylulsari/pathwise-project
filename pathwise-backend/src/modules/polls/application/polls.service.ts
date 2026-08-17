@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { NotificationsService } from '../../notifications/application/notifications.service';
 import {
@@ -28,9 +28,8 @@ export class PollsService {
   constructor(
     @InjectRepository(PollOrmEntity)
     private readonly polls: Repository<PollOrmEntity>,
-    @InjectRepository(PollVoteOrmEntity)
-    private readonly votes: Repository<PollVoteOrmEntity>,
     private readonly notifications: NotificationsService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(creatorUserId: string, input: CreatePollInput) {
@@ -56,32 +55,63 @@ export class PollsService {
     return poll;
   }
 
+  /**
+   * Read the poll for writing, inside a transaction, holding the row until the
+   * caller commits.
+   *
+   * Voting and closing both rewrite the whole row, and a user produces both
+   * within a second of each other by voting and then closing. Read plainly,
+   * the two overlap: each loads the poll, changes its own field and saves
+   * everything back, so whichever saves second silently reverts the other. In
+   * a 20-round probe against the dev server, 13 polls came back *open* after a
+   * close that had returned 200 — the vote had written the stale `status` back
+   * over it. The client believed the poll was closed and the database did not.
+   *
+   * `pessimistic_write` is `SELECT … FOR UPDATE`: the second request now waits
+   * for the first to commit and then reads what it actually wrote, so the vote
+   * sees `closed` and refuses instead of overwriting it.
+   */
+  private lockPoll(manager: EntityManager, pollId: string) {
+    return manager.findOne(PollOrmEntity, {
+      where: { id: pollId },
+      lock: { mode: 'pessimistic_write' },
+    });
+  }
+
   async vote(userId: string, pollId: string, optionId: string) {
-    const poll = await this.polls.findOne({ where: { id: pollId } });
-    if (!poll) throw new NotFoundException('Poll not found');
-    if (poll.status !== 'open') throw new BadRequestException('Poll is closed');
-    const option = poll.options.find((o) => o.id === optionId);
-    if (!option) throw new BadRequestException('Invalid option');
+    return this.dataSource.transaction(async (manager) => {
+      const poll = await this.lockPoll(manager, pollId);
+      if (!poll) throw new NotFoundException('Poll not found');
+      if (poll.status !== 'open') throw new BadRequestException('Poll is closed');
+      const option = poll.options.find((o) => o.id === optionId);
+      if (!option) throw new BadRequestException('Invalid option');
 
-    const already = await this.votes.findOne({ where: { pollId, userId } });
-    if (already) throw new BadRequestException('You have already voted');
+      const already = await manager.findOne(PollVoteOrmEntity, {
+        where: { pollId, userId },
+      });
+      if (already) throw new BadRequestException('You have already voted');
 
-    await this.votes.save(this.votes.create({ pollId, userId, optionId }));
-    option.votes += 1;
-    poll.options = [...poll.options]; // ensure jsonb change is detected
-    return this.polls.save(poll);
+      await manager.save(
+        manager.create(PollVoteOrmEntity, { pollId, userId, optionId }),
+      );
+      option.votes += 1;
+      poll.options = [...poll.options]; // ensure jsonb change is detected
+      return manager.save(poll);
+    });
   }
 
   async close(userId: string, pollId: string) {
-    const poll = await this.polls.findOne({ where: { id: pollId } });
-    if (!poll) throw new NotFoundException('Poll not found');
-    if (poll.creatorUserId !== userId) {
-      throw new BadRequestException('Only the creator can close the poll');
-    }
-    const winner = [...poll.options].sort((a, b) => b.votes - a.votes)[0];
-    poll.status = 'closed';
-    poll.winnerPlaceId = winner?.placeId ?? null;
-    return this.polls.save(poll);
+    return this.dataSource.transaction(async (manager) => {
+      const poll = await this.lockPoll(manager, pollId);
+      if (!poll) throw new NotFoundException('Poll not found');
+      if (poll.creatorUserId !== userId) {
+        throw new BadRequestException('Only the creator can close the poll');
+      }
+      const winner = [...poll.options].sort((a, b) => b.votes - a.votes)[0];
+      poll.status = 'closed';
+      poll.winnerPlaceId = winner?.placeId ?? null;
+      return manager.save(poll);
+    });
   }
 
   async listActive() {

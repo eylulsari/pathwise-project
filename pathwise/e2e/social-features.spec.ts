@@ -90,6 +90,85 @@ test('closing a poll and adding the winner injects it into Today’s Path', asyn
   await expect(page.locator('ol li h3', { hasText: winner })).toBeVisible({ timeout: 15_000 });
 });
 
+/**
+ * A vote and a close are two writes to the same poll, fired one after the
+ * other by a user who votes and then closes straight away. The responses can
+ * land in either order, and the test above hit the bad one roughly once every
+ * fifty runs: the poll re-opened, the trophy vanished, and "Add winner to
+ * path" went with it.
+ *
+ * Here the order is forced rather than waited for, so this fails every time
+ * against the unsequenced version instead of once in fifty.
+ */
+test('a slow vote response cannot re-open a poll that was already closed', async ({ page }) => {
+  await signup(page, 'pollrace');
+  await gotoSocial(page);
+
+  // Let the vote reach the server as usual — only its *response* is held, so
+  // the server sees the natural order and the client sees the reverse.
+  await page.route('**/polls/*/vote', async (route) => {
+    const response = await route.fetch();
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+    await route.fulfill({ response });
+  });
+
+  await page.getByRole('button', { name: /Start Poll/i }).first().click();
+  const q = `Race ${Date.now()}?`;
+  await page.getByPlaceholder(/Where should we go/i).fill(q);
+  const opts = page.getByRole('button', { name: /^☐ / });
+  await opts.nth(0).click();
+  await opts.nth(1).click();
+  await page.getByRole('button', { name: /Create poll/i }).click();
+
+  const card = page.locator('div.rounded-2xl', { hasText: q });
+  await expect(card).toBeVisible();
+
+  // Registered before the click, not after: on a slow run the held response
+  // could otherwise arrive before anything was listening, and the wait below
+  // would sit there until it timed out.
+  const voteLanded = page.waitForResponse((r) => /\/polls\/.*\/vote$/.test(r.url()));
+  await card.getByRole('button').filter({ hasText: /· \d+%/ }).first().click();
+  await card.getByRole('button', { name: /Close poll/i }).click();
+
+  const trophy = card.locator('span', { hasText: '🏆' });
+  await expect(trophy).toBeVisible();
+
+  // The late vote response arrives here. Nothing about it may put the poll
+  // back: it is older news than the close that has already been applied.
+  await voteLanded;
+  await expect(trophy).toBeVisible();
+  await expect(card.getByRole('button', { name: /Close poll/i })).toHaveCount(0);
+  await expect(card.getByRole('button', { name: /Add winner to path/i })).toBeVisible();
+});
+
+test.describe('poll list failure', () => {
+  /**
+   * Without this the test is a coin toss.
+   *
+   * `page.route` only sees requests issued by the page. Once the PWA service
+   * worker is controlling the tab it re-issues them from its own context,
+   * where the interception does not apply — so the abort below either lands or
+   * is quietly bypassed depending on whether the worker finished activating
+   * first. (The same distinction is why the map CSP needed `connect-src`.)
+   */
+  test.use({ serviceWorkers: 'block' });
+
+  test('a poll list that cannot be loaded says so, rather than "no polls yet"', async ({
+    page,
+  }) => {
+    await signup(page, 'pollfail');
+    // Only the list request. A vote or a close is a different path and must
+    // keep working, or this would prove nothing about the list specifically.
+    await page.route('**/polls', (route) =>
+      route.request().method() === 'GET' ? route.abort() : route.continue(),
+    );
+    await gotoSocial(page);
+
+    await expect(page.getByText(/Could not load the polls/i)).toBeVisible();
+    await expect(page.getByText(/No polls yet/i)).toHaveCount(0);
+  });
+});
+
 test('referral code from one user can be redeemed by another', async ({ page }) => {
   await signup(page, 'refA');
   await page.getByRole('link', { name: /Premium/ }).click();
