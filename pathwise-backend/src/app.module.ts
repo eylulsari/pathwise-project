@@ -26,6 +26,7 @@ import { PointsModule } from './modules/points/points.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { SafetyModule } from './modules/safety/safety.module';
 import { SocialModule } from './modules/social/social.module';
+import { MessagingModule } from './modules/messaging/messaging.module';
 import { CurrencyModule } from './modules/currency/currency.module';
 import { WeatherModule } from './modules/weather/weather.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
@@ -94,6 +95,7 @@ function serveClientIfBuilt(): DynamicModule[] {
     ReviewsModule,
     SafetyModule,
     SocialModule,
+    MessagingModule,
     CurrencyModule,
     WeatherModule,
     AssistantModule,

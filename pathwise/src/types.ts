@@ -332,6 +332,27 @@ export interface Itinerary {
   generatedAt: string;
 }
 
+/**
+ * Someone this account has a connection with, in one of three states.
+ *
+ * `pending-in` is a request waiting on you; `pending-out` is one you are
+ * waiting on. Only `accepted` can be messaged, and the server enforces that
+ * regardless of what this says.
+ */
+export interface MessagingConnection {
+  userId: string;
+  name: string;
+  status: 'pending-in' | 'pending-out' | 'accepted';
+}
+
+export interface DirectMessage {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  body: string;
+  createdAt: string;
+}
+
 export interface GenerateRouteRequest {
   mode: RouteMode;
   hub?: Hub;

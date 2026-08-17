@@ -14,9 +14,10 @@ import { CheckInMap } from '../components/social/CheckInMap';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { formatAge, isLive } from '../utils/presence';
 import { ReportButton } from '../components/social/ReportButton';
+import { ConnectRequestButton } from '../components/social/ConnectRequestButton';
+import { useAuth } from '../context/AuthContext';
 import { PollSection } from '../components/social/PollSection';
 import { HUB_LABEL } from '../utils/format';
-import { useAuth } from '../context/AuthContext';
 import { useT } from '../i18n';
 
 const ALL_TAGS: TravelTag[] = [
@@ -250,7 +251,17 @@ export default function Social() {
                     )}
                     <p className="text-ink/80">{c.message}</p>
                   </div>
-                  <ReportButton contentType="checkin" contentId={c.id} />
+                  <div className="flex flex-col items-end gap-1">
+                    <ReportButton contentType="checkin" contentId={c.id} />
+                    {/* The check-in feed is the only place in the app where
+                        real accounts meet — the buddy list is a curated seed
+                        with nobody behind it. So this is where asking to
+                        connect belongs, and it is a request: the other person
+                        has to accept before either of you can send anything. */}
+                    {c.traveler.id !== user?.id && (
+                      <ConnectRequestButton userId={c.traveler.id} />
+                    )}
+                  </div>
                 </div>
               );
             })}

@@ -1,4 +1,12 @@
-export type ReportedContentType = 'forum' | 'checkin' | 'route' | 'stale_info';
+// 'message' → a direct message, reported from the thread itself. Reporting
+// has to be one tap away from the thing being reported, or it does not get
+// used; `contentId` is the message id, so a moderator can find the exact row.
+export type ReportedContentType =
+  | 'forum'
+  | 'checkin'
+  | 'route'
+  | 'stale_info'
+  | 'message';
 export type ReportStatus = 'open' | 'reviewed';
 
 /** A user-filed report about a piece of social content. Framework-free. */

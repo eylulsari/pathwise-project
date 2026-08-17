@@ -4,12 +4,12 @@ import { useT } from '../../i18n';
 
 const REASONS = ['spam', 'offensive', 'misinformation', 'other'];
 
-/** "🚩 Report" for social content (forum / check-in / community route). */
+/** "🚩 Report" for social content (forum / check-in / route / direct message). */
 export function ReportButton({
   contentType,
   contentId,
 }: {
-  contentType: 'forum' | 'checkin' | 'route';
+  contentType: 'forum' | 'checkin' | 'route' | 'message';
   contentId: string;
 }) {
   const { t } = useT();

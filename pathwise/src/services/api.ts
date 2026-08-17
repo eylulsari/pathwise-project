@@ -306,7 +306,7 @@ export const api = {
   // MODERATION — report social content (B7).
   // ═════════════════════════════════════════════════════════════════
   async reportContent(
-    contentType: 'forum' | 'checkin' | 'route' | 'stale_info',
+    contentType: 'forum' | 'checkin' | 'route' | 'stale_info' | 'message',
     contentId: string,
     reason: string,
   ): Promise<void> {
@@ -314,6 +314,37 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ contentType, contentId, reason }),
     });
+  },
+
+  // ═════════════════════════════════════════════════════════════════
+  // DIRECT MESSAGES — only between accounts that accepted each other.
+  //
+  // The client shows and hides what it can, but none of it is the control:
+  // every one of these endpoints re-checks the connection and the block list
+  // server-side, from the identity in the token. See messaging.service.ts.
+  // ═════════════════════════════════════════════════════════════════
+  async listConnections(): Promise<import('../types').MessagingConnection[]> {
+    return http('/messages/connections');
+  },
+  async requestConnection(userId: string): Promise<void> {
+    await http(`/messages/connections/${userId}/request`, { method: 'POST' });
+  },
+  async acceptConnection(userId: string): Promise<void> {
+    await http(`/messages/connections/${userId}/accept`, { method: 'POST' });
+  },
+  async blockUser(userId: string): Promise<void> {
+    await http(`/messages/blocks/${userId}`, { method: 'POST' });
+  },
+  /** The conversation, oldest first. `since` fetches only what is newer. */
+  async getThread(
+    userId: string,
+    since?: string,
+  ): Promise<import('../types').DirectMessage[]> {
+    const q = since ? `?since=${encodeURIComponent(since)}` : '';
+    return http(`/messages/${userId}${q}`);
+  },
+  async sendMessage(userId: string, body: string): Promise<import('../types').DirectMessage> {
+    return http(`/messages/${userId}`, { method: 'POST', body: JSON.stringify({ body }) });
   },
 
   async logout(): Promise<void> {

@@ -26,6 +26,7 @@ export function AppHeader() {
           <NavLink to="/dashboard" className={linkClass}>{t('nav.plan')}</NavLink>
           <NavLink to="/social" className={linkClass}>{t('nav.social')}</NavLink>
           <NavLink to="/profile" className={linkClass}>{t('nav.profile')}</NavLink>
+          <NavLink to="/messages" className={linkClass}>{t('nav.messages')}</NavLink>
           <NavLink to="/essentials" className={linkClass}>{t('nav.essentials')}</NavLink>
           <NavLink
             to="/premium"

@@ -7,6 +7,7 @@ import Social from './pages/Social';
 import Profile from './pages/Profile';
 import Premium from './pages/Premium';
 import Essentials from './pages/Essentials';
+import Messages from './pages/Messages';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -74,6 +75,16 @@ export default function App() {
           <ProtectedRoute>
             <Page path="/essentials">
               <Essentials />
+            </Page>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <Page path="/messages">
+              <Messages />
             </Page>
           </ProtectedRoute>
         }
