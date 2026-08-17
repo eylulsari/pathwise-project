@@ -24,6 +24,7 @@ import type {
   JournalSummary,
   NearbySuggestion,
   PastTrip,
+  PersistedDay,
   Place,
   PlaceEnrichment,
   PointsAward,
@@ -386,6 +387,60 @@ export const api = {
   },
   async deleteTrip(id: string): Promise<void> {
     return http<void>(`/trips/${id}`, { method: 'DELETE' });
+  },
+
+  // ═════════════════════════════════════════════════════════════════
+  // WORKING PLAN — the day list the dashboard is currently editing.
+  //
+  // Distinct from TRIPS, which is the archive of plans a user named and kept.
+  // This is the live one: rewritten on every edit, one per user. Before it
+  // existed, a reordered day survived exactly as long as the browser tab did.
+  // ═════════════════════════════════════════════════════════════════
+  async getPlan(): Promise<PersistedDay[] | null> {
+    const res = await http<{ days: PersistedDay[] | null }>('/plan');
+    return res.days;
+  },
+  /**
+   * `opts.keepalive` is used by the unload flush — see Dashboard's pagehide
+   * handler for why that payload deliberately drops the cached itineraries.
+   */
+  async savePlan(days: PersistedDay[], opts: { keepalive?: boolean } = {}): Promise<void> {
+    return http<void>('/plan', {
+      method: 'PUT',
+      body: JSON.stringify({ days }),
+      keepalive: opts.keepalive,
+    });
+  },
+  async clearPlan(): Promise<void> {
+    return http<void>('/plan', { method: 'DELETE' });
+  },
+
+  // ═════════════════════════════════════════════════════════════════
+  // SAVED PLACES — bookmarks, and the seed for "start from my saved places".
+  // ═════════════════════════════════════════════════════════════════
+  async getSavedPlaces(): Promise<Place[]> {
+    return http<Place[]>('/saved-places');
+  },
+  async getSavedPlaceIds(): Promise<string[]> {
+    return http<string[]>('/saved-places/ids');
+  },
+  /**
+   * Idempotent — PUT, so a double tap is the same as one.
+   *
+   * `keepalive` is what makes the bookmark survive what people actually do:
+   * tap ☆ and immediately go somewhere else. The toggle flips optimistically,
+   * so the button says "Saved" straight away, but the request is still in
+   * flight — and a normal fetch is cancelled the moment the page navigates.
+   * The save was silently lost, and the saved list then said "nothing saved
+   * yet", which is worse than an error because it looks like an answer.
+   *
+   * Both requests are bodiless, so they sit far inside keepalive's 64 KB cap.
+   */
+  async savePlace(placeId: string): Promise<void> {
+    return http<void>(`/saved-places/${placeId}`, { method: 'PUT', keepalive: true });
+  },
+  async unsavePlace(placeId: string): Promise<void> {
+    return http<void>(`/saved-places/${placeId}`, { method: 'DELETE', keepalive: true });
   },
 
   // ═════════════════════════════════════════════════════════════════

@@ -1,18 +1,12 @@
-import type { GroupType, Hub, Interest, Weather } from '../../types';
+import type { GroupType, Interest, RouteConfig, Weather } from '../../types';
 import { HUBS } from '../../hubData';
 import { useT } from '../../i18n';
 import { useCurrency } from '../../context/CurrencyContext';
 import { CurrencySelect } from '../CurrencySelect';
 
-export interface RouteConfig {
-  hub: Hub;
-  budgetTry: number;
-  paceHours: number;
-  group: GroupType;
-  interests: Interest[];
-  weather: Weather;
-  startHour: number;
-}
+// Defined in types.ts (the persisted plan is built from it) and re-exported
+// here so call sites can keep importing it beside the form that edits it.
+export type { RouteConfig };
 
 const INTERESTS: Interest[] = [
   'food', 'history', 'photo', 'market', 'art', 'nature',
@@ -33,12 +27,17 @@ export function RouteGenerator({
   onGenerate,
   generating,
   offline = false,
+  savedCount = 0,
+  onStartFromSaved,
 }: {
   config: RouteConfig;
   onChange: (patch: Partial<RouteConfig>) => void;
   onGenerate: () => void;
   generating: boolean;
   offline?: boolean;
+  /** How many places the traveller has bookmarked, across all hubs. */
+  savedCount?: number;
+  onStartFromSaved?: () => void;
 }) {
   const { t } = useT();
   const { currency, format } = useCurrency();
@@ -209,6 +208,20 @@ export function RouteGenerator({
       <button onClick={onGenerate} disabled={generating || offline} className="btn-accent w-full">
         {offline ? t('dash.offlineNeed') : generating ? t('dash.generating') : t('dash.generate')}
       </button>
+
+      {/* Only offered once there is something to start from — an always-visible
+          button that does nothing on first run is worse than no button. */}
+      {onStartFromSaved && savedCount > 0 && (
+        <button
+          onClick={onStartFromSaved}
+          disabled={generating || offline}
+          title={t('saved.startFromTip')}
+          data-testid="start-from-saved"
+          className="w-full rounded-lg border border-terracotta/40 px-3 py-2 text-sm font-semibold text-terracotta transition-colors hover:bg-terracotta/10 disabled:opacity-50"
+        >
+          {t('saved.startFrom')} ({savedCount})
+        </button>
+      )}
     </div>
   );
 }

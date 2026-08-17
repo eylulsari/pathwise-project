@@ -169,6 +169,41 @@ export interface Reservation {
   note?: string;
 }
 
+/**
+ * What the traveller asked for on a given day. Lives here rather than beside
+ * the form that edits it, because the persisted plan is built out of it and a
+ * type owned by a component would make `types.ts` depend on the UI.
+ */
+export interface RouteConfig {
+  hub: Hub;
+  budgetTry: number;
+  paceHours: number;
+  group: GroupType;
+  interests: Interest[];
+  weather: Weather;
+  startHour: number;
+}
+
+/**
+ * One day of the working plan, as stored on the server.
+ *
+ * `placeIds` is the edit and `itinerary` is a cache of it. The order is what a
+ * drag actually produces and what the next rebuild replays; the itinerary is
+ * kept alongside so reopening the dashboard paints the plan immediately rather
+ * than firing one rebuild per day and showing spinners for a plan that has not
+ * changed. If the two ever disagree, `placeIds` wins — it is the intent.
+ *
+ * Deliberately excludes `undoStack`, `loading` and `error`: undo is scoped to
+ * a sitting, and the other two describe a request, not a plan.
+ */
+export interface PersistedDay {
+  config: RouteConfig;
+  mustVisitIds: string[];
+  reservations: Reservation[];
+  placeIds: string[];
+  itinerary: Itinerary | null;
+}
+
 export interface ItineraryStop {
   order: number;
   place: Place | null; // null → synthetic Lunch Break

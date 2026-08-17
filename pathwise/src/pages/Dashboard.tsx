@@ -14,6 +14,7 @@ import type {
   Itinerary,
   NearbySuggestion,
   Origin,
+  PersistedDay,
   Place,
   RebuildRouteRequest,
   Reservation,
@@ -50,6 +51,7 @@ import { DayCelebration } from '../components/DayCelebration';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { BADGES } from '../mockData';
 import { earnBadge } from '../utils/badgeStore';
+import { useSavedPlaces } from '../hooks/useSavedPlaces';
 
 // The Passport badge each hub completes.
 const HUB_BADGE: Record<string, string> = {
@@ -147,6 +149,7 @@ export default function Dashboard() {
   const [reordering, setReordering] = useState(false);
   const [undoVisible, setUndoVisible] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const { savedIds, toggle: toggleSaved } = useSavedPlaces();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -247,10 +250,16 @@ export default function Dashboard() {
     reservations: d.reservations,
   });
 
-  async function rebuildDay(index: number, ids: string[]) {
+  /**
+   * `from` defaults to the day in current state, but hydration has to pass it
+   * explicitly: `setDays` has not applied yet at that point, so reading
+   * `days[index]` there would rebuild the restored order against the *initial*
+   * scaffold's hub and pace.
+   */
+  async function rebuildDay(index: number, ids: string[], from?: DayState) {
     setReordering(true);
     try {
-      const it = await api.rebuildRoute(rebuildReq(days[index], ids));
+      const it = await api.rebuildRoute(rebuildReq(from ?? days[index], ids));
       patchDay(index, { itinerary: it });
     } catch {
       /* keep the previous itinerary on failure */
@@ -287,8 +296,90 @@ export default function Dashboard() {
     await rebuildDay(activeDay, arrayMove(ids, oldIndex, newIndex));
   }
 
+  /**
+   * Autosave the working plan.
+   *
+   * `hydrated` is the important part. Until the stored plan has been read back,
+   * `days` still holds the initial empty scaffold — and saving that would
+   * overwrite the user's real plan with three blank days on every page load.
+   * The flag is set only after hydration has either restored a plan or decided
+   * there is none.
+   *
+   * Debounced because edits arrive in bursts: a drag fires a state change, and
+   * so does the rebuild that follows it a moment later.
+   */
+  const hydrated = useRef(false);
+
+  const persistedDays = useCallback(
+    (withItinerary: boolean): PersistedDay[] =>
+      days.map((d) => ({
+        config: d.config,
+        mustVisitIds: d.mustVisitIds,
+        reservations: d.reservations,
+        placeIds: (d.itinerary?.stops ?? [])
+          .filter((s) => s.place)
+          .map((s) => s.place!.placeId),
+        itinerary: withItinerary ? d.itinerary : null,
+      })),
+    [days],
+  );
+
+  /** True while an edit has been made but not yet persisted. */
+  const unsaved = useRef(false);
+
+  useEffect(() => {
+    if (!hydrated.current || isOffline) return;
+    unsaved.current = true;
+    const handle = window.setTimeout(() => {
+      void api
+        .savePlan(persistedDays(true))
+        .then(() => {
+          unsaved.current = false;
+        })
+        .catch(() => {
+          /* an autosave that fails must not interrupt planning */
+        });
+    }, 700);
+    return () => window.clearTimeout(handle);
+  }, [days, isOffline, persistedDays]);
+
+  /**
+   * Flush the plan when the page is going away.
+   *
+   * The debounce above is cleared on unmount, so an edit followed within 700 ms
+   * by a reload or a tab close never saved at all — and a normal fetch fired at
+   * that moment is cancelled by the navigation anyway.
+   *
+   * The flush sends the stop order WITHOUT the cached itineraries. That is on
+   * purpose: `keepalive` is the only thing that survives an unload and it caps
+   * the body at 64 KB, which a week of full itineraries comfortably exceeds.
+   * The order is the part that cannot be recomputed — hydration rebuilds the
+   * rest from it. Losing the cache costs one round trip on the next load;
+   * losing the order costs the traveller their edit.
+   *
+   * `unsaved` is what keeps that trade rare. Firing on every navigation would
+   * strip the cached itineraries from a plan that was already safely stored,
+   * so every return to the dashboard would rebuild all three days — the flush
+   * would be destroying the cache it exists to protect.
+   */
+  useEffect(() => {
+    const flush = () => {
+      if (!hydrated.current || isOffline || !unsaved.current) return;
+      void api.savePlan(persistedDays(false), { keepalive: true }).catch(() => {});
+    };
+    // `pagehide` fires on reload, close and bfcache navigation; the visibility
+    // change covers mobile Safari backgrounding the tab without unloading it.
+    const onHide = () => document.visibilityState === 'hidden' && flush();
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onHide);
+    return () => {
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onHide);
+    };
+  }, [persistedDays, isOffline]);
+
   // On mount: if offline, hydrate the last cached plan instead of calling the
-  // network; otherwise generate the default plan + load premium usage.
+  // network; otherwise restore the saved plan, or generate a fresh one.
   // Guarded so React 18 StrictMode's double-invoke doesn't burn two optimizes.
   const didInit = useRef(false);
   useEffect(() => {
@@ -304,11 +395,66 @@ export default function Dashboard() {
       });
       return;
     }
-    generateFor(0, buildRequest(INITIAL_DAYS[0]));
+
+    // A stored plan wins over generating a new one: it holds edits the traveller
+    // made by hand, and regenerating would quietly throw them away. Only when
+    // there is nothing stored does the dashboard build a plan from scratch.
+    void api
+      .getPlan()
+      .then((stored) => {
+        if (stored && stored.length > 0) {
+          setDays(
+            stored.map((d) => ({
+              config: d.config,
+              mustVisitIds: d.mustVisitIds ?? [],
+              reservations: d.reservations ?? [],
+              itinerary: d.itinerary ?? null,
+              undoStack: [],
+              loading: false,
+              error: null,
+            })),
+          );
+          // A day saved by the unload flush carries the stop order but no
+          // cached itinerary. Rebuilding from that order restores exactly the
+          // day the traveller left; without this it would render as empty and
+          // the edit would look lost even though it was saved.
+          stored.forEach((d, i) => {
+            if (!d.itinerary && (d.placeIds?.length ?? 0) > 0) {
+              void rebuildDay(i, d.placeIds, {
+                config: d.config,
+                mustVisitIds: d.mustVisitIds ?? [],
+                reservations: d.reservations ?? [],
+                itinerary: null,
+                undoStack: [],
+                loading: false,
+                error: null,
+              });
+            }
+          });
+          return true;
+        }
+        return false;
+      })
+      .catch(() => false)
+      .then((restored) => {
+        hydrated.current = true;
+        if (restored) return;
+        generateFor(0, buildRequest(INITIAL_DAYS[0]));
+        planInitialHubs();
+      });
     api.getUsage().then(setUsage).catch(() => {});
-    // Ask the server which hubs these days should cover. Only day 1 has been
-    // generated at this point, so re-hubbing the untouched later days costs
-    // nothing — and day 1 keeps whatever it already started on.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
+   * Ask the server which hubs the days should cover. Only day 1 has been
+   * generated at this point, so re-hubbing the untouched later days costs
+   * nothing — and day 1 keeps whatever it already started on.
+   *
+   * Only runs for a freshly generated plan. A restored plan already carries the
+   * hubs the traveller settled on, and re-hubbing it would move their days.
+   */
+  function planInitialHubs() {
     api
       .getDayPlan(INITIAL_DAYS.length)
       .then((hubs) => {
@@ -322,8 +468,7 @@ export default function Dashboard() {
         );
       })
       .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }
 
   /**
    * Change the length of the trip.
@@ -577,12 +722,74 @@ export default function Dashboard() {
     void api.applyQuizTravelStyles(result);
   }
 
-  // AI "Add to Today's Path" → lock the place in and regenerate this day.
+  /**
+   * Add a place to today — from search, the AI panel, or a poll result.
+   *
+   * Two paths, and the difference matters. With a day already on screen the
+   * place is appended to the existing order and the day is *rebuilt*, so every
+   * stop the traveller dragged into position stays where they put it. A full
+   * regenerate would re-solve the day and silently undo their arrangement,
+   * which is the behaviour this had before and the reason editing felt
+   * disposable. With no day yet there is no order to preserve, so it generates.
+   *
+   * It joins `mustVisitIds` either way: that is what keeps it in the day if the
+   * traveller later changes the pace or the budget and the day is re-solved.
+   */
   function addToPath(placeId: string) {
     if (day.mustVisitIds.includes(placeId)) return;
     const next = [...day.mustVisitIds, placeId];
     patchDay(activeDay, { mustVisitIds: next });
+
+    const current = realIdsOf(day);
+    if (day.itinerary && !current.includes(placeId)) {
+      recordUndo(activeDay);
+      void rebuildDay(activeDay, [...current, placeId]);
+      return;
+    }
     generateFor(activeDay, { ...buildRequest(day), mustVisitIds: next });
+  }
+
+  /**
+   * "Start from my saved places" — the second half of the two-step flow.
+   *
+   * Only the saved places in *this day's* neighbourhood are added. Adding all
+   * of them would put a Kadıköy café into a Sultanahmet day, which the engine
+   * would then either drop or charge a ferry for; neither is what the button
+   * appears to promise.
+   *
+   * This one regenerates rather than rebuilds, deliberately: it is a statement
+   * about what the day should be made of, not an edit to an arrangement.
+   */
+  async function startFromSaved() {
+    const saved = await api.getSavedPlaces().catch(() => [] as Place[]);
+    const here = saved.filter((p) => p.hub === day.config.hub).map((p) => p.placeId);
+    if (here.length === 0) {
+      showToast(t('saved.none'));
+      return;
+    }
+    const next = [...new Set([...day.mustVisitIds, ...here])];
+    patchDay(activeDay, { mustVisitIds: next });
+    showToast(t('saved.added'));
+    await generateFor(activeDay, { ...buildRequest(day), mustVisitIds: next });
+  }
+
+  /**
+   * Drop a stop the traveller does not want.
+   *
+   * Rebuild rather than regenerate, for the same reason as adding: the rest of
+   * the day is their arrangement. It also leaves `mustVisitIds`, or a stop
+   * pinned earlier would be re-added by the very next re-solve and look like
+   * the delete had failed.
+   */
+  function removeStop(placeId: string) {
+    const remaining = realIdsOf(day).filter((id) => id !== placeId);
+    recordUndo(activeDay);
+    patchDay(activeDay, {
+      mustVisitIds: day.mustVisitIds.filter((id) => id !== placeId),
+      reservations: day.reservations.filter((r) => r.placeId !== placeId),
+    });
+    if (selectedPlaceId === placeId) setSelectedPlaceId(null);
+    void rebuildDay(activeDay, remaining);
   }
 
   // Tour "Set as Today's Itinerary" → focus this day on the tour's hub.
@@ -775,6 +982,8 @@ export default function Dashboard() {
             onGenerate={handleGenerate}
             generating={day.loading}
             offline={isOffline}
+            savedCount={savedIds.size}
+            onStartFromSaved={startFromSaved}
           />
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -841,6 +1050,9 @@ export default function Dashboard() {
               onDismissSuggestion={dismissSuggestion}
               visited={visited}
               onToggleVisited={toggleVisited}
+              onRemoveStop={removeStop}
+              savedIds={savedIds}
+              onToggleSaved={toggleSaved}
             />
           )}
         </div>

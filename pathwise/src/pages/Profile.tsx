@@ -11,8 +11,11 @@ import { BUCKET_LIST_IDS, PAST_TRIPS } from '../mockData';
 import { PLACES_BY_ID } from '../hubData';
 import { HUB_LABEL, formatTry, formatKm } from '../utils/format';
 import { useT } from '../i18n';
+import { useSavedPlaces } from '../hooks/useSavedPlaces';
+import { SavePlaceButton } from '../components/SavePlaceButton';
+import type { Place } from '../types';
 
-type Tab = 'trips' | 'passport' | 'spots';
+type Tab = 'trips' | 'passport' | 'spots' | 'saved';
 
 /** Normalized card shape for both saved (backend) and demo (mock) trips. */
 interface TripCard {
@@ -117,6 +120,7 @@ export default function Profile() {
           <TabButton active={tab === 'trips'} onClick={() => setTab('trips')}>{t('profile.pastTrips')}</TabButton>
           <TabButton active={tab === 'passport'} onClick={() => setTab('passport')}>{t('profile.passport')}</TabButton>
           <TabButton active={tab === 'spots'} onClick={() => setTab('spots')}>{t('profile.visitedSpots')}</TabButton>
+          <TabButton active={tab === 'saved'} onClick={() => setTab('saved')}>{t('saved.title')}</TabButton>
         </div>
 
         {tab === 'trips' && (
@@ -206,6 +210,8 @@ export default function Profile() {
           </div>
         )}
 
+        {tab === 'saved' && <SavedPlacesList />}
+
         {/* Opt-in women-traveler mode — outside the tabs so it is reachable
             from any tab and never buried behind a content switch. The UI has
             not been driven end-to-end yet, so contain it: a quiet notice here
@@ -230,6 +236,102 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="rounded-xl bg-white/50 p-3 text-center">
       <div className="font-display text-xl font-bold">{value}</div>
       <div className="text-xs text-ink/60">{label}</div>
+    </div>
+  );
+}
+
+/**
+ * Everything the traveller has bookmarked.
+ *
+ * Fetched as full records from the server rather than looked up in
+ * `PLACES_BY_ID`, so a place saved on a phone shows here on a laptop with its
+ * real name and neighbourhood, not a blank row.
+ */
+function SavedPlacesList() {
+  const { t } = useT();
+  const { savedIds, toggle } = useSavedPlaces();
+  const [places, setPlaces] = useState<Place[]>([]);
+  /**
+   * Three states, not two.
+   *
+   * This used to `.catch(() => setPlaces([]))`, which rendered a failed
+   * request as "you have not saved anywhere yet" — a sentence that is not
+   * true and that the traveller cannot tell from the truth. It also made the
+   * list appear only after the fetch landed, so under load there was a window
+   * where the page confidently said the list was empty.
+   */
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+
+  useEffect(() => {
+    let alive = true;
+    api
+      .getSavedPlaces()
+      .then((p) => {
+        if (!alive) return;
+        setPlaces(p);
+        setStatus('ready');
+      })
+      .catch(() => alive && setStatus('error'));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Unsaving from this list should make the row leave, and `savedIds` is what
+  // the toggle updates — so the fetched records are filtered through it rather
+  // than re-fetched on every tap.
+  const visible = places.filter((p) => savedIds.has(p.placeId));
+
+  if (status === 'loading') {
+    return (
+      <p
+        data-testid="saved-loading"
+        className="rounded-xl border border-ink/10 bg-surface-2 p-4 text-sm text-ink/50"
+      >
+        {t('saved.loading')}
+      </p>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <p
+        data-testid="saved-error"
+        className="rounded-xl border border-clay/30 bg-surface-2 p-4 text-sm text-clay"
+      >
+        {t('saved.error')}
+      </p>
+    );
+  }
+
+  if (visible.length === 0) {
+    return (
+      <p data-testid="saved-empty" className="rounded-xl border border-ink/10 bg-surface-2 p-4 text-sm text-ink/50">
+        {t('saved.empty')}
+      </p>
+    );
+  }
+
+  return (
+    <div data-testid="saved-list" className="grid gap-2 sm:grid-cols-2">
+      {visible.map((place) => (
+        <div
+          key={place.placeId}
+          className="flex items-center gap-3 rounded-xl border border-ink/10 bg-surface-2 p-3"
+        >
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-ink">{place.name}</p>
+            <p className="text-xs text-ink/50">{HUB_LABEL[place.hub]}</p>
+          </div>
+          <SavePlaceButton
+            placeId={place.placeId}
+            placeName={place.name}
+            saved
+            onToggle={toggle}
+            className="ml-auto flex-shrink-0"
+          />
+        </div>
+      ))}
     </div>
   );
 }

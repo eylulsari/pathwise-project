@@ -16,6 +16,7 @@ import type {
 import { BudgetBar } from './BudgetBar';
 import { LocalStoryModal } from './LocalStoryModal';
 import { OpenNowBadge } from './OpeningHours';
+import { SavePlaceButton } from './SavePlaceButton';
 import { formatTry, formatDuration, formatKm, formatEntryFee } from '../utils/format';
 import { haversineMeters, walkEstimate } from '../utils/geo';
 import { useT } from '../i18n';
@@ -36,6 +37,9 @@ export function TodayPath({
   onDismissSuggestion,
   visited,
   onToggleVisited,
+  onRemoveStop,
+  savedIds,
+  onToggleSaved,
 }: {
   itinerary: Itinerary;
   selectedPlaceId: string | null;
@@ -51,6 +55,11 @@ export function TodayPath({
   /** Set of placeIds the user has marked visited (for the completion celebration). */
   visited?: Set<string>;
   onToggleVisited?: (placeId: string) => void;
+  /** Drop a stop from the day. Absent → the row shows no remove button. */
+  onRemoveStop?: (placeId: string) => void;
+  /** Bookmarked place ids, so each row can draw its own star without asking. */
+  savedIds?: Set<string>;
+  onToggleSaved?: (placeId: string) => void;
 }) {
   const { t } = useT();
   const [storyPlace, setStoryPlace] = useState<Place | null>(null);
@@ -71,6 +80,13 @@ export function TodayPath({
         <h2 className="font-display text-xl font-bold">{t('today.title')}</h2>
         <span className="text-xs text-ink/50">
           {formatKm(itinerary.totalDistanceKm)} · {formatDuration(itinerary.totalDurationMinutes)}
+          {/* The raw minutes, for tests that need to prove the day was actually
+              recomputed rather than merely redrawn. Hidden from sighted users
+              and from assistive tech — the formatted value beside it is the
+              real label. */}
+          <span data-testid="day-total-minutes" hidden aria-hidden="true">
+            {itinerary.totalDurationMinutes}
+          </span>
           {reordering && <span className="ml-2 animate-pulse text-iznik">· {t('dash.saving')}</span>}
         </span>
       </div>
@@ -101,6 +117,9 @@ export function TodayPath({
               onToggleAnchor={onToggleAnchor}
               visited={stop.place ? visited?.has(stop.place.placeId) : false}
               onToggleVisited={onToggleVisited}
+              onRemove={onRemoveStop}
+              isSaved={stop.place ? savedIds?.has(stop.place.placeId) : false}
+              onToggleSaved={onToggleSaved}
             />
           ))}
         </ol>
@@ -190,6 +209,9 @@ function StopRow({
   onToggleAnchor,
   visited,
   onToggleVisited,
+  onRemove,
+  isSaved,
+  onToggleSaved,
 }: {
   stop: ItineraryStop;
   active: boolean;
@@ -200,6 +222,9 @@ function StopRow({
   onToggleAnchor?: (place: Place, currentArrival: string) => void;
   visited?: boolean;
   onToggleVisited?: (placeId: string) => void;
+  onRemove?: (placeId: string) => void;
+  isSaved?: boolean;
+  onToggleSaved?: (placeId: string) => void;
 }) {
   const { t } = useT();
 
@@ -218,7 +243,7 @@ function StopRow({
   }
 
   const place = stop.place!;
-  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} onJournal={onJournal} onToggleAnchor={onToggleAnchor} visited={visited} onToggleVisited={onToggleVisited} />;
+  return <SortableStopRow stop={stop} place={place} active={active} onSelect={onSelect} onStory={onStory} onReserve={onReserve} onJournal={onJournal} onToggleAnchor={onToggleAnchor} visited={visited} onToggleVisited={onToggleVisited} onRemove={onRemove} isSaved={isSaved} onToggleSaved={onToggleSaved} />;
 }
 
 function SortableStopRow({
@@ -232,6 +257,9 @@ function SortableStopRow({
   onToggleAnchor,
   visited,
   onToggleVisited,
+  onRemove,
+  isSaved,
+  onToggleSaved,
 }: {
   stop: ItineraryStop;
   place: Place;
@@ -243,6 +271,9 @@ function SortableStopRow({
   onToggleAnchor?: (place: Place, currentArrival: string) => void;
   visited?: boolean;
   onToggleVisited?: (placeId: string) => void;
+  onRemove?: (placeId: string) => void;
+  isSaved?: boolean;
+  onToggleSaved?: (placeId: string) => void;
 }) {
   const { t } = useT();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -364,6 +395,29 @@ function SortableStopRow({
               title={t('anchor.lockTip')}
             >
               {stop.reservation ? `⚓ ${t('anchor.locked')}` : `⏰ ${t('anchor.lock')}`}
+            </button>
+          )}
+          {onToggleSaved && (
+            <SavePlaceButton
+              placeId={place.placeId}
+              placeName={place.name}
+              saved={Boolean(isSaved)}
+              onToggle={onToggleSaved}
+            />
+          )}
+          {onRemove && (
+            // Pushed to the right so "remove" is never the button next to the
+            // one you meant to press.
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove(place.placeId);
+              }}
+              className="ml-auto text-xs font-semibold text-ink/40 hover:text-terracotta"
+              title={t('today.removeStopTip')}
+              aria-label={`${t('today.removeStop')}: ${place.name}`}
+            >
+              ✕ {t('today.removeStop')}
             </button>
           )}
         </div>
