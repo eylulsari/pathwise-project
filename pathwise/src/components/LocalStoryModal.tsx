@@ -7,6 +7,7 @@ import { ReviewsSection } from './ReviewsSection';
 import { PlaceEnrichmentPanel } from './PlaceEnrichmentPanel';
 import { OpeningHours } from './OpeningHours';
 import { PlaceFacts } from './PlaceFacts';
+import { MosqueEtiquette } from './MosqueEtiquette';
 import { useT } from '../i18n';
 
 /**
@@ -73,6 +74,10 @@ export function LocalStoryModal({
         {/* What this place is, from the record itself. Shown to everyone and
             never paywalled: these are plain facts, not editorial. */}
         <PlaceFacts place={place} />
+
+        {/* Etiquette belongs next to the mosque, not only on a reference page
+            the traveller would have had to read beforehand. */}
+        {place.placeType === 'mosque' && <MosqueEtiquette />}
 
         <section className="mt-4">
           <h4 className="text-sm font-bold text-iznik">📖 The story</h4>

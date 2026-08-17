@@ -12,7 +12,50 @@ export const translations = {
       loading: 'Loading your Istanbul…',
       sectionUnavailable: 'This section is temporarily unavailable.',
     },
-    nav: { plan: 'Plan', social: 'Social', profile: 'Profile' },
+    nav: { plan: 'Plan', social: 'Social', profile: 'Profile', essentials: 'Essentials' },
+    /**
+     * Static reference content. Every string here was supplied for the app —
+     * none of it is generated, and none of it should be edited to "improve" it
+     * without the same care: it is advice a traveller may act on in an
+     * emergency or inside a place of worship.
+     *
+     * Each bullet is its own key rather than an array, so the parity check
+     * counts them individually and a half-translated list fails the build.
+     */
+    essentials: {
+      title: 'Essentials',
+      subtitle: 'Before you go',
+      emergency: {
+        title: 'Emergency',
+        body: '112 — a single number for every emergency (police, ambulance, fire), free, 24/7. Say where you are, and say that you can speak English.',
+      },
+      mosque: {
+        title: 'Visiting a mosque',
+        i1: 'May be closed at prayer times',
+        i2: 'Shoulders and knees covered; women wear a headscarf (most mosques hand one out at the entrance)',
+        i3: 'Shoes come off',
+        i4: 'Do not walk in front of someone praying, and do not use flash',
+      },
+      tipping: {
+        title: 'Tipping',
+        i1: 'In a restaurant, ~10% is common if it is not already on the bill',
+        i2: 'For a taxi, rounding the fare up is enough',
+        i3: 'At a hamam or on a guided tour, a small tip is expected',
+      },
+      caution: {
+        title: 'Things to watch for',
+        i1: 'Make sure the taxi meter is running; if it is not, find another taxi',
+        i2: 'Be wary of a friendly approach on the street that steers you towards a particular shop or restaurant',
+        i3: 'A shoe shiner dropping a brush "by accident" is a known trick',
+        i4: 'Avoid a menu with no prices on it',
+      },
+      practical: {
+        title: 'Practical',
+        i1: 'Turkish lira (₺) — cards are widely accepted, but keep cash for small traders',
+        i2: 'An İstanbulkart for public transport (bought from the machines)',
+        i3: 'A tourist eSIM or SIM is easy to buy at the airport or a phone shop',
+      },
+    },
     landing: {
       signIn: 'Sign In',
       badge: 'Istanbul · smart & social',
@@ -526,7 +569,41 @@ export const translations = {
       loading: 'İstanbul’un yükleniyor…',
       sectionUnavailable: 'Bu bölüm şu anda kullanılamıyor.',
     },
-    nav: { plan: 'Planla', social: 'Sosyal', profile: 'Profil' },
+    nav: { plan: 'Planla', social: 'Sosyal', profile: 'Profil', essentials: 'Temel Bilgiler' },
+    essentials: {
+      title: 'Temel Bilgiler',
+      subtitle: 'Gitmeden Önce',
+      emergency: {
+        title: 'Acil Durum',
+        body: '112 — tüm acil durumlar için tek numara (polis/ambulans/itfaiye), ücretsiz, 7/24. Nerede olduğunu söyle, İngilizce konuşabileceğini belirt.',
+      },
+      mosque: {
+        title: 'Cami Ziyareti',
+        i1: 'Namaz vaktinde kapalı olabilir',
+        i2: 'Omuz ve diz kapalı olmalı, kadınlar başörtüsü (çoğu camide girişte veriliyor)',
+        i3: 'Ayakkabı çıkarılır',
+        i4: 'Namaz kılanın önünden geçme, flaş fotoğraf çekme',
+      },
+      tipping: {
+        title: 'Bahşiş',
+        i1: 'Restoranda hesaba dahil değilse ~%10 yaygın',
+        i2: 'Taksi ücretini yukarı yuvarlamak yeterli',
+        i3: 'Hamam ve rehberli turda küçük bahşiş beklenir',
+      },
+      caution: {
+        title: 'Dikkat Edilmesi Gerekenler',
+        i1: 'Taksi sayacının açık olduğundan emin ol, açılmıyorsa başka taksi bul',
+        i2: 'Sokakta arkadaşça yaklaşıp dükkan veya restorana yönlendirenlere dikkatli ol',
+        i3: 'Ayakkabı boyacısının “kaza ile” fırça düşürmesi bilinen bir numaradır',
+        i4: 'Fiyat yazmayan menüden kaçın',
+      },
+      practical: {
+        title: 'Pratik Bilgiler',
+        i1: 'Türk Lirası (₺) — kartlar yaygın, küçük esnaf için nakit bulundur',
+        i2: 'Toplu taşıma için İstanbulkart (otomatlardan alınır)',
+        i3: 'Havalimanı veya telekom mağazasında turist eSIM/hat kolay alınır',
+      },
+    },
     landing: {
       signIn: 'Giriş Yap',
       badge: 'İstanbul · akıllı & sosyal',
