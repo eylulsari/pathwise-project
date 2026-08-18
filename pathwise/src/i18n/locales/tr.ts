@@ -396,6 +396,17 @@ export const tr = {
     pinnedKept: 'Rezervasyonlu {count} durak yerinde bırakıldı',
     failed: 'Bu gün optimize edilemedi. Bağlantını kontrol edip tekrar dene.',
   },
+  museumPass: {
+    title: 'İstanbul Müze Kart',
+    coveredCount: 'Bugünkü {count} durak kartın kapsamında.',
+    estimatedLabel: 'bu biletlerin ayrı ayrı alınsa tahmini tutarı',
+    notNetNote:
+      'Bu, kapsamdaki girişlerin tek tek ne tutacağı — tasarrufun değil. Kartın kendi fiyatı var ve değişiyor, o yüzden burada fiyat vermiyoruz: güncel fiyata bakıp çıkarman gerekir.',
+    checkPrice: 'Güncel kart fiyatına bak',
+    uncoveredNote: 'Bugünkü ücretli {count} durak daha kartın kapsamında değil.',
+    approxWarning:
+      'Bu bilet fiyatları bizim tahminimiz, doğrulanmış fiyat değil. Toplamı kaba bir fikir olarak al.',
+  },
   list: {
     loading: 'Yükleniyor…',
     error: 'Bu yüklenemedi. Bağlantını kontrol edip tekrar dene.',

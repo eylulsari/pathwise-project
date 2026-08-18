@@ -399,6 +399,17 @@ export const de = {
     pinnedKept: '{count} reservierter Stopp blieb an seinem Platz',
     failed: 'Dieser Tag konnte nicht optimiert werden. Prüfe deine Verbindung und versuch es erneut.',
   },
+  museumPass: {
+    title: 'Istanbul Museum Pass',
+    coveredCount: '{count} Stopps von heute sind im Pass enthalten.',
+    estimatedLabel: 'geschätzte Kosten dieser Tickets bei Einzelkauf',
+    notNetNote:
+      'Das ist, was die enthaltenen Eintritte einzeln kosten würden — nicht deine Ersparnis. Der Pass hat einen eigenen Preis, der sich ändert, deshalb nennen wir ihn hier nicht: schau den aktuellen Preis nach und zieh ihn ab.',
+    checkPrice: 'Aktuellen Preis des Passes prüfen',
+    uncoveredNote: '{count} weitere kostenpflichtige Stopps heute sind nicht im Pass enthalten.',
+    approxWarning:
+      'Diese Ticketpreise sind unsere Schätzungen, keine geprüften Preise. Nimm die Summe als groben Anhaltspunkt.',
+  },
   list: {
     loading: 'Wird geladen…',
     error: 'Das konnte nicht geladen werden. Prüfe deine Verbindung und versuch es erneut.',

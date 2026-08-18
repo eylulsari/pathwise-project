@@ -14,6 +14,7 @@ import type {
   StartPoint,
 } from '../types';
 import { BudgetBar } from './BudgetBar';
+import { MuseumPassCard } from './MuseumPassCard';
 import { LocalStoryModal } from './LocalStoryModal';
 import { OpenNowBadge } from './OpeningHours';
 import { SavePlaceButton } from './SavePlaceButton';
@@ -92,6 +93,11 @@ export function TodayPath({
       </div>
 
       <BudgetBar itinerary={itinerary} />
+
+      {/* Sits under the budget because it is about the same money: which of
+          today's tickets one pass would cover. Renders nothing on a day with
+          no covered stops. */}
+      <MuseumPassCard itinerary={itinerary} />
 
       <RouteNotices notices={itinerary.notices} />
 

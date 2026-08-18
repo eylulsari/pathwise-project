@@ -435,6 +435,22 @@ export const en = {
    * Only the empty sentence differs per list, so only that one lives with
    * the feature it belongs to.
    */
+  /**
+   * Museum Pass. Every string here hedges, deliberately: the entry fees are
+   * estimates and the pass price is not ours to quote, so the card reports a
+   * gross figure and says so in words rather than implying a net saving.
+   */
+  museumPass: {
+    title: 'Istanbul Museum Pass',
+    coveredCount: '{count} stops today are covered by the pass.',
+    estimatedLabel: 'estimated cost of these tickets bought separately',
+    notNetNote:
+      'This is what the covered entries would cost on their own — not your saving. The pass has its own price, which changes, so we do not quote it here: check the current price and subtract.',
+    checkPrice: 'Check the current pass price',
+    uncoveredNote: '{count} other paid stops today are not covered by the pass.',
+    approxWarning:
+      'These ticket prices are our estimates, not verified prices. Treat the total as a rough guide.',
+  },
   list: {
     loading: 'Loading…',
     error: 'Could not load this. Check your connection and try again.',
