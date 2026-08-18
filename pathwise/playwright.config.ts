@@ -38,7 +38,8 @@ export default defineConfig({
   workers: 2,
   retries: 1,
   /**
-   * `list` for the terminal, `html` so a failure leaves something to read.
+   * `list` for the terminal, `html` so a failure leaves something to read, and
+   * `github` on CI so a failure is readable *without* the artifact.
    *
    * CI uploads `pathwise/playwright-report/` when the suite fails, and that
    * directory is produced by the html reporter — which was not enabled, so
@@ -47,9 +48,18 @@ export default defineConfig({
    * outside the runner: the job log needs admin rights to download, and the
    * one artifact that would not have was never written.
    *
-   * `open: 'never'` keeps it from trying to launch a browser on the runner.
+   * The artifact fixed half of that. It did not fix the other half: both the
+   * job log and the artifact download require admin rights on this repo, so a
+   * red run still says only "Process completed with exit code 1" to anyone
+   * reading the checks API. The `github` reporter writes each failure as a
+   * workflow annotation, and annotations are public — which is the difference
+   * between knowing *which* test broke and guessing.
+   *
+   * `open: 'never'` keeps html from trying to launch a browser on the runner.
    */
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: process.env.CI
+    ? [['list'], ['github'], ['html', { open: 'never' }]]
+    : [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:5173',
     trace: 'on-first-retry',
