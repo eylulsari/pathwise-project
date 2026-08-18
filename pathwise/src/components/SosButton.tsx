@@ -133,7 +133,7 @@ export function SosButton() {
     <>
       <button
         onClick={() => setStage('confirm')}
-        className="absolute bottom-3 right-3 z-[1001] flex items-center gap-1 rounded-full bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-900/50 ring-2 ring-red-400/50 transition-transform hover:scale-105"
+        className="absolute bottom-3 end-3 z-[1001] flex items-center gap-1 rounded-full bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-900/50 ring-2 ring-red-400/50 transition-transform hover:scale-105"
         title="SOS"
       >
         🆘 SOS

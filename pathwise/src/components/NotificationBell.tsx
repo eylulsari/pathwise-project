@@ -72,7 +72,7 @@ export function NotificationBell() {
       <button onClick={openPanel} className="relative rounded-lg px-2 py-1.5 text-lg hover:bg-ink/5" aria-label="Notifications">
         🔔
         {count > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-terracotta px-1 text-[10px] font-bold text-white">
+          <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-terracotta px-1 text-[10px] font-bold text-white">
             {count > 9 ? '9+' : count}
           </span>
         )}
@@ -81,7 +81,7 @@ export function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-[1041] mt-1 w-80 max-w-[90vw] overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-2xl">
+          <div className="absolute end-0 z-[1041] mt-1 w-80 max-w-[90vw] overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-2xl">
             <div className="flex items-center justify-between border-b border-ink/10 px-3 py-2">
               <span className="font-display text-sm font-bold text-ink">{t('notif.title')}</span>
               <div className="flex items-center gap-2 text-xs">
@@ -115,13 +115,13 @@ export function NotificationBell() {
                   <button
                     key={n.id}
                     onClick={() => click(n)}
-                    className={`flex w-full gap-2 border-b border-ink/5 px-3 py-2.5 text-left hover:bg-ink/5 ${n.read ? 'opacity-60' : ''}`}
+                    className={`flex w-full gap-2 border-b border-ink/5 px-3 py-2.5 text-start hover:bg-ink/5 ${n.read ? 'opacity-60' : ''}`}
                   >
                     <span className="text-lg">{ICONS[n.type] ?? '🔔'}</span>
                     <span className="flex-1">
                       <span className="block text-sm font-semibold text-ink">
                         {n.title}
-                        {!n.read && <span className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-sunset align-middle" />}
+                        {!n.read && <span className="ms-1 inline-block h-1.5 w-1.5 rounded-full bg-sunset align-middle" />}
                       </span>
                       <span className="block text-xs text-ink/60">{n.body}</span>
                     </span>

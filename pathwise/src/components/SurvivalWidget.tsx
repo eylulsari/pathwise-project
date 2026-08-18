@@ -17,7 +17,7 @@ export function SurvivalWidget() {
             <div key={cat.id} className="overflow-hidden rounded-lg border border-ink/10">
               <button
                 onClick={() => setOpen(isOpen ? null : cat.id)}
-                className="flex w-full items-center justify-between px-3 py-2 text-left text-sm font-semibold text-ink/90 hover:bg-ink/5"
+                className="flex w-full items-center justify-between px-3 py-2 text-start text-sm font-semibold text-ink/90 hover:bg-ink/5"
               >
                 <span>{cat.icon} {cat.title}</span>
                 <span className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}>⌄</span>

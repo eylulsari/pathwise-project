@@ -1063,7 +1063,7 @@ export default function Dashboard() {
             </select>
           </label>
         )}
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div className="ms-auto flex flex-wrap items-center gap-2">
           {usage && (
             <span className="rounded-lg border border-ink/10 px-2.5 py-1 text-xs text-ink/60">
               {usage.optimizeLimit === null
@@ -1111,7 +1111,7 @@ export default function Dashboard() {
       >
         {/* Controls / discovery tools. When a route exists they become the
             secondary rail (last); with no route they lead (natural DOM order). */}
-        <div className={`space-y-4 overflow-y-auto pr-1 ${showResultsFirst ? 'order-3' : ''}`}>
+        <div className={`space-y-4 overflow-y-auto pe-1 ${showResultsFirst ? 'order-3' : ''}`}>
           <RouteGenerator
             config={day.config}
             onChange={updateConfig}
@@ -1147,7 +1147,7 @@ export default function Dashboard() {
         </div>
 
         {/* Today's Path — leads (first) whenever a route exists or is loading. */}
-        <div className={`overflow-y-auto pr-1 ${showResultsFirst ? 'order-1' : ''}`}>
+        <div className={`overflow-y-auto pe-1 ${showResultsFirst ? 'order-1' : ''}`}>
           {undoVisible && day.undoStack.length > 0 && (
             <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-iznik/40 bg-iznik/10 px-3 py-2 text-sm">
               <span className="text-ink/90">✏️ {t('dash.routeUpdated')}</span>
@@ -1167,7 +1167,7 @@ export default function Dashboard() {
           {day.error && (
             <div className="rounded-xl bg-sunset/15 p-4 text-sm text-terracotta">
               {day.error}
-              <button onClick={handleGenerate} className="ml-2 underline">{t('dash.retry')}</button>
+              <button onClick={handleGenerate} className="ms-2 underline">{t('dash.retry')}</button>
             </div>
           )}
           {/*
@@ -1318,7 +1318,7 @@ export default function Dashboard() {
       {toast && (
         <div
           role="status"
-          className="fixed bottom-24 left-1/2 z-[1100] -translate-x-1/2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-soft-lg"
+          className="fixed bottom-24 start-1/2 z-[1100] -translate-x-1/2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-soft-lg"
         >
           {toast}
         </div>

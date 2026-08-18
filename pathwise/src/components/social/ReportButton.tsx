@@ -46,7 +46,7 @@ export function ReportButton({
       {open && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-[1041] mt-1 w-44 overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-xl">
+          <div className="absolute end-0 z-[1041] mt-1 w-44 overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-xl">
             <p className="px-3 py-2 text-[10px] uppercase tracking-wide text-ink/40">
               {t('report.reason')}
             </p>
@@ -55,7 +55,7 @@ export function ReportButton({
                 key={r}
                 disabled={busy}
                 onClick={() => submit(r)}
-                className="block w-full px-3 py-2 text-left text-xs text-ink/80 hover:bg-ink/5"
+                className="block w-full px-3 py-2 text-start text-xs text-ink/80 hover:bg-ink/5"
               >
                 {t(`report.${r}`)}
               </button>

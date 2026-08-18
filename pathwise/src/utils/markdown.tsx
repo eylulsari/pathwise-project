@@ -132,7 +132,7 @@ export function renderMarkdown(body: string): ReactNode[] {
       out.push(
         <blockquote
           key={key++}
-          className="mt-4 border-l-4 border-iznik/30 bg-iznik/5 py-2 pl-4 text-sm italic leading-relaxed text-ink/75"
+          className="mt-4 border-l-4 border-iznik/30 bg-iznik/5 py-2 ps-4 text-sm italic leading-relaxed text-ink/75"
         >
           {renderInline(quoted.join(' '), `q${key}`)}
         </blockquote>,
@@ -155,11 +155,11 @@ export function renderMarkdown(body: string): ReactNode[] {
       ));
       out.push(
         ordered ? (
-          <ol key={key++} className="mt-4 list-decimal space-y-2 pl-5 text-sm text-ink/80 marker:font-semibold marker:text-iznik">
+          <ol key={key++} className="mt-4 list-decimal space-y-2 ps-5 text-sm text-ink/80 marker:font-semibold marker:text-iznik">
             {li}
           </ol>
         ) : (
-          <ul key={key++} className="mt-4 list-disc space-y-2 pl-5 text-sm text-ink/80 marker:text-iznik">
+          <ul key={key++} className="mt-4 list-disc space-y-2 ps-5 text-sm text-ink/80 marker:text-iznik">
             {li}
           </ul>
         ),

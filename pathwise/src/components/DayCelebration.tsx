@@ -144,7 +144,7 @@ export function DayCelebration({
         </div>
 
         {badge && (
-          <div className="mt-4 flex items-center gap-3 rounded-2xl bg-accent-gradient p-3 text-left text-ink shadow-soft">
+          <div className="mt-4 flex items-center gap-3 rounded-2xl bg-accent-gradient p-3 text-start text-ink shadow-soft">
             <span className="text-3xl">{badge.emoji}</span>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wide text-ink/70">

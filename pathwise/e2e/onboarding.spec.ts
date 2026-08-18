@@ -454,12 +454,13 @@ test('language toggle switches the UI between English and Turkish', async ({ pag
   // Defaults to English (Playwright locale is en-US).
   await expect(page.getByRole('link', { name: 'Sign In', exact: true })).toBeVisible();
 
-  // Switch to Turkish via the header toggle.
-  await page.getByRole('button', { name: 'TR', exact: true }).click();
+  // Switch to Turkish via the header picker. This was a pair of EN/TR buttons
+  // until there were six languages, which do not fit on a header row.
+  await page.getByTestId('language-select').selectOption('tr');
   await expect(page.getByRole('link', { name: 'Giriş Yap', exact: true })).toBeVisible();
   await expect(page.getByText(/akıllı & sosyal/i)).toBeVisible();
 
   // Switch back to English.
-  await page.getByRole('button', { name: 'EN', exact: true }).click();
+  await page.getByTestId('language-select').selectOption('en');
   await expect(page.getByRole('link', { name: 'Sign In', exact: true })).toBeVisible();
 });

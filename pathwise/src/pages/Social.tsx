@@ -253,11 +253,11 @@ export default function Social() {
                     {/* No place → an unplaced "right here" check-in. */}
                     <span className="text-ink/50"> · {c.placeName || t('social.rightHere')} · {formatAge(c.createdAt)}</span>
                     {live ? (
-                      <span className="ml-2 whitespace-nowrap rounded-full bg-sage/20 px-2 py-0.5 text-[10px] font-semibold text-sage">
+                      <span className="ms-2 whitespace-nowrap rounded-full bg-sage/20 px-2 py-0.5 text-[10px] font-semibold text-sage">
                         🟢 {t('presence.available')}
                       </span>
                     ) : (
-                      <span className="ml-2 whitespace-nowrap rounded-full bg-ink/5 px-2 py-0.5 text-[10px] font-semibold text-ink/40">
+                      <span className="ms-2 whitespace-nowrap rounded-full bg-ink/5 px-2 py-0.5 text-[10px] font-semibold text-ink/40">
                         {t('presence.stale')}
                       </span>
                     )}
@@ -436,7 +436,7 @@ export default function Social() {
                     {r.liked ? '❤️' : '🤍'} {r.likes}
                   </button>
                   <button onClick={() => cloneRoute(r.hub)} className="rounded-lg bg-iznik/20 px-3 py-1.5 text-xs font-semibold text-ink">{t('social.clone')}</button>
-                  <span className="ml-auto self-center"><ReportButton contentType="route" contentId={r.id} /></span>
+                  <span className="ms-auto self-center"><ReportButton contentType="route" contentId={r.id} /></span>
                 </div>
               </div>
             ))}
@@ -486,7 +486,7 @@ function TravelerHead({ traveler }: { traveler: Traveler | RealTraveler }) {
         <p className="truncate font-display font-bold text-ink">{traveler.name}</p>
         {details && <p className="text-xs text-ink/50">{details}</p>}
       </div>
-      <span className="ml-auto flex items-center gap-1">
+      <span className="ms-auto flex items-center gap-1">
         {/* Reciprocity: the backend only sends `identifiesAsWoman` to viewers
             who opted in themselves, so this badge is invisible to everyone
             else. ⚠️ Self-declared, never verified. */}
@@ -592,7 +592,7 @@ function ForumThread({ q }: { q: ForumQuestion }) {
         answers over time, so labelling the whole thread would either brand a
         user's own words as demo data or leave the fixture ones unmarked.
       */}
-      <div className="mt-3 space-y-2 border-l-2 border-ink/10 pl-3">
+      <div className="mt-3 space-y-2 border-l-2 border-ink/10 ps-3">
         {thread.answers.map((a, i) => (
           <div key={i} className="text-sm" data-testid="forum-answer">
             <span className="font-semibold text-iznik">{a.authorName}</span>

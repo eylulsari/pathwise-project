@@ -55,7 +55,7 @@ export default function Premium() {
         <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-surface-2">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-ink/10 text-left">
+              <tr className="border-b border-ink/10 text-start">
                 <th className="px-4 py-3 font-semibold text-ink/70">{t('premium.feature')}</th>
                 <th className="px-4 py-3 font-semibold text-ink/70">{t('premium.free')}</th>
                 <th className="px-4 py-3 font-semibold text-iznik">{t('premium.premium')}</th>

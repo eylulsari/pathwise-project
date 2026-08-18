@@ -71,20 +71,20 @@ export function AiAssistant({
     <>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-5 right-5 z-[1050] flex h-14 w-14 items-center justify-center rounded-full bg-iznik text-2xl shadow-soft-lg transition-transform hover:scale-105"
+        className="fixed bottom-5 end-5 z-[1050] flex h-14 w-14 items-center justify-center rounded-full bg-iznik text-2xl shadow-soft-lg transition-transform hover:scale-105"
         aria-label="AI assistant"
       >
         {open ? '✕' : '🤖'}
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-5 z-[1050] flex h-[28rem] w-[22rem] max-w-[90vw] flex-col overflow-hidden rounded-2xl border border-ink/10 bg-surface-2 shadow-2xl">
+        <div className="fixed bottom-24 end-5 z-[1050] flex h-[28rem] w-[22rem] max-w-[90vw] flex-col overflow-hidden rounded-2xl border border-ink/10 bg-surface-2 shadow-2xl">
           <div className="bg-accent-gradient px-4 py-3 font-display font-bold text-ink">
             Pathwise Assistant
           </div>
           <div className="flex-1 space-y-3 overflow-y-auto p-3">
             {messages.map((m, i) => (
-              <div key={i} className={m.role === 'user' ? 'text-right' : ''}>
+              <div key={i} className={m.role === 'user' ? 'text-end' : ''}>
                 <span
                   className={`inline-block max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                     m.role === 'user' ? 'bg-iznik/30 text-ink' : 'bg-white text-ink/90'
@@ -93,7 +93,7 @@ export function AiAssistant({
                   {m.text}
                 </span>
                 {m.suggestion && (
-                  <div className="mt-2 rounded-xl border border-ink/10 bg-white p-3 text-left">
+                  <div className="mt-2 rounded-xl border border-ink/10 bg-white p-3 text-start">
                     <p className="font-semibold text-ink">{m.suggestion.name}</p>
                     <p className="text-xs text-ink/60">{m.suggestion.reason}</p>
                     <div className="mt-2 flex items-center gap-2 text-xs">

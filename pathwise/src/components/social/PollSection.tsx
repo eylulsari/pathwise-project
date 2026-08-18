@@ -137,9 +137,9 @@ export function PollSection() {
                       key={o.id}
                       onClick={() => vote(poll, o.id)}
                       disabled={poll.status === 'closed' || voted.has(poll.id)}
-                      className="relative block w-full overflow-hidden rounded-lg border border-ink/10 px-3 py-1.5 text-left text-sm disabled:cursor-default"
+                      className="relative block w-full overflow-hidden rounded-lg border border-ink/10 px-3 py-1.5 text-start text-sm disabled:cursor-default"
                     >
-                      <span className="absolute inset-y-0 left-0 bg-iznik/20" style={{ width: `${pct}%` }} />
+                      <span className="absolute inset-y-0 start-0 bg-iznik/20" style={{ width: `${pct}%` }} />
                       <span className="relative flex justify-between text-ink/90">
                         <span>{o.label}</span>
                         <span className="text-ink/50">{o.votes} · {pct}%</span>
@@ -185,7 +185,7 @@ export function PollSection() {
                   <button
                     key={id}
                     onClick={() => setPicked((prev) => on ? prev.filter((x) => x !== id) : prev.length < 4 ? [...prev, id] : prev)}
-                    className={`rounded-lg border-2 px-2 py-1 text-left text-xs ${on ? 'border-iznik bg-iznik/10 text-ink' : 'border-ink/10 text-ink/70'}`}
+                    className={`rounded-lg border-2 px-2 py-1 text-start text-xs ${on ? 'border-iznik bg-iznik/10 text-ink' : 'border-ink/10 text-ink/70'}`}
                   >
                     {on ? '☑ ' : '☐ '}{p?.name}
                   </button>

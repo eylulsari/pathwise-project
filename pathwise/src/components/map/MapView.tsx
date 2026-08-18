@@ -200,7 +200,7 @@ export function MapView({
       {/* Fullscreen toggle (top-right) */}
       <button
         onClick={() => setFullscreen((f) => !f)}
-        className="absolute right-3 top-3 z-[1001] rounded-lg bg-surface-2/90 px-3 py-2 text-sm font-semibold text-ink shadow-lg backdrop-blur transition-colors hover:bg-surface-2"
+        className="absolute end-3 top-3 z-[1001] rounded-lg bg-surface-2/90 px-3 py-2 text-sm font-semibold text-ink shadow-lg backdrop-blur transition-colors hover:bg-surface-2"
         title={fullscreen ? 'Exit full screen' : 'Full screen'}
       >
         {fullscreen ? '✕ Close' : '⛶ Full screen'}

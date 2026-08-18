@@ -71,9 +71,9 @@ export function OpeningHours({
   return (
     <p className={className}>
       🕒 {place.openingHours}
-      <OpenNowBadge place={place} className="ml-2" />
+      <OpenNowBadge place={place} className="ms-2" />
       {place.openingHoursSource === 'OpenStreetMap' && (
-        <span className="ml-1 text-ink/40">· {t('hours.osmSource')}</span>
+        <span className="ms-1 text-ink/40">· {t('hours.osmSource')}</span>
       )}
     </p>
   );

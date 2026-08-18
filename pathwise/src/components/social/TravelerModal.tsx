@@ -43,7 +43,7 @@ export function TravelerModal({
               <p className="text-sm text-ink/60">
                 {details}
                 {'soloVerified' in traveler && traveler.soloVerified && (
-                  <span className="ml-2 rounded-full bg-sage/15 px-2 py-0.5 text-xs font-semibold text-sage">
+                  <span className="ms-2 rounded-full bg-sage/15 px-2 py-0.5 text-xs font-semibold text-sage">
                     ✓ Solo-Verified
                   </span>
                 )}

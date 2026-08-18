@@ -103,7 +103,7 @@ export function AppHeader() {
               <div
                 role="menu"
                 data-testid="nav-more-menu"
-                className="absolute right-0 z-[950] mt-1 w-48 overflow-hidden rounded-xl border border-ink/10 bg-surface shadow-lg"
+                className="absolute end-0 z-[950] mt-1 w-48 overflow-hidden rounded-xl border border-ink/10 bg-surface shadow-lg"
               >
                 {SECONDARY.map((link) => (
                   <NavLink

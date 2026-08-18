@@ -129,7 +129,7 @@ export default function Messages() {
                 <button
                   onClick={() => c.status === 'accepted' && setActiveId(c.userId)}
                   disabled={c.status !== 'accepted'}
-                  className={`block w-full text-left text-sm font-semibold ${
+                  className={`block w-full text-start text-sm font-semibold ${
                     c.userId === activeId ? 'text-iznik' : 'text-ink'
                   } disabled:cursor-default disabled:text-ink/50`}
                 >

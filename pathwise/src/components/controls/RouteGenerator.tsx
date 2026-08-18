@@ -61,7 +61,7 @@ export function RouteGenerator({
             <button
               key={h.id}
               onClick={() => onChange({ hub: h.id })}
-              className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+              className={`flex items-center justify-between rounded-lg border px-3 py-2 text-start text-sm transition-colors ${
                 config.hub === h.id
                   ? 'border-transparent text-white'
                   : 'border-ink/10 text-ink/80 hover:border-ink/25'
@@ -81,7 +81,7 @@ export function RouteGenerator({
           <Label>
             {t('dash.dailyBudget')}: <span className="text-ink">₺{config.budgetTry.toLocaleString('tr-TR')}{config.budgetTry >= 5000 ? '+' : ''}</span>
             {currency.code !== 'TRY' && (
-              <span className="ml-1 text-ink/50">≈ {format(config.budgetTry)}</span>
+              <span className="ms-1 text-ink/50">≈ {format(config.budgetTry)}</span>
             )}
           </Label>
           <CurrencySelect />

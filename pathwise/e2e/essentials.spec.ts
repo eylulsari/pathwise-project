@@ -58,7 +58,7 @@ test('the page translates with the language toggle', async ({ page }) => {
   await page.goto('/essentials');
   await expect(page.getByRole('heading', { name: /^Essentials$/ })).toBeVisible();
 
-  await page.getByRole('button', { name: /TR/i }).first().click();
+  await page.getByTestId('language-select').selectOption('tr');
   await expect(page.getByRole('heading', { name: /Temel Bilgiler/ })).toBeVisible();
   await expect(page.getByTestId('essentials-list')).toContainText(/Ayakkabı çıkarılır/);
 });

@@ -128,7 +128,7 @@ export default function Profile() {
             {journal && journal.entryCount > 0 && (
               <div className="rounded-2xl border border-sage/30 bg-sage/5 p-4 text-sm">
                 <span className="font-display font-bold text-ink">📸 {t('journal.summary')}</span>
-                <span className="ml-2 text-ink/70">
+                <span className="ms-2 text-ink/70">
                   {journal.photoCount} {t('journal.photos')}, {journal.noteCount} {t('journal.notes')} · {t('journal.avg')} {journal.avgRating}★
                 </span>
               </div>
@@ -146,11 +146,11 @@ export default function Profile() {
                 <div>
                   <p className="font-semibold text-ink">
                     {tp.title}
-                    {tp.saved && <span className="ml-2 rounded-full bg-sage/15 px-2 py-0.5 text-[10px] font-semibold text-sage">{t('profile.saved')}</span>}
+                    {tp.saved && <span className="ms-2 rounded-full bg-sage/15 px-2 py-0.5 text-[10px] font-semibold text-sage">{t('profile.saved')}</span>}
                   </p>
                   <p className="text-xs text-ink/50">{HUB_LABEL[tp.hub]}</p>
                 </div>
-                <div className="text-right text-sm">
+                <div className="text-end text-sm">
                   <span className="rounded-full bg-iznik/15 px-2.5 py-1 text-xs font-semibold text-iznik">
                     {new Date(tp.dateISO).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                   </span>
@@ -171,14 +171,14 @@ export default function Profile() {
                     <p className="font-semibold text-ink">{b.name}</p>
                     <p className="text-xs text-ink/50">{b.description}</p>
                   </div>
-                  {b.earned && <span className="ml-auto text-sage">✓</span>}
+                  {b.earned && <span className="ms-auto text-sage">✓</span>}
                 </div>
                 {!b.earned && (
                   <div className="mt-3">
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink/10">
                       <div className="h-full rounded-full bg-accent-gradient" style={{ width: `${b.progress}%` }} />
                     </div>
-                    <p className="mt-1 text-right text-[10px] text-ink/40">{b.progress}%</p>
+                    <p className="mt-1 text-end text-[10px] text-ink/40">{b.progress}%</p>
                   </div>
                 )}
               </div>
@@ -201,7 +201,7 @@ export default function Profile() {
                     <p className="text-sm font-semibold text-ink">{place.name}</p>
                     <p className="text-xs text-ink/50">{HUB_LABEL[place.hub]}</p>
                   </div>
-                  <span className={`ml-auto text-xs font-semibold ${visited ? 'text-sage' : 'text-ink/40'}`}>
+                  <span className={`ms-auto text-xs font-semibold ${visited ? 'text-sage' : 'text-ink/40'}`}>
                     {visited ? t('profile.visited') : t('profile.notYet')}
                   </span>
                 </div>
@@ -342,7 +342,7 @@ function SavedPlacesList() {
             placeName={place.name}
             saved
             onToggle={unsave}
-            className="ml-auto flex-shrink-0"
+            className="ms-auto flex-shrink-0"
           />
         </div>
       ))}

@@ -50,7 +50,7 @@ export default function Landing() {
         {/* Features */}
         <section className="mt-16 grid w-full max-w-5xl gap-4 md:grid-cols-4">
           {features.map((f) => (
-            <div key={f.title} className="card-cream flex flex-col gap-2 p-5 text-left">
+            <div key={f.title} className="card-cream flex flex-col gap-2 p-5 text-start">
               <span className="text-3xl">{f.icon}</span>
               <h3 className="font-display text-lg font-bold">{f.title}</h3>
               <p className="text-sm text-ink/70">{f.body}</p>

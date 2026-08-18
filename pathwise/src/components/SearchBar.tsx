@@ -63,7 +63,7 @@ export function SearchBar({
       {open && q.trim() && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 right-0 z-[1041] mt-1 max-h-96 overflow-y-auto rounded-xl border border-ink/10 bg-surface-2 shadow-2xl">
+          <div className="absolute start-0 end-0 z-[1041] mt-1 max-h-96 overflow-y-auto rounded-xl border border-ink/10 bg-surface-2 shadow-2xl">
             {loading && <p className="px-4 py-3 text-sm text-ink/40">…</p>}
             {!loading && !hasResults && (
               <p className="px-4 py-4 text-sm text-ink/50">{t('search.empty')}</p>
@@ -76,7 +76,7 @@ export function SearchBar({
                     onFocusPlace(p);
                     setOpen(false);
                   }}
-                  className="flex-1 text-left"
+                  className="flex-1 text-start"
                 >
                   <span className="block text-sm font-semibold text-ink">{p.name}</span>
                   <span className="block text-xs text-ink/50">

@@ -106,7 +106,7 @@ export default function Tours() {
       {toast && (
         <div
           role="status"
-          className="fixed bottom-24 left-1/2 z-[1200] -translate-x-1/2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-soft-lg"
+          className="fixed bottom-24 start-1/2 z-[1200] -translate-x-1/2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-soft-lg"
         >
           {toast}
         </div>

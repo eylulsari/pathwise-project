@@ -50,12 +50,12 @@ export function OfflineDownload({
         className="rounded-lg border border-ink/10 px-3 py-1.5 text-sm font-semibold text-ink/80 hover:text-ink"
       >
         📥 {t('offlineDl.button')}{downloaded.size > 0 ? ` (${downloaded.size})` : ''}
-        {syncing && <span className="ml-1 animate-pulse text-sage">🔄</span>}
+        {syncing && <span className="ms-1 animate-pulse text-sage">🔄</span>}
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-[1041] mt-1 w-64 overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-xl">
+          <div className="absolute end-0 z-[1041] mt-1 w-64 overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-xl">
             <p className="border-b border-ink/10 px-3 py-2 text-[10px] uppercase tracking-wide text-ink/40">
               {t('offlineDl.title')}
             </p>
@@ -69,7 +69,7 @@ export function OfflineDownload({
                 <div key={i} className="flex items-center justify-between px-3 py-2 text-sm">
                   <span className="text-ink/80">
                     {d.label}
-                    <span className="ml-1 text-ink/40">— {size} MB</span>
+                    <span className="ms-1 text-ink/40">— {size} MB</span>
                   </span>
                   <button
                     onClick={() => toggle(i, d.itinerary)}

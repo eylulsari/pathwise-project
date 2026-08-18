@@ -2,18 +2,44 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
-import { translations, type Lang } from './translations';
+import { isRtl, translations, type Lang } from './translations';
 
 const STORAGE_KEY = 'pathwise.lang';
 
+const isLang = (value: string | null): value is Lang =>
+  value !== null && Object.prototype.hasOwnProperty.call(translations, value);
+
+/**
+ * The saved choice, else the browser's, else English.
+ *
+ * Matched on the primary subtag only, so `de-AT`, `es-419` and `ar-EG` all
+ * land on the language we have rather than falling through to English on a
+ * region we never listed.
+ */
 function detectLang(): Lang {
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved === 'tr' || saved === 'en') return saved;
-  return navigator.language?.toLowerCase().startsWith('tr') ? 'tr' : 'en';
+  if (isLang(saved)) return saved;
+  const primary = navigator.language?.toLowerCase().split('-')[0] ?? '';
+  return isLang(primary) ? primary : 'en';
+}
+
+/**
+ * Tell the document what language it is in and which way it runs.
+ *
+ * `dir` belongs on the root element rather than in component classes: it is
+ * what makes the browser lay out text, flex rows, scrollbars and form fields
+ * the other way round, and setting it once means no component has to know
+ * that Arabic exists. `lang` matters too — screen readers pick a voice from
+ * it, and hyphenation follows it.
+ */
+function applyDocumentLang(lang: Lang): void {
+  document.documentElement.lang = lang;
+  document.documentElement.dir = isRtl(lang) ? 'rtl' : 'ltr';
 }
 
 /** Resolve a dot-path like "dash.generate" against a nested dict. */
@@ -57,10 +83,18 @@ const I18nContext = createContext<I18nValue | undefined>(undefined);
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(detectLang);
 
+  // Also on mount, not only on change: a reload restores the saved language
+  // from localStorage without anyone calling setLang, and the document would
+  // otherwise render Arabic left-to-right until the user switched away and
+  // back again.
+  useEffect(() => {
+    applyDocumentLang(lang);
+  }, [lang]);
+
   const setLang = useCallback((l: Lang) => {
     localStorage.setItem(STORAGE_KEY, l);
     setLangState(l);
-    document.documentElement.lang = l;
+    applyDocumentLang(l);
   }, []);
 
   const t = useCallback(

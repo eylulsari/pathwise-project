@@ -38,7 +38,7 @@ export function MustVisitList({
               <button
                 key={id}
                 onClick={() => onToggle(id)}
-                className={`flex items-start gap-3 rounded-xl border-2 p-3 text-left transition-colors ${
+                className={`flex items-start gap-3 rounded-xl border-2 p-3 text-start transition-colors ${
                   on ? 'border-sage bg-sage/10' : 'border-ink/10 hover:border-ink/25'
                 }`}
               >

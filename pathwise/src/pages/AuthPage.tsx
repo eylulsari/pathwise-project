@@ -70,7 +70,7 @@ export default function AuthPage() {
           </h2>
           <p className="mt-4 max-w-sm text-ink/60">{t('auth.brandSub')}</p>
         </div>
-        <IstanbulSilhouette className="absolute bottom-0 left-0 h-40 w-full text-iznik/20" />
+        <IstanbulSilhouette className="absolute bottom-0 start-0 h-40 w-full text-iznik/20" />
       </div>
 
       {/* Form panel */}

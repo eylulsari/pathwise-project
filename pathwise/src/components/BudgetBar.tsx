@@ -27,7 +27,7 @@ export function BudgetBar({ itinerary }: { itinerary: Itinerary }) {
         <span className={`text-sm font-bold ${over ? 'text-terracotta' : 'text-ink'}`}>
           {formatTry(spent)} <span className="text-ink/40">/ {formatTry(budget)}</span>
           {currency.code !== 'TRY' && (
-            <span className="ml-1 text-ink/40">({format(spent)})</span>
+            <span className="ms-1 text-ink/40">({format(spent)})</span>
           )}
         </span>
       </div>

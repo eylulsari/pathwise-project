@@ -87,7 +87,7 @@ export function TodayPath({
           <span data-testid="day-total-minutes" hidden aria-hidden="true">
             {itinerary.totalDurationMinutes}
           </span>
-          {reordering && <span className="ml-2 animate-pulse text-iznik">· {t('dash.saving')}</span>}
+          {reordering && <span className="ms-2 animate-pulse text-iznik">· {t('dash.saving')}</span>}
         </span>
       </div>
 
@@ -246,14 +246,14 @@ function StopRow({
   // part of the day without mistaking it for somewhere you have to go.
   if (stop.isLunchBreak) {
     return (
-      <li className="relative pb-2 pl-9">
+      <li className="relative pb-2 ps-9">
         <Spine />
-        <span className="absolute left-0 top-2.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-terracotta/60 bg-surface text-[11px]">
+        <span className="absolute start-0 top-2.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-dashed border-terracotta/60 bg-surface text-[11px]">
           🍽️
         </span>
         <div className="rounded-xl border border-terracotta/25 bg-terracotta/10 px-3 py-2 text-sm">
           <span className="font-semibold text-terracotta">{t('today.lunch')}</span>
-          <span className="ml-2 text-ink/50">
+          <span className="ms-2 text-ink/50">
             {stop.arrivalTime}–{stop.departureTime} · {formatTry(stop.foodCostTry)}
           </span>
         </div>
@@ -307,13 +307,13 @@ function SortableStopRow({
   };
 
   return (
-    <li ref={setNodeRef} style={style} className="relative pb-2 pl-9">
+    <li ref={setNodeRef} style={style} className="relative pb-2 ps-9">
       <Spine />
       {/* The stop's place in the day, on the line rather than inside the card.
           It used to sit next to the title, which made every row start with a
           number and pushed the name — the thing being looked for — inward. */}
       <span
-        className={`absolute left-0 top-2.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shadow-soft transition-colors ${
+        className={`absolute start-0 top-2.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shadow-soft transition-colors ${
           visited
             ? 'bg-sage text-ink'
             : active
@@ -389,7 +389,7 @@ function SortableStopRow({
               )}
             </div>
           </div>
-          <div className="text-right text-xs">
+          <div className="text-end text-xs">
             <div className="text-ink/70">
               🎟️ {formatEntryFee(stop.entryFeeTry, stop.place?.entryFeeApprox, t('today.free'))}
             </div>
@@ -463,7 +463,7 @@ function SortableStopRow({
                 e.stopPropagation();
                 onRemove(place.placeId);
               }}
-              className="ml-auto text-xs font-semibold text-ink/40 hover:text-terracotta"
+              className="ms-auto text-xs font-semibold text-ink/40 hover:text-terracotta"
               title={t('today.removeStopTip')}
               aria-label={`${t('today.removeStop')}: ${place.name}`}
             >
@@ -480,7 +480,7 @@ function SortableStopRow({
         <div className="relative py-2">
           <span
             aria-hidden="true"
-            className="absolute left-[11px] top-0 flex h-full w-0.5 items-center justify-center bg-transparent"
+            className="absolute start-[11px] top-0 flex h-full w-0.5 items-center justify-center bg-transparent"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-ink/20" />
           </span>
@@ -502,7 +502,7 @@ function Spine() {
   return (
     <span
       aria-hidden="true"
-      className="absolute left-[11px] top-0 h-full w-0.5 bg-ink/10"
+      className="absolute start-[11px] top-0 h-full w-0.5 bg-ink/10"
     />
   );
 }
