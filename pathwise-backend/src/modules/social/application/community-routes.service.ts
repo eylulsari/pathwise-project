@@ -19,6 +19,14 @@ export interface CommunityRouteView {
   likes: number;
   /** Whether *this* viewer has liked it. */
   liked: boolean;
+  /**
+   * `true` for every route today — all of them are seed, authored by names
+   * with no accounts behind them, and their baseline like counts are invented
+   * too. Sent (rather than assumed by the client) so that the day a real
+   * "publish a route" feature exists, the label follows the data instead of
+   * having to be remembered.
+   */
+  isSample: boolean;
 }
 
 /**
@@ -55,6 +63,7 @@ export class CommunityRoutesService {
       tags: route.tags,
       likes: route.seedLikes + (counts.get(route.id) ?? 0),
       liked: mine.has(route.id),
+      isSample: true,
     }));
   }
 

@@ -16,6 +16,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { formatAge, isLive } from '../utils/presence';
 import { ReportButton } from '../components/social/ReportButton';
 import { ConnectRequestButton } from '../components/social/ConnectRequestButton';
+import { SampleBadge } from '../components/social/SampleBadge';
 import { useAuth } from '../context/AuthContext';
 import { PollSection } from '../components/social/PollSection';
 import { HUB_LABEL } from '../utils/format';
@@ -217,6 +218,10 @@ export default function Social() {
                   </div>
                   <div className="flex-1 text-sm">
                     <span className="font-semibold text-ink">{c.traveler.name}</span>
+                    {/* The feed mixes persisted check-ins with the seed, so the
+                        same flag that hides the connect button also earns the
+                        author the same badge used everywhere else. */}
+                    {c.traveler.isSample && <> <SampleBadge subtle /></>}
                     {/* No place → an unplaced "right here" check-in. */}
                     <span className="text-ink/50"> · {c.placeName || t('social.rightHere')} · {formatAge(c.createdAt)}</span>
                     {live ? (
@@ -346,9 +351,7 @@ export default function Social() {
           <section data-testid="sample-travelers">
             <div className="mb-1 flex flex-wrap items-center gap-2">
               <h2 className="font-display text-lg font-bold">{t('social.sampleTitle')}</h2>
-              <span className="rounded-full bg-mustard/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-ink/70">
-                {t('social.sampleBadge')}
-              </span>
+              <SampleBadge />
             </div>
             <p className="mb-3 text-xs leading-relaxed text-ink/55">
               {t('social.sampleNote')}
@@ -377,11 +380,15 @@ export default function Social() {
           <h2 className="mb-3 font-display text-lg font-bold">{t('social.communityRoutes')}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {routes.map((r) => (
-              <div key={r.id} className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
+              <div key={r.id} data-testid="community-route" className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-semibold text-ink">{r.title}</p>
-                    <p className="text-xs text-ink/50">by {r.authorName} · {HUB_LABEL[r.hub]}</p>
+                    {/* The author name is a fixture, and so is the baseline
+                        like count under it — the badge qualifies both. */}
+                    <p className="text-xs text-ink/50">
+                      by {r.authorName} {r.isSample && <SampleBadge subtle />} · {HUB_LABEL[r.hub]}
+                    </p>
                   </div>
                   <span className="text-xs text-ink/50">{r.stops} stops · {r.distanceKm} km</span>
                 </div>
@@ -530,11 +537,19 @@ function ForumThread({ q }: { q: ForumQuestion }) {
         <p className="font-semibold text-ink">{thread.question}</p>
         <ReportButton contentType="forum" contentId={thread.id} />
       </div>
-      <p className="text-xs text-ink/50">{thread.authorName} · {formatAge(thread.createdAt)}</p>
+      <p className="text-xs text-ink/50">
+        {thread.authorName} {thread.isSample && <SampleBadge subtle />} · {formatAge(thread.createdAt)}
+      </p>
+      {/*
+        The badge is per answer, not per thread. A seed question collects real
+        answers over time, so labelling the whole thread would either brand a
+        user's own words as demo data or leave the fixture ones unmarked.
+      */}
       <div className="mt-3 space-y-2 border-l-2 border-ink/10 pl-3">
         {thread.answers.map((a, i) => (
-          <div key={i} className="text-sm">
+          <div key={i} className="text-sm" data-testid="forum-answer">
             <span className="font-semibold text-iznik">{a.authorName}</span>
+            {a.isSample && <> <SampleBadge subtle /></>}
             <span className="text-ink/50"> · {formatAge(a.createdAt)}</span>
             <p className="text-ink/80">{a.text}</p>
           </div>

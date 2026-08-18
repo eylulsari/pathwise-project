@@ -673,6 +673,13 @@ export interface CommunityRoute {
   /** Whether the signed-in viewer has liked it. */
   liked: boolean;
   tags: Interest[];
+  /**
+   * `true` for every route today — the author names have no accounts behind
+   * them and the baseline like count is invented. Stated by the server, same
+   * flag and same meaning as on travellers and forum posts, so the UI labels
+   * what the data says rather than what someone remembered.
+   */
+  isSample: boolean;
 }
 
 // ── Group Poll (B3) ────────────────────────────────────────────────
@@ -704,6 +711,11 @@ export interface ForumAnswer {
   authorName: string;
   text: string;
   createdAt: string;
+  /**
+   * Per-answer, not per-thread: a seed question collects real answers over
+   * time, so one thread holds both kinds and only the fixture ones get marked.
+   */
+  isSample: boolean;
 }
 
 export interface ForumQuestion {
@@ -711,6 +723,8 @@ export interface ForumQuestion {
   authorName: string;
   question: string;
   createdAt: string;
+  /** `true` for every question today — all of them are seed. */
+  isSample: boolean;
   /** Oldest first — a thread reads top to bottom. */
   answers: ForumAnswer[];
 }

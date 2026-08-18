@@ -14,6 +14,13 @@ export interface ForumAnswer {
   authorName: string;
   text: string;
   createdAt: Date;
+  /**
+   * `true` when this was written by a curated demo author rather than an
+   * account. Same flag, same meaning and same rendering as the one on
+   * travelers and check-in authors — a name with nobody behind it is labelled
+   * wherever it appears, not only in the buddy list.
+   */
+  isSample: boolean;
 }
 
 export interface ForumQuestion {
@@ -21,6 +28,8 @@ export interface ForumQuestion {
   authorName: string;
   question: string;
   createdAt: Date;
+  /** Always `true` today: every question is seed — there is no "ask" UI. */
+  isSample: boolean;
   /** Oldest first — a thread reads top to bottom. */
   answers: ForumAnswer[];
 }

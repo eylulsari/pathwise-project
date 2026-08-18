@@ -111,10 +111,15 @@ export function seedForum(now: number = Date.now()): ForumQuestion[] {
     authorName: q.authorName,
     question: q.question,
     createdAt: new Date(now - q.minutesAgo * 60_000),
+    // Set here rather than stored per entry: everything in this file is a
+    // fixture by definition, so it cannot be got wrong for one row and right
+    // for the next.
+    isSample: true,
     answers: q.answers.map((a) => ({
       authorName: a.authorName,
       text: a.text,
       createdAt: new Date(now - a.minutesAgo * 60_000),
+      isSample: true,
     })),
   }));
 }

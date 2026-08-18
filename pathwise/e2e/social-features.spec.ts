@@ -108,6 +108,49 @@ test('forum accepts a quick answer', async ({ page }) => {
   await expect(page.getByText(txt)).toBeVisible();
 });
 
+/**
+ * The seed label, applied consistently.
+ *
+ * The sample-profiles section had it; forum threads and community routes did
+ * not, so the same invented names read as demo data in one place on the page
+ * and as real people twenty pixels further down. The claim under test is the
+ * pair: fixture content is marked, and the user's own words never are.
+ */
+test('seed-authored content is badged and a real answer is not', async ({ page }) => {
+  await signup(page, 'seedlabel');
+  await gotoSocial(page);
+
+  // Community routes: every one of them is a fixture today.
+  const route = page.getByTestId('community-route').first();
+  await expect(route).toBeVisible({ timeout: 20_000 });
+  await expect(route.getByTestId('sample-badge')).toHaveCount(1);
+
+  // A seed thread: the question line carries it.
+  const thread = page.getByTestId('forum-thread').filter({ hasText: /Museum Pass worth it/i });
+  await expect(thread).toBeVisible();
+  await expect(thread.getByTestId('sample-badge').first()).toBeVisible();
+
+  // A named seed answer rather than "every answer in the thread". This thread
+  // is where the quick-answer test posts, so on a database that has run the
+  // suite before it already holds real answers — asserting all of them are
+  // seed would fail for the right reason on the wrong claim.
+  const seedAnswer = thread.getByTestId('forum-answer').filter({ hasText: 'Yuki T.' });
+  await expect(seedAnswer).toHaveCount(1);
+  await expect(seedAnswer.getByTestId('sample-badge')).toHaveCount(1);
+
+  // Now answer it as the signed-in account. The thread stays labelled — it is
+  // still a fixture question — but this answer must not be.
+  const txt = `Real answer ${Date.now()}`;
+  await thread.getByPlaceholder(/Quick answer/i).fill(txt);
+  await thread.getByPlaceholder(/Quick answer/i).press('Enter');
+
+  const mine = thread.getByTestId('forum-answer').filter({ hasText: txt });
+  await expect(mine).toHaveCount(1);
+  await expect(mine.getByTestId('sample-badge')).toHaveCount(0);
+  // And the seed one beside it did not lose its badge in the re-render.
+  await expect(seedAnswer.getByTestId('sample-badge')).toHaveCount(1);
+});
+
 test('reporting a check-in confirms with a thank-you', async ({ page }) => {
   await signup(page, 'report');
   await gotoSocial(page);

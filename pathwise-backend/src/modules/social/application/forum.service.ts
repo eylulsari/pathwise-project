@@ -41,6 +41,9 @@ export class ForumService {
           authorName: row.authorName,
           text: row.text,
           createdAt: row.createdAt,
+          // A persisted answer has a real account behind it — `userId` is
+          // taken from the JWT when it is written.
+          isSample: false,
         })),
       ].sort(byOldestFirst),
     }));
