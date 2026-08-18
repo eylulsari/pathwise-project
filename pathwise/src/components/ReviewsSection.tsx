@@ -5,8 +5,14 @@ import { useT } from '../i18n';
 
 /**
  * Community reviews for a place (Phase 3): list + star form + helpful upvotes,
- * the community average next to the static Google rating, and a "report stale
- * info" action that feeds the existing content_reports moderation queue.
+ * the community average next to the curated score, and a "report stale info"
+ * action that feeds the existing content_reports moderation queue.
+ *
+ * ⚠️ That curated score is `place.rating`, and it is OURS — it is labelled
+ * "Pathwise editorial" on screen and must stay that way. This comment used to
+ * call it "the static Google rating", which it never was: no Google data is
+ * fetched anywhere in this app, and a number we wrote presented as Google's
+ * would be a fabricated rating attributed to a real company.
  */
 export function ReviewsSection({ place }: { place: Place }) {
   const { t } = useT();

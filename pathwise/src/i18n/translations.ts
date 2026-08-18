@@ -265,7 +265,6 @@ export const translations = {
       placeholder: 'Search a place… (e.g. Hagia Sophia, Kadıköy Market)',
       empty: 'No place by that name — we’ll add it soon.',
       add: '➕ Add',
-      tours: 'Tours & activities',
     },
     hours: {
       // ODbL requires credit wherever OSM-sourced hours are shown.
@@ -366,18 +365,6 @@ export const translations = {
       add: '➕ Add to Today’s Path',
       dismiss: 'Dismiss',
     },
-    /**
-     * ⚠️ These three belong to the OLDER tours surface — `ToursPanel` on the
-     * dashboard, which renders `CURATED_TOURS`/`LIVE_TOURS` from `mockData.ts`.
-     * That data carries invented prices, invented ratings and `.mock` booking
-     * links that resolve nowhere. It is not the same feature as the `/tours`
-     * page, whose strings are under `tours.items.*` above.
-     */
-    toursPanel: {
-      sponsored: 'Sponsored',
-      planIntoDay: '🗓️ Plan this into my day',
-      bookingClosed: 'Booking is not open yet — tours are listed for inspiration.',
-    },
     // Reward points — accrual only, no catalogue yet. The copy must not
     // promise a specific discount; see the note on PointsCard.
     // Check-in presence. The wording must stay in the "was here recently"
@@ -404,14 +391,17 @@ export const translations = {
       balanceLabel: 'Earned across the app',
       unit: 'points',
       earnedSuffix: 'points earned',
-      planHint: 'Planning a tour into your day earns reward points',
+      // The award fires when a partner link is opened on /tours. It used to
+      // read "plan a tour into your day", which described a dashboard panel
+      // that listed invented tours and no longer exists.
+      tourHint: 'Opening a tour on GetYourGuide earns reward points.',
       whatFor: 'What are points for?',
       whatForBody:
         'Nothing to spend them on just yet — you are building up a balance. Points are meant to become discounts and partner perks later, and everything you earn now is kept, so nothing is lost in the meantime.',
       howToEarn: 'How you earn them',
       recent: 'Recent activity',
       action: {
-        tourReserved: 'Plan a tour into your day',
+        tourReserved: 'Open a tour on GetYourGuide',
         referral: 'Invite a friend who joins',
         routeCompleted: 'Finish a day’s route',
         review: 'Review a place you visited',
@@ -911,7 +901,6 @@ export const translations = {
       placeholder: 'Bir yer ara… (örn. Ayasofya, Kadıköy Pazarı)',
       empty: 'Bu isimde bir yer bulamadık — yakında eklenecek.',
       add: '➕ Ekle',
-      tours: 'Turlar & aktiviteler',
     },
     hours: {
       osmSource: 'saatler OpenStreetMap’ten',
@@ -1011,12 +1000,6 @@ export const translations = {
       add: '➕ Bugünün Rotasına Ekle',
       dismiss: 'Kapat',
     },
-    /** ⚠️ Eski tur paneline ait — gerekçe İngilizce blokta. */
-    toursPanel: {
-      sponsored: 'Sponsorlu',
-      planIntoDay: '🗓️ Günüme ekle',
-      bookingClosed: 'Rezervasyon henüz açık değil — turlar ilham için listeleniyor.',
-    },
     presence: {
       available: 'Şu an müsait',
       stale: 'Daha önce buradaydı',
@@ -1039,14 +1022,14 @@ export const translations = {
       balanceLabel: 'Uygulama genelinde kazandıkların',
       unit: 'puan',
       earnedSuffix: 'puan kazandın',
-      planHint: 'Turu gününe eklemek ödül puanı kazandırır',
+      tourHint: 'GetYourGuide’da bir turu açmak ödül puanı kazandırır.',
       whatFor: 'Puanların ne işe yarıyor?',
       whatForBody:
         'Şimdilik harcayabileceğin bir yer yok — bakiye biriktiriyorsun. Puanlar ileride indirimlere ve partner ayrıcalıklarına dönüşecek; şimdi kazandığın her puan saklanıyor, bu sürede hiçbir şey kaybolmuyor.',
       howToEarn: 'Nasıl kazanırsın',
       recent: 'Son hareketler',
       action: {
-        tourReserved: 'Bir turu gününe ekle',
+        tourReserved: 'GetYourGuide’da bir tur aç',
         referral: 'Katılan bir arkadaş davet et',
         routeCompleted: 'Bir günün rotasını tamamla',
         review: 'Gittiğin bir mekana yorum yaz',

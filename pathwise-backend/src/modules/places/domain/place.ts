@@ -78,10 +78,17 @@ export type PlaceType =
   | 'experience';
 
 /**
- * A visitable place. Field shapes mirror the real sources they'd come from:
- *  - place_id, lat/lng, rating, reviewCount, photoUrl, openingHours → Google Places
- *  - entryFeeTry, museumPass → IBB Open Data
- *  - isIndoor / isSunsetSpot → derived tags used by the weather/time simulator
+ * A visitable place.
+ *
+ * Field *shapes* are modelled on the providers this data would come from in a
+ * real deployment — place_id, lat/lng, rating, reviewCount, photoUrl and
+ * openingHours after Google Places; entryFeeTry and museumPass after IBB Open
+ * Data; isIndoor / isSunsetSpot are our own derived tags for the weather and
+ * time simulator.
+ *
+ * ⚠️ Shaped after is not sourced from. Nothing here is fetched from Google:
+ * the ratings are ours and the `photoUrl`s point at a hostname that does not
+ * resolve. See `source` below.
  */
 export interface Place {
   placeId: string; // Google Places `place_id`
@@ -152,5 +159,16 @@ export interface Place {
   photoGoldenHour?: string;
   priceTier?: 1 | 2 | 3 | 4;
   emoji?: string;
+  /**
+   * Where this record's facts actually came from.
+   *
+   * ⚠️ Only name a real provider when the data really came from it. Thirty-
+   * three records said `'Google Places'` while being hand-written — their
+   * photo URLs pointed at `images.pathwise.mock`, and this app calls no Google
+   * API anywhere. They now say `'Curated (estimated)'`, which is what they are.
+   *
+   * If any of it is ever sourced from a provider for real, put the name back
+   * together with the data — not before.
+   */
   source?: string;
 }

@@ -750,23 +750,10 @@ export interface SavedTrip {
   createdAt: string;
 }
 
-// ── Curated / live tours ───────────────────────────────────────────
-export type TourSource = 'GetYourGuide' | 'TripAdvisor' | 'Pathwise';
-export interface Tour {
-  id: string;
-  title: string;
-  hub: Hub;
-  source: TourSource;
-  durationHours: number;
-  priceTry: number;
-  rating: number;
-  stopNames: string[];
-  live: boolean; // synced via "Sync Live Tours"
-  /** Partner booking link (mock ?ref=pathwise; real affiliate later). */
-  affiliateUrl: string;
-  /** Sponsored placement — badged and surfaced to the top; hidden for premium. */
-  isSponsored: boolean;
-}
+// (`Tour` and `TourSource` lived here. They described a local list of invented
+// activities badged as GetYourGuide's and TripAdvisor's. The /tours page keeps
+// its three real referrals in `data/tours.ts` and needs neither type.)
+
 
 // ── AI assistant ───────────────────────────────────────────────────
 export interface AiSuggestion {

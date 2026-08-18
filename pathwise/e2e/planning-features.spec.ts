@@ -111,20 +111,14 @@ test('save plan persists and shows up in Profile past trips', async ({ page }) =
   await expect(page.getByText('Saved', { exact: true }).first()).toBeVisible({ timeout: 10_000 });
 });
 
-test('tours panel lists, syncs live tours, and sets one as the itinerary', async ({ page }) => {
-  await signup(page, 'tours');
-  await expect(page.getByRole('heading', { name: /Curated & live tours/i })).toBeVisible();
-  await page.getByRole('button', { name: /Sync Live Tours/i }).click();
-  await expect(page.getByRole('button', { name: /✓ Synced/i })).toBeVisible({ timeout: 10_000 });
-  await page.locator('.bg-surface-2 button', { hasText: /·.*h.*⭐/ }).first().click();
-  // "Plan this into my day" was "Set as Today's Itinerary" until the tour panel
-  // dropped its dead affiliate link and moved the points award onto this
-  // button. Same action, same assertion — only the wording moved.
-  await expect(page.getByRole('button', { name: /Plan this into my day/i })).toBeVisible();
-  await page.getByRole('button', { name: /Plan this into my day/i }).click();
-  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
-  await expect(page.locator('ol li h3').first()).toBeVisible({ timeout: 15_000 });
-});
+/*
+ * The dashboard tours panel used to be covered here — it listed, "synced live
+ * tours" and set one as the day. It is gone: the tours it listed were
+ * invented, with made-up prices and ratings and `.mock` booking links, and
+ * two of them were attributed to GetYourGuide and TripAdvisor by name. There
+ * is nothing left to assert about it, and the surface that replaced it is
+ * covered in tours-blog.spec.ts against the real referral links.
+ */
 
 test('a trip can be stretched to seven days, each on its own neighborhood', async ({
   page,

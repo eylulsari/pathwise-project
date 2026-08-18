@@ -51,7 +51,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Early morning from Sultanahmet Park, before the sun swings behind the domes.',
     priceTier: 3,
     emoji: '🕌',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-sultanahmet-bluemosque',
@@ -116,7 +116,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Late afternoon from the Fourth Courtyard terrace, looking down the Bosphorus.',
     priceTier: 3,
     emoji: '🏰',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-sultanahmet-basilicacistern',
@@ -149,7 +149,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Indoors year-round; the uplit columns read best from the raised walkway.',
     priceTier: 2,
     emoji: '🏛️',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-sultanahmet-hippodrome',
@@ -181,7 +181,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Early morning, sun behind you lighting the Obelisk’s east face and the Blue Mosque domes.',
     priceTier: 1,
     emoji: '🏛️',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-sultanahmet-kucukayasofya',
@@ -213,7 +213,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Late afternoon; western sun rakes across the columned portico and green courtyard.',
     priceTier: 1,
     emoji: '🕌',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-sultanahmet-turkislam',
@@ -335,7 +335,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'No view spot — this is a quick, honest lunch between monuments.',
     priceTier: 2,
     emoji: '🍢',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-sultanahmet-arastacarsisi',
@@ -463,7 +463,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Mid-morning, when light drops through the painted vaults onto the main Kalpakçılar lane.',
     priceTier: 2,
     emoji: '🛒',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-sultanahmet-spicebazaar',
@@ -495,7 +495,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Mid-morning when shafts of light hit the pyramids of coloured spice at the arched entrances.',
     priceTier: 2,
     emoji: '🌶️',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-eminonu-suleymaniyecamii',
@@ -1169,7 +1169,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Shoot the tower itself from Büyük Hendek Cd. at dusk; from the top, sunset over the Golden Horn.',
     priceTier: 3,
     emoji: '🗼',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-galata-gulluoglu',
@@ -1201,7 +1201,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'No view — this is a 20-minute standing-counter stop.',
     priceTier: 2,
     emoji: '🍮',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-galata-camondo',
@@ -1233,7 +1233,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Morning, when the east-facing double curve is lit and still empty.',
     priceTier: 1,
     emoji: '📸',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-galata-istanbulmodern',
@@ -1266,7 +1266,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Sunset, when the reflecting pool on the roof mirrors the Süleymaniye silhouette.',
     priceTier: 3,
     emoji: '🖼️',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-galata-saltgalata',
@@ -1298,7 +1298,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Interior; the banking hall under its skylight around midday.',
     priceTier: 1,
     emoji: '🏛️',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-galata-karakoyrihtimi',
@@ -1399,7 +1399,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Interior — the turquoise tilework reads best in daylight at lunch.',
     priceTier: 3,
     emoji: '🍽️',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-galata-serdariekremcaddesi',
@@ -1453,7 +1453,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Late afternoon light on the courtyard fountain and lead-domed roofline.',
     priceTier: 1,
     emoji: '🕌',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-galata-namli',
@@ -1484,7 +1484,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'No view — this is a breakfast-and-deli stop, best mid-morning.',
     priceTier: 3,
     emoji: '🧀',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
 
   // ── Beşiktaş & Bosphorus (8) ──────────────────────────────────────
@@ -1606,7 +1606,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Late afternoon, when the day’s catch is laid out and the lamps come on.',
     priceTier: 2,
     emoji: '🐟',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-besiktas-ihlamurkasri',
@@ -1735,7 +1735,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Sunset into blue hour, when the mosque and the bridge are both lit.',
     priceTier: 1,
     emoji: '🕌',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-besiktas-ortakoy-kumpir',
@@ -1767,7 +1767,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'After dark, when the whole row is neon-lit and at its busiest.',
     priceTier: 2,
     emoji: '🥔',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-ortakoy-ortakoymeydani',
@@ -1822,7 +1822,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Sunrise, with the Asian shore lit across the water and the bay still glassy.',
     priceTier: 3,
     emoji: '⛵',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-ortakoy-rumelihisari',
@@ -2046,7 +2046,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Early morning; by 11:00 the lanes are a queue of photo shoots.',
     priceTier: 1,
     emoji: '🌈',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-balat-fenerpatriarchate',
@@ -2078,7 +2078,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Morning — the courtyard is small and falls into shade by afternoon.',
     priceTier: 1,
     emoji: '⛪',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-balat-kariyecamii',
@@ -2204,7 +2204,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'The blue-shuttered corner façade shoots well in late-morning light.',
     priceTier: 2,
     emoji: '🥖',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-balat-agora',
@@ -2236,7 +2236,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Interior; the old Greek-tavern room is warmest after dark.',
     priceTier: 3,
     emoji: '🍷',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-balat-ayvansaraysurlari',
@@ -2291,7 +2291,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Late morning, when shopkeepers set their pieces out across the pavement.',
     priceTier: 2,
     emoji: '🕰️',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-balat-cibalikapisi',
@@ -2380,7 +2380,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Late morning, when the fish and produce are freshly iced and stacked.',
     priceTier: 2,
     emoji: '🐟',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-kadikoy-modacaybahcesi',
@@ -2435,7 +2435,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'After dark, when the string lights come on and the crowd spills into the street.',
     priceTier: 3,
     emoji: '🍻',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-kadikoy-sureyya',
@@ -2499,7 +2499,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Overcast light is best for shooting murals flat and colour-true, no harsh shadows.',
     priceTier: 1,
     emoji: '🎨',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-kadikoy-ciya',
@@ -2531,7 +2531,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'No view; go at lunch when the widest spread is out.',
     priceTier: 2,
     emoji: '🍲',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-kadikoy-alimuhiddinhacibekir',
@@ -2586,7 +2586,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Evening, when the nostalgic tram rattles down the lit street.',
     priceTier: 2,
     emoji: '🛍️',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-kadikoy-kadikoybogaheykeli',
@@ -2687,7 +2687,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'No view; the retro garden is prettiest in dappled afternoon light.',
     priceTier: 2,
     emoji: '🍨',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-kadikoy-moda-icecream',
@@ -2718,7 +2718,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'No view; the shopfront is liveliest after dark in summer.',
     priceTier: 1,
     emoji: '🍦',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
   {
     placeId: 'ChIJ-kadikoy-modapier',
@@ -2749,7 +2749,7 @@ export const PLACE_DATASET: Place[] = [
     photoGoldenHour: 'Sunset behind the historic peninsula, straight off the pier’s western rail.',
     priceTier: 2,
     emoji: '⚓',
-    source: 'Google Places',
+    source: 'Curated (estimated)',
   },
 
   // ── Üsküdar (13) ───────────────────────────────────────────────────

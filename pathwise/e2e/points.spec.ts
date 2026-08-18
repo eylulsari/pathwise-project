@@ -38,26 +38,36 @@ test('the earn list is rendered from the server price list', async ({ page }) =>
 
   // Each earning action is listed with the value the backend actually awards.
   const row = (label: RegExp) => page.locator('li').filter({ hasText: label }).first();
-  await expect(row(/Plan a tour into your day/i)).toContainText('+25');
+  await expect(row(/Open a tour on GetYourGuide/i)).toContainText('+25');
   await expect(row(/Invite a friend who joins/i)).toContainText('+50');
   await expect(row(/Finish a day.s route/i)).toContainText('+30');
   await expect(row(/Review a place you visited/i)).toContainText('+15');
 });
 
-test('planning a tour into the day toasts the award and credits the profile', async ({ page }) => {
+test('opening a tour on GetYourGuide toasts the award and credits the profile', async ({
+  page,
+  context,
+}) => {
   await signup(page, 'reserve');
 
-  // Open a tour from the dashboard's tours panel.
-  const panel = page.locator('div.rounded-2xl', { hasText: 'Curated & live tours' }).first();
-  await expect(panel).toBeVisible({ timeout: 15_000 });
-  await panel.getByRole('button').nth(1).click(); // nth(0) is "Sync Live Tours"
-  await expect(page.getByRole('heading', { name: /Stops/i })).toBeVisible();
+  /*
+   * The award moved with the feature.
+   *
+   * It was granted from the dashboard tours panel, which is gone — the tours
+   * there were invented and their booking links were `.mock` placeholders.
+   * `tour_reserved` is defined as "booked a tour/activity through a partner
+   * link", and /tours is where the partner links are real, so that is where
+   * it is earned now.
+   */
+  await page.goto('/tours');
+  await expect(page.getByTestId('tour-card').first()).toBeVisible({ timeout: 15_000 });
 
-  // Planning the tour into the day is what earns the points. It used to be a
-  // "Reserve Spot" affiliate link opening a partner tab, but that URL was a
-  // placeholder — paying points for clicking a dead link is worse than not
-  // offering it, so the award moved to an action the user can complete.
-  await page.getByRole('button', { name: /Plan this into my day/i }).click();
+  // The link opens GetYourGuide in a new tab. Let it, then close it — the
+  // toast has to survive on the page behind, which is the point of showing it
+  // there rather than mid-navigation.
+  const opened = context.waitForEvent('page');
+  await page.getByTestId('tour-card').first().getByRole('link').click();
+  await (await opened).close();
 
   // Matched by text, not by role: dnd-kit renders its own empty
   // `role="status"` live region, so the role alone is ambiguous here.
@@ -67,6 +77,6 @@ test('planning a tour into the day toasts the award and credits the profile', as
   await expect(balance(page)).toContainText('25', { timeout: 15_000 });
   // …and the award is itemised in the ledger, not just added to a counter.
   await expect(
-    page.locator('li').filter({ hasText: /Plan a tour into your day/i }).last(),
+    page.locator('li').filter({ hasText: /Open a tour on GetYourGuide/i }).last(),
   ).toContainText('+25');
 });

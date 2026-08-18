@@ -40,7 +40,6 @@ import { TravelVibeQuiz, type QuizResult } from '../components/controls/TravelVi
 import { MustVisitList } from '../components/controls/MustVisitList';
 import { ReservationModal } from '../components/controls/ReservationModal';
 import { JournalModal } from '../components/JournalModal';
-import { ToursPanel } from '../components/tours/ToursPanel';
 import { AiAssistant } from '../components/ai/AiAssistant';
 import { SplitBill } from '../components/SplitBill';
 import { ExportRoute } from '../components/ExportRoute';
@@ -591,7 +590,7 @@ export default function Dashboard() {
     const hub = localStorage.getItem('pathwise.cloneHub');
     if (hub && !isOffline) {
       localStorage.removeItem('pathwise.cloneHub');
-      applyTourHub(hub as Hub);
+      applyHandedOffHub(hub as Hub);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
@@ -871,8 +870,14 @@ export default function Dashboard() {
     void rebuildDay(activeDay, remaining);
   }
 
-  // Tour "Set as Today's Itinerary" → focus this day on the tour's hub.
-  function applyTourHub(hub: Hub) {
+  /**
+   * Point this day at a neighbourhood and rebuild it.
+   *
+   * Named after the tours panel that used to call it; that panel is gone (it
+   * listed invented tours), and the only caller left is the hand-off from a
+   * cloned community route or a closed poll.
+   */
+  function applyHandedOffHub(hub: Hub) {
     const nextConfig = { ...day.config, hub };
     patchDay(activeDay, { config: nextConfig });
     generateFor(activeDay, { ...buildRequest({ ...day, config: nextConfig }) });
@@ -1041,7 +1046,6 @@ export default function Dashboard() {
         <SearchBar
           onFocusPlace={setSearchFocus}
           onAddPlace={addToPath}
-          onUseTourHub={applyTourHub}
         />
       </div>
 
@@ -1086,7 +1090,6 @@ export default function Dashboard() {
             titleKey="endPoint.title"
             showAuto
           />
-          <ToursPanel onUseTourHub={applyTourHub} offline={isOffline} />
           <SurvivalWidget />
         </div>
 

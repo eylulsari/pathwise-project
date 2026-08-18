@@ -3,10 +3,10 @@
  *
  * - Auth, itinerary, places and the social graph (check-ins, buddies, forum,
  *   community routes) call the real Pathwise backend over HTTP.
- * - Profile aggregates, tours and the offline weather fallback are still
- *   served from the mock modules with a simulated network delay; each of those
- *   documents the real endpoint it would hit (GetYourGuide, OpenWeatherMap) so
- *   the swap to live data stays a one-function change.
+ * - Profile aggregates and the offline weather fallback are still served from
+ *   the mock modules with a simulated network delay; each documents the real
+ *   endpoint it would hit (OpenWeatherMap) so the swap to live data stays a
+ *   one-function change.
  */
 import type {
   AiSuggestion,
@@ -31,7 +31,6 @@ import type {
   PointsSummary,
   ProfileStats,
   SavedTrip,
-  Tour,
   TravelerListResult,
   TravelTag,
   UsageInfo,
@@ -41,9 +40,7 @@ import { getDietary } from '../utils/travelerPreferences';
 import { withEarnedBadges } from '../utils/badgeStore';
 import {
   BADGES,
-  CURATED_TOURS,
   CURRENT_WEATHER,
-  LIVE_TOURS,
   PAST_TRIPS,
   PROFILE_STATS,
   TRAVELERS,
@@ -686,16 +683,12 @@ export const api = {
   },
 
   // ═════════════════════════════════════════════════════════════════
-  // TOURS — GetYourGuide / TripAdvisor partner APIs
-  //   return http<Tour[]>('/tours?source=getyourguide');
+  // (Tours were served from here. `getCuratedTours` and `syncLiveTours`
+  // returned a local list of invented activities — made-up prices and
+  // ratings, `.mock` booking links — attributed to GetYourGuide and
+  // TripAdvisor. The /tours page replaced them with three real referral
+  // links, which need no endpoint: they are three URLs in the bundle.)
   // ═════════════════════════════════════════════════════════════════
-  async getCuratedTours(): Promise<Tour[]> {
-    return delay(CURATED_TOURS);
-  },
-  /** "🔄 Sync Live Tours" — pretends to hit partner APIs (longer delay). */
-  async syncLiveTours(): Promise<Tour[]> {
-    return delay(LIVE_TOURS, 900);
-  },
 
   // ═════════════════════════════════════════════════════════════════
   // WEATHER — live OpenWeatherMap via the backend (GET /weather).

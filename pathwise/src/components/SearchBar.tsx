@@ -1,28 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Hub, Place, Tour } from '../types';
+import type { Place } from '../types';
 import { api } from '../services/api';
-import { CURATED_TOURS } from '../mockData';
 import { HUB_LABEL } from '../utils/format';
 import { useT } from '../i18n';
 
 /**
- * Free-text search over the 30 places (backend /places/search) plus curated
- * tours/activities (local). Debounced ~250ms. Selecting a place flies the map
- * to it; results offer "Add to Today's Path".
+ * Free-text search over the places (backend /places/search). Debounced ~250ms.
+ * Selecting a place flies the map to it; results offer "Add to Today's Path".
+ *
+ * It used to also match a local list of tours, which is why the results were
+ * grouped under headings. That list was invented — made-up prices and ratings
+ * on activities attributed to real companies — so it went, and with it the
+ * only path by which a search result was not a real place.
  */
 export function SearchBar({
   onFocusPlace,
   onAddPlace,
-  onUseTourHub,
 }: {
   onFocusPlace: (place: Place) => void;
   onAddPlace: (placeId: string) => void;
-  onUseTourHub: (hub: Hub) => void;
 }) {
   const { t } = useT();
   const [q, setQ] = useState('');
   const [places, setPlaces] = useState<Place[]>([]);
-  const [tours, setTours] = useState<Tour[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const timer = useRef<number | null>(null);
@@ -32,19 +32,12 @@ export function SearchBar({
     const query = q.trim();
     if (!query) {
       setPlaces([]);
-      setTours([]);
       return;
     }
     setLoading(true);
     // Debounce: search ~250ms after the last keystroke, not every keypress.
     timer.current = window.setTimeout(async () => {
-      const [p] = await Promise.all([api.searchPlaces(query).catch(() => [])]);
-      const ql = query.toLowerCase();
-      const tourMatches = CURATED_TOURS.filter(
-        (tr) => tr.title.toLowerCase().includes(ql) || HUB_LABEL[tr.hub].toLowerCase().includes(ql),
-      );
-      setPlaces(p);
-      setTours(tourMatches);
+      setPlaces(await api.searchPlaces(query).catch(() => []));
       setLoading(false);
     }, 250);
     return () => {
@@ -52,7 +45,7 @@ export function SearchBar({
     };
   }, [q]);
 
-  const hasResults = places.length > 0 || tours.length > 0;
+  const hasResults = places.length > 0;
 
   return (
     <div className="relative">
@@ -101,25 +94,6 @@ export function SearchBar({
                   {t('search.add')}
                 </button>
               </div>
-            ))}
-
-            {tours.length > 0 && (
-              <p className="border-b border-ink/5 bg-white px-4 py-1.5 text-[10px] uppercase tracking-wide text-ink/40">
-                {t('search.tours')}
-              </p>
-            )}
-            {tours.map((tr) => (
-              <button
-                key={tr.id}
-                onClick={() => {
-                  onUseTourHub(tr.hub);
-                  setOpen(false);
-                }}
-                className="block w-full border-b border-ink/5 px-4 py-2.5 text-left hover:bg-ink/5"
-              >
-                <span className="block text-sm font-semibold text-ink">🎟️ {tr.title}</span>
-                <span className="block text-xs text-ink/50">{HUB_LABEL[tr.hub]} · {tr.durationHours}h</span>
-              </button>
             ))}
           </div>
         </>

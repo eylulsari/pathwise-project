@@ -2,7 +2,6 @@ import type {
   Badge,
   PastTrip,
   ProfileStats,
-  Tour,
 } from './types';
 
 /**
@@ -58,26 +57,7 @@ export const PROFILE_STATS: ProfileStats = {
   spentTry: 8250,
 };
 
-// ── Tours (GetYourGuide / TripAdvisor shaped) ──────────────────────
-// affiliateUrl is a mock partner link (?ref=pathwise). isSponsored → badged,
-// surfaced to the top of the list, and hidden for premium (ad-free) users.
-export const CURATED_TOURS: Tour[] = [
-  { id: 'tour1', title: 'Imperial Istanbul: Old City Highlights', hub: 'sultanahmet', source: 'Pathwise', durationHours: 6, priceTry: 1900, rating: 4.8, stopNames: ['Hagia Sophia', 'Blue Mosque', 'Topkapı Palace', 'Grand Bazaar'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour1?ref=pathwise', isSponsored: true },
-  { id: 'tour2', title: 'Bosphorus & Palaces Afternoon', hub: 'besiktas-bogaz', source: 'Pathwise', durationHours: 5, priceTry: 1650, rating: 4.6, stopNames: ['Dolmabahçe Palace', 'Ortaköy Mosque', 'Bebek Seaside'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour2?ref=pathwise', isSponsored: false },
-  { id: 'tour3', title: 'Balat Photo Walk', hub: 'balat-fener', source: 'Pathwise', durationHours: 3, priceTry: 900, rating: 4.7, stopNames: ['Colorful Houses', 'Fener Patriarchate', 'Antique Shops'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour3?ref=pathwise', isSponsored: false },
-  { id: 'tour4', title: 'Kadıköy Market & Meze Evening', hub: 'kadikoy-moda', source: 'Pathwise', durationHours: 4, priceTry: 1250, rating: 4.7, stopNames: ['Kadıköy Market', 'Pickle row', 'Çiya Sofrası', 'Moda Pier'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour4?ref=pathwise', isSponsored: false },
-  { id: 'tour5', title: 'Galata After Dark: Rooftops & Meyhane', hub: 'karakoy-galata', source: 'Pathwise', durationHours: 4, priceTry: 1400, rating: 4.5, stopNames: ['Galata Tower', 'Serdar-ı Ekrem', 'Nevizade meyhane'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour5?ref=pathwise', isSponsored: false },
-  { id: 'tour6', title: 'Old City on a Budget (Walking Only)', hub: 'sultanahmet', source: 'Pathwise', durationHours: 4, priceTry: 550, rating: 4.4, stopNames: ['Hippodrome', 'Blue Mosque courtyard', 'Spice Bazaar', 'Gülhane Park'], live: false, affiliateUrl: 'https://partners.pathwise.mock/book/tour6?ref=pathwise', isSponsored: false },
-];
-
 // Returned by "🔄 Sync Live Tours" — pretends to sync from partner APIs.
-export const LIVE_TOURS: Tour[] = [
-  { id: 'live1', title: 'Sunset Bosphorus Cruise (Small Group)', hub: 'besiktas-bogaz', source: 'GetYourGuide', durationHours: 2, priceTry: 1200, rating: 4.9, stopNames: ['Ortaköy', 'Bebek', 'Rumeli Hisarı'], live: true, affiliateUrl: 'https://www.getyourguide.com/mock/live1?ref=pathwise', isSponsored: true },
-  { id: 'live2', title: 'Street Food Tour of Kadıköy', hub: 'kadikoy-moda', source: 'TripAdvisor', durationHours: 4, priceTry: 1450, rating: 4.8, stopNames: ['Çarşı', 'Çiya Sofrası', 'Ali Usta', 'Fish sandwich pier'], live: true, affiliateUrl: 'https://www.tripadvisor.com/mock/live2?ref=pathwise', isSponsored: false },
-  { id: 'live3', title: 'Hidden Galata Coffee & Baklava', hub: 'karakoy-galata', source: 'GetYourGuide', durationHours: 3, priceTry: 1100, rating: 4.7, stopNames: ['Karaköy Güllüoğlu', 'SALT Galata', 'Galata Tower'], live: true, affiliateUrl: 'https://www.getyourguide.com/mock/live3?ref=pathwise', isSponsored: false },
-  { id: 'live4', title: 'Balat & Fener Photo Safari', hub: 'balat-fener', source: 'TripAdvisor', durationHours: 3, priceTry: 950, rating: 4.6, stopNames: ['Merdivenli Yokuş', 'Fener Greek School', 'Ayvansaray shoreline'], live: true, affiliateUrl: 'https://www.tripadvisor.com/mock/live4?ref=pathwise', isSponsored: false },
-  { id: 'live5', title: 'Sultanahmet Early-Bird, Skip-the-Line', hub: 'sultanahmet', source: 'GetYourGuide', durationHours: 3, priceTry: 1750, rating: 4.8, stopNames: ['Hagia Sophia', 'Basilica Cistern', 'Topkapı Palace'], live: true, affiliateUrl: 'https://www.getyourguide.com/mock/live5?ref=pathwise', isSponsored: false },
-];
 
 // ── City Survival & Etiquette widget ───────────────────────────────
 export interface SurvivalCategory {
