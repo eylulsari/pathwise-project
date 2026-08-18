@@ -15,6 +15,7 @@ import { CurrentUser } from '../../../auth/infrastructure/decorators/current-use
 import { AuthUser } from '../../../auth/domain/auth-user';
 import {
   GenerateRouteDto,
+  OptimizeRouteDto,
   RebuildRouteDto,
   SuggestNearbyDto,
 } from '../../application/dto/generate-route.dto';
@@ -56,6 +57,21 @@ export class ItineraryController {
   @HttpCode(HttpStatus.OK)
   rebuild(@Body() dto: RebuildRouteDto) {
     return this.itinerary.rebuild(dto);
+  }
+
+  /**
+   * POST /api/itinerary/optimize — a shorter order for a day that already
+   * exists, with the original returned alongside so it can be put back.
+   *
+   * Behind the same daily limit as `generate`: this is the paid-for work —
+   * it runs the search and two assemblies — and leaving it un-guarded would
+   * be a way around the free plan's cap rather than a feature of it.
+   */
+  @UseGuards(OptimizeLimitGuard)
+  @Post('optimize')
+  @HttpCode(HttpStatus.OK)
+  optimize(@Body() dto: OptimizeRouteDto) {
+    return this.itinerary.optimize(dto);
   }
 
   /**

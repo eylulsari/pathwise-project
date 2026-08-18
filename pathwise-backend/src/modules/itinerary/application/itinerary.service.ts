@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Hub, Interest, Place } from '../../places/domain/place';
 import { PlacesService } from '../../places/application/places.service';
 import { JournalService } from '../../journal/application/journal.service';
-import { HUB_DATASET } from '../../places/infrastructure/persistence/hub.dataset';
+import {
+  HUB_DATASET,
+  HUB_SIDE,
+} from '../../places/infrastructure/persistence/hub.dataset';
 import { Itinerary, RouteGenerationInput } from '../domain/itinerary';
 import {
   MAX_TRIP_DAYS,
@@ -12,13 +15,48 @@ import {
 import { haversineMeters } from '../domain/geo';
 import { RouteStrategyFactory } from './route-strategy.factory';
 import { HubBudgetStrategy } from './strategies/hub-budget.strategy';
-import { GenerateRouteDto, RebuildRouteDto } from './dto/generate-route.dto';
+import { optimizeOrder, OptimizeResult } from '../domain/optimize';
+import {
+  GenerateRouteDto,
+  OptimizeRouteDto,
+  RebuildRouteDto,
+} from './dto/generate-route.dto';
 
 export interface NearbySuggestion {
   place: Place;
   nearPlaceName: string;
   distanceMeters: number;
   walkMinutes: number;
+}
+
+/** Both versions of the day, plus what changed between them. */
+export interface OptimizeRouteResult {
+  /** The day as it was — what "undo" restores. */
+  before: Itinerary;
+  /** The suggested day. Identical to `before` when nothing could be improved. */
+  after: Itinerary;
+  summary: OptimizeResult;
+}
+
+/**
+ * A weekday the optimiser can use, from whatever the client sent.
+ *
+ * The client knows which day the traveller is planning for and the server does
+ * not, so this is an input rather than `new Date()`. An absent or nonsensical
+ * value falls back to today in Istanbul — the place the trip is in, never the
+ * timezone of the device planning it, which is the same rule the client's
+ * open-now badge follows.
+ */
+function normalizeWeekday(weekday: number | undefined): number {
+  if (Number.isInteger(weekday) && weekday! >= 0 && weekday! <= 6) {
+    return weekday!;
+  }
+  const name = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Istanbul',
+    weekday: 'short',
+  }).format(new Date());
+  // Monday-first, matching parseSchedule.
+  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(name);
 }
 
 /**
@@ -76,6 +114,67 @@ export class ItineraryService {
 
     const strategy = this.factory.create(dto.mode);
     return strategy.generate(input);
+  }
+
+  /**
+   * Suggest a shorter order for a day the traveller already has.
+   *
+   * Returns BOTH itineraries, not just the improved one. The caller has to
+   * show what changed and be able to put it back, and rebuilding the original
+   * on the client would mean a second implementation of assembly living where
+   * it could drift from this one. `summary.improvedMinutes` is transit time
+   * only — see the note in optimize.ts on why visit durations are excluded.
+   *
+   * A day that cannot be improved comes back with the original order and
+   * `movedStops: 0`, which is a real answer rather than an error: the button
+   * should be able to say "this is already efficient".
+   */
+  async optimize(dto: OptimizeRouteDto): Promise<OptimizeRouteResult> {
+    const input: RouteGenerationInput = {
+      hub: dto.hub,
+      budgetTry: dto.budgetTry,
+      paceHours: dto.paceHours,
+      group: dto.group,
+      interests: [],
+      mustVisitIds: [],
+      weather: dto.weather,
+      startHour: dto.startHour,
+      startOrigin: dto.startOrigin,
+      endOrigin: dto.endOrigin,
+      reservations: dto.reservations,
+    };
+
+    const found = await this.places.findByIds(dto.placeIds);
+    const byId = new Map(found.map((p) => [p.placeId, p]));
+    // Preserves the caller's order, and drops ids that no longer resolve —
+    // the same tolerance rebuild() has, for the same reason: a stale id in a
+    // saved plan should cost that stop, not the whole request.
+    const ordered = dto.placeIds
+      .map((id) => byId.get(id))
+      .filter((p): p is Place => p !== undefined);
+
+    const before = await this.hubBudget.rebuild(
+      ordered.map((p) => p.placeId),
+      input,
+    );
+
+    const pinnedIds = new Set((dto.reservations ?? []).map((r) => r.placeId));
+    const result = optimizeOrder(
+      ordered.map((place) => ({
+        place,
+        side: HUB_SIDE[place.hub],
+        pinned: pinnedIds.has(place.placeId),
+      })),
+      dto.startHour * 60,
+      normalizeWeekday(dto.weekday),
+    );
+
+    const after =
+      result.movedStops === 0
+        ? before
+        : await this.hubBudget.rebuild(result.order, input);
+
+    return { before, after, summary: result };
   }
 
   /** Recompute an itinerary from an explicit, user-defined stop order. */

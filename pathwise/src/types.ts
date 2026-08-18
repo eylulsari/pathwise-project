@@ -402,6 +402,42 @@ export interface RebuildRouteRequest {
   reservations?: Reservation[];
 }
 
+/**
+ * `POST /itinerary/optimize` — reorder a day to spend less of it travelling.
+ *
+ * `weekday` is sent because opening hours are a per-day fact ("closed Mon")
+ * and only the client knows which day the traveller is planning for.
+ */
+export interface OptimizeRouteRequest extends RebuildRouteRequest {
+  /** 0 = Monday, matching how opening hours are written. */
+  weekday?: number;
+}
+
+export interface OptimizeSummary {
+  order: string[];
+  /** Transit minutes only — visit durations are the same in any order. */
+  beforeMinutes: number;
+  afterMinutes: number;
+  /** Zero means the day was already efficient and nothing was changed. */
+  movedStops: number;
+  /**
+   * How many stops had opening hours that could actually be checked. Most of
+   * the catalogue records none, so this is what stops the UI from claiming a
+   * guarantee about stops nobody has hours for.
+   */
+  constrainedStops: number;
+  /** Stops held in place by a booking. */
+  pinnedStops: number;
+}
+
+export interface OptimizeRouteResult {
+  /** The day as it was — what undo restores. */
+  before: Itinerary;
+  /** The suggested day. Identical to `before` when nothing improved. */
+  after: Itinerary;
+  summary: OptimizeSummary;
+}
+
 // ── Start / end point selector ─────────────────────────────────────
 export type StartPointKind = 'gps' | 'hotel' | 'transit' | 'map';
 export interface StartPoint {

@@ -13,6 +13,7 @@ import type {
   Hub,
   Itinerary,
   NearbySuggestion,
+  OptimizeSummary,
   Origin,
   PersistedDay,
   Place,
@@ -148,6 +149,12 @@ export default function Dashboard() {
   const [endPoint, setEndPoint] = useState<StartPoint | null>(null);
   const [reordering, setReordering] = useState(false);
   const [undoVisible, setUndoVisible] = useState(false);
+  // Day optimisation. The summary is kept after the reorder is applied so the
+  // traveller can see what the change bought them — a day that silently
+  // rearranges itself gives them no way to judge whether to keep it.
+  const [optimizing, setOptimizing] = useState(false);
+  const [optimizeSummary, setOptimizeSummary] = useState<OptimizeSummary | null>(null);
+  const [optimizeFailed, setOptimizeFailed] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const { savedIds, toggle: toggleSaved } = useSavedPlaces();
 
@@ -712,10 +719,52 @@ export default function Dashboard() {
     patchDay(activeDay, { itinerary: prevItinerary, undoStack: rest });
     setUndoVisible(false);
     setSelectedPlaceId(null);
+    // The saving was undone along with the reorder that produced it — leaving
+    // it on screen would credit the day with time it is no longer saving.
+    setOptimizeSummary(null);
+  }
+
+  /**
+   * Reorder today's stops to spend less of the day travelling.
+   *
+   * Distinct from "Build my path", which picks a different set of places: this
+   * keeps exactly the stops the traveller chose and only changes their order,
+   * so it is safe to press on a day someone has curated by hand.
+   *
+   * Undo is the existing snapshot layer rather than a second mechanism, and it
+   * is only pushed when something actually moved — offering to undo a change
+   * that was not made is how an undo button stops meaning anything.
+   */
+  async function handleOptimize() {
+    if (isOffline || optimizing) return;
+    const ids = realIdsOf(day);
+    if (ids.length < 3) return; // nothing a reorder could do
+    setOptimizing(true);
+    setOptimizeSummary(null);
+    setOptimizeFailed(false);
+    try {
+      const result = await api.optimizeRoute(rebuildReq(day, ids));
+      setOptimizeSummary(result.summary);
+      if (result.summary.movedStops > 0) {
+        recordUndo(activeDay);
+        patchDay(activeDay, { itinerary: result.after });
+        setSelectedPlaceId(null);
+      }
+    } catch {
+      // Surfaced, not swallowed: the daily free-plan cap answers 402 here, and
+      // a button that silently does nothing is indistinguishable from a broken
+      // one. Same rule as the lists — "we could not" is not "there is nothing".
+      setOptimizeFailed(true);
+    } finally {
+      setOptimizing(false);
+    }
   }
 
   function handleGenerate() {
     if (isOffline) return; // no network in offline mode
+    // A fresh plan is a different day; the old saving no longer describes it.
+    setOptimizeSummary(null);
+    setOptimizeFailed(false);
     recordUndo(activeDay); // A1 — snapshot before optimize
     generateFor(activeDay, buildRequest(day));
   }
@@ -950,6 +999,10 @@ export default function Dashboard() {
     }
     setActiveDay(index);
     setSelectedPlaceId(null);
+    // The summary describes the day it was computed for. Carrying it across
+    // would report Day 1's saving over Day 2's plan.
+    setOptimizeSummary(null);
+    setOptimizeFailed(false);
     if (!days[index].itinerary && !days[index].loading) {
       generateFor(index, buildRequest(days[index]));
     }
@@ -1115,6 +1168,74 @@ export default function Dashboard() {
             <div className="rounded-xl bg-sunset/15 p-4 text-sm text-terracotta">
               {day.error}
               <button onClick={handleGenerate} className="ml-2 underline">{t('dash.retry')}</button>
+            </div>
+          )}
+          {/*
+            Day optimisation: same stops, better order.
+            Only offered once there are three, because two stops have exactly
+            one order and a button that cannot do anything should not be lit.
+          */}
+          {day.itinerary && !day.loading && realIdsOf(day).length >= 3 && (
+            <div className="mb-3">
+              <button
+                onClick={() => void handleOptimize()}
+                disabled={optimizing || isOffline}
+                data-testid="optimize-day"
+                className="w-full rounded-xl border border-iznik/40 bg-iznik/5 px-3 py-2 text-sm font-semibold text-ink hover:bg-iznik/10 disabled:opacity-50"
+              >
+                {optimizing ? t('optimize.working') : `⚡ ${t('optimize.action')}`}
+              </button>
+
+              {optimizeFailed && (
+                <p data-testid="optimize-error" className="mt-2 rounded-xl bg-sunset/15 px-3 py-2 text-xs text-terracotta">
+                  {t('optimize.failed')}
+                </p>
+              )}
+
+              {optimizeSummary && !optimizeFailed && (
+                <div
+                  data-testid="optimize-summary"
+                  className="mt-2 rounded-xl border border-ink/10 bg-surface-2 px-3 py-2 text-xs leading-relaxed"
+                >
+                  {optimizeSummary.movedStops === 0 ? (
+                    // A day that could not be improved says so plainly, rather
+                    // than reshuffling stops to look like it did something.
+                    <p className="text-ink/70">✓ {t('optimize.alreadyGood')}</p>
+                  ) : (
+                    <>
+                      <p className="font-semibold text-ink">
+                        ⚡ {t('optimize.savedLabel')}:{' '}
+                        <span data-testid="optimize-before">{optimizeSummary.beforeMinutes}</span>
+                        {' → '}
+                        <span data-testid="optimize-after">{optimizeSummary.afterMinutes}</span>{' '}
+                        {t('optimize.minutes')}
+                        {' ('}
+                        −{optimizeSummary.beforeMinutes - optimizeSummary.afterMinutes}{' '}
+                        {t('optimize.minutes')})
+                      </p>
+                      <p className="mt-0.5 text-ink/55">
+                        {t('optimize.movedStops', { count: optimizeSummary.movedStops })}
+                      </p>
+                    </>
+                  )}
+                  {/*
+                    The honest limit, stated every time rather than buried in a
+                    tooltip: most places in the dataset carry no verified hours,
+                    so "we did not break anything" is a claim about the stops we
+                    could actually check. Saying how many keeps the promise the
+                    size it really is.
+                  */}
+                  <p className="mt-1 text-ink/45">
+                    🕐{' '}
+                    {t('optimize.hoursChecked', {
+                      checked: optimizeSummary.constrainedStops,
+                      total: realIdsOf(day).length,
+                    })}
+                    {optimizeSummary.pinnedStops > 0 &&
+                      ` · ${t('optimize.pinnedKept', { count: optimizeSummary.pinnedStops })}`}
+                  </p>
+                </div>
+              )}
             </div>
           )}
           {day.itinerary && !day.loading && (

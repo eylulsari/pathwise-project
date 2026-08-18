@@ -254,6 +254,23 @@ export class RebuildRouteDto {
   reservations?: ReservationDto[];
 }
 
+/**
+ * POST /api/itinerary/optimize — reorder a day the traveller already has.
+ *
+ * Everything RebuildRouteDto needs, plus the weekday: opening hours are a
+ * per-day fact ("closed Mon"), and the server has no way to know which day the
+ * traveller is planning for. Optional, because an older client sends none and
+ * must keep working — the service falls back to today in Istanbul.
+ */
+export class OptimizeRouteDto extends RebuildRouteDto {
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(6)
+  /** 0 = Monday, matching how opening hours are written. */
+  weekday?: number;
+}
+
 /** POST /api/itinerary/suggest-nearby — one "add this too" candidate. */
 export class SuggestNearbyDto {
   @IsIn(HUBS as unknown as string[])

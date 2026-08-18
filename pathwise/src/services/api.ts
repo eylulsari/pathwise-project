@@ -17,6 +17,8 @@ import type {
   CommunityRoute,
   ForumQuestion,
   GenerateRouteRequest,
+  OptimizeRouteRequest,
+  OptimizeRouteResult,
   RebuildRouteRequest,
   Hub,
   Itinerary,
@@ -37,6 +39,7 @@ import type {
 } from '../types';
 import { PLACES_BY_ID } from '../hubData';
 import { getDietary } from '../utils/travelerPreferences';
+import { istanbulNow } from '../utils/openingHours';
 import { withEarnedBadges } from '../utils/badgeStore';
 import {
   BADGES,
@@ -370,6 +373,23 @@ export const api = {
     return http<Itinerary>('/itinerary/rebuild', {
       method: 'POST',
       body: JSON.stringify(req),
+    });
+  },
+
+  /**
+   * Ask for a shorter order for the day.
+   *
+   * The weekday is filled in here rather than by every caller: it is the same
+   * question in every case — which day are these opening hours being checked
+   * against — and the answer is Istanbul's, not the device's, for the same
+   * reason the open-now badge reads Istanbul time.
+   */
+  async optimizeRoute(req: OptimizeRouteRequest): Promise<OptimizeRouteResult> {
+    return http<OptimizeRouteResult>('/itinerary/optimize', {
+      method: 'POST',
+      // Spread first: `...req` last would let an explicit `weekday: undefined`
+      // overwrite the default with nothing.
+      body: JSON.stringify({ ...req, weekday: req.weekday ?? istanbulNow().day }),
     });
   },
 

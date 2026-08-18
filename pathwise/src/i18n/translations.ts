@@ -413,6 +413,22 @@ export const translations = {
       lockTip: 'Pin this stop at its time — the rest re-sequences around it',
     },
     /**
+     * Day optimisation. `hoursChecked` deliberately names a number rather than
+     * saying "opening hours respected": most places in the dataset carry no
+     * verified hours, so the honest claim is about the stops we could check.
+     */
+    optimize: {
+      action: 'Optimise this day',
+      working: 'Working out a shorter route…',
+      alreadyGood: 'This day is already efficient — nothing worth moving.',
+      savedLabel: 'Travel time',
+      minutes: 'min',
+      movedStops: '{count} stops changed position. The stops themselves are unchanged.',
+      hoursChecked: 'Opening hours checked for {checked} of {total} stops — the rest have none recorded.',
+      pinnedKept: '{count} booked stop kept in place',
+      failed: 'Could not optimise this day. Check your connection and try again.',
+    },
+    /**
      * Shared by every list that distinguishes loading from failed from empty.
      * Only the empty sentence differs per list, so only that one lives with
      * the feature it belongs to.
@@ -1051,6 +1067,17 @@ export const translations = {
       lock: 'Saati sabitle',
       locked: 'Sabit',
       lockTip: 'Bu durağı saatine sabitle — gerisi etrafında yeniden dizilir',
+    },
+    optimize: {
+      action: 'Bu günü optimize et',
+      working: 'Daha kısa bir rota hesaplanıyor…',
+      alreadyGood: 'Bu gün zaten verimli — yerini değiştirmeye değer bir durak yok.',
+      savedLabel: 'Yolda geçen süre',
+      minutes: 'dk',
+      movedStops: '{count} durağın sırası değişti. Durakların kendisi aynı kaldı.',
+      hoursChecked: 'Açılış saatleri {total} durağın {checked} tanesi için kontrol edildi — diğerlerinde kayıtlı saat yok.',
+      pinnedKept: 'Rezervasyonlu {count} durak yerinde bırakıldı',
+      failed: 'Bu gün optimize edilemedi. Bağlantını kontrol edip tekrar dene.',
     },
     list: {
       loading: 'Yükleniyor…',
