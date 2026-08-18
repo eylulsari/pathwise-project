@@ -17,6 +17,8 @@ import { formatAge, isLive } from '../utils/presence';
 import { ReportButton } from '../components/social/ReportButton';
 import { ConnectRequestButton } from '../components/social/ConnectRequestButton';
 import { SampleBadge } from '../components/social/SampleBadge';
+import { ListState } from '../components/ListState';
+import { useAsyncList, type LoadStatus } from '../hooks/useAsyncList';
 import { useAuth } from '../context/AuthContext';
 import { PollSection } from '../components/social/PollSection';
 import { HUB_LABEL } from '../utils/format';
@@ -34,13 +36,27 @@ const ALL_TAGS: TravelTag[] = [
 export default function Social() {
   const { t } = useT();
   const navigate = useNavigate();
-  const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
+  /**
+   * Four lists, each keeping loading / failed / empty apart.
+   *
+   * They used to be `api.getX().then(setX)` with no catch at all: a failed
+   * request left the array at `[]` for good, which the page rendered as "no
+   * check-ins", "no routes", "no questions" — statements about Istanbul, made
+   * on the strength of a request that never arrived. The rejection was also
+   * unhandled, so the only trace was a console warning nobody sees.
+   */
+  const checkInList = useAsyncList<CheckIn>(() => api.getCheckIns(), []);
+  const checkIns = checkInList.items;
+  const routeList = useAsyncList<CommunityRoute>(() => api.getCommunityRoutes(), []);
+  const routes = routeList.items;
+  const forumList = useAsyncList<ForumQuestion>(() => api.getForum(), []);
+  const forum = forumList.items;
+
   // Two lists, kept apart all the way to the screen. `travelers` are accounts
   // and are the only ones anything can be done with; `samples` are fixtures.
   const [travelers, setTravelers] = useState<RealTraveler[]>([]);
   const [samples, setSamples] = useState<Traveler[]>([]);
-  const [routes, setRoutes] = useState<CommunityRoute[]>([]);
-  const [forum, setForum] = useState<ForumQuestion[]>([]);
+  const [travelerStatus, setTravelerStatus] = useState<LoadStatus>('loading');
 
   const [filter, setFilter] = useState<TravelTag | null>(null);
   // Whether the server could score this user at all (needs travel styles, or
@@ -67,11 +83,9 @@ export default function Social() {
 
   const didEmit = useRef(false);
   useEffect(() => {
-    api.getCheckIns().then(setCheckIns);
-    api.getCommunityRoutes().then(setRoutes);
-    api.getForum().then(setForum);
     // A nearby check-in → Notification Center (B6). Guard the StrictMode
-    // double-invoke so we don't emit twice.
+    // double-invoke so we don't emit twice. The three list fetches that used
+    // to sit here are now owned by the hooks above.
     if (!didEmit.current) {
       didEmit.current = true;
       api.emitNotification('nearby');
@@ -83,6 +97,7 @@ export default function Social() {
   // while the tag filter stays a client-side narrowing of the result.
   useEffect(() => {
     let active = true;
+    setTravelerStatus('loading');
     api
       .getTravelers({ womenOnly, eligible: womenModeEligible })
       .then((res) => {
@@ -99,8 +114,15 @@ export default function Social() {
             profile.preferredHubs.length > 0 ||
             profile.budgetLevel !== null,
         );
+        // `offline` means the request failed and this is the local fallback.
+        // The samples above are still real fixtures worth showing, but the
+        // real-account list is unknown rather than empty.
+        setTravelerStatus(res.offline ? 'error' : 'ready');
       })
-      .catch(() => {});
+      // This used to be `.catch(() => {})`, which left the list empty and let
+      // the page say "no travellers are discoverable yet" — a claim about who
+      // is using Pathwise, made when the request had in fact failed.
+      .catch(() => active && setTravelerStatus('error'));
     return () => {
       active = false;
     };
@@ -131,7 +153,7 @@ export default function Social() {
     setPosting(true);
     try {
       await api.createCheckIn(message);
-      setCheckIns(await api.getCheckIns());
+      await checkInList.reload();
       setCheckInText('');
     } catch {
       setPostFailed(true);
@@ -153,7 +175,7 @@ export default function Social() {
     if (!current) return;
     try {
       const updated = await api.likeCommunityRoute(id, !current.liked);
-      setRoutes((prev) => prev.map((r) => (r.id === id ? updated : r)));
+      routeList.setItems((prev) => prev.map((r) => (r.id === id ? updated : r)));
     } catch {
       /* leave the card untouched — the server rejected or is unreachable */
     }
@@ -201,6 +223,12 @@ export default function Social() {
           )}
 
           <div className="mt-4 space-y-2">
+            <ListState
+              status={checkInList.status}
+              empty={checkIns.length === 0}
+              emptyText={t('social.noCheckIns')}
+              testId="checkins"
+            >
             {checkIns.map((c) => {
               // Recomputed on every render rather than stored: presence is a
               // function of the clock, so a cached flag would go stale exactly
@@ -249,6 +277,7 @@ export default function Social() {
                 </div>
               );
             })}
+            </ListState>
           </div>
         </section>
 
@@ -290,7 +319,19 @@ export default function Social() {
               {t('social.matchEmptyProfile')}
             </p>
           )}
-          {/* Real accounts. Everything actionable on this page lives here. */}
+          {/* Real accounts. Everything actionable on this page lives here.
+
+              Three states, because the empty one makes a claim: "nobody else
+              is discoverable yet" is a statement about who uses Pathwise, and
+              it must not be what a failed request looks like. The sample
+              profiles below stay visible either way — they are fixtures and
+              need no network. */}
+          <ListState
+            status={travelerStatus}
+            empty={filtered.length === 0}
+            emptyText={t('social.noRealTravelers')}
+            testId="real-travelers-state"
+          >
           <div data-testid="real-travelers" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((tr) => (
               <div key={tr.id} data-testid="traveler-card" className="card-cream p-4">
@@ -329,15 +370,7 @@ export default function Social() {
               </div>
             ))}
           </div>
-
-          {/* Nobody else has signed up yet, or the filters excluded everyone.
-              Saying so is the honest answer — the sample profiles below are
-              deliberately not offered as a substitute. */}
-          {filtered.length === 0 && (
-            <p className="rounded-xl border border-dashed border-ink/15 px-4 py-6 text-center text-sm text-ink/50">
-              {t('social.noRealTravelers')}
-            </p>
-          )}
+          </ListState>
         </section>
 
         {/*
@@ -378,6 +411,12 @@ export default function Social() {
         {/* Community routes */}
         <section>
           <h2 className="mb-3 font-display text-lg font-bold">{t('social.communityRoutes')}</h2>
+          <ListState
+            status={routeList.status}
+            empty={routes.length === 0}
+            emptyText={t('social.noRoutes')}
+            testId="routes"
+          >
           <div className="grid gap-3 sm:grid-cols-2">
             {routes.map((r) => (
               <div key={r.id} data-testid="community-route" className="rounded-2xl border border-ink/10 bg-surface-2 p-4">
@@ -402,16 +441,24 @@ export default function Social() {
               </div>
             ))}
           </div>
+          </ListState>
         </section>
 
         {/* Local Q&A forum */}
         <section>
           <h2 className="mb-3 font-display text-lg font-bold">{t('social.localQA')}</h2>
+          <ListState
+            status={forumList.status}
+            empty={forum.length === 0}
+            emptyText={t('social.noThreads')}
+            testId="forum"
+          >
           <div className="space-y-3">
             {forum.map((q) => (
               <ForumThread key={q.id} q={q} />
             ))}
           </div>
+          </ListState>
         </section>
       </main>
 

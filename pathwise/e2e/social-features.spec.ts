@@ -233,6 +233,81 @@ test('a slow vote response cannot re-open a poll that was already closed', async
   await expect(card.getByRole('button', { name: /Add winner to path/i })).toBeVisible();
 });
 
+/**
+ * Every list on the page tells failure apart from emptiness.
+ *
+ * These lists used to be `api.getX().then(setX)` with no catch at all, so a
+ * failed request left the array empty for good and the page rendered it as
+ * "nobody has checked in yet" or "no travellers are discoverable yet". Both
+ * are claims about Istanbul, made on the strength of a request that never
+ * arrived — and the traveller had no way to tell them from the truth.
+ */
+test.describe('list failures', () => {
+  // Same reason as the poll test below: once the service worker controls the
+  // tab it re-issues requests from its own context, where `page.route` does
+  // not apply, and the abort silently stops landing.
+  test.use({ serviceWorkers: 'block' });
+
+  test('a check-in feed that fails to load says so, not "nobody has checked in"', async ({
+    page,
+  }) => {
+    await signup(page, 'feedfail');
+    await page.route('**/social/check-ins', (route) =>
+      route.request().method() === 'GET' ? route.abort() : route.continue(),
+    );
+    await gotoSocial(page);
+
+    await expect(page.getByTestId('checkins-error')).toBeVisible();
+    await expect(page.getByTestId('checkins-empty')).toHaveCount(0);
+    await expect(page.getByText(/Nobody has checked in yet/i)).toHaveCount(0);
+  });
+
+  test('a buddy list that fails to load does not claim nobody signed up', async ({ page }) => {
+    await signup(page, 'buddyfail');
+    await page.route('**/social/travelers**', (route) => route.abort());
+    await gotoSocial(page);
+
+    await expect(page.getByTestId('real-travelers-state-error')).toBeVisible();
+    await expect(page.getByTestId('real-travelers-state-empty')).toHaveCount(0);
+  });
+
+  test('the forum and routes report their own failures separately', async ({ page }) => {
+    await signup(page, 'forumfail');
+    // Only the forum. The routes request is left alone on purpose: a page
+    // where one list fails must still show the others, rather than degrading
+    // into a single page-wide error.
+    await page.route('**/social/forum', (route) =>
+      route.request().method() === 'GET' ? route.abort() : route.continue(),
+    );
+    await gotoSocial(page);
+
+    await expect(page.getByTestId('forum-error')).toBeVisible();
+    await expect(page.getByTestId('routes-error')).toHaveCount(0);
+    await expect(page.getByTestId('community-route').first()).toBeVisible();
+  });
+
+  test('a list that loads normally shows neither the loading nor the error line', async ({
+    page,
+  }) => {
+    await signup(page, 'listok');
+    await gotoSocial(page);
+
+    // The positive half of the claim: the three states are exclusive, so a
+    // list that has data is in none of the other two.
+    //
+    // Scoped to the routes list alone, and gated on its data being on screen
+    // first. This originally also asserted the forum and check-in lists were
+    // error-free, which made it a test of the whole environment: four
+    // independent requests, any one of which failing under a loaded parallel
+    // run turns the page's honest error state into a red test. Surfacing those
+    // failures is the feature — the assertion was the thing that was wrong.
+    await expect(page.getByTestId('community-route').first()).toBeVisible();
+    await expect(page.getByTestId('routes-error')).toHaveCount(0);
+    await expect(page.getByTestId('routes-loading')).toHaveCount(0);
+    await expect(page.getByTestId('routes-empty')).toHaveCount(0);
+  });
+});
+
 test.describe('poll list failure', () => {
   /**
    * Without this the test is a coin toss.

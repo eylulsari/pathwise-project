@@ -72,8 +72,22 @@ function serveClientIfBuilt(): DynamicModule[] {
     ConfigModule.forRoot({ isGlobal: true }),
     // Production only — see serveClientIfBuilt(). Empty in dev.
     ...serveClientIfBuilt(),
-    // Global rate limit: 100 requests / 60s per IP (auth routes tighten this).
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    /**
+     * Global rate limit: 100 requests / 60s per IP (auth routes tighten this).
+     *
+     * Overridable for the same reason AUTH_THROTTLE_LIMIT is, and it was an
+     * oversight that it was not: the E2E suite drives two browsers through the
+     * whole app from one address and goes well past 100 requests a minute, so
+     * a share of its requests came back 429. `ThrottlerGuard` answers without
+     * logging anything, so this surfaced as unrelated-looking UI failures —
+     * a dashboard that rendered but never built a path, a list that stayed
+     * empty — landing on different tests every run.
+     *
+     * The production default is unchanged.
+     */
+    ThrottlerModule.forRoot([
+      { ttl: 60000, limit: Number(process.env.GLOBAL_THROTTLE_LIMIT ?? 100) },
+    ]),
     DatabaseModule,
     CacheModule,
     // ── feature modules ──

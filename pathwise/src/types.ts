@@ -620,6 +620,17 @@ export interface TravelerListResult {
     preferredHubs: Hub[];
     budgetLevel: BudgetLevel | null;
   };
+  /**
+   * True when this came from the offline fallback rather than the server.
+   *
+   * Without it the fallback's empty `travelers` array is indistinguishable
+   * from the server genuinely reporting nobody, and the page rendered the
+   * first as the second: "nobody else has signed up yet" shown to someone
+   * whose request never left the device. The sample profiles still come back —
+   * they are local fixtures and need no network — so this flag is what lets
+   * the page show them while admitting it does not know about real accounts.
+   */
+  offline?: boolean;
 }
 
 /**

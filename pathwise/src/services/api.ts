@@ -596,12 +596,17 @@ export const api = {
           });
       // The mock is the demo seed, so it can only ever fill the sample list.
       // Real accounts live in the database and there is no offline stand-in
-      // for them — an empty list is the honest answer, and it is also what
-      // stops the offline path from offering a connect button to a fixture.
+      // for them, which is what stops this path from offering a connect button
+      // to a fixture. But an empty list is NOT the honest answer on its own:
+      // rendered plainly it says "nobody else has signed up yet", which is a
+      // claim about who uses Pathwise made from a request that failed. The
+      // flag is the difference between "there is nobody" and "we could not
+      // find out".
       return delay({
         travelers: [],
         sampleTravelers: visible.map((t) => ({ ...t, isSample: true as const })),
         womenOnlyApplied,
+        offline: true,
       });
     }
   },

@@ -412,6 +412,15 @@ export const translations = {
       locked: 'Locked',
       lockTip: 'Pin this stop at its time — the rest re-sequences around it',
     },
+    /**
+     * Shared by every list that distinguishes loading from failed from empty.
+     * Only the empty sentence differs per list, so only that one lives with
+     * the feature it belongs to.
+     */
+    list: {
+      loading: 'Loading…',
+      error: 'Could not load this. Check your connection and try again.',
+    },
     poll: {
       title: 'Group Polls',
       start: 'Start Poll',
@@ -551,6 +560,9 @@ export const translations = {
       localQA: 'Local Q&A',
       quickAnswer: 'Quick answer…',
       viewProfile: 'View profile',
+      noCheckIns: 'Nobody has checked in yet. Be the first — say where you are.',
+      noRoutes: 'No community routes to show right now.',
+      noThreads: 'No questions here yet.',
       badges: 'Badges',
       visitedProvinces: 'Visited provinces',
       noBadges: 'No badges yet — just getting started.',
@@ -1040,6 +1052,10 @@ export const translations = {
       locked: 'Sabit',
       lockTip: 'Bu durağı saatine sabitle — gerisi etrafında yeniden dizilir',
     },
+    list: {
+      loading: 'Yükleniyor…',
+      error: 'Bu yüklenemedi. Bağlantını kontrol edip tekrar dene.',
+    },
     poll: {
       title: 'Grup Oylamaları',
       start: 'Oylama Başlat',
@@ -1177,6 +1193,9 @@ export const translations = {
       communityRoutes: 'Topluluk rotaları',
       clone: '📋 Bu Rotayı Klonla',
       localQA: 'Yerel Soru-Cevap',
+      noCheckIns: 'Henüz kimse giriş yapmadı. İlk sen ol — nerede olduğunu yaz.',
+      noRoutes: 'Şu an gösterilecek topluluk rotası yok.',
+      noThreads: 'Burada henüz soru yok.',
       quickAnswer: 'Hızlı yanıt…',
       viewProfile: 'Profili gör',
       badges: 'Rozetler',

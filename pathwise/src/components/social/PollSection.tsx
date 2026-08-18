@@ -5,6 +5,8 @@ import { api } from '../../services/api';
 import { BUCKET_LIST_IDS } from '../../mockData';
 import { PLACES_BY_ID } from '../../hubData';
 import { useT } from '../../i18n';
+import { ListState } from '../ListState';
+import type { LoadStatus } from '../../hooks/useAsyncList';
 
 /** Group poll (B3): start a poll, friends vote, winner → Today's Path. */
 export function PollSection() {
@@ -17,14 +19,17 @@ export function PollSection() {
   const [voted, setVoted] = useState<Set<string>>(new Set());
 
   /**
-   * Whether the last load failed — not the same thing as having no polls.
+   * Which of the three the list is in — not two.
    *
-   * The failure used to be swallowed, and an empty list renders as "No polls
-   * yet — start one and let friends vote." So a request that never arrived was
-   * reported to the user as a fact about their group. "We don't know" and
-   * "there is nothing" are different answers, and only one of them was true.
+   * The failure used to be swallowed entirely, and an empty list renders as
+   * "No polls yet — start one and let friends vote." So a request that never
+   * arrived was reported to the user as a fact about their group. That got
+   * fixed; what stayed broken was the window before the *first* response, when
+   * the list is legitimately empty and said "no polls yet" to a group that may
+   * well have some. "We don't know yet", "we could not find out" and "there
+   * are none" are three answers, and only one of them was ever true.
    */
-  const [failed, setFailed] = useState(false);
+  const [status, setStatus] = useState<LoadStatus>('loading');
 
   const loadSeq = useRef(0);
   const load = () => {
@@ -38,11 +43,11 @@ export function PollSection() {
       .then((list) => {
         if (loadSeq.current !== ticket) return;
         setPolls(list);
-        setFailed(false);
+        setStatus('ready');
       })
       .catch(() => {
         if (loadSeq.current !== ticket) return;
-        setFailed(true);
+        setStatus('error');
       });
   };
   useEffect(() => { load(); }, []);
@@ -111,9 +116,13 @@ export function PollSection() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {polls.length === 0 && (
-          <p className="text-sm text-ink/40">{failed ? t('poll.error') : t('poll.empty')}</p>
-        )}
+        <ListState
+          status={status}
+          empty={polls.length === 0}
+          emptyText={t('poll.empty')}
+          errorText={t('poll.error')}
+          testId="polls"
+        >
         {polls.map((poll) => {
           const total = poll.options.reduce((s, o) => s + o.votes, 0);
           const winner = poll.winnerPlaceId ? PLACES_BY_ID[poll.winnerPlaceId] : null;
@@ -154,6 +163,7 @@ export function PollSection() {
             </div>
           );
         })}
+        </ListState>
       </div>
 
       {creating && (

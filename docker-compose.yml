@@ -51,6 +51,10 @@ services:
       # Dev/CI: raise the auth rate limit so the E2E suite (many sign-ups) isn't
       # throttled. Keep the default (10) in production.
       AUTH_THROTTLE_LIMIT: ${AUTH_THROTTLE_LIMIT:-100}
+      # Same reason, for the global limit: the suite drives the whole app from
+      # one IP and goes far past 100 requests/minute. Keep the default (100) in
+      # production — this is a per-IP budget, and behind a NAT it is shared.
+      GLOBAL_THROTTLE_LIMIT: ${GLOBAL_THROTTLE_LIMIT:-5000}
       # Optional — weather falls back to mock data if unset. (Never committed.)
       OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
       # Optional — AI assistant uses Groq first, then Gemini, and falls back to
