@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openFromMoreMenu } from './helpers/nav';
 
 /**
  * Full-stack smoke test: real browser drives onboarding → dashboard, then
@@ -137,7 +138,7 @@ test('trial→free locks Day 2, and upgrading to Premium unlocks it', async ({ p
   await expect(page.getByRole('button', { name: /🔒 Day 2/ })).toHaveCount(0);
 
   // Switch to Free on the Premium page (ends the trial) to reach the paywall.
-  await page.getByRole('link', { name: /Premium/ }).click();
+  await openFromMoreMenu(page, /Premium/);
   await expect(page).toHaveURL(/\/premium$/);
   await page.getByRole('button', { name: /Switch to Free/i }).click();
   await expect(page.getByRole('button', { name: /Upgrade to Premium/i })).toBeVisible({ timeout: 10_000 });
@@ -149,7 +150,7 @@ test('trial→free locks Day 2, and upgrading to Premium unlocks it', async ({ p
   await expect(page.getByText(/optimizations left today/i)).toBeVisible();
 
   // Upgrade → Day 2 unlocked + unlimited.
-  await page.getByRole('link', { name: /Premium/ }).click();
+  await openFromMoreMenu(page, /Premium/);
   await page.getByRole('button', { name: /Upgrade to Premium/i }).click();
   await expect(page.getByRole('button', { name: /Switch to Free/i })).toBeVisible({ timeout: 10_000 });
   await page.getByRole('link', { name: 'Plan', exact: true }).click();

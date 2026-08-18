@@ -8,6 +8,8 @@ import Profile from './pages/Profile';
 import Premium from './pages/Premium';
 import Essentials from './pages/Essentials';
 import Messages from './pages/Messages';
+import Tours from './pages/Tours';
+import Blog, { BlogPostPage } from './pages/Blog';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -85,6 +87,39 @@ export default function App() {
           <ProtectedRoute>
             <Page path="/messages">
               <Messages />
+            </Page>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tours"
+        element={
+          <ProtectedRoute>
+            <Page path="/tours">
+              <Tours />
+            </Page>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/blog"
+        element={
+          <ProtectedRoute>
+            <Page path="/blog">
+              <Blog />
+            </Page>
+          </ProtectedRoute>
+        }
+      />
+      {/* Keyed by slug so moving between posts remounts the boundary — a post
+          that fails to render must not leave the previous one's error in
+          place. */}
+      <Route
+        path="/blog/:slug"
+        element={
+          <ProtectedRoute>
+            <Page path="/blog/:slug">
+              <BlogPostPage />
             </Page>
           </ProtectedRoute>
         }

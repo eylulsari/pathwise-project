@@ -91,7 +91,7 @@ export function ToursPanel({
               <span className="flex flex-shrink-0 gap-1">
                 {tour.isSponsored && (
                   <span className="rounded-full bg-terracotta/20 px-2 py-0.5 text-[10px] font-semibold text-terracotta">
-                    {t('tours.sponsored')}
+                    {t('toursPanel.sponsored')}
                   </span>
                 )}
                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${SOURCE_BADGE[tour.source]}`}>
@@ -122,7 +122,7 @@ export function ToursPanel({
             </span>
             {detail.isSponsored && (
               <span className="ml-2 rounded-full bg-terracotta/20 px-2 py-0.5 text-xs font-semibold text-terracotta">
-                {t('tours.sponsored')}
+                {t('toursPanel.sponsored')}
               </span>
             )}
 
@@ -149,13 +149,13 @@ export function ToursPanel({
               }}
               className="btn-accent mt-6 w-full"
             >
-              {t('tours.planIntoDay')}
+              {t('toursPanel.planIntoDay')}
             </button>
             <p className="mt-1.5 text-center text-[11px] text-ink/40">
               {t('points.planHint')}
             </p>
             <p className="mt-3 text-center text-[11px] text-ink/40">
-              {t('tours.bookingClosed')}
+              {t('toursPanel.bookingClosed')}
             </p>
           </div>
         </div>

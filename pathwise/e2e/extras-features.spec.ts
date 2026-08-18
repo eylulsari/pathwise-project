@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openFromMoreMenu } from './helpers/nav';
 
 /** Feature regression — smaller / partial features. Runs via `npm run e2e`. */
 
@@ -136,7 +137,7 @@ test('a stop can be dragged onto Day 2', async ({ page }) => {
 
 test('free user sees the locked audio guide in the story modal', async ({ page }) => {
   await signup(page, 'gating');
-  await page.getByRole('link', { name: /Premium/ }).click();
+  await openFromMoreMenu(page, /Premium/);
   await page.waitForURL(/\/premium$/);
   await page.getByRole('button', { name: /Switch to Free/i }).click();
   await expect(page.getByRole('button', { name: /Upgrade to Premium/i })).toBeVisible({ timeout: 10_000 });

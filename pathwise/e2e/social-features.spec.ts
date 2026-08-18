@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openFromMoreMenu } from './helpers/nav';
 
 /** Feature regression — social cluster + referral. Runs via `npm run e2e`. */
 
@@ -219,7 +220,7 @@ test.describe('poll list failure', () => {
 
 test('referral code from one user can be redeemed by another', async ({ page }) => {
   await signup(page, 'refA');
-  await page.getByRole('link', { name: /Premium/ }).click();
+  await openFromMoreMenu(page, /Premium/);
   await page.waitForURL(/\/premium$/);
   const codeA = (await page.locator('code').first().textContent())?.trim() ?? '';
   expect(codeA).toMatch(/^PW/);
@@ -228,7 +229,7 @@ test('referral code from one user can be redeemed by another', async ({ page }) 
   await page.waitForURL((u) => !u.pathname.endsWith('/premium'), { timeout: 10_000 });
 
   await signup(page, 'refB');
-  await page.getByRole('link', { name: /Premium/ }).click();
+  await openFromMoreMenu(page, /Premium/);
   await page.waitForURL(/\/premium$/);
   await page.getByPlaceholder('PWXXXXXX').fill(codeA);
   await page.getByRole('button', { name: 'Redeem', exact: true }).click();

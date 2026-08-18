@@ -12,7 +12,65 @@ export const translations = {
       loading: 'Loading your Istanbul…',
       sectionUnavailable: 'This section is temporarily unavailable.',
     },
-    nav: { plan: 'Plan', social: 'Social', profile: 'Profile', messages: 'Messages', essentials: 'Essentials' },
+    nav: {
+      plan: 'Plan',
+      social: 'Social',
+      profile: 'Profile',
+      messages: 'Messages',
+      essentials: 'Essentials',
+      tours: 'Tours',
+      blog: 'Blog',
+      more: 'More',
+    },
+    /**
+     * Guided tours — affiliate referrals to GetYourGuide.
+     *
+     * ⚠️ There is no price string here and there must not be one. Pathwise has
+     * no access to GetYourGuide's live prices, so any figure would be invented,
+     * and an invented price is a quote the reader can hold us to. The CTA sends
+     * them to look instead.
+     */
+    tours: {
+      title: 'Guided tours',
+      subtitle: 'Booked on GetYourGuide, not here.',
+      disclosure:
+        'These are affiliate links. Booking, payment and cancellation all happen on GetYourGuide — Pathwise may earn a commission, at no extra cost to you.',
+      cta: 'See prices on GetYourGuide',
+      footnote:
+        'Prices, availability and cancellation terms are GetYourGuide’s and can change at any time, so we do not repeat them here.',
+      category: {
+        bosphorus: 'Bosphorus cruise',
+        historic: 'Historic sites & museums',
+        walking: 'Walking tour',
+      },
+      /**
+       * ⚠️ Each of these describes the tour its link actually opens — the
+       * redirect was followed and checked. Do not reword them from the label a
+       * link arrived with; two of the three labels were wrong.
+       */
+      items: {
+        'bosphorus-dinner-cruise': {
+          title: 'Bosphorus cruise with dinner',
+          desc: 'An evening on the water with a private table and dinner included.',
+        },
+        'hagia-sophia-guided': {
+          title: 'Hagia Sophia guided tour',
+          desc: 'Hagia Sophia with a local guide.',
+        },
+        'fener-balat-walk': {
+          title: 'Fener & Balat walking tour',
+          desc: 'A half-day guided walk through the Fener and Balat neighbourhoods.',
+        },
+      },
+    },
+    blog: {
+      title: 'Blog',
+      subtitle: 'Guides to Istanbul, written by the Pathwise team.',
+      readMore: 'Read',
+      backToList: 'All posts',
+      minRead: 'min read',
+      notFound: 'That post does not exist. It may have been renamed.',
+    },
     /**
      * Static reference content. Every string here was supplied for the app —
      * none of it is generated, and none of it should be edited to "improve" it
@@ -308,7 +366,14 @@ export const translations = {
       add: '➕ Add to Today’s Path',
       dismiss: 'Dismiss',
     },
-    tours: {
+    /**
+     * ⚠️ These three belong to the OLDER tours surface — `ToursPanel` on the
+     * dashboard, which renders `CURATED_TOURS`/`LIVE_TOURS` from `mockData.ts`.
+     * That data carries invented prices, invented ratings and `.mock` booking
+     * links that resolve nowhere. It is not the same feature as the `/tours`
+     * page, whose strings are under `tours.items.*` above.
+     */
+    toursPanel: {
       sponsored: 'Sponsored',
       planIntoDay: '🗓️ Plan this into my day',
       bookingClosed: 'Booking is not open yet — tours are listed for inspiration.',
@@ -614,7 +679,54 @@ export const translations = {
       loading: 'İstanbul’un yükleniyor…',
       sectionUnavailable: 'Bu bölüm şu anda kullanılamıyor.',
     },
-    nav: { plan: 'Planla', social: 'Sosyal', profile: 'Profil', messages: 'Mesajlar', essentials: 'Temel Bilgiler' },
+    nav: {
+      plan: 'Planla',
+      social: 'Sosyal',
+      profile: 'Profil',
+      messages: 'Mesajlar',
+      essentials: 'Temel Bilgiler',
+      tours: 'Turlar',
+      blog: 'Blog',
+      more: 'Daha fazla',
+    },
+    /** ⚠️ Fiyat anahtarı yok ve olmamalı — gerekçe İngilizce blokta. */
+    tours: {
+      title: 'Rehberli turlar',
+      subtitle: 'Rezervasyon GetYourGuide’da yapılır, burada değil.',
+      disclosure:
+        'Bunlar affiliate bağlantılardır. Rezervasyon, ödeme ve iptal tamamen GetYourGuide üzerinden yürür — Pathwise komisyon alabilir, sana ek bir maliyeti olmaz.',
+      cta: 'GetYourGuide’da fiyatları gör',
+      footnote:
+        'Fiyat, müsaitlik ve iptal koşulları GetYourGuide’a aittir ve her an değişebilir; bu yüzden burada tekrarlamıyoruz.',
+      category: {
+        bosphorus: 'Boğaz turu',
+        historic: 'Tarihi yerler & müzeler',
+        walking: 'Yürüyüş turu',
+      },
+      /** ⚠️ Linklerin gerçekten açtığı turlar — gerekçe İngilizce blokta. */
+      items: {
+        'bosphorus-dinner-cruise': {
+          title: 'Boğaz turu ve akşam yemeği',
+          desc: 'Suda bir akşam; özel masa ve akşam yemeği dahil.',
+        },
+        'hagia-sophia-guided': {
+          title: 'Ayasofya rehberli turu',
+          desc: 'Ayasofya, yerel bir rehber eşliğinde.',
+        },
+        'fener-balat-walk': {
+          title: 'Fener & Balat yürüyüş turu',
+          desc: 'Fener ve Balat semtlerinde yarım günlük rehberli yürüyüş.',
+        },
+      },
+    },
+    blog: {
+      title: 'Blog',
+      subtitle: 'Pathwise ekibinin yazdığı İstanbul rehberleri.',
+      readMore: 'Oku',
+      backToList: 'Tüm yazılar',
+      minRead: 'dk okuma',
+      notFound: 'Böyle bir yazı yok. Adı değişmiş olabilir.',
+    },
     essentials: {
       title: 'Temel Bilgiler',
       subtitle: 'Gitmeden Önce',
@@ -899,7 +1011,8 @@ export const translations = {
       add: '➕ Bugünün Rotasına Ekle',
       dismiss: 'Kapat',
     },
-    tours: {
+    /** ⚠️ Eski tur paneline ait — gerekçe İngilizce blokta. */
+    toursPanel: {
       sponsored: 'Sponsorlu',
       planIntoDay: '🗓️ Günüme ekle',
       bookingClosed: 'Rezervasyon henüz açık değil — turlar ilham için listeleniyor.',

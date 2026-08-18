@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { openFromMoreMenu } from './helpers/nav';
 
 /**
  * The Essentials page, and the mosque etiquette that also appears on a mosque's
@@ -25,7 +26,7 @@ test('Essentials is reachable from the nav and carries all five sections', async
 }) => {
   await signUp(page, 'ess');
 
-  await page.getByRole('link', { name: /^Essentials$/i }).click();
+  await openFromMoreMenu(page, /Essentials/);
   await expect(page).toHaveURL(/\/essentials$/);
   await expect(page.getByRole('heading', { name: /^Essentials$/ })).toBeVisible();
 

@@ -20,7 +20,7 @@ import type {
   Reservation,
   StartPoint,
 } from '../types';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { UsageInfo } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -155,7 +155,30 @@ export default function Dashboard() {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   );
-  const [showQuiz, setShowQuiz] = useState(false);
+  /**
+   * The Vibe Quiz is a modal, and its open/closed state lives in the URL.
+   *
+   * It stays a modal because its whole job is to feed this page: the answers
+   * become the generation inputs and the route is rebuilt underneath it. A
+   * separate route would mean shipping the result back here, for no gain.
+   *
+   * What it lacked was a link. `?quiz=1` makes it shareable and bookmarkable,
+   * and makes the browser's back button close it — none of which a `useState`
+   * boolean can do. `replace` so a quiz opened and closed does not leave two
+   * dashboard entries in the history.
+   */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showQuiz = searchParams.get('quiz') === '1';
+  const setShowQuiz = (open: boolean) =>
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (open) next.set('quiz', '1');
+        else next.delete('quiz');
+        return next;
+      },
+      { replace: true },
+    );
   const [showMustVisit, setShowMustVisit] = useState(false);
   const [showSplitBill, setShowSplitBill] = useState(false);
   const [simulatedOffline, setSimulatedOffline] = useState(false);
