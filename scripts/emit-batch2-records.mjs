@@ -83,7 +83,6 @@ for (const place of places) {
     lng: ${hit.lng},
     rating: null,
     reviewCount: 0,
-    photoUrl: ${q(`https://images.pathwise.mock/${slug(place.name)}.jpg`)},
     category: ${q(category)},
     interests: [${place.interests.map(q).join(', ')}],
     entryFeeTry: ${place.entryFeeTry},${paid ? '\n    entryFeeApprox: true,' : ''}

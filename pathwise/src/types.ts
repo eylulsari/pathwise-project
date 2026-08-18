@@ -111,7 +111,6 @@ export interface Place {
    */
   rating: number | null;
   reviewCount: number;
-  photoUrl: string;
   category: Interest;
   interests: Interest[];
   entryFeeTry: number;
@@ -156,7 +155,11 @@ export interface Place {
   priceTier?: 1 | 2 | 3 | 4;
   /** Display emoji for map pins / lists. */
   emoji?: string;
-  /** Provenance label for the record (e.g. 'Google Places', 'IBB'). */
+  /**
+   * Provenance label — 'Curated (estimated)' or 'IBB Open Data'.
+   * ⚠️ Only ever name a provider the data really came from; see the backend's
+   * `place.ts` for why thirty-three records stopped claiming 'Google Places'.
+   */
   source?: string;
 }
 

@@ -81,14 +81,19 @@ export type PlaceType =
  * A visitable place.
  *
  * Field *shapes* are modelled on the providers this data would come from in a
- * real deployment — place_id, lat/lng, rating, reviewCount, photoUrl and
- * openingHours after Google Places; entryFeeTry and museumPass after IBB Open
- * Data; isIndoor / isSunsetSpot are our own derived tags for the weather and
- * time simulator.
+ * real deployment — place_id, lat/lng, rating, reviewCount and openingHours
+ * after Google Places; entryFeeTry and museumPass after IBB Open Data;
+ * isIndoor / isSunsetSpot are our own derived tags for the weather and time
+ * simulator.
  *
- * ⚠️ Shaped after is not sourced from. Nothing here is fetched from Google:
- * the ratings are ours and the `photoUrl`s point at a hostname that does not
- * resolve. See `source` below.
+ * ⚠️ Shaped after is not sourced from. Nothing here is fetched from Google —
+ * the ratings are ours. See `source` below.
+ *
+ * There is deliberately no photo field. There was one (`photoUrl`), pointing
+ * at `images.pathwise.mock`, which resolves nowhere; nothing ever rendered it,
+ * in any commit. Real photos arrive from the Wikipedia enrichment as
+ * `thumbnailUrl`, carrying the attribution and licence link that using them
+ * requires — which a bare URL string on this record could not express.
  */
 export interface Place {
   placeId: string; // Google Places `place_id`
@@ -108,7 +113,6 @@ export interface Place {
   rating: number | null;
   /** Reviews behind `rating`. 0 alongside a null rating means "not yet rated". */
   reviewCount: number;
-  photoUrl: string;
   category: Interest;
   interests: Interest[];
   entryFeeTry: number; // 0 = free
@@ -163,9 +167,9 @@ export interface Place {
    * Where this record's facts actually came from.
    *
    * ⚠️ Only name a real provider when the data really came from it. Thirty-
-   * three records said `'Google Places'` while being hand-written — their
-   * photo URLs pointed at `images.pathwise.mock`, and this app calls no Google
-   * API anywhere. They now say `'Curated (estimated)'`, which is what they are.
+   * three records said `'Google Places'` while being hand-written — this app
+   * calls no Google API anywhere. They now say `'Curated (estimated)'`, which
+   * is what they are.
    *
    * If any of it is ever sourced from a provider for real, put the name back
    * together with the data — not before.
