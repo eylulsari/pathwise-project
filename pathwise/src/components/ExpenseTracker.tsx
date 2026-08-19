@@ -5,6 +5,7 @@ import type {
   ExpenseLedger,
   ItineraryStop,
   MessagingConnection,
+  Place,
 } from '../types';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -105,9 +106,20 @@ export function ExpenseTracker({
   const spentToday = ledger.spentByDayTry[dayIndex] ?? 0;
   const plannedToday = budgetsTry[dayIndex] ?? 0;
 
+  /**
+   * The real stops, in the order they are visited.
+   *
+   * A stop's place is nullable — a lunch break is a stop with no place — so
+   * the list is narrowed once here rather than guarded at each use.
+   */
+  const placedStops = useMemo(
+    () => stops.filter((s): s is typeof s & { place: Place } => s.place !== null),
+    [stops],
+  );
+
   const chosenStop = useMemo(
-    () => stops.find((s) => s.placeId === placeId),
-    [stops, placeId],
+    () => placedStops.find((s) => s.place.placeId === placeId),
+    [placedStops, placeId],
   );
 
   async function submit(): Promise<void> {
@@ -122,7 +134,7 @@ export function ExpenseTracker({
         category,
         amount: Math.round(value * 100) / 100,
         currency: entryCurrency,
-        ...(placeId ? { placeId, placeName: chosenStop?.name ?? placeId } : {}),
+        ...(placeId ? { placeId, placeName: chosenStop?.place.name ?? placeId } : {}),
         ...(note.trim() ? { note: note.trim() } : {}),
         ...(paidBy ? { paidByUserId: paidBy } : {}),
         // A shared expense includes the payer: they ate the meal too. An empty
@@ -248,9 +260,9 @@ export function ExpenseTracker({
               className="min-w-0 flex-1 rounded-lg border border-ink/15 bg-white px-2 py-2 text-sm text-ink outline-none focus:border-iznik"
             >
               <option value="">{t('expenses.place')}</option>
-              {stops.map((s) => (
-                <option key={s.placeId} value={s.placeId}>
-                  {s.name}
+              {placedStops.map((s) => (
+                <option key={s.place.placeId} value={s.place.placeId}>
+                  {s.place.name}
                 </option>
               ))}
             </select>

@@ -43,6 +43,54 @@ jobs:
       - run: npm run build
       - run: npm test # unit tests use in-memory data + mocks — no DB needed
 
+  # Twice a feature has shipped an @Entity with no migration to create its
+  # table. Dev runs with synchronize:true, so TypeORM built the table locally
+  # and every other job here passed against a schema the migrations had never
+  # produced; production runs with synchronize:false and had no table at all.
+  # Nothing above can catch that, because it all stands on the mechanism doing
+  # the hiding. This job builds the schema from migrations alone, on an empty
+  # database, and compares it to the entities.
+  migrations:
+    name: Migrations build the schema the entities describe
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pathwise-backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: pathwise
+          POSTGRES_PASSWORD: pathwise_dev_password
+          # A scratch database, empty and used by nothing else. The check
+          # refuses to run against a database that already has tables — a pass
+          # obtained that way would prove nothing, quietly.
+          POSTGRES_DB: pathwise_migcheck
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pathwise"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: pathwise-backend/package-lock.json
+      - run: npm ci
+      # The migration CLI runs against dist/, not src/.
+      - run: npm run build
+      - run: npm run migration:check
+        env:
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: pathwise
+          POSTGRES_PASSWORD: pathwise_dev_password
+          POSTGRES_DB: pathwise_migcheck
+
   frontend:
     name: Frontend (lint + type-check + i18n + build)
     runs-on: ubuntu-latest

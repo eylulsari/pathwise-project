@@ -147,3 +147,51 @@ test('a shared expense settles between connected buddies, and only them', async 
   expect(ledger.expenses).toHaveLength(0);
   expect(ledger.debts).toHaveLength(0);
 });
+
+/**
+ * The place picker listed the day's stops using fields ItineraryStop does not
+ * have — `s.placeId` and `s.name`, where the type carries `s.place`. Every
+ * option therefore rendered blank, with an undefined value. It shipped because
+ * the frontend type-check was being run as `tsc --noEmit` against a
+ * solution-style root tsconfig, which checks nothing, and because no test ever
+ * opened this dropdown.
+ */
+test('the place picker lists the day’s real stops, and pins an expense to one', async ({
+  page,
+  request,
+}) => {
+  const me = await register(request, 'place', 'Place Pinner');
+  await signInUi(page, me.email);
+  await openExpenses(page);
+
+  const picker = page.getByTestId('expense-place');
+  const options = picker.locator('option');
+
+  // More than the placeholder alone, and every one of them named.
+  expect(await options.count()).toBeGreaterThan(1);
+  const labels = (await options.allTextContents()).slice(1);
+  expect(labels.length).toBeGreaterThan(0);
+  for (const label of labels) {
+    expect(label.trim()).not.toBe('');
+  }
+
+  // A real value too — the blank-option bug gave every entry an undefined
+  // value, which the browser silently backfills with the label text.
+  const values = await options.evaluateAll((els) =>
+    els.map((el) => (el as HTMLOptionElement).value),
+  );
+  for (const value of values.slice(1)) {
+    expect(value).not.toBe('');
+    expect(value).not.toBe('undefined');
+  }
+
+  // And the expense records the place's NAME, not its id.
+  const firstPlace = labels[0].trim();
+  await picker.selectOption({ index: 1 });
+  await page.getByLabel('Amount').fill('250');
+  await page.getByRole('button', { name: /Add expense/i }).click();
+
+  await expect(page.getByTestId('expense-row').first()).toContainText(firstPlace, {
+    timeout: 15_000,
+  });
+});
