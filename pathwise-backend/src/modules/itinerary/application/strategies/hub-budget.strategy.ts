@@ -23,6 +23,8 @@ import {
   TransitPoint,
 } from '../../domain/transit';
 import { RouteGenerationStrategy } from '../../domain/route-generation-strategy.port';
+import { normalizeWeekday } from '../../../places/domain/opening-hours';
+import { respectOpeningHours } from '../../domain/opening-feasibility';
 
 /**
  * HubBudgetStrategy — the core route engine.
@@ -208,10 +210,47 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
         : selected;
 
     // 5 — order geographically; sunset spots pushed to the end in the evening.
-    const ordered = this.orderStops(weatherAdjusted, input);
+    const geographic = this.orderStops(weatherAdjusted, input);
+
+    /**
+     * 5b — and then off the locked doors.
+     *
+     * Everything above orders by distance, score and weather; none of it had
+     * ever looked at whether a place is open when the day arrives. It put
+     * Kadıköy Barlar Sokağı — which opens at 16:00 — at 12:51, on every day of
+     * the week, and Monday-closed museums into Mondays.
+     *
+     * Applied to GENERATION only. `rebuild` deliberately skips it: that path
+     * exists to honour a stop order the traveller dragged into place, and
+     * silently removing one of their stops would undo the edit they just made.
+     * They get a notice instead — the same "warn, don't block" rule the rest of
+     * the editing flow follows.
+     */
+    const feasible = respectOpeningHours({
+      ordered: geographic,
+      startMinutes: input.startHour * 60,
+      weekday: normalizeWeekday(input.weekday),
+      travelMinutes: (from, to) => this.transportLeg(from, to).durationMinutes,
+    });
+    const ordered = feasible.ordered;
+
+    // Said out loud rather than left as a silently shorter day: a stop that
+    // disappears without explanation reads as the engine losing it.
+    const closedAllDay = feasible.dropped
+      .filter((d) => d.reason === 'closed-all-day')
+      .map((d) => d.place.name);
+    if (closedAllDay.length > 0) {
+      notices.push({ code: 'closed-that-day', severity: 'info', places: closedAllDay });
+    }
+    const tooLate = feasible.dropped
+      .filter((d) => d.reason === 'never-open-in-time')
+      .map((d) => d.place.name);
+    if (tooLate.length > 0) {
+      notices.push({ code: 'opens-too-late', severity: 'info', places: tooLate });
+    }
 
     // 6–8 — assemble, measure against the real clock, trim until it fits.
-    return this.assembleWithinDay(ordered, input, hub, mustSet, notices);
+    return this.assembleWithinDay(ordered, input, hub, mustSet, notices, feasible.waits);
   }
 
   /**
@@ -246,6 +285,8 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     hub: Hub,
     mustSet: Set<string>,
     notices: ItineraryNotice[],
+    /** placeId → minutes to wait for the door to open, from the feasibility pass. */
+    waits: Map<string, number> = new Map(),
   ): Itinerary {
     const dayStart = input.startHour * 60;
     const deadline = Math.min(
@@ -265,7 +306,7 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
         : Infinity;
 
     const stops = [...ordered];
-    let itinerary = this.assemble(stops, input, hub);
+    let itinerary = this.assemble(stops, input, hub, waits);
     const tooLong = () => dayStart + itinerary.totalDurationMinutes > deadline;
     // The walking rule stops at three stops. Below that it is no longer
     // shortening a day, it is deleting one — and someone who cannot walk far
@@ -278,7 +319,7 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       const idx = stops.map((p) => mustSet.has(p.placeId)).lastIndexOf(false);
       if (idx === -1) break; // only forced stops left — say so instead
       stops.splice(idx, 1);
-      itinerary = this.assemble(stops, input, hub);
+      itinerary = this.assemble(stops, input, hub, waits);
     }
 
     return {
@@ -550,6 +591,7 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
     ordered: Place[],
     input: RouteGenerationInput,
     hub: Hub,
+    waits: Map<string, number> = new Map(),
   ): Itinerary {
     const reservations = new Map(
       (input.reservations ?? []).map((r) => [r.placeId, r]),
@@ -598,6 +640,13 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
         if (pinned >= clock) clock = pinned; // wait for the booking
         else clock = pinned; // honor the pin even if it means an earlier slot
       }
+
+      // A short wait for opening, decided by the feasibility pass. Arriving at
+      // 15:40 somewhere that opens at 16:00 is a coffee, not a defect — but the
+      // clock has to admit the twenty minutes rather than pretend the door was
+      // open, or every time after this one is wrong.
+      const wait = waits.get(place.placeId) ?? 0;
+      if (wait > 0) clock += wait;
 
       const arrival = clock;
       const departure = clock + place.avgVisitMinutes;

@@ -306,7 +306,9 @@ export type ItineraryNoticeCode =
   | 'adalar-separate-day'
   | 'adalar-last-ferry'
   | 'adalar-return-ferry'
-  | 'cross-side-day';
+  | 'cross-side-day'
+  | 'closed-that-day'
+  | 'opens-too-late';
 
 export interface ItineraryNotice {
   code: ItineraryNoticeCode;

@@ -11,6 +11,14 @@ import { Itinerary, RouteGenerationInput } from '../../domain/itinerary';
  * the regression test compares new code against old behaviour rather than
  * against itself.
  *
+ * Every case pins weekday to Tuesday. Generation now consults opening hours,
+ * and an unpinned case would take "today in Istanbul" — making the fixture
+ * pass on a Wednesday and fail on the Monday when the closed-day museums drop
+ * out of it. A regression baseline that depends on the day it is run is not a
+ * baseline. Tuesday is chosen because nothing in the catalogue closes on it,
+ * so these cases keep testing scoring rather than the calendar; the closed-day
+ * behaviour has its own tests in hub-budget.strategy.spec.ts.
+ *
  * Shared with the spec rather than inlined so both sides cannot drift.
  */
 export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
@@ -23,6 +31,7 @@ export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
     mustVisitIds: [],
     weather: 'sunny',
     startHour: 10,
+    weekday: 1, // Tuesday — pinned, see the note above
   },
   'couple, sultanahmet, rain': {
     hub: 'sultanahmet',
@@ -33,6 +42,7 @@ export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
     mustVisitIds: [],
     weather: 'rainy',
     startHour: 9,
+    weekday: 1, // Tuesday — pinned, see the note above
   },
   'friends, beyoglu, evening': {
     hub: 'beyoglu-taksim',
@@ -43,6 +53,7 @@ export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
     mustVisitIds: [],
     weather: 'sunny',
     startHour: 17,
+    weekday: 1, // Tuesday — pinned, see the note above
   },
   'must-visits and a pinned booking': {
     hub: 'karakoy-galata',
@@ -53,6 +64,7 @@ export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
     mustVisitIds: ['ChIJ-karakoy-galatatower'],
     weather: 'sunny',
     startHour: 11,
+    weekday: 1, // Tuesday — pinned, see the note above
     reservations: [{ placeId: 'ChIJ-karakoy-galatatower', time: '14:30' }],
   },
   'tight budget and pace': {
@@ -64,6 +76,7 @@ export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
     mustVisitIds: [],
     weather: 'sunny',
     startHour: 9,
+    weekday: 1, // Tuesday — pinned, see the note above
   },
   'island day': {
     hub: 'adalar',
@@ -74,6 +87,7 @@ export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
     mustVisitIds: [],
     weather: 'sunny',
     startHour: 9,
+    weekday: 1, // Tuesday — pinned, see the note above
   },
   'quiz mode, history + relaxed': {
     hub: undefined,
@@ -84,6 +98,7 @@ export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
     mustVisitIds: [],
     weather: 'sunny',
     startHour: 10,
+    weekday: 1, // Tuesday — pinned, see the note above
     quiz: { mood: 'history', pace: 'relaxed', budgetTry: 1800 },
   },
   'quiz mode, foodie + packed': {
@@ -95,6 +110,7 @@ export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
     mustVisitIds: [],
     weather: 'sunny',
     startHour: 11,
+    weekday: 1, // Tuesday — pinned, see the note above
     quiz: { mood: 'foodie', pace: 'packed', budgetTry: 2400 },
   },
   'no interests at all': {
@@ -106,6 +122,7 @@ export const GOLDEN_CASES: Record<string, RouteGenerationInput> = {
     mustVisitIds: [],
     weather: 'sunny',
     startHour: 10,
+    weekday: 1, // Tuesday — pinned, see the note above
   },
 };
 

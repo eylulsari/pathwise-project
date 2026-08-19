@@ -245,6 +245,10 @@ export const en = {
       'This plan runs late for the last ferry back (around 20:00). Drop a stop or start earlier.',
     noticeCrossSideDay:
       'This day crosses the Bosphorus. The ferry is included in the times below — it costs about an hour door to door.',
+    noticeClosedThatDay:
+      '{places} is closed on the day of this plan, so it is not in it. The rest of the day is unchanged.',
+    noticeOpensTooLate:
+      '{places} opens later than this day runs, so it is not in it. Start later, or give it its own evening.',
     readStory: '📖 Read Local Story & Tips',
     free: 'Free',
     museumPass: 'Museum Pass',

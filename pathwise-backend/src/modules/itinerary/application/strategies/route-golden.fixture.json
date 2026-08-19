@@ -52,39 +52,47 @@
         "departureTime": "13:51",
         "durationMinutes": 60,
         "transportMode": "walk",
-        "transportMinutes": 2
+        "transportMinutes": 4
       },
       {
         "order": 6,
-        "placeId": "ChIJ-kadikoy-barlar",
+        "placeId": "ChIJ-kadikoy-alimuhiddinhacibekir",
         "isLunchBreak": false,
-        "arrivalTime": "13:53",
-        "departureTime": "14:53",
-        "durationMinutes": 60,
+        "arrivalTime": "13:55",
+        "departureTime": "14:15",
+        "durationMinutes": 20,
         "transportMode": "walk",
-        "transportMinutes": 6
+        "transportMinutes": 13
       },
       {
         "order": 7,
-        "placeId": "ChIJ-kadikoy-alimuhiddinhacibekir",
+        "placeId": "ChIJ-kadikoy-moda-sahil",
         "isLunchBreak": false,
-        "arrivalTime": "14:59",
-        "departureTime": "15:19",
-        "durationMinutes": 20,
+        "arrivalTime": "14:28",
+        "departureTime": "15:18",
+        "durationMinutes": 50,
         "transportMode": null,
         "transportMinutes": null
       }
     ],
     "costBreakdown": {
       "ticketsTry": 0,
-      "foodTry": 1440,
+      "foodTry": 1150,
       "transportTry": 0,
-      "totalTry": 1440
+      "totalTry": 1150
     },
     "overBudget": false,
-    "totalDistanceKm": 1.4,
-    "totalDurationMinutes": 319,
-    "notices": []
+    "totalDistanceKm": 2.1,
+    "totalDurationMinutes": 318,
+    "notices": [
+      {
+        "code": "opens-too-late",
+        "severity": "info",
+        "places": [
+          "Kadıköy Barlar Sokağı"
+        ]
+      }
+    ]
   },
   "couple, sultanahmet, rain": {
     "hub": "sultanahmet",
@@ -480,61 +488,61 @@
       },
       {
         "order": 3,
-        "placeId": "ChIJ-kadikoy-barlar",
-        "isLunchBreak": false,
-        "arrivalTime": "13:00",
-        "departureTime": "14:00",
-        "durationMinutes": 60,
-        "transportMode": "walk",
-        "transportMinutes": 2
-      },
-      {
-        "order": 4,
         "placeId": "ChIJ-kadikoy-baylan",
         "isLunchBreak": false,
-        "arrivalTime": "14:02",
-        "departureTime": "14:42",
+        "arrivalTime": "13:00",
+        "departureTime": "13:40",
         "durationMinutes": 40,
         "transportMode": "walk",
         "transportMinutes": 0
       },
       {
-        "order": 5,
+        "order": 4,
         "placeId": "ChIJ-kadikoy-carsi",
         "isLunchBreak": false,
-        "arrivalTime": "14:42",
-        "departureTime": "15:42",
+        "arrivalTime": "13:40",
+        "departureTime": "14:40",
         "durationMinutes": 60,
         "transportMode": "walk",
         "transportMinutes": 2
       },
       {
-        "order": 6,
+        "order": 5,
         "placeId": "ChIJ-kadikoy-ciya",
         "isLunchBreak": false,
-        "arrivalTime": "15:44",
-        "departureTime": "16:54",
+        "arrivalTime": "14:42",
+        "departureTime": "15:52",
         "durationMinutes": 70,
         "transportMode": "walk",
         "transportMinutes": 4
       },
       {
-        "order": 7,
+        "order": 6,
         "placeId": "ChIJ-kadikoy-alimuhiddinhacibekir",
         "isLunchBreak": false,
-        "arrivalTime": "16:58",
-        "departureTime": "17:18",
+        "arrivalTime": "15:56",
+        "departureTime": "16:16",
         "durationMinutes": 20,
         "transportMode": "walk",
         "transportMinutes": 10
       },
       {
-        "order": 8,
+        "order": 7,
         "placeId": "ChIJ-kadikoy-moda-icecream",
         "isLunchBreak": false,
-        "arrivalTime": "17:28",
-        "departureTime": "17:48",
+        "arrivalTime": "16:26",
+        "departureTime": "16:46",
         "durationMinutes": 20,
+        "transportMode": "walk",
+        "transportMinutes": 9
+      },
+      {
+        "order": 8,
+        "placeId": "ChIJ-kadikoy-barlar",
+        "isLunchBreak": false,
+        "arrivalTime": "16:55",
+        "departureTime": "17:55",
+        "durationMinutes": 60,
         "transportMode": null,
         "transportMinutes": null
       }
@@ -546,8 +554,8 @@
       "totalTry": 2708
     },
     "overBudget": true,
-    "totalDistanceKm": 3.3,
-    "totalDurationMinutes": 408,
+    "totalDistanceKm": 3.9,
+    "totalDurationMinutes": 415,
     "notices": []
   },
   "no interests at all": {

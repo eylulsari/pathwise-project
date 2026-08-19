@@ -175,3 +175,21 @@ export function isClosedOn(schedule: WeekSchedule, day: number): boolean {
   const windows = schedule.byDay.get(day);
   return !windows || windows.length === 0;
 }
+
+/**
+ * A weekday index the schedule functions understand, 0 = Monday.
+ *
+ * Takes the caller's value when it is a real weekday, and otherwise answers
+ * "today in Istanbul" — not today wherever the server happens to be running.
+ * A plan is for a city, and the city is the one whose museums close.
+ */
+export function normalizeWeekday(weekday: number | undefined): number {
+  if (Number.isInteger(weekday) && weekday! >= 0 && weekday! <= 6) {
+    return weekday!;
+  }
+  const name = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Istanbul',
+    weekday: 'short',
+  }).format(new Date());
+  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(name);
+}

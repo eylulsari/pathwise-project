@@ -186,6 +186,8 @@ const NOTICE_KEY: Record<ItineraryNotice['code'], string> = {
   'adalar-return-ferry': 'today.noticeAdalarReturnFerry',
   'adalar-last-ferry': 'today.noticeAdalarLastFerry',
   'cross-side-day': 'today.noticeCrossSideDay',
+  'closed-that-day': 'today.noticeClosedThatDay',
+  'opens-too-late': 'today.noticeOpensTooLate',
 };
 
 function RouteNotices({ notices }: { notices?: ItineraryNotice[] }) {

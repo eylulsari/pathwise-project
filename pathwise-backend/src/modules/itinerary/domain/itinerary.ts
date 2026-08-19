@@ -71,6 +71,12 @@ export interface RouteGenerationInput {
   mustVisitIds: string[];
   weather: Weather;
   startHour: number; // 0–23, when the day begins
+  /**
+   * Which weekday the plan is for, 0 = Monday. Absent means today in
+   * Istanbul. Only opening hours read it — a Monday plan must not be built
+   * around museums that are shut on Mondays.
+   */
+  weekday?: number;
   /** Where the day starts (used to seed the route order). */
   startOrigin?: Origin;
   /** Where the day should end. When omitted the engine auto-suggests one. */
@@ -128,7 +134,11 @@ export type ItineraryNoticeCode =
   /** Routine reminder that an island day has to catch a boat home. */
   | 'adalar-return-ferry'
   /** The day crosses the Bosphorus — real, doable, and worth an hour of it. */
-  | 'cross-side-day';
+  | 'cross-side-day'
+  /** Shut for the whole of that weekday, so it was left out of the plan. */
+  | 'closed-that-day'
+  /** Opens later than this day can wait for, so it was left out of the plan. */
+  | 'opens-too-late';
 
 export interface ItineraryNotice {
   code: ItineraryNoticeCode;

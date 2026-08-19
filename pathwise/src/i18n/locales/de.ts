@@ -227,6 +227,10 @@ export const de = {
       'Dieser Plan wird für die letzte Fähre zurück (gegen 20:00) zu knapp. Streich einen Stopp oder fang früher an.',
     noticeCrossSideDay:
       'An diesem Tag geht es über den Boğaz. Die Fähre ist in den Zeiten unten enthalten — von Tür zu Tür kostet sie etwa eine Stunde.',
+    noticeClosedThatDay:
+      '{places} hat am Tag dieses Plans geschlossen und ist deshalb nicht dabei. Der Rest des Tages bleibt unverändert.',
+    noticeOpensTooLate:
+      '{places} öffnet später, als dieser Tag dauert, und ist deshalb nicht dabei. Fang später an oder gib dem Ort einen eigenen Abend.',
     readStory: '📖 Lokale Geschichte & Tipps lesen',
     free: 'Kostenlos',
     museumPass: 'Museumspass',

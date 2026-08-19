@@ -224,6 +224,10 @@ export const tr = {
       'Bu plan son vapura (20:00 civarı) geç kalıyor. Bir durak çıkar ya da güne daha erken başla.',
     noticeCrossSideDay:
       'Bu gün Boğaz’ı geçiyor. Vapur aşağıdaki saatlere dahil — kapıdan kapıya yaklaşık bir saat.',
+    noticeClosedThatDay:
+      '{places} bu planın gününde kapalı, o yüzden plana konmadı. Günün geri kalanı değişmedi.',
+    noticeOpensTooLate:
+      '{places} bu günün bittiği saatten sonra açılıyor, o yüzden plana konmadı. Daha geç başla ya da ona ayrı bir akşam ayır.',
     readStory: '📖 Yerel Hikaye & İpuçları',
     free: 'Ücretsiz',
     museumPass: 'Müze Kart',

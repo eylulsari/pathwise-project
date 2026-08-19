@@ -18,6 +18,23 @@ import golden from './route-golden.fixture.json';
  * If a future change to scoring is intended to move these routes, the fixture
  * has to be re-captured deliberately and the diff read stop by stop. It should
  * never be regenerated to make a red test go green.
+ *
+ * RE-CAPTURED ONCE, DELIBERATELY — opening hours.
+ * The engine used to schedule places while they were shut: Kadıköy Barlar
+ * Sokağı, which opens at 16:00, was planned for 12:51 on every generated
+ * Kadıköy day. Teaching generation to read opening hours moved exactly two
+ * cases, and the diff was read stop by stop before it was kept:
+ *
+ *   solo, kadikoy, midday      Barlar Sokağı leaves the day — it is only five
+ *                              hours long and never reaches 16:00. Moda Sahili
+ *                              takes the freed slot. 1.4 km → 2.1 km.
+ *   quiz mode, foodie + packed Barlar Sokağı moves from 14:02 to the end of
+ *                              the day, after the ice cream at 16:55, which is
+ *                              when it is actually open. 3.3 km → 3.9 km.
+ *
+ * Nothing else in the fixture moved. Every case now pins `weekday`, because
+ * generation consults the calendar and a baseline that reads "today" would
+ * pass on a Wednesday and fail on the Monday the closed museums drop out.
  */
 describe('a route asked for the old way comes back the old way', () => {
   const places = new PlacesService(new InMemoryPlaceRepository());

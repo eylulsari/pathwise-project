@@ -2,6 +2,11 @@ import { PlacesService } from '../../../places/application/places.service';
 import { InMemoryPlaceRepository } from '../../../places/infrastructure/persistence/in-memory-place.repository';
 import { RouteGenerationInput } from '../../domain/itinerary';
 import { HubBudgetStrategy } from './hub-budget.strategy';
+import {
+  isClosedOn,
+  isOpenThroughout,
+  parseSchedule,
+} from '../../../places/domain/opening-hours';
 
 /** Builds a real PlacesService over the curated in-memory dataset. */
 function makeStrategy(): HubBudgetStrategy {
@@ -277,5 +282,86 @@ describe('HubBudgetStrategy', () => {
     const { ticketsTry, foodTry, transportTry, totalTry } = result.costBreakdown;
     expect(ticketsTry + foodTry + transportTry).toBe(totalTry);
     expect(totalTry).toBeGreaterThanOrEqual(0);
+  });
+});
+
+/**
+ * The generator used to plan visits to places that were shut at the hour it
+ * chose. Measured across the golden cases before the fix: Kadıköy Barlar
+ * Sokağı (opens 16:00) was scheduled for 12:51 on all seven days, and the
+ * Museum of Turkish & Islamic Arts, Istanbul Modern, SALT Galata and the Grand
+ * Bazaar were each planned into a day they are closed.
+ */
+describe('HubBudgetStrategy — opening hours', () => {
+  const strategy = makeStrategy();
+  const MONDAY = 0;
+  const toMin = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+
+  it('does not plan the bar street before it opens', async () => {
+    const result = await strategy.generate(
+      baseInput({ hub: 'kadikoy-moda', startHour: 10, weekday: 2 }),
+    );
+    const bar = result.stops.find((s) => /Barlar Sokağı/.test(s.place?.name ?? ''));
+    // Either it is not in the day at all, or it is in it at an hour it is open.
+    if (bar) {
+      expect(bar.place!.openingHours).toMatch(/16:00/);
+      expect(toMin(bar.arrivalTime)).toBeGreaterThanOrEqual(16 * 60);
+    }
+  });
+
+  it('plans no stop into an hour its own opening hours exclude, on any weekday', async () => {
+    for (let weekday = 0; weekday < 7; weekday++) {
+      const result = await strategy.generate(
+        baseInput({ hub: 'kadikoy-moda', startHour: 10, weekday }),
+      );
+      for (const stop of result.stops) {
+        if (!stop.place?.openingHours) continue;
+        const schedule = parseSchedule(stop.place.openingHours);
+        if (!schedule) continue; // hours we cannot read are nobody's evidence
+        expect({
+          day: weekday,
+          place: stop.place.name,
+          at: stop.arrivalTime,
+          hours: stop.place.openingHours,
+          open: isOpenThroughout(
+            schedule,
+            weekday,
+            toMin(stop.arrivalTime),
+            toMin(stop.departureTime),
+          ),
+        }).toMatchObject({ open: true });
+      }
+    }
+  });
+
+  it('leaves a Monday-closed museum out of a Monday, and says why', async () => {
+    const result = await strategy.generate(
+      baseInput({ hub: 'sultanahmet', interests: ['history'], weekday: MONDAY }),
+    );
+    for (const stop of result.stops) {
+      if (!stop.place?.openingHours) continue;
+      const schedule = parseSchedule(stop.place.openingHours);
+      if (!schedule) continue;
+      expect(isClosedOn(schedule, MONDAY)).toBe(false);
+    }
+  });
+
+  it('still fills the day — the fix must not empty it', async () => {
+    // The tempting over-correction is to treat unknown hours as closed, which
+    // would delete three quarters of the catalogue.
+    const result = await strategy.generate(baseInput({ weekday: MONDAY }));
+    expect(result.stops.filter((s) => s.place).length).toBeGreaterThan(2);
+  });
+
+  it('does not silently drop a stop the traveller dragged into place', async () => {
+    // rebuild() is the manual-edit path. Removing one of their stops there
+    // would undo the edit they just made, so it warns instead of trimming.
+    const generated = await strategy.generate(baseInput({ hub: 'kadikoy-moda' }));
+    const ids = generated.stops.filter((s) => s.place).map((s) => s.place!.placeId);
+    const withBar = [...ids, 'ChIJ-kadikoy-barlar'];
+
+    const rebuilt = await strategy.rebuild(withBar, baseInput({ startHour: 10 }));
+    const rebuiltIds = rebuilt.stops.filter((s) => s.place).map((s) => s.place!.placeId);
+    expect(rebuiltIds).toContain('ChIJ-kadikoy-barlar');
   });
 });

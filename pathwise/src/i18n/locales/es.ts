@@ -227,6 +227,10 @@ export const es = {
       'Este plan se alarga demasiado para el último ferry de vuelta (sobre las 20:00). Quita una parada o empieza antes.',
     noticeCrossSideDay:
       'Este día cruza el Boğaz. El ferry está incluido en los horarios de abajo — de puerta a puerta cuesta cerca de una hora.',
+    noticeClosedThatDay:
+      '{places} está cerrado el día de este plan, así que no aparece. El resto del día no cambia.',
+    noticeOpensTooLate:
+      '{places} abre más tarde de lo que dura este día, así que no aparece. Empieza más tarde o dale su propia noche.',
     readStory: '📖 Leer la historia local y los consejos',
     free: 'Gratis',
     museumPass: 'Museum Pass',

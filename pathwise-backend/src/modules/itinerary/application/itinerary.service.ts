@@ -16,6 +16,7 @@ import { haversineMeters } from '../domain/geo';
 import { RouteStrategyFactory } from './route-strategy.factory';
 import { HubBudgetStrategy } from './strategies/hub-budget.strategy';
 import { optimizeOrder, OptimizeResult } from '../domain/optimize';
+import { normalizeWeekday } from '../../places/domain/opening-hours';
 import {
   GenerateRouteDto,
   OptimizeRouteDto,
@@ -47,17 +48,6 @@ export interface OptimizeRouteResult {
  * timezone of the device planning it, which is the same rule the client's
  * open-now badge follows.
  */
-function normalizeWeekday(weekday: number | undefined): number {
-  if (Number.isInteger(weekday) && weekday! >= 0 && weekday! <= 6) {
-    return weekday!;
-  }
-  const name = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/Istanbul',
-    weekday: 'short',
-  }).format(new Date());
-  // Monday-first, matching parseSchedule.
-  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(name);
-}
 
 /**
  * Stand-in score for a place with `rating: null` (nobody has rated it yet).
