@@ -1012,8 +1012,17 @@ export default function Dashboard() {
   // only in the genuine no-route states (error, or offline with no cached plan).
   const showResultsFirst = !!day.itinerary || day.loading;
 
+  // On a phone the page scrolls as one column, so min-h-screen is right.
+  // From xl the layout is a fixed three-column workspace whose columns scroll
+  // inside themselves, and that only works if the shell is exactly one
+  // viewport tall: the grid below is a flex child with flex-1, and flex-1
+  // sets flex-basis:0 — which takes over main-axis sizing from any height it
+  // is given. With an auto-height parent the free space is measured against
+  // the content, so the grid grew to fit it and the map with it. Measured at
+  // 1600x900 before this: the grid was 2426px tall and the map 2394px, nearly
+  // three screens, with its declared calc(100vh-155px) never applying.
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col xl:h-screen xl:min-h-0 xl:overflow-hidden">
       <AppHeader />
 
       {isOffline && (
@@ -1103,7 +1112,7 @@ export default function Dashboard() {
       </div>
 
       <div
-        className={`grid flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2 xl:h-[calc(100vh-155px)] ${
+        className={`grid min-h-0 flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-2 ${
           showResultsFirst
             ? 'xl:grid-cols-[minmax(340px,420px)_1fr_320px]' // Today's Path | Map | controls
             : 'xl:grid-cols-[330px_minmax(340px,400px)_1fr]' // controls | Today's Path | Map
@@ -1111,7 +1120,7 @@ export default function Dashboard() {
       >
         {/* Controls / discovery tools. When a route exists they become the
             secondary rail (last); with no route they lead (natural DOM order). */}
-        <div className={`space-y-4 overflow-y-auto pe-1 ${showResultsFirst ? 'order-3' : ''}`}>
+        <div className={`min-h-0 space-y-4 overflow-y-auto pe-1 ${showResultsFirst ? 'order-3' : ''}`}>
           <RouteGenerator
             config={day.config}
             onChange={updateConfig}
@@ -1147,7 +1156,7 @@ export default function Dashboard() {
         </div>
 
         {/* Today's Path — leads (first) whenever a route exists or is loading. */}
-        <div className={`overflow-y-auto pe-1 ${showResultsFirst ? 'order-1' : ''}`}>
+        <div className={`min-h-0 overflow-y-auto pe-1 ${showResultsFirst ? 'order-1' : ''}`}>
           {undoVisible && day.undoStack.length > 0 && (
             <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-iznik/40 bg-iznik/10 px-3 py-2 text-sm">
               <span className="text-ink/90">✏️ {t('dash.routeUpdated')}</span>
@@ -1261,7 +1270,7 @@ export default function Dashboard() {
         </div>
 
         {/* Map — sits right after the plan in results-first mode. */}
-        <div className={`relative h-[60vh] xl:h-full ${showResultsFirst ? 'order-2' : ''}`}>
+        <div className={`relative min-h-0 h-[60vh] xl:h-full ${showResultsFirst ? 'order-2' : ''}`}>
           <MapView
             itinerary={day.itinerary}
             selectedPlaceId={selectedPlaceId}

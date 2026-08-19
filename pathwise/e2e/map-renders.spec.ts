@@ -130,3 +130,60 @@ test('the backend publishes a CSP that permits the map, photos and routing', asy
   // `net::ERR_FAILED` that mentions neither CSP nor the missing directive.
   expect(directive('connect-src')).toContain('basemaps.cartocdn.com');
 });
+
+/**
+ * The workspace must fit the window it is given.
+ *
+ * It did not. At 1600×900 the layout grid measured 2426px and the map 2394px —
+ * nearly three screens of map, with the page scrolling past it. The declared
+ * `xl:h-[calc(100vh-155px)]` never applied: the grid is a flex child with
+ * `flex-1`, and `flex-1` sets `flex-basis: 0`, which takes over main-axis
+ * sizing from any height the element is also given. With a `min-h-screen`
+ * (auto-height) parent, the free space that basis is measured against comes
+ * from the content, so the grid grew to fit its tallest column.
+ *
+ * Two things were needed, and each was measured to be load-bearing on its own:
+ * a shell that is exactly one viewport tall from `xl` up, so there is a real
+ * height to distribute, and `min-h-0` on the grid and its items, so they may
+ * shrink below their content instead of pushing the row open again. With
+ * either one missing the grid measures 2426px.
+ */
+test('the desktop workspace fits the viewport, and its columns scroll inside it', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await signUp(page);
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible({
+    timeout: 25_000,
+  });
+
+  const geometry = await page.evaluate(() => {
+    const grid = document.querySelector('div.grid.flex-1') as HTMLElement | null;
+    if (!grid) return null;
+    const columns = Array.from(grid.children).map((el) => ({
+      height: Math.round((el as HTMLElement).getBoundingClientRect().height),
+      scrollHeight: (el as HTMLElement).scrollHeight,
+    }));
+    return {
+      viewport: window.innerHeight,
+      grid: Math.round(grid.getBoundingClientRect().height),
+      columns,
+    };
+  });
+
+  expect(geometry).not.toBeNull();
+  // The whole workspace inside one screen, not three.
+  expect(geometry!.grid).toBeLessThanOrEqual(geometry!.viewport);
+
+  // Every column the same height as the row — including the map, which is what
+  // reads as broken when the row runs away.
+  for (const column of geometry!.columns) {
+    expect(column.height).toBeLessThanOrEqual(geometry!.viewport);
+  }
+
+  // And the tall column really scrolls rather than stretching the page: its
+  // content is taller than the box it is shown in.
+  expect(Math.max(...geometry!.columns.map((c) => c.scrollHeight))).toBeGreaterThan(
+    geometry!.grid,
+  );
+});
