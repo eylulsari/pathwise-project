@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -24,7 +24,31 @@ export interface Narration {
   lang: NarrationLang;
   /** Where the facts came from — shown as attribution, never hidden. */
   sourceTitle: string;
+  /**
+   * Whether this came out of the cache or was just generated.
+   *
+   * Reported because a cache that has silently stopped working looks exactly
+   * like a cache that is merely cold: the feature keeps answering, and the
+   * only difference is a paid API call on every open that nobody notices.
+   * This makes the difference observable from outside the process.
+   */
+  fromCache: boolean;
 }
+
+/**
+ * A cache lookup has three outcomes, not two.
+ *
+ * `miss` means "not stored yet" and is normal. `unavailable` means the cache
+ * itself could not be consulted — a missing table, a dead connection — and is
+ * a fault. Collapsing the second into the first is what let this feature run
+ * in production for a full deploy with no cache at all: the reads threw, the
+ * error was logged at warn and discarded, and every request paid for a fresh
+ * narration while the endpoint kept returning 200.
+ */
+type CacheRead =
+  | { status: 'hit'; script: string }
+  | { status: 'miss' }
+  | { status: 'unavailable' };
 
 export const narrationLang = (raw: string | undefined): NarrationLang => {
   const primary = (raw ?? '').toLowerCase().split('-')[0];
@@ -59,7 +83,7 @@ export const narrationLang = (raw: string | undefined): NarrationLang => {
  * category, which is the tempting version and the dishonest one.
  */
 @Injectable()
-export class NarrationService {
+export class NarrationService implements OnModuleInit {
   private readonly logger = new Logger(NarrationService.name);
 
   constructor(
@@ -78,7 +102,9 @@ export class NarrationService {
     if (!wiki?.summary) return null;
 
     const cached = await this.readCache(placeId, lang, wiki.title);
-    if (cached) return { script: cached, lang, sourceTitle: wiki.title };
+    if (cached.status === 'hit') {
+      return { script: cached.script, lang, sourceTitle: wiki.title, fromCache: true };
+    }
 
     const apiKey = this.config.get<string>('GROQ_API_KEY');
     const model = this.config.get<string>('GROQ_MODEL');
@@ -89,27 +115,7 @@ export class NarrationService {
       return null;
     }
 
-    let script: string;
-    try {
-      const result = await this.groq.generate({
-        apiKey,
-        model,
-        systemInstruction: this.prompt(lang),
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: `Title: ${wiki.title}\n\nExtract:\n${wiki.summary}` }],
-          },
-        ],
-      });
-      script = result.text.trim();
-    } catch (err) {
-      // A narration is a nice-to-have on a detail panel; a failed generation
-      // must degrade to "no player", never to a broken page.
-      this.logger.warn(`Narration generation failed for ${placeId}: ${String(err)}`);
-      return null;
-    }
-
+    const script = await this.generate(placeId, lang, wiki.title, wiki.summary);
     if (!script) return null;
 
     /**
@@ -135,7 +141,74 @@ export class NarrationService {
     }
 
     await this.writeCache(placeId, lang, script, wiki.title);
-    return { script, lang, sourceTitle: wiki.title };
+    return { script, lang, sourceTitle: wiki.title, fromCache: false };
+  }
+
+  /**
+   * Ask the model for a script, and refuse to lose the answer quietly.
+   *
+   * The model behind this is a reasoning model, and its thinking tokens are
+   * charged against the same `max_tokens` budget as the answer. When the
+   * thinking runs long the budget is gone before any prose is produced, and
+   * the call returns HTTP 200 with `finish_reason: "length"` and an empty
+   * string. Measured against the real Ayasofya extract, that happened on
+   * roughly one call in three.
+   *
+   * The old code turned that into `return null`, with no log line at all —
+   * and `null` is the same answer this service gives for a place that has no
+   * Wikipedia article. So a place with a perfectly good article intermittently
+   * showed no audio guide, and nothing anywhere said why. That is the failure
+   * this whole round is about, so: it is logged with the reason the model
+   * gave, and retried once, because the condition is intermittent rather than
+   * permanent.
+   */
+  private async generate(
+    placeId: string,
+    lang: NarrationLang,
+    title: string,
+    summary: string,
+  ): Promise<string | null> {
+    const apiKey = this.config.get<string>('GROQ_API_KEY')!;
+    const model = this.config.get<string>('GROQ_MODEL')!;
+
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      let result: { text: string; finishReason?: string };
+      try {
+        result = await this.groq.generate({
+          apiKey,
+          model,
+          systemInstruction: this.prompt(lang),
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: `Title: ${title}\n\nExtract:\n${summary}` }],
+            },
+          ],
+        });
+      } catch (err) {
+        // A narration is a nice-to-have on a detail panel; a failed call must
+        // degrade to "no player", never to a broken page. Rate limits land
+        // here, and they are worth seeing.
+        this.logger.warn(
+          `Narration generation failed for ${placeId} (${lang}), attempt ${attempt}: ${String(err)}`,
+        );
+        return null;
+      }
+
+      const script = result.text.trim();
+      if (script) return script;
+
+      this.logger.warn(
+        `Narration for ${placeId} (${lang}) came back EMPTY on attempt ${attempt} ` +
+          `(finish_reason=${result.finishReason ?? 'unknown'}). This is not a place ` +
+          `without an article — the model produced no text.`,
+      );
+    }
+
+    this.logger.warn(
+      `Narration for ${placeId} (${lang}) gave up after 2 empty generations — no player shown.`,
+    );
+    return null;
   }
 
   /**
@@ -158,34 +231,93 @@ export class NarrationService {
     ].join(' ');
   }
 
+  /**
+   * Say once, at boot, whether the cache is usable at all.
+   *
+   * This is the check whose absence cost a deploy. `narration_cache` had no
+   * migration, so production ran with no table; every request threw inside
+   * readCache, the throw was logged at warn and folded into "cache miss", and
+   * the feature went on answering 200 while paying for a fresh narration each
+   * time. Nothing in the logs said the word "missing", and nothing failed.
+   *
+   * A single ERROR line at startup turns that into something a person can see
+   * without going looking. It deliberately does not throw: a broken cache is a
+   * slower feature, not a reason to refuse to serve the whole app.
+   */
+  async onModuleInit(): Promise<void> {
+    try {
+      await this.cache.count();
+    } catch (err) {
+      this.cacheUsable = false;
+      this.logger.error(
+        `narration_cache is not queryable — every narration will be regenerated and billed. ` +
+          `Has the migration run? Cause: ${String(err)}`,
+      );
+    }
+  }
+
+  /**
+   * Hit, miss, or "could not ask" — three outcomes, never two.
+   *
+   * The `unavailable` branch logs at ERROR, not warn, because it is a fault in
+   * infrastructure rather than an ordinary cold read, and it is the exact case
+   * that hid for a whole deploy behind a warn-level line.
+   */
   private async readCache(
     placeId: string,
     lang: string,
     sourceTitle: string,
-  ): Promise<string | null> {
+  ): Promise<CacheRead> {
     try {
       const row = await this.cache.findOne({ where: { placeId, lang } });
+      if (!row) return { status: 'miss' };
       // A script written from a different article version is stale — the
       // article is the whole basis for it.
-      if (row && row.sourceTitle === sourceTitle) return row.script;
+      if (row.sourceTitle !== sourceTitle) return { status: 'miss' };
+      return { status: 'hit', script: row.script };
     } catch (err) {
-      this.logger.warn(`Narration cache read failed for ${placeId}: ${String(err)}`);
+      this.cacheUsable = false;
+      this.logger.error(
+        `Narration cache READ FAILED for ${placeId} (${lang}) — this is not a cache ` +
+          `miss, the cache could not be consulted: ${String(err)}`,
+      );
+      return { status: 'unavailable' };
     }
-    return null;
   }
 
+  /**
+   * Returns whether the script was actually stored.
+   *
+   * A failed write is still not fatal — the narration just generated is
+   * returned either way — but it is reported rather than absorbed, so a cache
+   * that has stopped accepting writes cannot masquerade as one that is simply
+   * always cold.
+   */
   private async writeCache(
     placeId: string,
     lang: string,
     script: string,
     sourceTitle: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       await this.cache.save({ placeId, lang, script, sourceTitle });
+      this.cacheUsable = true;
+      return true;
     } catch (err) {
-      // Swallowed: a cache that cannot be written is a slower feature, not a
-      // broken one. The narration just generated is still returned.
-      this.logger.warn(`Narration cache write failed for ${placeId}: ${String(err)}`);
+      this.cacheUsable = false;
+      this.logger.error(
+        `Narration cache WRITE FAILED for ${placeId} (${lang}) — the next request ` +
+          `for this place will be billed again: ${String(err)}`,
+      );
+      return false;
     }
+  }
+
+  /** Whether the cache has worked since the last time it was touched. */
+  private cacheUsable = true;
+
+  /** Read by the health endpoint, so the degradation is visible from outside. */
+  isCacheUsable(): boolean {
+    return this.cacheUsable;
   }
 }

@@ -433,6 +433,7 @@ export const tr = {
       'Güncel kur değil, çevrimdışı yedek kur kullanıldı — hesaplaşmadan önce kontrol et.',
     failed: 'Harcama kaydedilemedi.',
     buddiesEmpty: 'Harcamayı paylaşmak için önce bir arkadaşla bağlan.',
+    loadFailed: 'Harcamalar şu an yüklenemiyor. Bu boş bir defter değil — birazdan tekrar dene.',
     cat: {
       food: 'Yemek',
       tickets: 'Bilet',

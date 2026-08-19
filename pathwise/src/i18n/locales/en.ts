@@ -477,6 +477,7 @@ export const en = {
       'Converted at an offline fallback rate, not today’s — check it before you settle.',
     failed: 'Could not save that expense.',
     buddiesEmpty: 'Connect with a buddy to split an expense.',
+    loadFailed: 'Expenses cannot be loaded right now. This is not an empty ledger — try again in a moment.',
     cat: {
       food: 'Food',
       tickets: 'Tickets',

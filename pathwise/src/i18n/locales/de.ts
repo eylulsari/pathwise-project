@@ -436,6 +436,7 @@ export const de = {
       'Umgerechnet mit einem Offline-Ersatzkurs, nicht dem heutigen — prüfe ihn vor dem Ausgleich.',
     failed: 'Die Ausgabe konnte nicht gespeichert werden.',
     buddiesEmpty: 'Verbinde dich mit einem Buddy, um eine Ausgabe zu teilen.',
+    loadFailed: 'Die Ausgaben lassen sich gerade nicht laden. Das ist kein leeres Buch — versuch es gleich noch einmal.',
     cat: {
       food: 'Essen',
       tickets: 'Tickets',

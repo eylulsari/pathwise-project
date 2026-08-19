@@ -2,7 +2,9 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -79,6 +81,8 @@ const toTry = (kurus: number): number => Math.round(kurus) / 100;
  */
 @Injectable()
 export class ExpensesService {
+  private readonly logger = new Logger(ExpensesService.name);
+
   constructor(
     @InjectRepository(ExpenseOrmEntity)
     private readonly repo: Repository<ExpenseOrmEntity>,
@@ -131,10 +135,30 @@ export class ExpensesService {
   }
 
   async ledger(userId: string): Promise<ExpenseLedger> {
-    const rows = await this.repo.find({
-      where: { userId },
-      order: { createdAt: 'DESC' },
-    });
+    let rows: ExpenseOrmEntity[];
+    try {
+      rows = await this.repo.find({
+        where: { userId },
+        order: { createdAt: 'DESC' },
+      });
+    } catch (err) {
+      /**
+       * A ledger that cannot be read must say so.
+       *
+       * This used to be an unguarded call, so a database fault surfaced as a
+       * bare 500 with no indication of what had failed — which is how the
+       * missing `trip_expenses` table would have reached a traveller: the
+       * Expenses panel simply erroring, with the cause visible nowhere.
+       *
+       * 503 rather than 500 because the request is fine and the dependency is
+       * not, and the cause is logged at ERROR rather than folded into an empty
+       * result. An empty ledger and an unreadable one look identical on screen
+       * — "₺2000 left, nobody owes anybody" — and that is the one thing this
+       * must never quietly claim.
+       */
+      this.logger.error(`Expense ledger read failed for ${userId}: ${String(err)}`);
+      throw new ServiceUnavailableException('Expenses cannot be loaded right now');
+    }
 
     const spentByDayKurus: Record<number, number> = {};
     const byCategoryKurus: Record<string, number> = {};

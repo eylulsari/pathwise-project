@@ -333,6 +333,21 @@ export function ExpenseTracker({
           )}
         </section>
 
+        {/* A ledger that failed to load must not be drawn as an empty one.
+            "₺2000 left" and "Nobody owes anybody" are both true statements
+            about a trip with no expenses and both false about a trip whose
+            expenses could not be fetched — and on screen they are identical.
+            So when the read fails, the whole readout is replaced by the
+            failure rather than rendered from zeros. */}
+        {status === 'error' ? (
+          <p
+            data-testid="expense-load-error"
+            className="mt-4 rounded-xl bg-terracotta/10 px-3 py-3 text-sm font-semibold text-terracotta"
+          >
+            {t('expenses.loadFailed')}
+          </p>
+        ) : (
+          <>
         {/* ── Against the plan ───────────────────────────────────── */}
         <section
           className="mt-4 rounded-xl bg-iznik/10 p-3"
@@ -454,6 +469,8 @@ export function ExpenseTracker({
             </ul>
           </ListState>
         </section>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ExpensesService } from './expenses.service';
 import type { Repository } from 'typeorm';
 import type { CurrencyService } from '../../currency/application/currency.service';
@@ -175,5 +175,55 @@ describe('ExpensesService — whose books', () => {
     });
     await service.remove(ME, 'e9');
     expect(deleted).toEqual(['e9']);
+  });
+});
+
+describe('ExpensesService — a ledger that cannot be read', () => {
+  function broken() {
+    const repo = {
+      find: () => Promise.reject(new Error('relation "trip_expenses" does not exist')),
+    } as unknown as Repository<ExpenseOrmEntity>;
+    return new ExpensesService(
+      repo,
+      {} as unknown as CurrencyService,
+      {} as unknown as MessagingService,
+      {} as unknown as UsersService,
+    );
+  }
+
+  it('refuses to answer, rather than reporting an empty trip', async () => {
+    // The failure mode this replaces: the read threw, and everything above it
+    // rendered from zeros — "₺2000 left", "nobody owes anybody" — which is a
+    // true description of a trip with no expenses and a lie about one whose
+    // expenses could not be fetched.
+    const service = broken();
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+
+    await expect(service.ledger('me')).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
+    jest.restoreAllMocks();
+  });
+
+  it('says something a traveller can read, not a bare 500', async () => {
+    const service = broken();
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+
+    await expect(service.ledger('me')).rejects.toThrow(/cannot be loaded right now/i);
+    jest.restoreAllMocks();
+  });
+
+  it('logs the real cause at error level for whoever has to fix it', async () => {
+    const service = broken();
+    const errors: string[] = [];
+    jest
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation((msg: unknown) => void errors.push(String(msg)));
+
+    await service.ledger('me').catch(() => {});
+
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toMatch(/trip_expenses/);
+    jest.restoreAllMocks();
   });
 });

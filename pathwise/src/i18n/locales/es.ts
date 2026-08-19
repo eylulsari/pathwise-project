@@ -436,6 +436,7 @@ export const es = {
       'Convertido con un tipo de reserva sin conexión, no el de hoy — compruébalo antes de ajustar cuentas.',
     failed: 'No se pudo guardar el gasto.',
     buddiesEmpty: 'Conecta con un compañero para dividir un gasto.',
+    loadFailed: 'Los gastos no se pueden cargar ahora mismo. Esto no es una cuenta vacía — inténtalo en un momento.',
     cat: {
       food: 'Comida',
       tickets: 'Entradas',

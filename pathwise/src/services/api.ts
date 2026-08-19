@@ -395,9 +395,9 @@ export const api = {
   async getNarration(
     placeId: string,
     lang: string,
-  ): Promise<{ script: string; lang: string; sourceTitle: string } | null> {
+  ): Promise<{ script: string; lang: string; sourceTitle: string; fromCache: boolean } | null> {
     const r = await http<{
-      narration: { script: string; lang: string; sourceTitle: string } | null;
+      narration: { script: string; lang: string; sourceTitle: string; fromCache: boolean } | null;
     }>(`/places/${placeId}/narration?lang=${encodeURIComponent(lang)}`);
     return r.narration;
   },

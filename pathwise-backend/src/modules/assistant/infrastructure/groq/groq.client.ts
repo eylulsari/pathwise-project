@@ -33,10 +33,23 @@ export interface GroqFunctionCall {
 export interface GroqResult {
   text: string;
   functionCall?: GroqFunctionCall;
+  /**
+   * Why the model stopped.
+   *
+   * Reported because `'length'` with empty text is a real outcome for a
+   * reasoning model: the thinking tokens count against `max_tokens`, and they
+   * can consume the whole budget before a single word of the answer is
+   * emitted. A caller that sees only an empty string cannot tell that apart
+   * from a model that had nothing to say — measured at roughly one call in
+   * three for narration, which is how the audio guide came to vanish for a
+   * place that has a perfectly good article.
+   */
+  finishReason?: string;
 }
 
 interface GroqResponse {
   choices?: {
+    finish_reason?: string;
     message?: {
       content?: string | null;
       tool_calls?: {
@@ -96,7 +109,8 @@ export class GroqClient {
     }
 
     const body = (await res.json()) as GroqResponse;
-    const message = body.choices?.[0]?.message;
+    const choice = body.choices?.[0];
+    const message = choice?.message;
 
     const text = (message?.content ?? '').trim();
 
@@ -106,7 +120,7 @@ export class GroqClient {
       functionCall = { name: call.name, args: parseArgs(call.arguments, this.logger) };
     }
 
-    return { text, functionCall };
+    return { text, functionCall, finishReason: choice?.finish_reason };
   }
 }
 
