@@ -153,15 +153,13 @@ test('a trip can be stretched to seven days, each on its own neighborhood', asyn
   await expect(page.getByRole('button', { name: /^Day 2$/ })).toBeVisible();
 });
 
-test('split bill adds an item and computes the per-person share', async ({ page }) => {
-  await signup(page, 'split');
-  await page.getByRole('button', { name: /Split Bill/i }).click();
-  await page.getByPlaceholder('Item').fill('Dinner');
-  await page.getByPlaceholder('₺').fill('600');
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
-  await expect(page.getByText(/Each person pays/i)).toBeVisible();
-  await expect(page.getByText('Dinner')).toBeVisible();
-});
+// (The Split Bill test lived here. It drove a modal that kept its items in
+// component state, opened pre-loaded with an invented ₺420 lunch, and divided
+// by a headcount with no notion of who paid — so the one number it asserted
+// was an equal share of a bill nobody had entered. That modal is now a
+// persisted ledger; see expenses.spec.ts, which covers recording, reload
+// persistence, the budget comparison, the settlement, and the rule that no
+// endpoint here moves money.)
 
 test('PDF export opens a print-ready window with the itinerary', async ({ page }) => {
   await signup(page, 'pdf');

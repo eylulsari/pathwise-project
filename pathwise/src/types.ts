@@ -827,3 +827,70 @@ export interface AiSuggestion {
   costTry: number;
   safety: 'safe' | 'caution';
 }
+
+
+// ── Trip expenses ──────────────────────────────────────────────────
+//
+// ⚠️ A record, not a payment rail. Pathwise computes who owes whom and stops
+// there: it holds no funds, moves no money and stores no payment credential.
+// Same call as the tours page, which links out rather than selling a ticket.
+
+export type ExpenseCategory =
+  | 'food'
+  | 'tickets'
+  | 'transport'
+  | 'shopping'
+  | 'other';
+
+export type ExpenseCurrency = 'TRY' | 'USD' | 'EUR' | 'GBP';
+
+export interface Expense {
+  id: string;
+  dayIndex: number;
+  category: ExpenseCategory;
+  placeId: string | null;
+  placeName: string | null;
+  note: string | null;
+  amountTry: number;
+  /** What was typed, in the currency it was typed in. */
+  enteredAmount: number;
+  enteredCurrency: ExpenseCurrency;
+  /** Lira per unit of `enteredCurrency` at the time. Null when already lira. */
+  rateToTry: number | null;
+  /** 'live' | 'cache' | 'fallback' | 'none' — the UI labels a non-live rate. */
+  rateSource: string;
+  paidByUserId: string;
+  /** Empty means personal: counted in the budget, owed by nobody. */
+  participantIds: string[];
+  createdAt: string;
+}
+
+/** One line of "who owes whom" — to be settled between the people, not here. */
+export interface Debt {
+  fromId: string;
+  toId: string;
+  amountTry: number;
+}
+
+export interface ExpenseLedger {
+  expenses: Expense[];
+  spentByDayTry: Record<number, number>;
+  totalTry: number;
+  byCategoryTry: Record<string, number>;
+  debts: Debt[];
+  names: Record<string, string>;
+  /** Always true. The server states it so this screen cannot omit it. */
+  settlementIsRecordOnly: true;
+}
+
+export interface CreateExpenseRequest {
+  dayIndex: number;
+  category: ExpenseCategory;
+  amount: number;
+  currency: ExpenseCurrency;
+  placeId?: string;
+  placeName?: string;
+  note?: string;
+  paidByUserId?: string;
+  participantIds?: string[];
+}

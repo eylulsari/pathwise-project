@@ -28,6 +28,7 @@ import { SafetyModule } from './modules/safety/safety.module';
 import { SocialModule } from './modules/social/social.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
 import { CurrencyModule } from './modules/currency/currency.module';
+import { ExpensesModule } from './modules/expenses/expenses.module';
 import { WeatherModule } from './modules/weather/weather.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
 
@@ -113,6 +114,7 @@ function serveClientIfBuilt(): DynamicModule[] {
     CurrencyModule,
     WeatherModule,
     AssistantModule,
+    ExpensesModule,
   ],
   controllers: [HealthController],
   providers: [

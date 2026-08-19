@@ -9,5 +9,8 @@ import { CurrencyController } from './infrastructure/http/currency.controller';
 @Module({
   controllers: [CurrencyController],
   providers: [CurrencyService],
+  // Exported so the expense ledger can price a foreign-currency entry with
+  // the same rates the display converter uses.
+  exports: [CurrencyService],
 })
 export class CurrencyModule {}

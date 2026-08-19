@@ -802,6 +802,27 @@ export const api = {
       }),
     });
   },
+
+  // ═════════════════════════════════════════════════════════════════
+  // TRIP EXPENSES — a ledger, not a payment rail.
+  //
+  // There is no endpoint here that pays anybody, and there is not going to
+  // be one: the server computes who owes whom and the group settles it
+  // however they already do. Naming a buddy records your account of the
+  // trip; the server refuses any name you are not connected to, and writes
+  // nothing into that buddy's own ledger.
+  // ═════════════════════════════════════════════════════════════════
+  async getExpenses(): Promise<import('../types').ExpenseLedger> {
+    return http('/expenses');
+  },
+  async addExpense(
+    body: import('../types').CreateExpenseRequest,
+  ): Promise<import('../types').Expense> {
+    return http('/expenses', { method: 'POST', body: JSON.stringify(body) });
+  },
+  async deleteExpense(id: string): Promise<void> {
+    await http(`/expenses/${id}`, { method: 'DELETE' });
+  },
 };
 
 /** One turn of chat history in the backend's canonical shape. */

@@ -42,7 +42,7 @@ import { MustVisitList } from '../components/controls/MustVisitList';
 import { ReservationModal } from '../components/controls/ReservationModal';
 import { JournalModal } from '../components/JournalModal';
 import { AiAssistant } from '../components/ai/AiAssistant';
-import { SplitBill } from '../components/SplitBill';
+import { ExpenseTracker } from '../components/ExpenseTracker';
 import { ExportRoute } from '../components/ExportRoute';
 import { OfflineToggle } from '../components/OfflineToggle';
 import { OfflineDownload } from '../components/OfflineDownload';
@@ -186,7 +186,7 @@ export default function Dashboard() {
       { replace: true },
     );
   const [showMustVisit, setShowMustVisit] = useState(false);
-  const [showSplitBill, setShowSplitBill] = useState(false);
+  const [showExpenses, setShowExpenses] = useState(false);
   const [simulatedOffline, setSimulatedOffline] = useState(false);
   const online = useOnlineStatus();
   const isOffline = !online || simulatedOffline;
@@ -1083,10 +1083,10 @@ export default function Dashboard() {
             {saveState === 'saved' ? `✓ ${t('dash.saved')}` : saveState === 'saving' ? t('dash.saving') : `💾 ${t('dash.savePlan')}`}
           </button>
           <button
-            onClick={() => setShowSplitBill(true)}
+            onClick={() => setShowExpenses(true)}
             className="rounded-lg border border-ink/10 px-3 py-1.5 text-sm font-semibold text-ink/80 hover:text-ink"
           >
-            💰 {t('dash.splitBill')}
+            💰 {t('dash.expenses')}
           </button>
           {day.itinerary && <ExportRoute itinerary={day.itinerary} />}
           <OfflineDownload days={days.map((d, i) => ({ label: `${t('dash.day')} ${i + 1}`, itinerary: d.itinerary }))} />
@@ -1283,7 +1283,15 @@ export default function Dashboard() {
           onClose={closeMustVisit}
         />
       )}
-      {showSplitBill && <SplitBill onClose={() => setShowSplitBill(false)} />}
+      {showExpenses && (
+        <ExpenseTracker
+          onClose={() => setShowExpenses(false)}
+          dayCount={days.length}
+          activeDay={activeDay}
+          budgetsTry={days.map((d) => d.config.budgetTry)}
+          stops={day.itinerary?.stops ?? []}
+        />
+      )}
       {reservingPlace && (
         <ReservationModal
           place={reservingPlace}
