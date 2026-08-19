@@ -493,13 +493,14 @@ export const en = {
   museumPass: {
     title: 'Istanbul Museum Pass',
     coveredCount: '{count} stops today are covered by the pass.',
-    estimatedLabel: 'estimated cost of these tickets bought separately',
+    estimatedLabel:
+      'estimated difference — what these entries would cost bought separately',
     notNetNote:
-      'This is what the covered entries would cost on their own — not your saving. The pass has its own price, which changes, so we do not quote it here: check the current price and subtract.',
+      'The pass has its own price, and it changes, so we do not quote it here. Check the current price and subtract it yourself to see where you land.',
     checkPrice: 'Check the current pass price',
     uncoveredNote: '{count} other paid stops today are not covered by the pass.',
     approxWarning:
-      'These ticket prices are our estimates, not verified prices. Treat the total as a rough guide.',
+      'These ticket prices are our estimates, not verified prices, and what the pass covers changes. Check the current prices and the current coverage before relying on this.',
   },
   list: {
     loading: 'Loading…',

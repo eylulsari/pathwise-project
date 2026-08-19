@@ -45,8 +45,10 @@ test('the card lists the covered stops and marks the total as an estimate', asyn
   // The tilde and the word both. A "~" on its own is easy to skim past, and
   // this number is assembled entirely from unverified fees.
   await expect(page.getByTestId('museum-pass-total')).toContainText('~');
-  await expect(card).toContainText(/estimated cost of these tickets/i);
+  await expect(card).toContainText(/estimated difference/i);
   await expect(card).toContainText(/our estimates, not verified prices/i);
+  // Coverage changes too, not just the prices — the reader is told to check both.
+  await expect(card).toContainText(/current coverage/i);
 });
 
 test('it never claims a net saving, and never quotes the pass price', async ({ page }) => {
@@ -55,8 +57,10 @@ test('it never claims a net saving, and never quotes the pass price', async ({ p
 
   const card = page.getByTestId('museum-pass-card');
 
-  // Says out loud which half of the sum it is.
-  await expect(card).toContainText(/not your saving/i);
+  // The word 'saving' is gone from this card entirely: the figure is a
+  // difference the reader still has to finish computing, and calling it a
+  // saving would hand them a conclusion we cannot stand behind.
+  await expect(card).not.toContainText(/saving/i);
   await expect(card).toContainText(/check the current price and subtract/i);
 
   // And sends the reader to the source for the half we do not have, rather
