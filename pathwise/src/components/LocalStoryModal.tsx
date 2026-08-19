@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { ReviewsSection } from './ReviewsSection';
 import { PlaceEnrichmentPanel } from './PlaceEnrichmentPanel';
+import { NarrationPlayer } from './NarrationPlayer';
 import { OpeningHours } from './OpeningHours';
 import { PlaceFacts } from './PlaceFacts';
 import { MosqueEtiquette } from './MosqueEtiquette';
@@ -155,6 +156,10 @@ export function LocalStoryModal({
         )}
 
         {/* Live enrichment — OSM tags + Wikipedia (silently hidden if absent) */}
+        {/* Sits beside the Wikipedia panel because it is written from the
+            same article — and renders nothing when there isn't one. */}
+        <NarrationPlayer placeId={place.placeId} />
+
         <PlaceEnrichmentPanel place={place} />
 
         {/* Community reviews — available to everyone (Phase 3) */}

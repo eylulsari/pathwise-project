@@ -399,6 +399,13 @@ export const de = {
     pinnedKept: '{count} reservierter Stopp blieb an seinem Platz',
     failed: 'Dieser Tag konnte nicht optimiert werden. Prüfe deine Verbindung und versuch es erneut.',
   },
+  narration: {
+    play: 'Anhören',
+    stop: 'Stopp',
+    length: 'etwa eine Minute',
+    source: 'Erzählt nach dem Wikipedia-Artikel „{source}“.',
+    failed: 'Der Audioguide konnte nicht geladen werden.',
+  },
   museumPass: {
     title: 'Istanbul Museum Pass',
     coveredCount: '{count} Stopps von heute sind im Pass enthalten.',

@@ -384,6 +384,24 @@ export const api = {
    * against — and the answer is Istanbul's, not the device's, for the same
    * reason the open-now badge reads Istanbul time.
    */
+  /**
+   * A spoken-guide script for a place, in the given language.
+   *
+   * `null` is a normal answer — the place has no Wikipedia article, or
+   * narration is not configured — so it is returned rather than thrown. A
+   * network failure still throws, because that is a different thing and the
+   * player says so.
+   */
+  async getNarration(
+    placeId: string,
+    lang: string,
+  ): Promise<{ script: string; lang: string; sourceTitle: string } | null> {
+    const r = await http<{
+      narration: { script: string; lang: string; sourceTitle: string } | null;
+    }>(`/places/${placeId}/narration?lang=${encodeURIComponent(lang)}`);
+    return r.narration;
+  },
+
   async optimizeRoute(req: OptimizeRouteRequest): Promise<OptimizeRouteResult> {
     return http<OptimizeRouteResult>('/itinerary/optimize', {
       method: 'POST',

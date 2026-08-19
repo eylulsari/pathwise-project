@@ -440,6 +440,13 @@ export const en = {
    * estimates and the pass price is not ours to quote, so the card reports a
    * gross figure and says so in words rather than implying a net saving.
    */
+  narration: {
+    play: 'Listen',
+    stop: 'Stop',
+    length: 'about a minute',
+    source: 'Narrated from the Wikipedia article “{source}”.',
+    failed: 'Could not load the audio guide.',
+  },
   museumPass: {
     title: 'Istanbul Museum Pass',
     coveredCount: '{count} stops today are covered by the pass.',

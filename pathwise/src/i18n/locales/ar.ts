@@ -406,6 +406,13 @@ export const ar = {
     pinnedKept: 'بقيت {count} محطة محجوزة في مكانها',
     failed: 'تعذّر تحسين هذا اليوم. تحقق من اتصالك وحاول مجددًا.',
   },
+  narration: {
+    play: 'استمع',
+    stop: 'إيقاف',
+    length: 'نحو دقيقة',
+    source: 'مروي عن مقالة ويكيبيديا «{source}».',
+    failed: 'تعذّر تحميل الدليل الصوتي.',
+  },
   museumPass: {
     title: 'Istanbul Museum Pass',
     coveredCount: 'تشمل البطاقة {count} من محطات اليوم.',

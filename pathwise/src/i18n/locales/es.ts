@@ -399,6 +399,13 @@ export const es = {
     pinnedKept: '{count} parada reservada se ha quedado donde estaba',
     failed: 'No se ha podido optimizar este día. Comprueba tu conexión e inténtalo otra vez.',
   },
+  narration: {
+    play: 'Escuchar',
+    stop: 'Parar',
+    length: 'alrededor de un minuto',
+    source: 'Narrado a partir del artículo de Wikipedia «{source}».',
+    failed: 'No se ha podido cargar la audioguía.',
+  },
   museumPass: {
     title: 'Istanbul Museum Pass',
     coveredCount: '{count} paradas de hoy están incluidas en el pase.',

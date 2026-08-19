@@ -401,6 +401,13 @@ export const ru = {
     pinnedKept: 'Остановок с бронью оставлено на месте: {count}',
     failed: 'Не удалось оптимизировать этот день. Проверьте соединение и попробуйте ещё раз.',
   },
+  narration: {
+    play: 'Слушать',
+    stop: 'Стоп',
+    length: 'около минуты',
+    source: 'Составлено по статье Википедии «{source}».',
+    failed: 'Не удалось загрузить аудиогид.',
+  },
   museumPass: {
     title: 'Istanbul Museum Pass',
     coveredCount: 'Сегодня в карту входит остановок: {count}.',

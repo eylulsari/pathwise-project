@@ -396,6 +396,13 @@ export const tr = {
     pinnedKept: 'Rezervasyonlu {count} durak yerinde bırakıldı',
     failed: 'Bu gün optimize edilemedi. Bağlantını kontrol edip tekrar dene.',
   },
+  narration: {
+    play: 'Dinle',
+    stop: 'Durdur',
+    length: 'yaklaşık bir dakika',
+    source: '“{source}” Wikipedia maddesinden anlatıldı.',
+    failed: 'Sesli rehber yüklenemedi.',
+  },
   museumPass: {
     title: 'İstanbul Müze Kart',
     coveredCount: 'Bugünkü {count} durak kartın kapsamında.',

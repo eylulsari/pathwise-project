@@ -8,9 +8,14 @@ import { OverpassClient } from './infrastructure/enrichment/overpass.client';
 import { WikipediaClient } from './infrastructure/enrichment/wikipedia.client';
 import { PLACE_REPOSITORY } from './domain/place.repository.port';
 import { WikipediaCacheOrmEntity } from './infrastructure/persistence/wikipedia-cache.orm-entity';
+import { NarrationCacheOrmEntity } from './infrastructure/persistence/narration-cache.orm-entity';
+import { NarrationService } from './application/narration.service';
+import { GroqClient } from '../assistant/infrastructure/groq/groq.client';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WikipediaCacheOrmEntity])],
+  imports: [
+    TypeOrmModule.forFeature([WikipediaCacheOrmEntity, NarrationCacheOrmEntity]),
+  ],
   controllers: [PlacesController],
   providers: [
     PlacesService,
@@ -19,6 +24,9 @@ import { WikipediaCacheOrmEntity } from './infrastructure/persistence/wikipedia-
     EnrichmentService,
     OverpassClient,
     WikipediaClient,
+    // Audio-guide scripts: Groq writes them, the browser speaks them.
+    NarrationService,
+    GroqClient,
   ],
   // Exported so the itinerary module can pull places for route generation.
   exports: [PlacesService],
