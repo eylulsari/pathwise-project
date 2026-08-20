@@ -191,6 +191,25 @@ const NOTICE_KEY: Record<ItineraryNotice['code'], string> = {
   'must-visit-closed': 'today.noticeMustVisitClosed',
 };
 
+/**
+ * The mark beside a notice should be about the notice.
+ *
+ * Every informational notice used to be a ferry — which is right for the four
+ * that are about crossing water and wrong for the two that are about a locked
+ * door. A museum that is shut on Mondays got 🚢, and an icon that contradicts
+ * its sentence is worse than no icon: the reader stops trusting the row before
+ * they finish reading it.
+ */
+const NOTICE_ICON: Record<ItineraryNotice['code'], string> = {
+  'adalar-separate-day': '⛴️',
+  'adalar-return-ferry': '⛴️',
+  'adalar-last-ferry': '⛴️',
+  'cross-side-day': '🌉',
+  'closed-that-day': '🔒',
+  'opens-too-late': '🕗',
+  'must-visit-closed': '⚠️',
+};
+
 function RouteNotices({ notices }: { notices?: ItineraryNotice[] }) {
   const { t } = useT();
   if (!notices || notices.length === 0) return null;
@@ -201,17 +220,24 @@ function RouteNotices({ notices }: { notices?: ItineraryNotice[] }) {
         <div
           key={notice.code}
           role={notice.severity === 'warning' ? 'alert' : undefined}
-          className={`rounded-xl border px-3 py-2 text-xs ${
+          className={`flex items-start gap-2 rounded-xl border px-3 py-2 text-xs leading-relaxed ${
             notice.severity === 'warning'
-              ? 'border-terracotta/40 bg-terracotta/10 text-terracotta'
-              : 'border-ink/10 bg-ink/5 text-ink/60'
+              ? 'border-terracotta/40 bg-terracotta/10 font-medium text-terracotta'
+              : 'border-ink/10 bg-surface-2 text-ink/70'
           }`}
         >
-          {notice.severity === 'warning' ? '⚠️ ' : '🚢 '}
-          {t(NOTICE_KEY[notice.code]).replace(
-            '{places}',
-            (notice.places ?? []).join(', '),
-          )}
+          {/* Decorative: the sentence beside it already says everything, and a
+              screen reader announcing "warning sign" before it would only be
+              in the way. The warning is carried by role="alert" instead. */}
+          <span aria-hidden="true" className="shrink-0 leading-none">
+            {NOTICE_ICON[notice.code]}
+          </span>
+          <span className="min-w-0">
+            {t(NOTICE_KEY[notice.code]).replace(
+              '{places}',
+              (notice.places ?? []).join(', '),
+            )}
+          </span>
         </div>
       ))}
     </div>

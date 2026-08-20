@@ -3,6 +3,26 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      screens: {
+        /**
+         * The dashboard's locked three-column workspace, gated on ROOM.
+         *
+         * `xl` alone asks the wrong question. It means "at least 1280px
+         * wide", and width is not what a full-height workspace needs — a
+         * 1366x768 laptop clears xl comfortably and then has roughly 640px of
+         * viewport left after the browser's own chrome, which is not enough
+         * for a header, the day tabs and three columns. The page was pinned
+         * to 100vh with overflow hidden, so the controls rail simply ended
+         * mid-air with no way to reach the rest of it.
+         *
+         * 860px of viewport height is the line. A 1080p monitor clears it
+         * (~950px of viewport) and keeps the workspace it was designed for;
+         * every laptop panel falls below it and gets an ordinary page that
+         * scrolls. Note this measures the VIEWPORT, not the screen, which is
+         * why a "900px" laptop lands on the scrolling side where it belongs.
+         */
+        workspace: { raw: '(min-width: 1280px) and (min-height: 860px)' },
+      },
       colors: {
         // ── Pathwise "Pastel Istanbul" palette ──
         // Warm ivory ground + three balanced Istanbul motif families:

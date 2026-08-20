@@ -189,3 +189,68 @@ test('the desktop workspace fits the viewport, and its columns scroll inside it'
     geometry!.grid,
   );
 });
+
+/**
+ * The same lock, on a laptop, where it was wrong.
+ *
+ * The workspace above was gated on `xl` — a width. Height is what it actually
+ * depends on, and a 1366x768 laptop clears xl with roughly 640px of viewport
+ * left after the browser's chrome. It got the locked layout anyway: the shell
+ * pinned to 100vh with `overflow: hidden`, the controls rail (Budget, Time
+ * Available, Group) taller than the strip it was given, and no way to scroll
+ * the page to the rest of it. The settings simply ended.
+ *
+ * So this asserts the opposite of the test above, at the size where the
+ * opposite is correct: the document scrolls, and everything in the rail can
+ * be reached by scrolling it.
+ */
+test('a laptop gets a page that scrolls, not a workspace that traps the controls', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await signUp(page);
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible({
+    timeout: 25_000,
+  });
+
+  const before = await page.evaluate(() => {
+    const doc = document.documentElement;
+    const grid = document.querySelector('div.grid.flex-1') as HTMLElement | null;
+    const rail = grid?.querySelector<HTMLElement>('[class*="order-3"]') ?? null;
+    return {
+      docScrollHeight: doc.scrollHeight,
+      docClientHeight: doc.clientHeight,
+      overflowY: getComputedStyle(doc).overflowY,
+      railBottom: rail ? Math.round(rail.getBoundingClientRect().bottom) : null,
+      railHeight: rail ? Math.round(rail.getBoundingClientRect().height) : null,
+    };
+  });
+
+  // Nothing is clipping the page shut.
+  expect(before.overflowY).not.toBe('hidden');
+
+  // The rail is drawn at its full height rather than cropped into a strip —
+  // this is what the 100vh lock was taking away.
+  expect(before.railHeight).not.toBeNull();
+  expect(before.railHeight!).toBeGreaterThan(before.docClientHeight * 0.5);
+
+  // And the document is genuinely longer than one screen, so there is
+  // something to scroll to.
+  expect(before.docScrollHeight).toBeGreaterThan(before.docClientHeight);
+
+  // Scrolling reaches the bottom of the controls: the last thing in the rail
+  // ends at or above the fold once the page is scrolled down.
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.waitForTimeout(400);
+  const reached = await page.evaluate(() => {
+    const grid = document.querySelector('div.grid.flex-1') as HTMLElement | null;
+    const rail = grid?.querySelector<HTMLElement>('[class*="order-3"]') ?? null;
+    if (!rail) return null;
+    return {
+      bottom: Math.round(rail.getBoundingClientRect().bottom),
+      viewport: window.innerHeight,
+    };
+  });
+  expect(reached).not.toBeNull();
+  expect(reached!.bottom).toBeLessThanOrEqual(reached!.viewport + 2);
+});
