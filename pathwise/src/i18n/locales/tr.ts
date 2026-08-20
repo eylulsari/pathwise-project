@@ -150,6 +150,38 @@ export const tr = {
     brand2: 'tek akıllı yol.',
     brandSub:
       'Bütçeye duyarlı rotalar oluşturmak, gezileri kaydetmek ve doğrulanmış gezginlerle tanışmak için giriş yap.',
+    rememberMe:
+      'Oturumum açık kalsın',
+    rememberHint:
+      'Yalnız bu cihazda. Çıkış yapmak oturumu her yerde bitirir.',
+    showPassword:
+      'Şifreyi göster',
+    hidePassword:
+      'Şifreyi gizle',
+    capsLock:
+      'Caps Lock açık.',
+    orDivider:
+      'veya',
+    continueGoogle:
+      'Google ile devam et',
+    continueApple:
+      'Apple ile devam et',
+    socialSoon:
+      'Henüz bağlı değil',
+    socialNote:
+      'Sosyal giriş henüz bir sağlayıcıya bağlanmadı, bu yüzden çalışmıyor. Şimdilik e-postanı kullan.',
+    card1:
+      'İki kıta, bir öğleden sonra — ve vapur saatlerini bilen bir plan.',
+    card1Place:
+      'Karaköy → Kadıköy',
+    card2:
+      'Dokuzda kuyruk, sekizde avlu. İşin çoğu zamanlama.',
+    card2Place:
+      'Topkapı Sarayı',
+    card3:
+      'Üç saat süren kahvaltı gecikme değildir. Programın kendisidir.',
+    card3Place:
+      'Beşiktaş',
   },
   success: {
     title: 'Aramıza katıldın',

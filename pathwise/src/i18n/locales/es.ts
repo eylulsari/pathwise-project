@@ -153,6 +153,38 @@ export const es = {
     brand2: 'un solo camino bien pensado.',
     brandSub:
       'Inicia sesión para generar rutas ajustadas a tu presupuesto, guardar viajes y conocer compañía de viaje verificada.',
+    rememberMe:
+      'Mantener la sesión iniciada',
+    rememberHint:
+      'Solo en este dispositivo. Cerrar sesión la termina en todas partes.',
+    showPassword:
+      'Mostrar contraseña',
+    hidePassword:
+      'Ocultar contraseña',
+    capsLock:
+      'Bloq Mayús está activado.',
+    orDivider:
+      'o',
+    continueGoogle:
+      'Continuar con Google',
+    continueApple:
+      'Continuar con Apple',
+    socialSoon:
+      'Aún sin conectar',
+    socialNote:
+      'El inicio de sesión social todavía no está conectado a ningún proveedor, así que no hace nada. Usa tu correo por ahora.',
+    card1:
+      'Dos continentes, una tarde — y un plan que se sabe los horarios del ferry.',
+    card1Place:
+      'Karaköy → Kadıköy',
+    card2:
+      'A las nueve la cola, a las ocho el patio. Casi todo es cuestión de hora.',
+    card2Place:
+      'Palacio de Topkapı',
+    card3:
+      'Un desayuno de tres horas no es un retraso. Es el itinerario.',
+    card3Place:
+      'Beşiktaş',
   },
   success: {
     title: 'Ya estás dentro',

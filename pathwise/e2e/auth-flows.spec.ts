@@ -111,3 +111,115 @@ test('a new account is greeted once, and can walk straight past it', async ({ pa
   });
   await expect(page.getByTestId('welcome-modal')).toHaveCount(0);
 });
+
+test('the password can be looked at, and the form says when Caps Lock is on', async ({
+  page,
+}) => {
+  await page.goto('/auth');
+  const password = page.getByPlaceholder('At least 8 characters');
+  await password.fill('secret123');
+
+  // Hidden by default — the eye is an affordance, not the resting state.
+  await expect(password).toHaveAttribute('type', 'password');
+  await page.getByTestId('auth-password-toggle').click();
+  await expect(password).toHaveAttribute('type', 'text');
+  // And the caret is still in the box: revealing a password should not cost
+  // the traveller their place in it.
+  await expect(password).toBeFocused();
+
+  await page.getByTestId('auth-password-toggle').click();
+  await expect(password).toHaveAttribute('type', 'password');
+
+  // Caps Lock is read from the keyboard event's modifier state, so it is
+  // right the moment it is true rather than guessed from what was typed.
+  //
+  // Driven with a synthetic event on purpose: `keyboard.press('CapsLock')`
+  // sends the keystroke but does not toggle the OS-level modifier that
+  // getModifierState reports, so the high-level API cannot express the state
+  // this feature reads. Dispatching the event with the modifier set exercises
+  // the same handler the browser would call.
+  const capsKey = (on: boolean) =>
+    password.evaluate((el, capsOn) => {
+      el.dispatchEvent(
+        new KeyboardEvent('keyup', {
+          key: 'a',
+          bubbles: true,
+          // Non-standard init, honoured by Chromium — checked before relying
+          // on it, because a silently ignored flag would make this test pass
+          // against a feature that does nothing.
+          modifierCapsLock: capsOn,
+        } as KeyboardEventInit),
+      );
+    }, on);
+
+  await expect(page.getByTestId('auth-caps-lock')).toHaveCount(0);
+  await capsKey(true);
+  await expect(page.getByTestId('auth-caps-lock')).toBeVisible();
+  await capsKey(false);
+  await expect(page.getByTestId('auth-caps-lock')).toHaveCount(0);
+
+  // And it goes away when the box does, rather than lingering over a field
+  // nobody is typing in.
+  await capsKey(true);
+  await expect(page.getByTestId('auth-caps-lock')).toBeVisible();
+  await password.blur();
+  await expect(page.getByTestId('auth-caps-lock')).toHaveCount(0);
+});
+
+test('"keep me signed in" decides where the session is kept', async ({ page }) => {
+  await page.goto('/auth');
+  const remember = page.getByTestId('auth-remember');
+  // On by default, because that is how every existing session already behaves.
+  await expect(remember).toBeChecked();
+  await remember.uncheck();
+
+  await page.getByPlaceholder('Aylin Demir').fill('Session Tester');
+  await page
+    .getByPlaceholder('you@example.com')
+    .fill(`e2e_remember_${Date.now()}@std.antalya.edu.tr`);
+  await page.getByPlaceholder('At least 8 characters').fill('secret123');
+  await page.getByRole('button', { name: /Create account/i }).click();
+  await page.waitForURL(/\/dashboard/, { timeout: 20_000 });
+
+  const where = await page.evaluate(() => ({
+    local: localStorage.getItem('pathwise.access'),
+    session: sessionStorage.getItem('pathwise.access'),
+  }));
+  // The tab holds it; the browser does not. Closing the tab ends the session
+  // on this machine, which is the whole promise of leaving the box unticked.
+  expect(where.session).not.toBeNull();
+  expect(where.local).toBeNull();
+});
+
+test('a rejected sign-in is felt as well as read, and the form survives it', async ({
+  page,
+}) => {
+  await gotoSignIn(page);
+  await page.getByPlaceholder('you@example.com').fill('nobody@std.antalya.edu.tr');
+  await page.getByPlaceholder(/characters|Password/i).first().fill('wrong-password-here');
+  await page.getByRole('button', { name: /^Sign in$/i }).click();
+
+  await expect(page.getByTestId('auth-error')).toBeVisible({ timeout: 15_000 });
+
+  // The shake is a nudge, not a reset: what was typed is still there, so the
+  // traveller fixes one field rather than filling the form again.
+  await expect(page.getByPlaceholder('you@example.com')).toHaveValue(
+    'nobody@std.antalya.edu.tr',
+  );
+});
+
+test('the social buttons admit they are not connected to anything', async ({ page }) => {
+  await page.goto('/auth');
+
+  for (const id of ['auth-social-google', 'auth-social-apple']) {
+    const button = page.getByTestId(id);
+    await expect(button).toBeVisible();
+    // Disabled, not merely inert: a button that looks ready and does nothing
+    // when pressed is worse than one that never offered.
+    await expect(button).toBeDisabled();
+  }
+
+  await expect(page.getByTestId('auth-social-note')).toContainText(
+    /not wired to a provider yet/i,
+  );
+});

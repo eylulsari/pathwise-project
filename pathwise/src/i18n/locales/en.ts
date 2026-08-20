@@ -170,6 +170,38 @@ export const en = {
     brand2: 'one smart path.',
     brandSub:
       'Sign in to generate budget-aware routes, save trips and meet verified travel buddies.',
+    rememberMe:
+      'Keep me signed in',
+    rememberHint:
+      'On this device only. Sign out ends the session everywhere.',
+    showPassword:
+      'Show password',
+    hidePassword:
+      'Hide password',
+    capsLock:
+      'Caps Lock is on.',
+    orDivider:
+      'or',
+    continueGoogle:
+      'Continue with Google',
+    continueApple:
+      'Continue with Apple',
+    socialSoon:
+      'Not connected yet',
+    socialNote:
+      'Social sign-in is not wired to a provider yet, so these do nothing. Use your email for now.',
+    card1:
+      'Two continents, one afternoon — and a plan that knows the ferry times.',
+    card1Place:
+      'Karaköy → Kadıköy',
+    card2:
+      'The queue at nine, the courtyard at eight. Timing is most of it.',
+    card2Place:
+      'Topkapı Palace',
+    card3:
+      'Breakfast that lasts three hours is not a delay. It is the itinerary.',
+    card3Place:
+      'Beşiktaş',
   },
   success: {
     title: 'You’re in',

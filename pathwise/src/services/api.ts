@@ -59,16 +59,71 @@ const delay = <T>(data: T, ms = 350): Promise<T> =>
 // Only the short-lived access token is kept in JS. The refresh token lives in
 // an httpOnly cookie the browser attaches automatically (safe from XSS).
 const ACCESS_KEY = 'pathwise.access';
+const REMEMBER_KEY = 'pathwise.remember';
 
+/**
+ * "Remember me" decides WHERE the access token lives, which is the only part
+ * of a session this browser actually controls.
+ *
+ * Remembered (the default, and what every existing session already has):
+ * localStorage, so closing the browser and coming back tomorrow finds you
+ * signed in. Not remembered: sessionStorage, which the browser drops when the
+ * tab closes.
+ *
+ * Be precise about the limit. The refresh token is an httpOnly cookie with
+ * its own lifetime and only the server can revoke it — so this is "keep me
+ * signed in on this machine", not "end my session everywhere". It works
+ * because nothing tries to refresh without an access token in hand: both the
+ * refresh path and the auth bootstrap check for one first, so a dropped
+ * sessionStorage means a signed-out app even while the cookie is still valid.
+ *
+ * Sign out is what actually kills the cookie, and it still does.
+ */
 export const tokenStore = {
-  get access() {
-    return localStorage.getItem(ACCESS_KEY);
+  /** Absent preference means remembered — that is how this always behaved. */
+  get remembered(): boolean {
+    try {
+      return localStorage.getItem(REMEMBER_KEY) !== 'false';
+    } catch {
+      return true;
+    }
+  },
+  setRemembered(value: boolean) {
+    try {
+      localStorage.setItem(REMEMBER_KEY, String(value));
+      // Move any token already held, so the choice takes effect at once
+      // rather than at the next sign-in.
+      const held = localStorage.getItem(ACCESS_KEY) ?? sessionStorage.getItem(ACCESS_KEY);
+      if (held) {
+        localStorage.removeItem(ACCESS_KEY);
+        sessionStorage.removeItem(ACCESS_KEY);
+        (value ? localStorage : sessionStorage).setItem(ACCESS_KEY, held);
+      }
+    } catch {
+      /* private mode — the default (remembered) still applies */
+    }
+  },
+  get access(): string | null {
+    try {
+      return localStorage.getItem(ACCESS_KEY) ?? sessionStorage.getItem(ACCESS_KEY);
+    } catch {
+      return null;
+    }
   },
   setAccess(access: string) {
-    localStorage.setItem(ACCESS_KEY, access);
+    try {
+      (this.remembered ? localStorage : sessionStorage).setItem(ACCESS_KEY, access);
+    } catch {
+      /* private mode / quota — the session lasts as long as the page does */
+    }
   },
   clear() {
-    localStorage.removeItem(ACCESS_KEY);
+    try {
+      localStorage.removeItem(ACCESS_KEY);
+      sessionStorage.removeItem(ACCESS_KEY);
+    } catch {
+      /* nothing to clear */
+    }
   },
 };
 

@@ -153,6 +153,38 @@ export const de = {
     brand2: 'ein kluger Weg.',
     brandSub:
       'Melde dich an, um budgetbewusste Routen zu erstellen, Reisen zu speichern und verifizierte Reisebegleitungen zu treffen.',
+    rememberMe:
+      'Angemeldet bleiben',
+    rememberHint:
+      'Nur auf diesem Gerät. Abmelden beendet die Sitzung überall.',
+    showPassword:
+      'Passwort anzeigen',
+    hidePassword:
+      'Passwort verbergen',
+    capsLock:
+      'Feststelltaste ist an.',
+    orDivider:
+      'oder',
+    continueGoogle:
+      'Weiter mit Google',
+    continueApple:
+      'Weiter mit Apple',
+    socialSoon:
+      'Noch nicht verbunden',
+    socialNote:
+      'Die Anmeldung über soziale Netzwerke ist noch an keinen Anbieter angebunden und tut daher nichts. Nutze vorerst deine E-Mail.',
+    card1:
+      'Zwei Kontinente, ein Nachmittag — und ein Plan, der die Fährzeiten kennt.',
+    card1Place:
+      'Karaköy → Kadıköy',
+    card2:
+      'Um neun die Schlange, um acht der Hof. Timing ist das meiste davon.',
+    card2Place:
+      'Topkapı-Palast',
+    card3:
+      'Ein Frühstück über drei Stunden ist keine Verzögerung. Es ist das Programm.',
+    card3Place:
+      'Beşiktaş',
   },
   success: {
     title: 'Du bist drin',

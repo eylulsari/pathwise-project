@@ -98,3 +98,39 @@
     animation: none;
   }
 }
+
+/* ── Auth screen motion ─────────────────────────────────────────────
+   A rejected sign-in should be felt as well as read. The shake is short,
+   small and runs once: it draws the eye back to the form without turning a
+   wrong password into a spectacle. `prefers-reduced-motion` removes the
+   movement and leaves the message, which is where the information is. */
+@keyframes auth-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(5px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(3px); }
+  80% { transform: translateX(-2px); }
+}
+
+.animate-auth-shake {
+  animation: auth-shake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* The inspiration cards cross-fade rather than cutting, so a glance away and
+   back does not land on a jump. */
+@keyframes auth-card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-auth-card {
+  animation: auth-card-in 0.6s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-auth-shake,
+  .animate-auth-card {
+    animation: none;
+  }
+}
