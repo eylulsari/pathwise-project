@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { AssistantService } from '../../application/assistant.service';
 import { ChatDto } from '../../application/dto/chat.dto';
+import { GenerateAiRouteDto } from '../../application/dto/generate-ai-route.dto';
 import { AssistantReply } from '../../domain/assistant.types';
 import { ChatRateLimitGuard } from '../guards/chat-rate-limit.guard';
 import { JwtAuthGuard } from '../../../auth/infrastructure/guards/jwt-auth.guard';
@@ -28,5 +29,11 @@ export class AssistantController {
       activePlan: dto.activePlan ?? [],
       dietary: dto.dietary,
     });
+  }
+
+  @Post('route')
+  @HttpCode(HttpStatus.OK)
+  generateRoute(@Body() dto: GenerateAiRouteDto) {
+    return this.assistant.generateRoute(dto.prompt);
   }
 }

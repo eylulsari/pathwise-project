@@ -38,12 +38,14 @@ import { DayTab } from '../components/dnd/DayTab';
 import { SearchBar } from '../components/SearchBar';
 import { AppHeader } from '../components/AppHeader';
 import { MapView } from '../components/map/MapView';
+import { AiRoutePlanner } from '../components/ai/AiRoutePlanner';
 import { SosButton } from '../components/SosButton';
 import { TodayPath } from '../components/TodayPath';
 import { RouteGenerator, type RouteConfig } from '../components/controls/RouteGenerator';
 import { StartPointSelector } from '../components/controls/StartPointSelector';
 import { SurvivalWidget } from '../components/SurvivalWidget';
 import { WelcomeModal } from '../components/WelcomeModal';
+import { ShareRoute } from '../components/ShareRoute';
 import { TravelVibeQuiz, type QuizResult } from '../components/controls/TravelVibeQuiz';
 import { MustVisitList } from '../components/controls/MustVisitList';
 import { ReservationModal } from '../components/controls/ReservationModal';
@@ -150,6 +152,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [usage, setUsage] = useState<UsageInfo | null>(null);
   const [optimizeBlocked, setOptimizeBlocked] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [days, setDays] = useState<DayState[]>(INITIAL_DAYS);
   const [activeDay, setActiveDay] = useState(0);
   const [startPoint, setStartPoint] = useState<StartPoint | null>(null);
@@ -921,6 +924,30 @@ export default function Dashboard() {
     generateFor(activeDay, { ...buildRequest(day), mustVisitIds: next });
   }
 
+  function applyAiRoute(placeIds: string[]) {
+    const current = realIdsOf(day);
+    const added = [...new Set(placeIds)].filter((id) => !current.includes(id));
+    if (!added.length) return;
+    const mustVisitIds = [...new Set([...day.mustVisitIds, ...added])];
+    patchDay(activeDay, { mustVisitIds });
+    if (day.itinerary) {
+      recordUndo(activeDay);
+      void rebuildDay(activeDay, [...current, ...added]);
+    } else {
+      void generateFor(activeDay, { ...buildRequest(day), mustVisitIds });
+    }
+    showToast(`✨ AI rotası eklendi: ${added.length} durak`);
+  }
+
+  function loadExampleRoute() {
+    applyAiRoute([
+      'ChIJ-kadikoy-kadikoyvapuriskelesi',
+      'ChIJ-kadikoy-carsi',
+      'ChIJ-kadikoy-sureyya',
+      'ChIJ-kadikoy-modacaybahcesi',
+    ]);
+  }
+
   /**
    * "Start from my saved places" — the second half of the two-step flow.
    *
@@ -1156,7 +1183,18 @@ export default function Dashboard() {
           >
             💰 {t('dash.expenses')}
           </button>
-          {day.itinerary && <ExportRoute itinerary={day.itinerary} />}
+          {day.itinerary && (
+            <>
+              <button
+                onClick={() => setShowShare(true)}
+                data-testid="open-share"
+                className="rounded-lg border border-ink/10 px-3 py-1.5 text-sm font-semibold text-ink/80 hover:text-ink"
+              >
+                📤 {t('share.open')}
+              </button>
+              <ExportRoute itinerary={day.itinerary} />
+            </>
+          )}
           <OfflineDownload days={days.map((d, i) => ({ label: `${t('dash.day')} ${i + 1}`, itinerary: d.itinerary }))} />
           <OfflineToggle offline={isOffline} onToggle={() => setSimulatedOffline((o) => !o)} />
         </div>
@@ -1353,12 +1391,16 @@ export default function Dashboard() {
             focusPlace={searchFocus}
             onAddFocus={(id) => { addToPath(id); setSearchFocus(null); }}
           />
+          <AiRoutePlanner onApply={applyAiRoute} onLoadExample={loadExampleRoute} />
           <SosButton />
         </div>
       </div>
       </DndContext>
 
       {showWelcome && <WelcomeModal onClose={closeWelcome} />}
+      {/* Every planned day, not just the one on screen — the thing worth
+          sending is the trip, and the day tabs are a detail of this device. */}
+      {showShare && <ShareRoute days={days} onClose={() => setShowShare(false)} />}
       {showQuiz && <TravelVibeQuiz onComplete={handleQuiz} onClose={() => setShowQuiz(false)} />}
       {showMustVisit && (
         <MustVisitList

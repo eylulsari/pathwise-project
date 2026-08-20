@@ -807,4 +807,66 @@ export const en = {
     safetyRequiresDeclaration:
       'Available once you tick “I identify as a woman”.',
   },
+  share: {
+    close:
+      'Close',
+    open:
+      'Share',
+    title:
+      'Share this trip',
+    subtitle:
+      'Paste it into a chat, or send a link that opens on its own.',
+    previewLabel:
+      'The summary that will be copied',
+    copySummary:
+      'Copy summary',
+    copyLink:
+      'Copy link',
+    copiedSummary:
+      '✓ Summary copied',
+    copiedLink:
+      '✓ Link copied',
+    copyFailed:
+      'Your browser would not let us copy. The text is selected — press Ctrl/⌘+C.',
+    linkTooLong:
+      'This trip is too long to fit in a link. The summary above still copies.',
+    linkNote:
+      'The link carries the summary itself, so it opens for anyone — and nothing about your trip is stored on a server to make it work.',
+    heading:
+      'Pathwise · Istanbul',
+    dayLine:
+      'Day {day}',
+    budgetLine:
+      'Budget: {spent} of {budget}',
+    walkingLine:
+      'Walking: {km} km',
+    stopsLine:
+      '{stops} stops over {days} day(s)',
+    lunch:
+      'Lunch break',
+    footer:
+      'Planned with Pathwise',
+  },
+  shared: {
+    title:
+      'A trip someone planned for you',
+    readOnly:
+      'Read-only. Make your own to change it.',
+    cta:
+      'Plan my own trip',
+    emptyTitle:
+      'Nothing to open here',
+    emptyBody:
+      'This link is empty or was cut short on its way — chat apps sometimes trim long ones. Ask whoever sent it to copy the summary instead.',
+  },
+  export: {
+    menu:
+      'Export',
+    pdf:
+      'Export PDF',
+    maps:
+      'Open in Google Maps',
+    calendar:
+      'Add to Calendar (.ics)',
+  },
 } as const;

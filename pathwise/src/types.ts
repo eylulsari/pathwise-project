@@ -317,6 +317,11 @@ export interface ItineraryNotice {
   places?: string[];
 }
 
+/** One day as the share sheet sees it: everything else about a day is local. */
+export interface DayShare {
+  itinerary: Itinerary | null;
+}
+
 export interface Itinerary {
   hub: Hub;
   mode: RouteMode;

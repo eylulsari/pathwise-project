@@ -858,6 +858,13 @@ export const api = {
     });
   },
 
+  async generateAiRoute(prompt: string): Promise<{
+    stops: { placeId: string; name: string; lat: number; lng: number; description: string; estimatedMinutes: number }[];
+    source: 'groq';
+  }> {
+    return http('/assistant/route', { method: 'POST', body: JSON.stringify({ prompt }) });
+  },
+
   // ═════════════════════════════════════════════════════════════════
   // TRIP EXPENSES — a ledger, not a payment rail.
   //

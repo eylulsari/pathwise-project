@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MailerPort, PasswordResetEmail } from '../../domain/password-reset.port';
+import {
+  MailerPort,
+  PasswordResetEmail,
+  WelcomeEmail,
+} from '../../domain/password-reset.port';
 
 /**
  * The mailer this project currently has: none.
@@ -26,6 +30,11 @@ import { MailerPort, PasswordResetEmail } from '../../domain/password-reset.port
 export class UnconfiguredMailer implements MailerPort {
   readonly configured = false;
   private readonly logger = new Logger(UnconfiguredMailer.name);
+
+  sendWelcome(email: WelcomeEmail): Promise<void> {
+    this.logger.warn(`Welcome email was not sent to ${email.to}: no mail provider configured`);
+    return Promise.resolve();
+  }
 
   sendPasswordReset(email: PasswordResetEmail): Promise<void> {
     this.logger.error(

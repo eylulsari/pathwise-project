@@ -50,6 +50,7 @@ function build(opts: { configured?: boolean; knownEmail?: boolean } = {}) {
 
   const mailer: MailerPort = {
     configured: opts.configured ?? true,
+    sendWelcome: () => Promise.resolve(),
     sendPasswordReset: (email) => {
       sent.push(email);
       return Promise.resolve();

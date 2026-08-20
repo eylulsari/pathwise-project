@@ -12,6 +12,7 @@ import type { Itinerary, Place } from '../../types';
 import { HUB_BY_ID } from '../../hubData';
 import { formatEntryFee } from '../../utils/format';
 import { OpeningHours } from '../OpeningHours';
+import { WeatherWidget } from '../WeatherWidget';
 
 /** A numbered, hub-accented pin built as a divIcon (avoids the broken default
  *  Leaflet marker-image paths under bundlers). */
@@ -31,6 +32,16 @@ function pin(order: number | string, color: string, active: boolean): L.DivIcon 
     iconAnchor: [14, 28],
     popupAnchor: [0, -28],
   });
+}
+
+function routeDistanceKm(places: Place[]): number {
+  return places.slice(1).reduce((total, place, index) => {
+    const previous = places[index];
+    const lat = ((place.lat - previous.lat) * Math.PI) / 180;
+    const lng = ((place.lng - previous.lng) * Math.PI) / 180;
+    const a = Math.sin(lat / 2) ** 2 + Math.cos((previous.lat * Math.PI) / 180) * Math.cos((place.lat * Math.PI) / 180) * Math.sin(lng / 2) ** 2;
+    return total + 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }, 0);
 }
 
 /** Flies the map to the selected place, and keeps the map sized correctly when
@@ -108,6 +119,8 @@ export function MapView({
   const center = hub.center;
   const selected = places.find((p) => p.placeId === selectedPlaceId) ?? null;
   const line = places.map((p) => [p.lat, p.lng]) as [number, number][];
+  const totalMinutes = places.reduce((total, place) => total + place.avgVisitMinutes, 0);
+  const distanceKm = routeDistanceKm(places);
 
   return (
     <div
@@ -196,6 +209,17 @@ export function MapView({
         )}
         <MapController center={center} selected={selected} focus={focusPlace ?? null} resizeSignal={resizeSignal} />
       </MapContainer>
+
+      <div className="absolute start-3 top-3 z-[1000]">
+        <WeatherWidget />
+      </div>
+      {places.length > 0 && (
+        <div className="absolute bottom-3 start-3 z-[1000] rounded-xl border border-white/30 bg-surface-2/95 px-3 py-2 text-sm shadow-lg backdrop-blur">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink/50">Rota Özeti</p>
+          <p className="mt-1 font-semibold">{places.length} durak · ~{Math.round(totalMinutes / 30) * 30 || totalMinutes} dk</p>
+          <p className="text-xs text-ink/60">Yaklaşık {distanceKm.toFixed(1)} km yürüyüş</p>
+        </div>
+      )}
 
       {/* Fullscreen toggle (top-right) */}
       <button

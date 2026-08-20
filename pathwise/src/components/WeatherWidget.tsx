@@ -8,10 +8,15 @@ type Weather = Awaited<ReturnType<typeof api.getWeather>>;
 export function WeatherWidget() {
   const { t } = useT();
   const [w, setW] = useState<Weather | null>(null);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    api.getWeather().then(setW);
+    api.getWeather().then(setW).finally(() => setLoading(false));
   }, []);
+  if (loading) {
+    return <div className="flex items-center gap-2 rounded-xl bg-surface-2/95 px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur"><span className="h-4 w-4 animate-spin rounded-full border-2 border-iznik/30 border-t-iznik" /> Canlı hava durumu yükleniyor</div>;
+  }
   if (!w) return null;
+  const needsOutdoorWarning = typeof w.conditionCode === 'number' && w.conditionCode >= 200 && w.conditionCode < 600;
 
   const crowdColor =
     w.crowdLevel === 'High'
@@ -21,7 +26,8 @@ export function WeatherWidget() {
         : 'text-sage';
 
   return (
-    <div className="flex items-center gap-2 rounded-xl border border-ink/10 bg-surface-2 px-3 py-2 text-sm">
+    <div className="rounded-xl border border-white/30 bg-surface-2/95 px-3 py-2 text-sm shadow-lg backdrop-blur">
+      <div className="flex items-center gap-2">
       <span className="text-lg">{w.icon}</span>
       <span className="font-semibold">{w.city}: {w.tempC}°C</span>
       {typeof w.feelsLikeC === 'number' && w.feelsLikeC !== w.tempC && (
@@ -33,6 +39,8 @@ export function WeatherWidget() {
       )}
       <span className="mx-1 text-ink/20">|</span>
       <span className={crowdColor}>{t('weather.crowds')}: {w.crowdLevel}</span>
+      </div>
+      {needsOutdoorWarning && <span className="mt-2 inline-flex rounded-full bg-terracotta/15 px-2 py-1 text-xs font-semibold text-terracotta">⚠ Açık hava duraklarına dikkat edin</span>}
     </div>
   );
 }

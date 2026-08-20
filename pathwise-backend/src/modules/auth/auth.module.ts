@@ -11,7 +11,7 @@ import { REFRESH_TOKEN_STORE } from './domain/refresh-token-store.port';
 import { PasswordResetService } from './application/password-reset.service';
 import { PasswordResetTokenOrmEntity } from './infrastructure/persistence/password-reset-token.orm-entity';
 import { TypeOrmPasswordResetRepository } from './infrastructure/persistence/typeorm-password-reset.repository';
-import { UnconfiguredMailer } from './infrastructure/mail/unconfigured.mailer';
+import { EmailService } from './infrastructure/mail/email.service';
 import { MAILER, PASSWORD_RESET_STORE } from './domain/password-reset.port';
 
 @Module({
@@ -31,15 +31,8 @@ import { MAILER, PASSWORD_RESET_STORE } from './domain/password-reset.port';
     { provide: REFRESH_TOKEN_STORE, useClass: TypeOrmRefreshTokenRepository },
     PasswordResetService,
     { provide: PASSWORD_RESET_STORE, useClass: TypeOrmPasswordResetRepository },
-    /**
-     * The one line that changes when a mail provider exists.
-     *
-     * Swap UnconfiguredMailer for ResendMailer and the reset flow turns on:
-     * the token logic, the endpoints and the client all already handle the
-     * configured case. Until then this reports itself as unconfigured and the
-     * service refuses rather than pretending to send.
-     */
-    { provide: MAILER, useClass: UnconfiguredMailer },
+    EmailService,
+    { provide: MAILER, useExisting: EmailService },
   ],
   exports: [JwtAuthGuard],
 })

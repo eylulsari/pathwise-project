@@ -762,4 +762,66 @@ export const de = {
     safetyRequiresDeclaration:
       'Verfügbar, sobald du „Ich identifiziere mich als Frau“ ankreuzt.',
   },
+  share: {
+    close:
+      'Schließen',
+    open:
+      'Teilen',
+    title:
+      'Diese Reise teilen',
+    subtitle:
+      'Füge sie in einen Chat ein oder schick einen Link, der sich von selbst öffnet.',
+    previewLabel:
+      'Die Zusammenfassung, die kopiert wird',
+    copySummary:
+      'Zusammenfassung kopieren',
+    copyLink:
+      'Link kopieren',
+    copiedSummary:
+      '✓ Zusammenfassung kopiert',
+    copiedLink:
+      '✓ Link kopiert',
+    copyFailed:
+      'Dein Browser hat das Kopieren verweigert. Der Text ist markiert — Strg/⌘+C.',
+    linkTooLong:
+      'Diese Reise ist zu lang für einen Link. Die Zusammenfassung oben lässt sich weiterhin kopieren.',
+    linkNote:
+      'Der Link trägt die Zusammenfassung selbst, deshalb öffnet er sich bei allen — und dafür wird nichts über deine Reise auf einem Server gespeichert.',
+    heading:
+      'Pathwise · Istanbul',
+    dayLine:
+      'Tag {day}',
+    budgetLine:
+      'Budget: {spent} von {budget}',
+    walkingLine:
+      'Zu Fuß: {km} km',
+    stopsLine:
+      '{stops} Stopps an {days} Tag(en)',
+    lunch:
+      'Mittagspause',
+    footer:
+      'Geplant mit Pathwise',
+  },
+  shared: {
+    title:
+      'Eine Reise, die jemand für dich geplant hat',
+    readOnly:
+      'Nur zum Lesen. Erstelle deine eigene, um sie zu ändern.',
+    cta:
+      'Meine eigene Reise planen',
+    emptyTitle:
+      'Hier gibt es nichts zu öffnen',
+    emptyBody:
+      'Dieser Link ist leer oder wurde unterwegs abgeschnitten — Chat-Apps kürzen lange Links manchmal. Bitte die Person, stattdessen die Zusammenfassung zu kopieren.',
+  },
+  export: {
+    menu:
+      'Exportieren',
+    pdf:
+      'Als PDF exportieren',
+    maps:
+      'In Google Maps öffnen',
+    calendar:
+      'Zum Kalender hinzufügen (.ics)',
+  },
 } as const;

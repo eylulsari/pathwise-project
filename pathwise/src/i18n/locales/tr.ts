@@ -763,4 +763,66 @@ export const tr = {
     safetyRequiresDeclaration:
       '“Kendimi kadın olarak tanımlıyorum” seçildiğinde kullanılabilir.',
   },
+  share: {
+    close:
+      'Kapat',
+    open:
+      'Paylaş',
+    title:
+      'Bu geziyi paylaş',
+    subtitle:
+      'Sohbete yapıştır ya da kendi başına açılan bir link gönder.',
+    previewLabel:
+      'Kopyalanacak özet',
+    copySummary:
+      'Özeti kopyala',
+    copyLink:
+      'Linki kopyala',
+    copiedSummary:
+      '✓ Özet kopyalandı',
+    copiedLink:
+      '✓ Link kopyalandı!',
+    copyFailed:
+      'Tarayıcın kopyalamamıza izin vermedi. Metin seçili — Ctrl/⌘+C.',
+    linkTooLong:
+      'Bu gezi bir linke sığmayacak kadar uzun. Yukarıdaki özet yine de kopyalanıyor.',
+    linkNote:
+      'Link özetin kendisini taşıyor, bu yüzden herkeste açılıyor — ve bunun çalışması için gezinle ilgili hiçbir şey sunucuda saklanmıyor.',
+    heading:
+      'Pathwise · İstanbul',
+    dayLine:
+      '{day}. Gün',
+    budgetLine:
+      'Bütçe: {spent} / {budget}',
+    walkingLine:
+      'Yürüyüş: {km} km',
+    stopsLine:
+      '{days} günde {stops} durak',
+    lunch:
+      'Öğle molası',
+    footer:
+      'Pathwise ile planlandı',
+  },
+  shared: {
+    title:
+      'Birinin senin için planladığı bir gezi',
+    readOnly:
+      'Salt okunur. Değiştirmek için kendininkini oluştur.',
+    cta:
+      'Kendi gezimi planla',
+    emptyTitle:
+      'Burada açılacak bir şey yok',
+    emptyBody:
+      'Bu link boş ya da yolda kesilmiş — sohbet uygulamaları uzun linkleri bazen kırpar. Gönderen kişiden özeti kopyalamasını iste.',
+  },
+  export: {
+    menu:
+      'Dışa aktar',
+    pdf:
+      'PDF olarak indir',
+    maps:
+      'Google Haritalar\'da aç',
+    calendar:
+      'Takvime ekle (.ics)',
+  },
 } as const;

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PlacesService } from '../../places/application/places.service';
 import { Place } from '../../places/domain/place';
@@ -69,6 +69,39 @@ export class AssistantService {
       this.logger.warn(`${provider} call failed, using fallback: ${String(err)}`);
       return this.fallback(input.message);
     }
+  }
+
+  /** Generates only catalogue-backed map pins; coordinates never come from the model. */
+  async generateRoute(prompt: string): Promise<{ stops: AiRouteStop[]; source: 'groq' }> {
+    const apiKey = this.config.get<string>('GROQ_API_KEY');
+    if (!apiKey) throw new ServiceUnavailableException('AI route generation is not configured');
+
+    const candidates = selectRelevantPlaces(prompt, await this.places.findAll());
+    const result = await this.groq.generate({
+      apiKey,
+      model: this.config.get<string>('GROQ_MODEL') || 'llama-3.3-70b-versatile',
+      systemInstruction: [
+        'Create a short Istanbul route. Return ONLY valid JSON: {"placeIds":["id-1","id-2"]}.',
+        'Choose 2 to 5 ids, in visit order, only from CANDIDATES.',
+        `CANDIDATES:\n${candidates.map(placeLine).join('\n')}`,
+      ].join('\n'),
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    });
+    const byId = new Map(candidates.map((place) => [place.placeId, place]));
+    const stops = parseRouteIds(result.text)
+      .map((id) => byId.get(id))
+      .filter((place): place is Place => Boolean(place))
+      .slice(0, 5)
+      .map((place) => ({
+        placeId: place.placeId,
+        name: place.name,
+        lat: place.lat,
+        lng: place.lng,
+        description: place.localTip,
+        estimatedMinutes: place.avgVisitMinutes,
+      }));
+    if (stops.length < 2) throw new ServiceUnavailableException('AI route generation returned too few valid stops');
+    return { stops, source: 'groq' };
   }
 
   // ── Live path ──────────────────────────────────────────────────────
@@ -201,6 +234,25 @@ export class AssistantService {
         'I can help you plan around budget, weather and vibe. Try asking for a sunset spot, a cheap eat, or a rainy-day plan.',
       source: 'fallback',
     };
+  }
+}
+
+export interface AiRouteStop {
+  placeId: string;
+  name: string;
+  lat: number;
+  lng: number;
+  description: string;
+  estimatedMinutes: number;
+}
+
+function parseRouteIds(text: string): string[] {
+  try {
+    const value: unknown = JSON.parse(text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim());
+    const ids = value && typeof value === 'object' ? (value as { placeIds?: unknown }).placeIds : [];
+    return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
+  } catch {
+    return [];
   }
 }
 

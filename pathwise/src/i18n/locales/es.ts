@@ -762,4 +762,66 @@ export const es = {
     safetyRequiresDeclaration:
       'Disponible en cuanto marques «Me identifico como mujer».',
   },
+  share: {
+    close:
+      'Cerrar',
+    open:
+      'Compartir',
+    title:
+      'Comparte este viaje',
+    subtitle:
+      'Pégalo en un chat o envía un enlace que se abre solo.',
+    previewLabel:
+      'El resumen que se copiará',
+    copySummary:
+      'Copiar resumen',
+    copyLink:
+      'Copiar enlace',
+    copiedSummary:
+      '✓ Resumen copiado',
+    copiedLink:
+      '✓ Enlace copiado',
+    copyFailed:
+      'Tu navegador no nos dejó copiar. El texto está seleccionado: pulsa Ctrl/⌘+C.',
+    linkTooLong:
+      'Este viaje es demasiado largo para caber en un enlace. El resumen de arriba sí se copia.',
+    linkNote:
+      'El enlace lleva el resumen dentro, así que se abre para cualquiera, y nada de tu viaje se guarda en un servidor para que funcione.',
+    heading:
+      'Pathwise · Estambul',
+    dayLine:
+      'Día {day}',
+    budgetLine:
+      'Presupuesto: {spent} de {budget}',
+    walkingLine:
+      'A pie: {km} km',
+    stopsLine:
+      '{stops} paradas en {days} día(s)',
+    lunch:
+      'Pausa para comer',
+    footer:
+      'Planificado con Pathwise',
+  },
+  shared: {
+    title:
+      'Un viaje que alguien planificó para ti',
+    readOnly:
+      'Solo lectura. Crea el tuyo para cambiarlo.',
+    cta:
+      'Planificar mi propio viaje',
+    emptyTitle:
+      'Aquí no hay nada que abrir',
+    emptyBody:
+      'Este enlace está vacío o se cortó por el camino: las apps de chat a veces recortan los largos. Pide a quien te lo envió que copie el resumen.',
+  },
+  export: {
+    menu:
+      'Exportar',
+    pdf:
+      'Exportar PDF',
+    maps:
+      'Abrir en Google Maps',
+    calendar:
+      'Añadir al calendario (.ics)',
+  },
 } as const;

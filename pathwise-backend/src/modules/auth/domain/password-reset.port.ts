@@ -31,6 +31,11 @@ export interface PasswordResetEmail {
   expiresInMinutes: number;
 }
 
+export interface WelcomeEmail {
+  to: string;
+  name: string;
+}
+
 /**
  * The delivery channel — the part this project does not have yet.
  *
@@ -51,5 +56,6 @@ export interface PasswordResetEmail {
  */
 export interface MailerPort {
   readonly configured: boolean;
+  sendWelcome(email: WelcomeEmail): Promise<void>;
   sendPasswordReset(email: PasswordResetEmail): Promise<void>;
 }

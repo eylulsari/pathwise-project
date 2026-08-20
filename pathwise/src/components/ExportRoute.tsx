@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { exportItineraryPdf, googleMapsUrl } from '../utils/export';
 import { downloadIcs } from '../utils/ics';
 import { api } from '../services/api';
+import { useT } from '../i18n';
 
 const PDF_KEY = 'pathwise.pdfExports'; // "YYYY-MM:count"
 
@@ -21,8 +22,14 @@ function recordPdfExport() {
   localStorage.setItem(PDF_KEY, `${month}:${count}`);
 }
 
-/** Export menu — PDF (gated), Google Maps directions, and .ics calendar. */
+/**
+ * Export menu — PDF (gated), Google Maps directions, and .ics calendar.
+ *
+ * Its labels were hardcoded English until now: the one menu in a six-language
+ * app that only spoke one of them.
+ */
 export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
+  const { t } = useT();
   const { isPremium } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -44,14 +51,14 @@ export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
         onClick={() => setOpen((o) => !o)}
         className="rounded-lg border border-ink/10 px-3 py-1.5 text-sm font-semibold text-ink/80 hover:text-ink"
       >
-        ⬇ Export ▾
+        ⬇ {t('export.menu')} ▾
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-[1040]" onClick={() => setOpen(false)} />
           <div className="absolute end-0 z-[1041] mt-1 w-56 overflow-hidden rounded-xl border border-ink/10 bg-surface-2 shadow-xl">
             <button onClick={onPdf} className="block w-full px-4 py-2.5 text-start text-sm text-ink/80 hover:bg-ink/5">
-              📄 Export PDF{!isPremium && !canExportPdf() ? ' 🔒' : ''}
+              📄 {t('export.pdf')}{!isPremium && !canExportPdf() ? ' 🔒' : ''}
             </button>
             <a
               href={googleMapsUrl(itinerary)}
@@ -60,7 +67,7 @@ export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
               onClick={() => setOpen(false)}
               className="block w-full px-4 py-2.5 text-start text-sm text-ink/80 hover:bg-ink/5"
             >
-              🗺️ Open in Google Maps
+              🗺️ {t('export.maps')}
             </a>
             <button
               onClick={() => {
@@ -69,7 +76,7 @@ export function ExportRoute({ itinerary }: { itinerary: Itinerary }) {
               }}
               className="block w-full px-4 py-2.5 text-start text-sm text-ink/80 hover:bg-ink/5"
             >
-              📅 Add to Calendar (.ics)
+              📅 {t('export.calendar')}
             </button>
           </div>
         </>

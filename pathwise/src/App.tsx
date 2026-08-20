@@ -10,6 +10,7 @@ import Essentials from './pages/Essentials';
 import Messages from './pages/Messages';
 import Tours from './pages/Tours';
 import Blog, { BlogPostPage } from './pages/Blog';
+import SharedRoute from './pages/SharedRoute';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -31,6 +32,9 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Page path="/"><Landing /></Page>} />
       <Route path="/auth" element={<Page path="/auth"><AuthPage /></Page>} />
+      {/* Public on purpose: whoever opens a shared link has no account, and
+          the plan rides in the URL fragment rather than on the server. */}
+      <Route path="/s" element={<Page path="/s"><SharedRoute /></Page>} />
       <Route
         path="/dashboard"
         element={

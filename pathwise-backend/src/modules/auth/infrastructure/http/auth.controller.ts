@@ -23,6 +23,7 @@ import { PasswordResetService } from '../../application/password-reset.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { AuthUser } from '../../domain/auth-user';
+import { EmailService } from '../mail/email.service';
 
 const REFRESH_COOKIE = 'pw_refresh';
 
@@ -41,6 +42,7 @@ export class AuthController {
     private readonly auth: AuthService,
     private readonly reset: PasswordResetService,
     private readonly config: ConfigService,
+    private readonly email: EmailService,
   ) {}
 
   /** POST /api/auth/register */
@@ -49,6 +51,15 @@ export class AuthController {
   async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     const { refreshToken, ...rest } = await this.auth.register(dto);
     this.setRefreshCookie(res, refreshToken);
+    // A welcome email is useful, but delivery must not turn a successfully
+    // created account into a failed registration response.
+    if (this.email.configured) {
+      try {
+        await this.email.sendWelcome({ to: rest.user.email, name: rest.user.name });
+      } catch {
+        // EmailService logs delivery failures without exposing provider details.
+      }
+    }
     return rest; // { user, accessToken }
   }
 
