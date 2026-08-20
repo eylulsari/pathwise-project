@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { dismissWelcome } from './helpers/welcome';
 
 /**
  * Editing a generated route, and having the edit survive.
@@ -19,6 +20,7 @@ async function signUp(page: Page, tag: string): Promise<void> {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 }
 
@@ -182,4 +184,54 @@ test('removing a stop recomputes the day, and it stays removed', async ({ page }
   await page.reload();
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
   expect(await stopNames(page)).toEqual(after);
+});
+
+/**
+ * The half the flush cannot cover.
+ *
+ * `pagehide` guarantees the save is *sent*, not that it arrives before the
+ * next document's `GET /plan` is answered. Those are two connections and
+ * nothing orders them, so roughly one reload in eight came back with the plan
+ * as it was before the edit — and the next autosave then wrote that stale
+ * plan back over the good one, losing the removal for good.
+ *
+ * Blocking the PUT is the same failure made deterministic: from the browser's
+ * side, a write that never lands and a write that lands too late are
+ * indistinguishable. What rescues the edit is the journal — written to
+ * localStorage synchronously at the moment of the edit, and preferred over
+ * the server's answer until the server has confirmed that exact revision.
+ */
+test('an edit survives a reload even when its save never reaches the server', async ({
+  page,
+}) => {
+  await signUp(page, 'journal');
+
+  const before = await stopNames(page);
+  expect(before.length).toBeGreaterThan(2);
+  await waitForAutosave(page, before);
+
+  // From here the server hears nothing. Reads still work, so hydration will
+  // answer with the plan as it was before the removal.
+  await page.route('**/api/plan', async (route) => {
+    if (route.request().method() === 'PUT') return route.abort();
+    return route.continue();
+  });
+
+  await page.getByRole('button', { name: new RegExp(`Remove: ${before[1]}`, 'i') }).click();
+  await expect
+    .poll(async () => (await stopNames(page)).length, { timeout: 15_000 })
+    .toBe(before.length - 1);
+  const after = await stopNames(page);
+
+  await page.reload();
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+  await expect.poll(async () => stopNames(page), { timeout: 25_000 }).toEqual(after);
+
+  // And once the writes get through, the server catches up on its own — the
+  // journal is a bridge, not a second copy of the truth.
+  await page.unroute('**/api/plan');
+  await waitForAutosave(page, after);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
+  await expect.poll(async () => stopNames(page), { timeout: 25_000 }).toEqual(after);
 });

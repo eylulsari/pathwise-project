@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { dismissWelcome } from './helpers/welcome';
 
 /**
  * The map disappeared in production while every existing test stayed green.
@@ -29,6 +30,7 @@ async function signUp(page: import('@playwright/test').Page): Promise<void> {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await dismissWelcome(page);
 }
 
 test('the dashboard map paints real tiles, not just an empty container', async ({

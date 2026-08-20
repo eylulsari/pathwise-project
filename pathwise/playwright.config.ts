@@ -23,22 +23,28 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: true,
   /**
-   * One worker. Measured, not assumed.
+   * One worker. Measured, not assumed — and the note that used to sit here
+   * was wrong on both of its numbers.
    *
-   * On a fresh database the full suite runs 2.6 min at three workers with one
-   * failure and three flaky, and 3.0 min at one worker with nothing flaky at
-   * all. The whole prize for the extra concurrency is around twenty seconds of
-   * wall clock, and the price is tests that fail on load rather than on
-   * behaviour — which costs far more than twenty seconds the moment somebody
-   * has to work out whether a red run means the code broke or the box was
-   * busy.
+   * It claimed 2.6 min at three workers and 3.0 min at one, with "nothing
+   * flaky at all". The first was taken while an unrelated process was
+   * saturating the box. The second was one green run read as a guarantee; a
+   * later eight-run sample had a failure in it. Re-measured on a clean
+   * migration-built database, one worker runs all 143 tests in 6.6 min.
    *
-   * Two was the compromise and it still leaked: this round caught
-   * route-editing's autosave-debounce test going flaky at two workers.
+   * Both figures are corrected here rather than quietly deleted, because a
+   * comment that overstates its evidence is how the next person gets talked
+   * out of investigating a real failure.
    *
-   * Every spec here drives one dev-mode backend and one Postgres. That, not
-   * the runner, is the bottleneck, so extra workers only queue more work
-   * against the same server.
+   * The decision survives the correction. Concurrency buys a few minutes and
+   * costs failures that are about load rather than behaviour, and working out
+   * which kind of red a run is costs far more than the minutes. Two was the
+   * compromise and it leaked: it is what caught route-editing's
+   * autosave-debounce test going flaky.
+   *
+   * Every spec drives one dev-mode backend and one Postgres. That, not the
+   * runner, is the bottleneck, so extra workers only queue more work against
+   * the same server.
    *
    * The retry stays for genuinely transient slowness — but it is no longer
    * doing the job of hiding contention.

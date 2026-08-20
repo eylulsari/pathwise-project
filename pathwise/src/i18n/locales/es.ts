@@ -247,6 +247,8 @@ export const es = {
       '{places} está cerrado el día de este plan, así que no aparece. El resto del día no cambia.',
     noticeOpensTooLate:
       '{places} abre más tarde de lo que dura este día, así que no aparece. Empieza más tarde o dale su propia noche.',
+    noticeMustVisitClosed:
+      '{places} está en tu lista de imprescindibles, pero cierra el día de este plan. Lo hemos dejado en vez de quitarlo: cambia el plan a otro día o comprueba el horario antes de salir.',
     readStory: '📖 Leer la historia local y los consejos',
     free: 'Gratis',
     museumPass: 'Museum Pass',

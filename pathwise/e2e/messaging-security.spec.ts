@@ -1,4 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
+import { dismissWelcome } from './helpers/welcome';
 
 /**
  * The messaging rules, asserted against the running API.
@@ -194,6 +195,7 @@ test('two people can connect from a check-in and exchange a message', async ({ b
     await page.getByPlaceholder('At least 8 characters').fill('secret123');
     await page.getByRole('button', { name: /Create account/i }).click();
     await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+    await dismissWelcome(page);
   };
 
   await signUpUI(pageA, 'anna');

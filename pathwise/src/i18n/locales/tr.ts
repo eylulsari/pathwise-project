@@ -244,6 +244,8 @@ export const tr = {
       '{places} bu planın gününde kapalı, o yüzden plana konmadı. Günün geri kalanı değişmedi.',
     noticeOpensTooLate:
       '{places} bu günün bittiği saatten sonra açılıyor, o yüzden plana konmadı. Daha geç başla ya da ona ayrı bir akşam ayır.',
+    noticeMustVisitClosed:
+      '{places} mutlaka görülecekler listende ama bu planın gününde kapalı. Çıkarmak yerine planda bıraktık — planı başka bir güne al ya da yola çıkmadan saatleri bir kontrol et.',
     readStory: '📖 Yerel Hikaye & İpuçları',
     free: 'Ücretsiz',
     museumPass: 'Müze Kart',

@@ -188,6 +188,7 @@ const NOTICE_KEY: Record<ItineraryNotice['code'], string> = {
   'cross-side-day': 'today.noticeCrossSideDay',
   'closed-that-day': 'today.noticeClosedThatDay',
   'opens-too-late': 'today.noticeOpensTooLate',
+  'must-visit-closed': 'today.noticeMustVisitClosed',
 };
 
 function RouteNotices({ notices }: { notices?: ItineraryNotice[] }) {

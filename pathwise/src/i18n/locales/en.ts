@@ -265,6 +265,8 @@ export const en = {
       '{places} is closed on the day of this plan, so it is not in it. The rest of the day is unchanged.',
     noticeOpensTooLate:
       '{places} opens later than this day runs, so it is not in it. Start later, or give it its own evening.',
+    noticeMustVisitClosed:
+      '{places} is on your must-visit list but is closed on the day of this plan. It has been left in rather than dropped — move the plan to another day, or check the hours before you set out.',
     readStory: '📖 Read Local Story & Tips',
     free: 'Free',
     museumPass: 'Museum Pass',

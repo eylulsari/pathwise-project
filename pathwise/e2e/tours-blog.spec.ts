@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { dismissWelcome } from './helpers/welcome';
 
 /**
  * The Tours referral page, the Blog, and the navigation that reaches them.
@@ -14,6 +15,7 @@ async function signUp(page: Page, tag: string) {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
 }
 
 /** Open the "More" menu and follow one of its links. */

@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { dismissWelcome } from './helpers/welcome';
 import { openFromMoreMenu } from './helpers/nav';
 
 /**
@@ -19,6 +20,7 @@ async function signUp(page: Page, tag: string): Promise<void> {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
 }
 
 test('Essentials is reachable from the nav and carries all five sections', async ({

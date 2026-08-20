@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { dismissWelcome } from './helpers/welcome';
 
 /**
  * Reward points (Görev 1). Requires the stack running (docker compose up -d).
@@ -17,6 +18,7 @@ async function signup(page: Page, tag: string) {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
 }
 
 const balance = (page: Page) => page.getByTestId('points-balance');

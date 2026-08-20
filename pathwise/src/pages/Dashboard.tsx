@@ -28,6 +28,12 @@ import { useAuth } from '../context/AuthContext';
 import { useT } from '../i18n';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { cacheItineraries, loadCachedItineraries } from '../utils/offlineCache';
+import {
+  enqueue as enqueueSave,
+  markSaved,
+  pendingPlan,
+  recordEdit,
+} from '../utils/planJournal';
 import { DayTab } from '../components/dnd/DayTab';
 import { SearchBar } from '../components/SearchBar';
 import { AppHeader } from '../components/AppHeader';
@@ -140,7 +146,7 @@ const INITIAL_DAYS: DayState[] = FALLBACK_HUBS.slice(0, DEFAULT_TRIP_DAYS).map(
 
 export default function Dashboard() {
   const { t } = useT();
-  const { isPremium } = useAuth();
+  const { isPremium, user } = useAuth();
   const navigate = useNavigate();
   const [usage, setUsage] = useState<UsageInfo | null>(null);
   const [optimizeBlocked, setOptimizeBlocked] = useState(false);
@@ -176,10 +182,24 @@ export default function Dashboard() {
    */
   const [searchParams, setSearchParams] = useSearchParams();
   const showQuiz = searchParams.get('quiz') === '1';
-  // Set once by the redirect after sign-up, and cleared the moment it is
-  // dismissed, so it cannot reappear on a reload or a back button.
-  const showWelcome = searchParams.get('welcome') === '1';
-  const closeWelcome = () =>
+  /**
+   * The greeting is a one-shot, not addressable state — unlike the quiz above.
+   *
+   * The redirect after sign-up carries `?welcome=1`, and that parameter used
+   * to stay in the address bar for as long as the panel was open. Two things
+   * were wrong with that. A reload re-opened a greeting the traveller had
+   * already read, and the address bar said "welcome" while the screen behind
+   * it was a fully built day. It also broke every test that waits for the
+   * dashboard by its URL, which is how it was found.
+   *
+   * So the parameter is read once into state and removed from the URL
+   * immediately, before anything can be reloaded or shared.
+   */
+  const [showWelcome, setShowWelcome] = useState(
+    () => searchParams.get('welcome') === '1',
+  );
+  useEffect(() => {
+    if (searchParams.get('welcome') !== '1') return;
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -188,6 +208,8 @@ export default function Dashboard() {
       },
       { replace: true },
     );
+  }, [searchParams, setSearchParams]);
+  const closeWelcome = () => setShowWelcome(false);
   const setShowQuiz = (open: boolean) =>
     setSearchParams(
       (prev) => {
@@ -401,20 +423,24 @@ export default function Dashboard() {
   const unsaved = useRef(false);
 
   useEffect(() => {
-    if (!hydrated || isOffline) return;
+    if (!hydrated || isOffline || !user) return;
     unsaved.current = true;
+    // Synchronous, and before the debounce is even scheduled: a reload one
+    // keystroke from now must find this edit written down somewhere the next
+    // page load can read it. See planJournal — the flush alone is not enough,
+    // because the request that beats it is the next document's GET.
+    const rev = recordEdit(user.id, persistedDays(false));
     const handle = window.setTimeout(() => {
-      void api
-        .savePlan(persistedDays(true))
-        .then(() => {
+      const payload = persistedDays(true);
+      enqueueSave(() =>
+        api.savePlan(payload).then(() => {
+          markSaved(user.id, rev);
           unsaved.current = false;
-        })
-        .catch(() => {
-          /* an autosave that fails must not interrupt planning */
-        });
+        }),
+      );
     }, 700);
     return () => window.clearTimeout(handle);
-  }, [days, isOffline, persistedDays, hydrated]);
+  }, [days, isOffline, persistedDays, hydrated, user]);
 
   /**
    * Flush the plan when the page is going away.
@@ -474,7 +500,13 @@ export default function Dashboard() {
     // there is nothing stored does the dashboard build a plan from scratch.
     void api
       .getPlan()
-      .then((stored) => {
+      .then((fetched) => {
+        // An edit the server has not confirmed outranks whatever it just sent
+        // back, because the two requests race and the read can win. Order
+        // only, no cached itineraries — the rebuild below restores the rest.
+        const pending = user ? pendingPlan(user.id) : null;
+        const stored = pending ?? fetched;
+        if (pending) unsaved.current = true;
         if (stored && stored.length > 0) {
           setDays(
             stored.map((d) => ({

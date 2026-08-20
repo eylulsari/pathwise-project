@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────────────────────
+# Build context for the ROOT Dockerfile (render.yaml: dockerContext: .)
+#
+# Docker only reads a .dockerignore at the context root, so the two nested
+# ones (pathwise/, pathwise-backend/) do nothing for the production image —
+# this file is what actually applies to it.
+#
+# The important entry is node_modules. Both stages run `npm ci` and then
+# `COPY <half>/ ./` on top; without this, a host tree built on Windows or
+# macOS is layered over the Linux install, and the platform-specific binaries
+# npm resolved (rollup, esbuild, swc) are the wrong ones. That fails at build
+# time with a missing-module error that has nothing to do with the code.
+# ─────────────────────────────────────────────────────────────
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+
+# Secrets must never enter an image layer. Vite inlines anything VITE_* it
+# finds at build time, so a stray pathwise/.env would be baked into the bundle
+# the browser downloads.
+.env
+.env.*
+!.env.example
+
+# Test output and local noise.
+**/test-results
+**/playwright-report
+**/.playwright
+**/*.log
+
+# Not needed to build, and .git is large.
+.git
+.github
+**/.vscode
+**/.idea

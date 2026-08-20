@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { dismissWelcome } from './helpers/welcome';
 import { openFromMoreMenu } from './helpers/nav';
 
 /**
@@ -23,6 +24,7 @@ test('sign up, land on dashboard, map and Today’s Path render', async ({ page 
 
   // ── Success → Dashboard (auto-redirect) ──
   await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await dismissWelcome(page);
 
   // Today's Path renders with real stops from the backend engine.
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
@@ -51,6 +53,7 @@ test('can open the Travel Vibe Quiz from the dashboard', async ({ page }) => {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await dismissWelcome(page);
 
   await page.getByRole('button', { name: /Vibe Quiz/i }).click();
   await expect(page.getByRole('heading', { name: /Travel Vibe Quiz/i })).toBeVisible();
@@ -65,6 +68,7 @@ test('drag-and-drop reorders Today’s Path and an End point selector exists', a
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await dismissWelcome(page);
 
   // End point selector (Phase 2) is present with an Auto option.
   await expect(page.getByRole('heading', { name: 'End point' })).toBeVisible();
@@ -108,6 +112,7 @@ test('can pin a reservation and see a nearby suggestion', async ({ page }) => {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 
   // Lower the pace (2nd range = pace) and regenerate so the hub isn't
@@ -133,6 +138,7 @@ test('trial→free locks Day 2, and upgrading to Premium unlocks it', async ({ p
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
 
   // A6: new users get a 7-day Premium trial → Day 2 is unlocked initially.
   await expect(page.getByRole('button', { name: /🔒 Day 2/ })).toHaveCount(0);
@@ -171,6 +177,7 @@ test('offline mode: banner, disabled network actions, and IndexedDB cache', asyn
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 
   // The generated plan is persisted to IndexedDB for offline use.
@@ -204,6 +211,7 @@ test('currency converter shows converted budget and calendar export works', asyn
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 
   // B4: switch display currency to USD → converted budget appears.
@@ -227,6 +235,7 @@ test('notification center receives a nearby alert and can mute types', async ({ 
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await dismissWelcome(page);
 
   // Visiting Social emits a "nearby" notification.
   await page.getByRole('link', { name: 'Social', exact: true }).click();
@@ -251,6 +260,7 @@ test('selective offline: download a chosen day and see its size', async ({ page 
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 15_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 
   // Open the Offline download menu → per-day list with MB sizes.
@@ -271,6 +281,7 @@ test('group poll: create, vote, and see the tally', async ({ page }) => {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 30_000 });
+  await dismissWelcome(page);
 
   await page.getByRole('link', { name: 'Social', exact: true }).click();
   await page.waitForURL(/\/social$/);
@@ -301,6 +312,7 @@ test('search bar finds a place and adds it to Today’s Path', async ({ page }) 
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 
   const search = page.getByPlaceholder(/Search a place/i);
@@ -328,6 +340,7 @@ test('can leave a community review from a stop’s story modal', async ({ page }
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 
   // Open a stop's story modal → reviews section.
@@ -356,6 +369,7 @@ test('SOS button confirms, shows emergency info, and shares location', async ({ 
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 
   // Press SOS → a confirm step guards against accidental presses.
@@ -380,6 +394,7 @@ test('story modal shows live Wikipedia + OSM enrichment for a landmark', async (
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 
   // Force a known enriched landmark (Hagia Sophia) into the day via search.
@@ -430,6 +445,7 @@ test('a place with no mapped article shows no enrichment panel at all', async ({
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
 
   // Kadıköy's day is small cafés and shops rather than monuments, so most of
   // its stops carry no article. Take one that genuinely has no panel and

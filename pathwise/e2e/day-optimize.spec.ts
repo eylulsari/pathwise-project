@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { dismissWelcome } from './helpers/welcome';
 
 /**
  * Day optimisation: same stops, shorter route, and always reversible.
@@ -19,6 +20,7 @@ async function signUp(page: Page, tag: string): Promise<void> {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
   await expect(page.getByRole('heading', { name: /Today.s Path/i })).toBeVisible();
 }
 

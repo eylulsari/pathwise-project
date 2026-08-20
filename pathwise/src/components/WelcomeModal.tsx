@@ -12,8 +12,9 @@ import { useT } from '../i18n';
  * Three sentences and a way out. It is deliberately not a tour, not a
  * multi-step wizard, and not a form: the fastest way to understand this app is
  * to look at the day behind this panel, so the panel's job is to be read once
- * and dismissed. It never comes back — it is keyed to a URL parameter set only
- * by the redirect after sign-up.
+ * and dismissed. It never comes back: the dashboard reads the redirect's
+ * ?welcome=1 into state and strips it from the URL on mount, so there is
+ * nothing left for a reload or a back button to re-open.
  */
 export function WelcomeModal({ onClose }: { onClose: () => void }) {
   const { t } = useT();

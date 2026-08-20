@@ -9,12 +9,20 @@ import { useT } from '../i18n';
 type Mode = 'signin' | 'signup';
 
 /**
- * Where someone locked out should write. Configured, not committed: the only
- * address available today is a person's own, and baking that into a public
- * repo is not a decision code should make. With it unset the note still says
- * what is true, it just cannot hand over an address.
+ * Where someone locked out should write.
+ *
+ * The project address is the default so the note is never a dead end: an
+ * unconfigured build printed "write to us" and then gave the reader nowhere
+ * to write, which is worse than saying nothing at all. Override it with
+ * VITE_SUPPORT_EMAIL at build time — Vite inlines this value, so it cannot
+ * be changed by a runtime env var afterwards.
+ *
+ * The default is only as good as the mailbox behind it. Point the MX for
+ * pathwise.app at something a person reads, or set the env var to an address
+ * that already works.
  */
-const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL ?? '';
+const SUPPORT_EMAIL =
+  import.meta.env.VITE_SUPPORT_EMAIL ?? 'support@pathwise.app';
 
 export default function AuthPage() {
   const { t } = useT();

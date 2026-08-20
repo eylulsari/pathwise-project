@@ -308,7 +308,8 @@ export type ItineraryNoticeCode =
   | 'adalar-return-ferry'
   | 'cross-side-day'
   | 'closed-that-day'
-  | 'opens-too-late';
+  | 'opens-too-late'
+  | 'must-visit-closed';
 
 export interface ItineraryNotice {
   code: ItineraryNoticeCode;

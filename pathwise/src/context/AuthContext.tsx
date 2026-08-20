@@ -7,6 +7,7 @@ import {
 } from 'react';
 import type { AuthUser } from '../types';
 import { api, tokenStore } from '../services/api';
+import { clearJournal } from '../utils/planJournal';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -96,6 +97,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout: AuthContextValue['logout'] = async () => {
     await api.logout();
+    // An unsent plan edit belongs to the session that made it. Leaving it
+    // behind would let it be replayed into whoever signs in on this browser
+    // next — the journal is keyed by user id, but there is no reason to keep
+    // a stranger's plan on their machine either.
+    clearJournal();
     setUser(null);
   };
 

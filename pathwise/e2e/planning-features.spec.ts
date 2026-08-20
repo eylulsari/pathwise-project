@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { dismissWelcome } from './helpers/welcome';
 
 /**
  * Feature regression — planning / account / content (the previously-untested
@@ -13,6 +14,7 @@ async function signup(page: Page, tag: string) {
   await page.getByPlaceholder('At least 8 characters').fill('secret123');
   await page.getByRole('button', { name: /Create account/i }).click();
   await page.waitForURL(/\/dashboard$/, { timeout: 20_000 });
+  await dismissWelcome(page);
   return email;
 }
 
