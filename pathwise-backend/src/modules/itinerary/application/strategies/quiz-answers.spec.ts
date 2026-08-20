@@ -26,6 +26,11 @@ const base = (over: Partial<RouteGenerationInput> = {}): RouteGenerationInput =>
   mustVisitIds: [],
   weather: 'sunny',
   startHour: 11,
+  // Pinned. Generation reads opening hours, and with no weekday given it
+  // takes today in Istanbul — which would make every assertion below depend
+  // on the day the suite happens to run. Tuesday: nothing in the catalogue
+  // closes on it, so these tests keep measuring what they are about.
+  weekday: 1,
   ...over,
 });
 
@@ -98,7 +103,25 @@ describe('how far you will walk', () => {
     const short = await strategy.generate({ ...input, walkingTolerance: 'short' });
 
     expect(walkingMeters(normal)).toBeGreaterThan(1500);
-    expect(walkingMeters(short)).toBeLessThanOrEqual(1500);
+    expect(walkingMeters(short)).toBeLessThan(walkingMeters(normal));
+
+    /**
+     * The ceiling is not an absolute promise, and this used to assert that it
+     * was — which held only because the days it was written against happened
+     * to reach it before running out of stops.
+     *
+     * Trimming stops at three (MIN_STOPS_AFTER_WALK_TRIM): below that the rule
+     * would be deleting a day rather than shortening one, and someone who
+     * cannot walk far still came to Istanbul to see something. So a day pinned
+     * at the floor may sit over the ceiling, and does — this same request walks
+     * 1223 m on most weekdays and 1510 m on Thursdays and Sundays, when opening
+     * hours change which three stops survive.
+     *
+     * What is actually guaranteed is this: under the ceiling, or already as
+     * short as a day is allowed to get.
+     */
+    const stopsLeft = realStops(short.stops).length;
+    expect(walkingMeters(short) <= 1500 || stopsLeft <= 3).toBe(true);
   });
 
   it('leaves the day alone for the two answers that are not "short"', async () => {

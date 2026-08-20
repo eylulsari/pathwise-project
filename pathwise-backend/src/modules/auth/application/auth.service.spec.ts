@@ -35,7 +35,12 @@ describe('AuthService', () => {
       findById: jest.fn(),
       startTrial: jest.fn().mockResolvedValue(undefined),
     };
-    refreshStore = { save: jest.fn(), isValid: jest.fn(), revoke: jest.fn() };
+    refreshStore = {
+      save: jest.fn(),
+      isValid: jest.fn(),
+      revoke: jest.fn(),
+      revokeAllForUser: jest.fn(),
+    };
     jwt = {
       signAsync: jest.fn().mockResolvedValue('signed.jwt.token'),
       verifyAsync: jest.fn(),

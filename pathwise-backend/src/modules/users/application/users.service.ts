@@ -25,6 +25,11 @@ export class UsersService {
     return this.users.findByEmail(email);
   }
 
+  /** Replace a password. The caller is responsible for having hashed it. */
+  setPasswordHash(id: string, passwordHash: string): Promise<void> {
+    return this.users.setPasswordHash(id, passwordHash);
+  }
+
   async findById(id: string): Promise<User> {
     const user = await this.users.findById(id);
     if (!user) throw new NotFoundException('User not found');

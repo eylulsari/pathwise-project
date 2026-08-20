@@ -23,19 +23,27 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: true,
   /**
-   * Cap concurrency so the single dev backend isn't overwhelmed.
+   * One worker. Measured, not assumed.
    *
-   * This was 3, and 3 was measured to be past the point where parallelism
-   * pays. On a fresh database the full suite came out at 2.6 min with four
-   * unstable tests at three workers, and 3.8 min with one — so the whole
-   * benefit of the extra workers is about fifteen percent of wall clock, paid
-   * for in tests that fail on load rather than on behaviour. Every spec here
-   * drives one dev-mode backend and one Postgres; that, not the runner, is the
-   * bottleneck. Two keeps some overlap without the queue building up.
+   * On a fresh database the full suite runs 2.6 min at three workers with one
+   * failure and three flaky, and 3.0 min at one worker with nothing flaky at
+   * all. The whole prize for the extra concurrency is around twenty seconds of
+   * wall clock, and the price is tests that fail on load rather than on
+   * behaviour — which costs far more than twenty seconds the moment somebody
+   * has to work out whether a red run means the code broke or the box was
+   * busy.
    *
-   * One retry still absorbs transient slowness.
+   * Two was the compromise and it still leaked: this round caught
+   * route-editing's autosave-debounce test going flaky at two workers.
+   *
+   * Every spec here drives one dev-mode backend and one Postgres. That, not
+   * the runner, is the bottleneck, so extra workers only queue more work
+   * against the same server.
+   *
+   * The retry stays for genuinely transient slowness — but it is no longer
+   * doing the job of hiding contention.
    */
-  workers: 2,
+  workers: 1,
   retries: 1,
   /**
    * `list` for the terminal, `html` so a failure leaves something to read, and

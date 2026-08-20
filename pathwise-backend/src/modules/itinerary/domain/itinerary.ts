@@ -138,7 +138,9 @@ export type ItineraryNoticeCode =
   /** Shut for the whole of that weekday, so it was left out of the plan. */
   | 'closed-that-day'
   /** Opens later than this day can wait for, so it was left out of the plan. */
-  | 'opens-too-late';
+  | 'opens-too-late'
+  /** A stop the traveller asked for is shut when the day reaches it. Kept. */
+  | 'must-visit-closed';
 
 export interface ItineraryNotice {
   code: ItineraryNoticeCode;

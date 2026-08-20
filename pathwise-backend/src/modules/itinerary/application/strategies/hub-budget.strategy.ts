@@ -231,6 +231,10 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       startMinutes: input.startHour * 60,
       weekday: normalizeWeekday(input.weekday),
       travelMinutes: (from, to) => this.transportLeg(from, to).durationMinutes,
+      // Must-visits and booked stops are never removed by this pass. Topkapı is
+      // shut on Tuesdays; a traveller who asked for Topkapı is owed that fact,
+      // not a Tuesday that quietly does not contain it.
+      forcedIds: mustSet,
     });
     const ordered = feasible.ordered;
 
@@ -247,6 +251,17 @@ export class HubBudgetStrategy implements RouteGenerationStrategy {
       .map((d) => d.place.name);
     if (tooLate.length > 0) {
       notices.push({ code: 'opens-too-late', severity: 'info', places: tooLate });
+    }
+
+    // A stop the traveller asked for, that is shut when the day reaches it.
+    // Kept in the plan and warned about — this is the one case where the
+    // notice is the whole point, because the stop is still on the list.
+    if (feasible.keptClosed.length > 0) {
+      notices.push({
+        code: 'must-visit-closed',
+        severity: 'warning',
+        places: feasible.keptClosed.map((k) => k.place.name),
+      });
     }
 
     // 6–8 — assemble, measure against the real clock, trim until it fits.

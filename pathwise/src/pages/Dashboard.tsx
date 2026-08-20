@@ -37,6 +37,7 @@ import { TodayPath } from '../components/TodayPath';
 import { RouteGenerator, type RouteConfig } from '../components/controls/RouteGenerator';
 import { StartPointSelector } from '../components/controls/StartPointSelector';
 import { SurvivalWidget } from '../components/SurvivalWidget';
+import { WelcomeModal } from '../components/WelcomeModal';
 import { TravelVibeQuiz, type QuizResult } from '../components/controls/TravelVibeQuiz';
 import { MustVisitList } from '../components/controls/MustVisitList';
 import { ReservationModal } from '../components/controls/ReservationModal';
@@ -175,6 +176,18 @@ export default function Dashboard() {
    */
   const [searchParams, setSearchParams] = useSearchParams();
   const showQuiz = searchParams.get('quiz') === '1';
+  // Set once by the redirect after sign-up, and cleared the moment it is
+  // dismissed, so it cannot reappear on a reload or a back button.
+  const showWelcome = searchParams.get('welcome') === '1';
+  const closeWelcome = () =>
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('welcome');
+        return next;
+      },
+      { replace: true },
+    );
   const setShowQuiz = (open: boolean) =>
     setSearchParams(
       (prev) => {
@@ -1284,6 +1297,7 @@ export default function Dashboard() {
       </div>
       </DndContext>
 
+      {showWelcome && <WelcomeModal onClose={closeWelcome} />}
       {showQuiz && <TravelVibeQuiz onComplete={handleQuiz} onClose={() => setShowQuiz(false)} />}
       {showMustVisit && (
         <MustVisitList

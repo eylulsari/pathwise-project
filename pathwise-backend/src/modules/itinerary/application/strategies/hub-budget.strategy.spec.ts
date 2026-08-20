@@ -23,6 +23,11 @@ const baseInput = (over: Partial<RouteGenerationInput> = {}): RouteGenerationInp
   mustVisitIds: [],
   weather: 'sunny',
   startHour: 10,
+  // Pinned. Generation reads opening hours, and with no weekday given it
+  // takes today in Istanbul — which would make every assertion below depend
+  // on the day the suite happens to run. Tuesday: nothing in the catalogue
+  // closes on it, so these tests keep measuring what they are about.
+  weekday: 1,
   ...over,
 });
 

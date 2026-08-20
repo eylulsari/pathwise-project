@@ -92,6 +92,12 @@ export class TypeOrmUserRepository implements UserRepositoryPort {
     return rows.map((r) => this.toDomain(r));
   }
 
+  async setPasswordHash(id: string, passwordHash: string): Promise<void> {
+    // A targeted update rather than a round-trip through save(): the reset
+    // flow has no business rewriting the rest of the row.
+    await this.repo.update({ id }, { passwordHash });
+  }
+
   async save(user: User): Promise<User> {
     const saved = await this.repo.save({
       id: user.id,

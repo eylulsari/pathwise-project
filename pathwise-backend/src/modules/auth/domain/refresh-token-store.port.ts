@@ -14,4 +14,12 @@ export interface RefreshTokenStorePort {
   isValid(userId: string, jti: string): Promise<boolean>;
   /** Revoke a single refresh JTI (used on rotation + logout). */
   revoke(userId: string, jti: string): Promise<void>;
+  /**
+   * Revoke every session a user has.
+   *
+   * Used after a password reset. If the reset happened because somebody else
+   * was in the account, leaving their refresh token alive would make the new
+   * password decorative.
+   */
+  revokeAllForUser(userId: string): Promise<void>;
 }

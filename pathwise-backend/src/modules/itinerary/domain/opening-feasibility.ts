@@ -53,12 +53,32 @@ export interface FeasibilityInput {
   travelMinutes: (from: Place, to: Place) => number;
   /** How long a traveller may reasonably wait for a door to open. */
   maxWaitMinutes?: number;
+  /**
+   * Places the traveller asked for by name — must-visits and booked stops.
+   *
+   * These are never removed, whatever their hours say. The rest of the engine
+   * has always treated them as sacred: they are forced past the interest
+   * scoring, past the money budget and past the pace trim. A door being shut
+   * is a better reason than any of those, and still not good enough — someone
+   * who typed "Topkapı" into their plan is owed the word "closed", not a day
+   * that quietly does not contain it.
+   *
+   * They are still reordered to a time they are open where that is possible.
+   */
+  forcedIds?: ReadonlySet<string>;
 }
+
+export type ClosedReason = 'closed-all-day' | 'never-open-in-time';
 
 export interface FeasibilityResult {
   ordered: Place[];
   /** Places removed because they are shut whenever the day could reach them. */
-  dropped: { place: Place; reason: 'closed-all-day' | 'never-open-in-time' }[];
+  dropped: { place: Place; reason: ClosedReason }[];
+  /**
+   * Places kept despite being shut, because the traveller asked for them.
+   * The caller warns about these rather than hiding them.
+   */
+  keptClosed: { place: Place; reason: ClosedReason }[];
   /** placeId → minutes the traveller waits for opening, where non-zero. */
   waits: Map<string, number>;
 }
@@ -101,16 +121,27 @@ function opensAt(
 
 export function respectOpeningHours(input: FeasibilityInput): FeasibilityResult {
   const maxWait = input.maxWaitMinutes ?? DEFAULT_MAX_WAIT;
+  const forced = input.forcedIds ?? new Set<string>();
   const waits = new Map<string, number>();
   const dropped: FeasibilityResult['dropped'] = [];
+  const keptClosed: FeasibilityResult['keptClosed'] = [];
+
+  /** Removed if the traveller did not ask for it; kept and flagged if they did. */
+  const setAside = (place: Place, reason: ClosedReason): void => {
+    if (forced.has(place.placeId)) keptClosed.push({ place, reason });
+    else dropped.push({ place, reason });
+  };
 
   // Places shut all day never enter the scheduling loop: no ordering saves
   // them, and leaving them in only to remove them later muddies the reason.
   const survivors: Place[] = [];
+  const closedAllDay: Place[] = [];
   for (const place of input.ordered) {
     const schedule = scheduleFor(place);
     if (schedule && isClosedOn(schedule, input.weekday)) {
-      dropped.push({ place, reason: 'closed-all-day' });
+      setAside(place, 'closed-all-day');
+      // A forced stop still travels with the day — shut, flagged, and there.
+      if (forced.has(place.placeId)) closedAllDay.push(place);
       continue;
     }
     survivors.push(place);
@@ -162,9 +193,11 @@ export function respectOpeningHours(input: FeasibilityInput): FeasibilityResult 
       // Nothing is open right now. Take the one that opens soonest, if the
       // wait is one a person would actually accept.
       if (fallbackIndex === -1) {
-        // Everything left is unreachable today — the day ends here.
+        // Everything left is unreachable today — the day ends here, except
+        // for anything the traveller asked for by name.
         for (const place of remaining) {
-          dropped.push({ place, reason: 'never-open-in-time' });
+          setAside(place, 'never-open-in-time');
+          if (forced.has(place.placeId)) result.push(place);
         }
         break;
       }
@@ -173,8 +206,14 @@ export function respectOpeningHours(input: FeasibilityInput): FeasibilityResult 
         clock + (previous ? input.travelMinutes(previous, place) : 0);
       const wait = fallbackArrival - arrival;
       if (wait > maxWait) {
-        dropped.push({ place, reason: 'never-open-in-time' });
+        setAside(place, 'never-open-in-time');
         remaining.splice(fallbackIndex, 1);
+        // Kept in the day at its unhappy hour rather than removed.
+        if (forced.has(place.placeId)) {
+          result.push(place);
+          clock = arrival + place.avgVisitMinutes;
+          previous = place;
+        }
         continue;
       }
       waits.set(place.placeId, wait);
@@ -189,5 +228,7 @@ export function respectOpeningHours(input: FeasibilityInput): FeasibilityResult 
     previous = place;
   }
 
-  return { ordered: result, dropped, waits };
+  // Stops that are shut all day cannot be placed at a sensible hour, so they
+  // ride at the end rather than displacing a stop that is actually open.
+  return { ordered: [...result, ...closedAllDay], dropped, keptClosed, waits };
 }

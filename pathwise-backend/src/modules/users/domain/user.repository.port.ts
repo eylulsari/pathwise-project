@@ -36,6 +36,8 @@ export interface UserRepositoryPort {
     limit: number;
   }): Promise<User[]>;
   save(user: User): Promise<User>;
+  /** Replace only the password hash — used by the reset flow. */
+  setPasswordHash(id: string, passwordHash: string): Promise<void>;
   setSubscriptionTier(id: string, tier: SubscriptionTier): Promise<User>;
   setTrialEndsAt(id: string, trialEndsAt: Date | null): Promise<User>;
   /** Partial update of the opt-in women-traveler preferences. */

@@ -40,4 +40,8 @@ export class TypeOrmRefreshTokenRepository implements RefreshTokenStorePort {
   async revoke(userId: string, jti: string): Promise<void> {
     await this.repo.delete({ userId, jti });
   }
+
+  async revokeAllForUser(userId: string): Promise<void> {
+    await this.repo.delete({ userId });
+  }
 }
